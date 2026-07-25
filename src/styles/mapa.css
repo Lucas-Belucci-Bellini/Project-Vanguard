@@ -1,0 +1,112 @@
+/* Mapa tático: o mapa ocupa tudo, HUD flutua, painel fica à direita. */
+
+/* `.mapa` compartilha o elemento com `.vg-pagina`, que já é
+ * `position:absolute; inset:0; display:flex`. NÃO declarar `position` aqui.
+ *
+ * ⚠️ O contêiner do mapa é posicionado por FLEX, de propósito. O
+ * `maplibre-gl.css` é importado em tempo de execução (junto com o motor), ou
+ * seja, DEPOIS das folhas do app — e ele traz `.maplibregl-map{position:
+ * relative}`. Qualquer `position:absolute` que a gente pusesse aqui perderia
+ * a cascata para essa regra, e o contêiner colapsaria para largura zero.
+ * Layout por flex não disputa `position` com ninguém. */
+
+.mapa__canvas { flex: 1 1 auto; min-width: 0; height: 100%; background: var(--color-bg); }
+
+/* Camada de rótulos: fica por cima do WebGL e é transparente ao mouse, senão
+ * roubaria o arrasto do mapa. */
+.mapa__rotulos {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mapa__painel {
+  flex: 0 0 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  overflow-y: auto;
+  background: var(--color-bg-elevated);
+  border-left: var(--border-base);
+}
+
+.mapa__hud {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+
+.mapa__hud-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-overlay);
+  border: var(--border-base);
+  border-left: 3px solid var(--color-cyan);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(3px);
+}
+
+.mapa__hud-rot {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wider);
+}
+.mapa__hud-valor {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-cyan);
+  text-shadow: var(--shadow-glow-cyan);
+  letter-spacing: var(--tracking-wide);
+}
+.mapa__hud-sub { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+
+.mapa__botoes { display: flex; flex-direction: column; gap: var(--space-xs); }
+
+.mapa__info { font-size: var(--font-size-sm); }
+.mapa__info-mgrs {
+  color: var(--color-cyan);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  margin-bottom: var(--space-2xs);
+}
+
+.mapa__solucao { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+.mapa__falha { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 480px; }
+
+/* Controles do MapLibre puxados para a paleta Mil-Spec. */
+.maplibregl-ctrl-group {
+  background: var(--color-surface) !important;
+  border: var(--border-base) !important;
+  border-radius: var(--radius-sm) !important;
+}
+.maplibregl-ctrl-group button + button { border-top: var(--border-thin) !important; }
+.maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(1) hue-rotate(60deg); }
+.maplibregl-ctrl-scale {
+  background: var(--color-overlay) !important;
+  border-color: var(--color-cyan-edge) !important;
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-mono) !important;
+  font-size: var(--font-size-xs) !important;
+  border-radius: var(--radius-sm);
+}
+.maplibregl-ctrl-attrib {
+  background: var(--color-overlay) !important;
+  font-size: 9px !important;
+}
+.maplibregl-ctrl-attrib a { color: var(--color-text-muted) !important; }
+
+@media (max-width: 900px) {
+  .vg-pagina.mapa { flex-direction: column; }
+  .mapa__canvas { flex: 1 1 55%; height: auto; width: 100%; }
+  .mapa__painel { flex: 0 0 45%; width: 100%; height: auto; border-left: none; border-top: var(--border-base); }
+}

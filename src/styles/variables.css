@@ -1,0 +1,205 @@
+/**
+ * Design tokens — Project Vanguard · estética "Mil-Spec"
+ *
+ * ── Por que estes nomes de token ──
+ * São os MESMOS nomes do `variables.css` do Projeto Baluarte (--color-bg,
+ * --color-surface, --color-cyan, --space-*, --radius-*, --font-*). Os valores
+ * mudam; a interface não. Consequência prática: um componente do Vanguard
+ * colado no Baluarte assume a "Ouro de Fábula" sozinho, e um componente do
+ * Baluarte colado aqui fica Mil-Spec. Zero tradução de tema.
+ *
+ * ── A paleta ──
+ * Oliva profundo de fundo, areia no texto, VERDE-FÓSFORO como acento e ÂMBAR
+ * como segundo acento. É a leitura de mapa militar noturno: o fundo some, o
+ * dado brilha. Nada de azul de UI genérica — azul, vermelho, verde-claro e
+ * amarelo aqui têm significado tático reservado (APP-6) e não podem ser
+ * gastos em decoração.
+ *
+ * ── Contraste ──
+ * Fósforo (#8bff3f) sobre fundo (#0c0f0a) dá ~13:1. Areia sobre fundo, ~11:1.
+ * Ambos passam AAA. O texto "muted" fica em 4.6:1 — passa AA para corpo.
+ */
+
+:root {
+  /* === Fundo e superfícies (oliva profundo) === */
+  --color-bg: #0c0f0a;
+  --color-bg-elevated: #11150e;
+  --color-surface: #171c13;
+  --color-surface-2: #1e2419;
+  --color-surface-3: #262d20;
+  --color-overlay: rgba(6, 9, 5, 0.88);
+
+  /* === Acentos === */
+  /* Nome mantido por compatibilidade com o Baluarte: "cyan" = acento 1. */
+  --color-cyan: #8bff3f;              /* verde-fósforo */
+  --color-cyan-soft: rgba(139, 255, 63, 0.14);
+  --color-cyan-edge: rgba(139, 255, 63, 0.42);
+  --color-magenta: #ffb000;           /* âmbar (acento 2) */
+  --color-magenta-soft: rgba(255, 176, 0, 0.14);
+  --color-magenta-edge: rgba(255, 176, 0, 0.42);
+
+  /* === Texto (areia / pergaminho militar) === */
+  --color-text-primary: #dcd6c0;
+  --color-text-secondary: #a29a7f;
+  --color-text-muted: #6f6a56;
+  --color-text-inverse: #0c0f0a;
+
+  /* === Estados === */
+  --color-success: #4caf50;
+  --color-success-soft: rgba(76, 175, 80, 0.12);
+  --color-warning: #ffb000;
+  --color-warning-soft: rgba(255, 176, 0, 0.12);
+  --color-danger: #ff4136;
+  --color-danger-soft: rgba(255, 65, 54, 0.12);
+  --color-info: #8bff3f;
+
+  /* === Afiliação APP-6 / MIL-STD-2525 ===
+   * Cores NORMATIVAS de identidade tática. Não são escolha estética: quem lê
+   * carta militar espera exatamente estas. Nunca reaproveitar em UI comum. */
+  --app6-amigo: #80e0ff;              /* azul-claro — friend */
+  --app6-hostil: #ff8080;             /* vermelho-claro — hostile */
+  --app6-neutro: #aaffaa;             /* verde-claro — neutral */
+  --app6-desconhecido: #ffff80;       /* amarelo — unknown/pending */
+
+  /* === Bordas === */
+  --border-thin: 1px solid rgba(139, 255, 63, 0.10);
+  --border-base: 1px solid rgba(139, 255, 63, 0.20);
+  --border-strong: 1px solid rgba(139, 255, 63, 0.42);
+  --border-amber: 1px solid rgba(255, 176, 0, 0.42);
+
+  /* === Espaçamento (escala 4 px) === */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* === Raios ===
+   * Deliberadamente pequenos: equipamento militar não tem cantos macios.
+   * O visual de "instrumento" vem daqui tanto quanto da cor. */
+  --radius-xs: 0px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-pill: 999px;
+
+  /* === Tipografia ===
+   * Mono em TUDO. Não é preciosismo: numeral tabular impede o layout de
+   * dançar quando a coordenada muda 10×/s, e é o que faz um HUD parecer
+   * instrumento em vez de página. */
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular,
+               Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  --font-sans: var(--font-mono);
+  --font-display: var(--font-mono);
+
+  --font-size-xs: 10px;
+  --font-size-sm: 11px;
+  --font-size-base: 13px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 28px;
+  --font-size-3xl: 38px;
+  --font-size-display: 52px;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.15;
+  --line-height-base: 1.5;
+  --line-height-loose: 1.7;
+
+  --tracking-tight: 0;
+  --tracking-base: 0.02em;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.14em;
+  --tracking-widest: 0.22em;
+
+  /* === Sombras e glow === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 3px 10px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.75);
+  --shadow-glow-cyan: 0 0 10px rgba(139, 255, 63, 0.32), 0 0 24px rgba(139, 255, 63, 0.12);
+  --shadow-glow-cyan-strong: 0 0 16px rgba(139, 255, 63, 0.55), 0 0 40px rgba(139, 255, 63, 0.22);
+  --shadow-glow-magenta: 0 0 10px rgba(255, 176, 0, 0.32), 0 0 24px rgba(255, 176, 0, 0.12);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+  /* === Transições ===
+   * Rápidas. Numa ferramenta operacional, animação longa é atraso disfarçado. */
+  --transition-fast: 90ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Layout === */
+  --header-height: 44px;
+  --sidebar-width: 0px;               /* o Vanguard usa navegação por abas */
+  --content-max-width: 1600px;
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-overlay: 500;
+  --z-modal: 1000;
+  --z-toast: 1500;
+
+  /* === Grade do mapa === */
+  --grid-line: rgba(220, 214, 192, 0.22);
+  --grid-line-forte: rgba(220, 214, 192, 0.40);
+  --grid-label: rgba(255, 176, 0, 0.85);
+}
+
+/**
+ * Modo NOITE (visão noturna). Reduz tudo ao vermelho profundo: o olho
+ * adaptado ao escuro é quase cego ao vermelho, então a tela deixa de destruir
+ * a adaptação. É um requisito real de equipamento de campo, não um tema.
+ */
+:root[data-modo='noite'] {
+  --color-bg: #0a0000;
+  --color-bg-elevated: #120200;
+  --color-surface: #1a0300;
+  --color-surface-2: #220400;
+  --color-surface-3: #2c0600;
+  --color-cyan: #ff3b30;
+  --color-cyan-soft: rgba(255, 59, 48, 0.14);
+  --color-cyan-edge: rgba(255, 59, 48, 0.42);
+  --color-magenta: #ff6b57;
+  --color-text-primary: #ff9d94;
+  --color-text-secondary: #c2645c;
+  --color-text-muted: #8a453f;
+  --grid-line: rgba(255, 100, 90, 0.20);
+  --grid-line-forte: rgba(255, 100, 90, 0.38);
+  --grid-label: rgba(255, 107, 87, 0.85);
+  --border-base: 1px solid rgba(255, 59, 48, 0.22);
+  --border-strong: 1px solid rgba(255, 59, 48, 0.45);
+  --shadow-glow-cyan: 0 0 10px rgba(255, 59, 48, 0.30);
+  --shadow-glow-cyan-strong: 0 0 16px rgba(255, 59, 48, 0.5);
+}
+
+/** Modo DIA (alto brilho, sol a pino): inverte para máximo contraste. */
+:root[data-modo='dia'] {
+  --color-bg: #d8d5c4;
+  --color-bg-elevated: #cfccb9;
+  --color-surface: #c4c1ac;
+  --color-surface-2: #b8b5a0;
+  --color-surface-3: #aaa792;
+  --color-cyan: #1d4d00;
+  --color-cyan-soft: rgba(29, 77, 0, 0.14);
+  --color-cyan-edge: rgba(29, 77, 0, 0.5);
+  --color-magenta: #7a4b00;
+  --color-text-primary: #14170f;
+  --color-text-secondary: #3d4232;
+  --color-text-muted: #5f6450;
+  --color-text-inverse: #f2f0e6;
+  --grid-line: rgba(20, 23, 15, 0.28);
+  --grid-line-forte: rgba(20, 23, 15, 0.5);
+  --grid-label: rgba(122, 75, 0, 0.95);
+  --border-base: 1px solid rgba(29, 77, 0, 0.28);
+  --border-strong: 1px solid rgba(29, 77, 0, 0.55);
+  --shadow-glow-cyan: none;
+  --shadow-glow-cyan-strong: none;
+}

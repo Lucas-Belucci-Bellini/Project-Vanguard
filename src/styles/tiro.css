@@ -1,0 +1,87 @@
+/* Computador de tiro — entrada à esquerda, saída à direita. */
+
+.tiro { display: grid; grid-template-columns: 340px 1fr; gap: var(--space-md); padding: var(--space-md); }
+
+.tiro__entrada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+  padding-right: var(--space-xs);
+}
+
+.tiro__saida {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+  padding-right: var(--space-xs);
+}
+
+.tiro__calcular { padding: var(--space-md); font-size: var(--font-size-md); letter-spacing: var(--tracking-wider); }
+
+/* Os dois números grandes. */
+.tiro__hud { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+
+@media (max-width: 1100px) {
+  .tiro { grid-template-columns: 1fr; }
+  .tiro__hud { grid-template-columns: 1fr; }
+}
+
+/* Chips de dados secundários. */
+.tiro__chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-sm);
+}
+
+.tiro__chip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-sm);
+  background: var(--color-surface);
+  border: var(--border-thin);
+  border-radius: var(--radius-sm);
+}
+.tiro__chip-rot {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wide);
+}
+.tiro__chip-val {
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tiro__tabela-wrap { overflow-x: auto; }
+
+.tiro__motivos { margin: 0; padding-left: var(--space-lg); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.tiro__motivos li { margin-bottom: var(--space-2xs); }
+
+.tiro__vazio {
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-cyan-edge);
+  border-radius: var(--radius-md);
+}
+
+.tiro__json { background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius-sm); }
+.tiro__json summary {
+  cursor: pointer;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-magenta);
+}
+.tiro__json pre {
+  margin: 0;
+  padding: var(--space-md);
+  overflow-x: auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  border-top: var(--border-thin);
+  max-height: 420px;
+}
