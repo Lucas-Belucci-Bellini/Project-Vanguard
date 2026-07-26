@@ -31,30 +31,25 @@ import {
   latLonParaUTM, utmParaLatLon, latLonParaMGRS, fusoDe, gridVector
 } from '../engine/mgrs.js';
 import { radToMil } from '../engine/angles.js';
+import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 
-/* Bases sem chave de API. A estética pedida (topográfico cru / satélite sem
- * enfeite) é justamente o que estas três entregam. */
-const BASES = {
-  topo: {
-    nome: 'TOPOGRÁFICO',
-    tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
-            'https://b.tile.opentopomap.org/{z}/{x}/{y}.png'],
-    max: 17,
-    creditos: '© OpenTopoMap / OpenStreetMap contributors (CC-BY-SA)'
-  },
-  satelite: {
-    nome: 'SATÉLITE',
-    tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-    max: 19,
-    creditos: '© Esri World Imagery'
-  },
-  tatico: {
-    nome: 'TÁTICO',
-    tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
-    max: 19,
-    creditos: '© CARTO / OpenStreetMap contributors'
-  }
-};
+/* Bases sem chave de API, vindas do catálogo COMPARTILHADO com o Projeto
+ * Baluarte (`src/data/camadas-mapa.js`, API idêntica nos dois repos — a mesma
+ * decisão do `helpers.js`).
+ *
+ * Antes esta lista era local e tinha 3 camadas; o Baluarte tinha a dele com 7.
+ * As duas já divergiam. Agora o Vanguard enxerga TODAS as bases do Baluarte —
+ * inclusive a segunda fonte de satélite, que salva quando a primeira não cobre
+ * a área — e camada nova entra nos dois de uma vez.
+ *
+ * O formato local (`{nome, tiles, max, creditos}`) continua: é o que o resto
+ * desta tela consome. A adaptação é esta linha, não uma refatoração. */
+const BASES = Object.fromEntries(CAMADAS_BASE.map((c) => [c.id, {
+  nome: c.nome.toUpperCase(),
+  tiles: c.tiles,
+  max: c.maxzoom,
+  creditos: c.creditos,
+}]));
 
 /** Intervalo da grade (m) conforme o zoom — mesma lógica de uma carta. */
 function intervaloGrade(zoom) {
@@ -203,7 +198,10 @@ export function mapaPage() {
   /* ── Painel lateral ── */
   const selBase = h('select', { className: 'vg-modo' },
     ...Object.entries(BASES).map(([k, v]) => h('option', { value: k }, v.nome)));
-  selBase.value = 'topo';
+  /* Abre no topográfico: é a carta de quem navega por grade. O catálogo
+   * compartilhado marca `padrao` no satélite (o padrão do Baluarte), e aqui
+   * a escolha é outra de propósito — mesma lista, telas com usos diferentes. */
+  selBase.value = BASES.terreno ? 'terreno' : Object.keys(BASES)[0];
 
   const btnPeca = h('button', { onclick: () => setModo('peca') }, '◈ MARCAR PEÇA');
   const btnAlvo = h('button', { onclick: () => setModo('alvo') }, '✱ MARCAR ALVO');
