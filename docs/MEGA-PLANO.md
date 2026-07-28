@@ -212,7 +212,7 @@ Trocados por `data-modo` no `<html>`; só variáveis mudam, nenhum componente sa
 | 1.7 | Design system Mil-Spec + 3 modos de tela | `src/styles/variables.css` |
 | 1.8 | Mapa tático com grade MGRS sobreposta e rótulos de carta | `src/pages/mapa.js` |
 | 1.9 | Computador de tiro | `src/pages/tiro.js` |
-| 1.10 | **54 testes** ancorados em constantes geodésicas publicadas | `test/` |
+| 1.10 | **65 testes** ancorados em constantes geodésicas publicadas | `test/` |
 
 ### 🔜 Fase 2 — Navegação de campo (2 sprints)
 
@@ -329,6 +329,6 @@ grandeza. Tudo listado na tela `#/sobre` — não escondido em rodapé.
 ```bash
 npm install
 npm run dev      # http://localhost:5174
-npm test         # 54 testes do motor
+npm test         # 65 testes do motor
 npm run build    # dist/
 ```

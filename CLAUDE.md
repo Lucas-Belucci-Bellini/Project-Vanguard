@@ -28,7 +28,7 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/styles/` — 1 CSS por tela + tokens em `variables.css`
 - `src/ui/helpers.js` — hyperscript `h()`, **API idêntica** à do Baluarte de propósito
 - `src/core/estado.js` — estado persistido (`vanguard:` no localStorage)
-- `test/` — `node --test`, 54 testes
+- `test/` — `node --test`, 65 testes
 
 ## Regras do projeto
 
@@ -54,6 +54,17 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - **Camada de texto do mapa é canvas 2D**, não `symbol` layer — esta exigiria um
   endpoint de `glyphs` (dependência de rede + fonte alheia).
 - **Mil NATO (6400) ≠ MRAD (6283).** O motor guarda radiano e converte só na borda.
+- **A grade do Arma 3 está INVERTIDA em relação ao MGRS.** Medido no config: em
+  30 dos 31 mundos o `passoY` é negativo (Altis: `offsetY=30720`, `passoY=-100`),
+  ou seja o rótulo de northing conta do **norte para o sul** — o oposto do
+  `gridref.js`, que é MGRS local e está certo para o que ele descreve. Grade de
+  carta do jogo passa por `arma3-grid.js`, que lê offset e **sinal** daquele
+  mundo. Assumir convenção espelha o eixo N-S: em Altis, até 30 km de erro.
+  O `ChernobylZone` conta para cima — não "conserte" o sinal achando que é dado
+  quebrado, há teste cobrindo os dois casos.
+- **`src/data/arma3-terrenos.js` é GERADO** por `scripts/arma3/gerar-base-terrenos.py`
+  no Projeto Baluarte, que escreve nos dois repos. Editar à mão aqui é perder a
+  edição no próximo dump — e fazer as duas bases divergirem em silêncio.
 - **Azimute de GRADE, não verdadeiro**, para tiro.
 - **Peça e alvo em fusos UTM diferentes**: `gridVector()` reprojeta no fuso da peça.
 - **`ventoDirecaoDeg` é de ONDE o vento vem** (convenção METAR).

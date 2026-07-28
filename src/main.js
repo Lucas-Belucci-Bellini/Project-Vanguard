@@ -59,9 +59,27 @@ function montarShell() {
   return { abas, main };
 }
 
+/**
+ * Separa `#/tiro?terreno=altis` em rota e parâmetros.
+ *
+ * Existe para o Projeto Baluarte poder mandar contexto junto do link — abrir
+ * o computador de tiro já no terreno que o operador estava olhando lá. Sem
+ * isso o hash com `?` não casaria com rota nenhuma e cairia no mapa, que é
+ * pior que ignorar o parâmetro: leva para a tela errada.
+ */
+function lerHash(bruto) {
+  const hash = bruto || PADRAO;
+  const corte = hash.indexOf('?');
+  if (corte < 0) return { caminho: hash, query: {} };
+  return {
+    caminho: hash.slice(0, corte),
+    query: Object.fromEntries(new URLSearchParams(hash.slice(corte + 1))),
+  };
+}
+
 async function navegar({ abas, main }) {
-  const hash = location.hash || PADRAO;
-  const rota = ROTAS.find((r) => r.hash === hash) ?? ROTAS[0];
+  const { caminho, query } = lerHash(location.hash);
+  const rota = ROTAS.find((r) => r.hash === caminho) ?? ROTAS[0];
 
   for (const b of abas) {
     if (b.dataset.hash === rota.hash) b.setAttribute('aria-current', 'page');
@@ -76,7 +94,7 @@ async function navegar({ abas, main }) {
 
   try {
     const pagina = await rota.carregar();
-    const { elemento, desmontar } = pagina();
+    const { elemento, desmontar } = pagina({ query });
     desmontarAtual = desmontar ?? null;
     main.append(elemento);
   } catch (erro) {

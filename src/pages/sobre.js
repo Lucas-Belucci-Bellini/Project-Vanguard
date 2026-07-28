@@ -10,6 +10,12 @@
 import { h } from '../ui/helpers.js';
 import { listarSistemas } from '../engine/charges.js';
 import { VERSAO_MOTOR, SCHEMA_PEDIDO, SCHEMA_RESPOSTA } from '../engine/fire-mission.js';
+import { A3TER, A3TER_META } from '../data/arma3-terrenos.js';
+
+/* Contado da base, não escrito à mão: um mundo novo com northing pra cima
+ * mudaria a frase da tela, e uma ressalva desatualizada é pior que nenhuma. */
+const COM_GRADE = A3TER.filter((t) => t.grade);
+const NORTE_PARA_SUL = COM_GRADE.filter((t) => t.grade.passoY < 0).length;
 
 export function sobrePage() {
   const raiz = h('div', { className: 'vg-pagina', style: { overflowY: 'auto', padding: '24px', display: 'block' } });
@@ -40,6 +46,11 @@ export function sobrePage() {
           'Svalbard. Precisão de ida-e-volta abaixo de 5 cm no mundo todo.'),
         h('li', null, h('strong', null, 'Grade local: '),
           'grid de 4 a 10 dígitos no estilo Arma 3, com quadro opcionalmente amarrado ao mundo real.'),
+        h('li', null, h('strong', null, 'Terrenos do Arma 3: '),
+          `${A3TER_META.comGrade} mundos com a grade lida do config de cada um `
+          + `(${A3TER_META.oficiais} oficiais, ${A3TER_META.mods} de mod). `
+          + 'A grade da carta do jogo é convertida em metros do mundo pelo offset e pelo '
+          + 'SINAL do passo daquele mundo — ver a ressalva abaixo.'),
         h('li', null, h('strong', null, 'Geodésia: '),
           'Vincenty direto e inverso (precisão milimétrica) para navegação; plano da ' +
           'grade UTM para tiro — que é o que a doutrina de artilharia usa.'),
@@ -75,7 +86,17 @@ export function sobrePage() {
           'alcances envolvidos (< 10 km).'),
         h('li', null, 'A dispersão é um modelo de ordem de grandeza, não tabela de tiro.'),
         h('li', null, 'A altitude vem de modelo digital de terreno (Open-Meteo), com erro ' +
-          'típico de alguns metros. Em terreno acidentado, confira.'))),
+          'típico de alguns metros. Em terreno acidentado, confira.'),
+        h('li', null, h('strong', null, 'Terreno do Arma 3: '),
+          'a grade vem do config de cada mundo, mas a ',
+          h('strong', null, 'altitude não'),
+          ' — o dump não traz o mapa de elevação. Digite a cota lida no jogo; deixá-la '
+          + 'em zero calcula como se peça e alvo estivessem no mesmo nível.'),
+        h('li', null, h('strong', null, 'Northing invertido: '),
+          `em ${NORTE_PARA_SUL} dos ${COM_GRADE.length} mundos o rótulo de northing `
+          + 'cresce para o SUL, ao contrário de toda carta MGRS. O motor respeita o sinal do '
+          + 'passo de cada mundo, mas isso só vale se o terreno certo estiver selecionado: '
+          + 'terreno errado espelha o eixo N-S e o azimute sai 180° fora.'))),
 
     painel('◤ CONTRATO DE INTEGRAÇÃO',
       h('p', null, 'O computador de tiro é chamável de fora — mesma função no navegador, em Web Worker, em Node ou atrás de HTTP:'),

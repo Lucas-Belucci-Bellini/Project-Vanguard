@@ -25,6 +25,37 @@
 
 ---
 
+## 1.1 O que já está de pé: os terrenos do Arma 3
+
+Antes das vias abaixo (que são plano), esta ponte já funciona nos dois lados —
+e é o primeiro pedaço de **dado** compartilhado, não só de código.
+
+| Peça | Onde mora | Papel |
+|---|---|---|
+| `scripts/arma3/gerar-base-terrenos.py` | **Baluarte** | Gerador. Lê o dump de `CfgWorlds` e escreve **nos dois repos** |
+| `src/data/arma3-terrenos.js` | os dois | 31 mundos com a grade medida (offset, passo, dígitos) |
+| `public/arma3/terrenos-db.json` | os dois | localidades e aeroportos, carregado sob demanda |
+| `src/utils/arma3-grade.js` | Baluarte | conversor grade ⇄ metros |
+| `src/engine/arma3-grid.js` | Vanguard | o mesmo conversor + integração com a missão de tiro |
+
+**Por que o gerador escreve nos dois em vez de cada repo ter a sua cópia:** duas
+bases mantidas à mão divergem, e a divergência aqui não faz barulho — dá um
+azimute plausível e errado. Um gerador, duas saídas, um `git diff` no CI do
+Baluarte para provar que o commit bate com o dump.
+
+**A passagem de bastão:** o card de terreno do Baluarte (`src/pages/vanguard.js`)
+resolve azimute plano e linka para
+`project-vanguard-cyan.vercel.app/#/tiro?terreno=…&peca=…&alvo=…`. O Vanguard lê
+os três parâmetros, entra no quadro local no terreno certo e abre já calculado —
+com carga, elevação, tempo de voo e vento, que o card do Baluarte não faz
+(assumidamente: sem DEM, não há diferença de altitude).
+
+⚠️ **O sinal do passo é a armadilha.** Em 30 dos 31 mundos o northing do Arma
+conta do norte para o sul. Os dois conversores leem o sinal do config; nenhum
+dos dois assume convenção. Ver `src/engine/arma3-grid.js` para a medição.
+
+---
+
 ## 2. As três vias do briefing, avaliadas
 
 O briefing levantou três abordagens. Todas são certas — para partes
@@ -106,7 +137,7 @@ cp -r ../Project-Vanguard/test src/utils/vanguard/__test__
 > que submódulo git. Quando estabilizar, promover a submódulo ou a pacote npm
 > privado — aí a cópia vira dívida.
 
-Os 54 testes vêm junto e rodam com `node --test`, sem runner novo.
+Os 65 testes vêm junto e rodam com `node --test`, sem runner novo.
 
 ### Passo 2 — Registrar as rotas
 
