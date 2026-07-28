@@ -1,0 +1,57 @@
+# CI do Project Vanguard.
+#
+# O CLAUDE.md deste repo manda "merge com CI verde" desde o começo, mas não
+# havia CI: os 65 testes do motor rodavam só na máquina de quem lembrasse de
+# rodar. Um motor de balística e de coordenadas é exatamente o tipo de código
+# em que a regressão não aparece na tela — ela aparece num azimute plausível e
+# errado. Então o teste tem de rodar em toda proposta de mudança.
+
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  verificar:
+    name: Testes + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Mesma major do `engines` do package.json. Se divergir, o CI passa a
+          # testar num runtime que ninguém usa.
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # O motor primeiro: se a física quebrou, o build passar não consola.
+      - name: Testes do motor
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # A base de terrenos é GERADA no Projeto Baluarte e copiada pra cá. Não
+      # dá pra regenerá-la aqui (o dump do jogo não vive neste repo), mas dá
+      # pra cobrar que ela não seja editada até ficar incoerente: o próprio
+      # arquivo declara quantos mundos traz.
+      - name: A base de terrenos é coerente com o que ela declara?
+        run: |
+          node --input-type=module -e "
+            import { A3TER, A3TER_TOTAL, A3TER_META } from './src/data/arma3-terrenos.js';
+            const comGrade = A3TER.filter((t) => t.grade).length;
+            const erros = [];
+            if (A3TER.length !== A3TER_TOTAL) erros.push(\`A3TER tem \${A3TER.length}, A3TER_TOTAL diz \${A3TER_TOTAL}\`);
+            if (comGrade !== A3TER_META.comGrade) erros.push(\`\${comGrade} com grade, META diz \${A3TER_META.comGrade}\`);
+            for (const t of A3TER) {
+              if (t.tamanhoM !== null && !(t.tamanhoM > 0)) erros.push(\`\${t.classe}: tamanhoM \${t.tamanhoM} — ausência é null, nunca zero\`);
+              if (t.grade && !t.grade.passoY) erros.push(\`\${t.classe}: passoY zero (negativo é normal; zero é dado quebrado)\`);
+            }
+            if (erros.length) { console.error(erros.join('\n')); process.exit(1); }
+            console.log(\`ok — \${A3TER.length} terrenos, \${comGrade} com grade\`);
+          "
