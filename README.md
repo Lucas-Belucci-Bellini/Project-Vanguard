@@ -29,6 +29,17 @@ partir das posições e altitudes, com vento, seleção de carga e aviso de
 segurança. Solução exata em vácuo (forma fechada) e solução com arrasto
 quadrático por integração numérica.
 
+**🗺️ Terrenos do Arma 3** — o mesmo computador de tiro aceita a grade lida na
+carta do jogo, em **31 mundos** cuja grade foi medida do `CfgWorlds` de cada
+um. Dá para escolher o alvo pelo nome do lugar (Kavala, Athira, …) em vez de
+decorar seis dígitos.
+
+> A grade de cada mundo traz **offset e SINAL do passo**, e o sinal importa: em
+> 30 dos 31 mundos o rótulo de northing cresce para o **sul**, ao contrário de
+> toda carta MGRS. Assumir a convenção MGRS espelha o eixo N-S e joga o azimute
+> 180° fora. Por isso o quadro "terreno do Arma 3" é explícito na tela, e não
+> um palpite — ver `src/engine/arma3-grid.js`.
+
 ---
 
 ## Rodar
@@ -36,7 +47,7 @@ quadrático por integração numérica.
 ```bash
 npm install
 npm run dev      # http://localhost:5174
-npm test         # 54 testes do motor
+npm test         # 65 testes do motor
 npm run build    # dist/
 ```
 
@@ -52,13 +63,17 @@ src/
     angles.js        conversão de ângulos (mil NATO ≠ MRAD!)
     geo.js           WGS84, Vincenty direto/inverso, haversine
     mgrs.js          lat/lon ⇄ UTM ⇄ MGRS + vetor de tiro na grade
-    gridref.js       grade local estilo Arma 3 (grid de 4 a 10 dígitos)
+    gridref.js       grade local genérica (MGRS sobre um quadro local)
+    arma3-grid.js    grade REAL de cada mundo do Arma 3 (offset + sinal do passo)
     ballistics.js    solucionadores de vácuo e de arrasto
     charges.js       6 sistemas de armas, arrasto DERIVADO de dado publicado
     fire-mission.js  o contrato GPS ⇄ computador de tiro
+  data/
+    arma3-terrenos.js   ⚠️ GERADO no Projeto Baluarte — não editar à mão
   pages/           telas (#/mapa, #/tiro, #/sobre)
   ui/ core/ styles/
-test/              54 testes (node --test)
+public/arma3/      localidades e aeroportos por terreno (carregado sob demanda)
+test/              65 testes (node --test)
 docs/              MEGA-PLANO · BALISTICA · DESIGN-SYSTEM · INTEGRACAO-BALUARTE
 ```
 

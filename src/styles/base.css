@@ -157,6 +157,10 @@ input:focus, select:focus, button:focus-visible {
 .vg-painel__corpo { padding: var(--space-md); }
 
 /* ── Campo de formulário ── */
+/* `hidden` precisa vencer o `display` que damos aqui. A regra do navegador é
+ * `[hidden]{display:none}` na folha do UA, que perde de QUALQUER regra nossa —
+ * então um `.vg-campo` marcado como hidden continuaria visível. */
+[hidden] { display: none !important; }
 .vg-campo { display: flex; flex-direction: column; gap: var(--space-2xs); margin-bottom: var(--space-sm); }
 .vg-campo > label {
   font-size: var(--font-size-xs);

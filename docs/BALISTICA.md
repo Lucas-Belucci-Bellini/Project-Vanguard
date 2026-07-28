@@ -5,7 +5,7 @@
 > GPS topográfico do Vanguard e ao Projeto Baluarte.
 >
 > **Estado:** Fases 1 e 2 entregues (`src/engine/ballistics.js`,
-> `charges.js`, `fire-mission.js`, tela `#/tiro`, 54 testes).
+> `charges.js`, `fire-mission.js`, tela `#/tiro`, 65 testes).
 
 ---
 
@@ -183,14 +183,27 @@ erro de centenas de km); **(b)** ignorar o fator de escala do UTM (k₀ = 0,9996
 }
 ```
 
-**`pos` aceita três formatos, e misturar é permitido** (alvo em MGRS, peça em
+**`pos` aceita quatro formatos, e misturar é permitido** (alvo em MGRS, peça em
 lat/lon), desde que ambos sejam do mesmo *quadro* (geográfico ou local):
 
 ```json
 { "tipo": "latlon", "lat": -22.95, "lon": -43.21, "alt": 30 }
 { "tipo": "mgrs",   "valor": "23K PQ 83477 60685", "alt": 30 }
-{ "tipo": "local",  "grid": "123456", "alt": 50 }
+{ "tipo": "local",  "x": 12340, "y": 5670, "alt": 50 }
+{ "tipo": "local",  "grid": "034056", "terreno": "altis", "alt": 50 }
 ```
+
+A última forma é a **grade lida na carta do Arma 3**. Com `terreno`, o grid é
+convertido pelo `CfgWorlds` daquele mundo — offset e **sinal** do passo. Sem
+`terreno`, `grid` cai na grade local genérica do `gridref.js`, que é a
+convenção MGRS (origem no canto sudoeste, northing para cima).
+
+⚠️ **As duas não são intercambiáveis.** Em 30 dos 31 mundos medidos o rótulo de
+northing do Arma cresce para o **sul**; a mesma string dá pontos espelhados nos
+dois quadros. Por isso `terreno` não tem valor padrão: adivinhar erraria o eixo
+N-S em silêncio. Terreno fora da base, sem grade no config, ou grid ilegível
+levantam exceção — e peça e alvo em **terrenos diferentes** são recusados na
+validação, porque os dois viram `local` e a conta fecharia com cara de válida.
 
 **`ventoDirecaoDeg` é de ONDE o vento vem** (convenção METAR: vento de 270° =
 vento de oeste). É a convenção da carta meteorológica, e a que mais gente erra

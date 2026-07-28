@@ -17,10 +17,14 @@
 import '../styles/tiro.css';
 import { h, $, empty, dist, mil, seg, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
-import { resolverMissao } from '../engine/fire-mission.js';
+import { resolverMissao, normalizarPosicao } from '../engine/fire-mission.js';
 import { listarSistemas, SISTEMAS } from '../engine/charges.js';
 import { latLonParaMGRS } from '../engine/mgrs.js';
 import { MIL_SYSTEMS } from '../engine/angles.js';
+import {
+  terrenosComGrade, acharTerreno, sentidoNorthing, metrosParaGrade, dentroDoMundo
+} from '../engine/arma3-grid.js';
+import { carregarTerrenos } from '../data/arma3-terrenos.js';
 
 /* Converte a posição guardada no estado para o formato do contrato. */
 function paraContrato(p, quadro) {
@@ -30,9 +34,24 @@ function paraContrato(p, quadro) {
     : { tipo: 'local', x: p.x, y: p.y, alt: p.alt ?? 0 };
 }
 
-export function tiroPage() {
-  const quadro = estado.get(CHAVES.QUADRO, 'geo');
+export function tiroPage({ query = {} } = {}) {
+  /* O quadro deixou de ser lido uma vez e congelado: agora é trocável na
+   * própria tela (MGRS do mundo real × grade de um terreno do Arma 3), e
+   * praticamente tudo que é rótulo, dica e placeholder depende dele. */
+  let quadro = estado.get(CHAVES.QUADRO, 'geo');
+
+  /* `#/tiro?terreno=altis` — como o Projeto Baluarte manda contexto junto do
+   * link. Um terreno pedido implica o quadro local: chegar com o terreno certo
+   * e a tela em MGRS seria pior que não passar nada. Só vale se o terreno
+   * existir de fato, para um link velho não trocar o quadro à toa. */
+  const terrenoPedido = query.terreno && acharTerreno(query.terreno);
+  if (terrenoPedido?.grade) quadro = 'local';
   const sistemaMil = estado.get(CHAVES.MIL, 'nato');
+
+  /* Terrenos do jogo com grade MEDIDA no config (offset + sinal do passo).
+   * Sem grade não dá para converter "034056" em metros — e esses ficam de
+   * fora da lista em vez de aparecerem quebrados. */
+  const TERRENOS_A3 = terrenosComGrade();
   let ambiente = estado.get(CHAVES.AMBIENTE, {
     ventoVelocidadeMs: 0, ventoDirecaoDeg: 0, declinacaoMagDeg: 0
   });
@@ -72,42 +91,166 @@ export function tiroPage() {
 
   const inPecaAlt = h('input', { type: 'number', step: '1', value: '0' });
   const inAlvoAlt = h('input', { type: 'number', step: '1', value: '0' });
-  const inPecaPos = h('input', { type: 'text', placeholder: quadro === 'geo' ? '23K PQ 83477 60685' : '123456' });
-  const inAlvoPos = h('input', { type: 'text', placeholder: quadro === 'geo' ? '23K PQ 86000 63000' : '135470' });
+  const inPecaPos = h('input', { type: 'text' });
+  const inAlvoPos = h('input', { type: 'text' });
 
   const inVentoVel = h('input', { type: 'number', step: '0.5', value: String(ambiente.ventoVelocidadeMs ?? 0) });
   const inVentoDir = h('input', { type: 'number', step: '1', value: String(ambiente.ventoDirecaoDeg ?? 0) });
   const inDeclinacao = h('input', { type: 'number', step: '0.1', value: String(ambiente.declinacaoMagDeg ?? 0) });
 
-  /* Pré-preenche com o que veio do mapa, se houver. */
-  const pecaSalva = estado.get(CHAVES.PECA, null);
-  const alvoSalvo = estado.get(CHAVES.ALVO, null);
-  if (pecaSalva) {
-    inPecaPos.value = quadro === 'geo'
-      ? latLonParaMGRS(pecaSalva.lat, pecaSalva.lon, 5, true)
-      : `${Math.round(pecaSalva.x)},${Math.round(pecaSalva.y)}`;
-    inPecaAlt.value = String(Math.round(pecaSalva.alt ?? 0));
+  /* ── Quadro de referência ──
+   * Duas realidades diferentes, e o operador precisa ver em qual está: MGRS
+   * amarra ao planeta; a grade do Arma amarra ao config de UM mundo. Digitar
+   * "034056" nas duas dá pontos diferentes, então isto não pode ser implícito. */
+  const selQuadro = h('select', {
+    onchange: () => { quadro = selQuadro.value; estado.set(CHAVES.QUADRO, quadro); atualizarQuadro(); }
+  },
+    h('option', { value: 'geo' }, 'MGRS — mundo real'),
+    h('option', { value: 'local' }, 'GRADE DE TERRENO — Arma 3')
+  );
+  selQuadro.value = quadro;
+
+  const selTerreno = h('select', {
+    onchange: () => { estado.set(CHAVES.TERRENO, selTerreno.value); atualizarQuadro(); }
+  }, ...TERRENOS_A3.map((t) => h('option', { value: t.id },
+    `${t.nome}${t.ehMod ? ' [MOD]' : ''}${t.tamanhoM ? ` — ${(t.tamanhoM / 1000).toFixed(1)} km` : ''}`)));
+
+  /* O terreno guardado pode ter sumido da base (mod removido do dump). Cai no
+   * Altis, e se nem ele existir, no primeiro com grade — nunca em `undefined`,
+   * que faria a grade ser lida pela convenção genérica sem ninguém notar. */
+  const terrenoSalvo = terrenoPedido?.grade ? terrenoPedido.id : estado.get(CHAVES.TERRENO, 'altis');
+  selTerreno.value = TERRENOS_A3.some((t) => t.id === terrenoSalvo)
+    ? terrenoSalvo
+    : (TERRENOS_A3.some((t) => t.id === 'altis') ? 'altis' : TERRENOS_A3[0]?.id ?? '');
+
+  const dicaTerreno = h('span', { className: 'vg-dica' }, '');
+  const campoTerreno = TERRENOS_A3.length
+    ? h('div', { className: 'vg-campo' },
+        h('label', null, 'Terreno'), selTerreno, dicaTerreno)
+    : h('div', { className: 'vg-aviso' },
+        'A base de terrenos do Arma 3 não trouxe nenhum mundo com grade medida.');
+
+  const terrenoAtual = () => (quadro === 'local' ? acharTerreno(selTerreno.value) : null);
+
+  /* ── Localidades do terreno ──
+   * O `A3TER` do bundle traz só a contagem; os nomes e as posições moram no
+   * JSON pesado, buscado sob demanda. Poder dizer "alvo em Kavala" em vez de
+   * decorar seis dígitos é o que torna o terreno do jogo utilizável de fato —
+   * e o nome vira grade na tela, então o operador confere contra a carta. */
+  const selLocalidade = h('select', { disabled: true },
+    h('option', null, 'carregando…'));
+  const btnLocalPeca = h('button', { type: 'button', disabled: true, onclick: () => usarLocalidade(inPecaPos) }, '→ PEÇA');
+  const btnLocalAlvo = h('button', { type: 'button', disabled: true, onclick: () => usarLocalidade(inAlvoPos) }, '→ ALVO');
+  const dicaLocalidade = h('span', { className: 'vg-dica' }, '');
+
+  const painelLocalidades = h('div', { className: 'vg-painel' },
+    h('div', { className: 'vg-painel__titulo' }, '◤ LOCALIDADES DO TERRENO'),
+    h('div', { className: 'vg-painel__corpo' },
+      h('div', { className: 'vg-campo' },
+        h('label', null, 'Lugar'), selLocalidade, dicaLocalidade),
+      h('div', { className: 'vg-campo__linha' }, btnLocalPeca, btnLocalAlvo)));
+
+  /* Rótulos legíveis dos tipos do config. O que não estiver aqui aparece com o
+   * nome cru do engine — inventar tradução para um tipo que não conhecemos
+   * seria afirmar algo sobre o dado. */
+  const TIPO_LOCAL = {
+    NameCityCapital: 'capital', NameCity: 'cidade', NameVillage: 'vila',
+    NameLocal: 'local', NameMarine: 'marítimo', Hill: 'elevação',
+    CityCenter: 'centro urbano', Airport: 'aeroporto',
+  };
+
+  let dbTerrenos = null;   // promessa do JSON pesado, buscada uma vez só
+  let vivo = true;         // a tela pode sair antes do fetch voltar
+
+  /** Lugares nomeados do terreno, já em metros do mundo. */
+  function lugaresDe(db, t) {
+    const bruto = db?.terrenos?.[t.id];
+    if (!bruto) return [];
+    const loc = (bruto.localidades ?? [])
+      .filter((l) => l.nome && Number.isFinite(l.x) && Number.isFinite(l.y))
+      .map((l) => ({ nome: l.nome, tipo: TIPO_LOCAL[l.tipo] ?? l.tipo, x: l.x, y: l.y }));
+    const aer = (bruto.aeroportos ?? [])
+      .filter((a) => Number.isFinite(a.x) && Number.isFinite(a.y))
+      .map((a, i) => ({
+        nome: `Aeroporto ${a.nome ?? i}`, tipo: TIPO_LOCAL.Airport, x: a.x, y: a.y,
+      }));
+    return [...loc, ...aer].sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
   }
-  if (alvoSalvo) {
-    inAlvoPos.value = quadro === 'geo'
-      ? latLonParaMGRS(alvoSalvo.lat, alvoSalvo.lon, 5, true)
-      : `${Math.round(alvoSalvo.x)},${Math.round(alvoSalvo.y)}`;
-    inAlvoAlt.value = String(Math.round(alvoSalvo.alt ?? 0));
+
+  function preencherLocalidades() {
+    const t = terrenoAtual();
+    if (!t) return;
+    empty(selLocalidade);
+    selLocalidade.disabled = true;
+    btnLocalPeca.disabled = btnLocalAlvo.disabled = true;
+    selLocalidade.append(h('option', null, 'carregando…'));
+    dicaLocalidade.textContent = '';
+
+    if (!dbTerrenos) dbTerrenos = carregarTerrenos();
+    dbTerrenos.then((db) => {
+      if (!vivo || terrenoAtual()?.id !== t.id) return;
+      const lugares = lugaresDe(db, t);
+      empty(selLocalidade);
+      if (!lugares.length) {
+        selLocalidade.append(h('option', null, '— sem lugares nomeados —'));
+        dicaLocalidade.textContent = `${t.nome} não declara localidade com nome.`;
+        return;
+      }
+      for (const [i, l] of lugares.entries()) {
+        const g = metrosParaGrade(l.x, l.y, t);
+        selLocalidade.append(h('option', { value: String(i) },
+          `${l.nome} — ${l.tipo}${g ? ` · ${g}` : ''}`));
+      }
+      selLocalidade.dataset.lugares = JSON.stringify(lugares);
+      selLocalidade.disabled = false;
+      btnLocalPeca.disabled = btnLocalAlvo.disabled = false;
+      dicaLocalidade.textContent = `${lugares.length} lugares em ${t.nome}`;
+    }).catch((err) => {
+      if (!vivo) return;
+      dbTerrenos = null;  // deixa tentar de novo na próxima troca de terreno
+      empty(selLocalidade);
+      selLocalidade.append(h('option', null, '— indisponível —'));
+      dicaLocalidade.textContent = `Não deu para carregar a base de localidades: ${err.message}`;
+    });
   }
+
+  /** Joga a localidade escolhida no campo de posição, já como grade. */
+  function usarLocalidade(input) {
+    const t = terrenoAtual();
+    const lugares = JSON.parse(selLocalidade.dataset.lugares || '[]');
+    const l = lugares[Number(selLocalidade.value)];
+    if (!t || !l) return;
+    /* Grade quando dá; metros quando o mundo não tem grade utilizável. O que
+     * NÃO pode é escrever um número sem dizer em que unidade ele está. */
+    input.value = metrosParaGrade(l.x, l.y, t) || `${Math.round(l.x)},${Math.round(l.y)}`;
+  }
+
+  /* Rótulos e dicas mudam com o quadro; guardados para não reconstruir a tela. */
+  const lblPecaPos = h('label', null, '');
+  const dicaPecaPos = h('span', { className: 'vg-dica' }, '');
+  const lblAlvoPos = h('label', null, '');
+  const campoDeclinacao = campo('Declinação mag. (°)', inDeclinacao, 'Leste positivo');
 
   entrada.append(
     h('div', { className: 'vg-painel' },
+      h('div', { className: 'vg-painel__titulo' }, '◤ QUADRO'),
+      h('div', { className: 'vg-painel__corpo' },
+        campo('Referência', selQuadro),
+        campoTerreno)),
+
+    painelLocalidades,
+
+    h('div', { className: 'vg-painel' },
       h('div', { className: 'vg-painel__titulo' }, '◤ PEÇA'),
       h('div', { className: 'vg-painel__corpo' },
-        campo(quadro === 'geo' ? 'Posição (MGRS)' : 'Grid local', inPecaPos,
-          quadro === 'geo' ? 'Aceita 4 a 10 dígitos' : 'Grid (ex.: 123456) ou "x,y" em metros'),
+        h('div', { className: 'vg-campo' }, lblPecaPos, inPecaPos, dicaPecaPos),
         campo('Altitude (m)', inPecaAlt),
         campo('Sistema', selSistema))),
 
     h('div', { className: 'vg-painel' },
       h('div', { className: 'vg-painel__titulo' }, '◤ ALVO'),
       h('div', { className: 'vg-painel__corpo' },
-        campo(quadro === 'geo' ? 'Posição (MGRS)' : 'Grid local', inAlvoPos),
+        h('div', { className: 'vg-campo' }, lblAlvoPos, inAlvoPos),
         campo('Altitude (m)', inAlvoAlt))),
 
     h('div', { className: 'vg-painel' },
@@ -116,7 +259,7 @@ export function tiroPage() {
         h('div', { className: 'vg-campo__linha' },
           campo('Vento (m/s)', inVentoVel),
           campo('Vento de (°)', inVentoDir, 'De onde vem')),
-        quadro === 'geo' && campo('Declinação mag. (°)', inDeclinacao, 'Leste positivo'))),
+        campoDeclinacao)),
 
     h('div', { className: 'vg-painel' },
       h('div', { className: 'vg-painel__titulo' }, '◤ OPÇÕES'),
@@ -128,6 +271,78 @@ export function tiroPage() {
 
     h('button', { className: 'primario tiro__calcular', onclick: () => calcular() }, '▶ CALCULAR SOLUÇÃO')
   );
+
+  /**
+   * Reflete o quadro escolhido na tela inteira.
+   *
+   * O texto do sentido do northing não é enfeite: é a diferença entre acertar
+   * o alvo e acertar o ponto espelhado. Em 30 dos 31 mundos do jogo o rótulo
+   * de northing cresce para o SUL, ao contrário de toda carta MGRS — e quem
+   * não sabe disso não tem como desconfiar do resultado.
+   */
+  function atualizarQuadro() {
+    const geo = quadro === 'geo';
+    campoTerreno.hidden = geo;
+    campoDeclinacao.hidden = !geo;
+    painelLocalidades.hidden = geo || !TERRENOS_A3.length;
+    if (!painelLocalidades.hidden) preencherLocalidades();
+
+    lblPecaPos.textContent = geo ? 'Posição (MGRS)' : 'Grade da carta';
+    lblAlvoPos.textContent = lblPecaPos.textContent;
+
+    const t = terrenoAtual();
+    if (geo) {
+      inPecaPos.placeholder = '23K PQ 83477 60685';
+      inAlvoPos.placeholder = '23K PQ 86000 63000';
+      dicaPecaPos.textContent = 'Aceita 4 a 10 dígitos';
+      return;
+    }
+
+    const g = t?.grade;
+    const dig = g ? g.digitos * 2 : 6;
+    inPecaPos.placeholder = '0'.repeat(Math.max(0, dig - 4)) + '3405';
+    inAlvoPos.placeholder = '0'.repeat(Math.max(0, dig - 4)) + '5062';
+    dicaPecaPos.textContent = `Grade de ${dig} dígitos como está na carta, ou "x,y" em metros do mundo`;
+
+    if (!t) { dicaTerreno.textContent = ''; return; }
+    const sentido = sentidoNorthing(t) === 'norte-para-sul'
+      ? '⚠ northing conta do NORTE para o SUL'
+      : 'northing conta do sul para o norte';
+    dicaTerreno.textContent = [
+      t.tamanhoM ? `${t.tamanhoM / 1000} × ${t.tamanhoM / 1000} km` : 'tamanho não declarado',
+      g ? `célula ${Math.abs(g.passoX)} m` : null,
+      sentido,
+    ].filter(Boolean).join(' · ');
+  }
+
+  /* Pré-preenche com o que veio do mapa, se houver. Em quadro local a posição
+   * salva está em metros do mundo: vira grade quando há terreno para converter,
+   * e "x,y" quando não há — nunca um número que finja ser grade. */
+  const pecaSalva = estado.get(CHAVES.PECA, null);
+  const alvoSalvo = estado.get(CHAVES.ALVO, null);
+  const preencher = (p) => {
+    if (quadro === 'geo') return latLonParaMGRS(p.lat, p.lon, 5, true);
+    const t = terrenoAtual();
+    return (t && metrosParaGrade(p.x, p.y, t)) || `${Math.round(p.x)},${Math.round(p.y)}`;
+  };
+  if (pecaSalva) {
+    inPecaPos.value = preencher(pecaSalva);
+    inPecaAlt.value = String(Math.round(pecaSalva.alt ?? 0));
+  }
+  if (alvoSalvo) {
+    inAlvoPos.value = preencher(alvoSalvo);
+    inAlvoAlt.value = String(Math.round(alvoSalvo.alt ?? 0));
+  }
+
+  /* As grades do link vencem o que ficou salvo: quem clicou "abrir no
+   * Vanguard" no Baluarte quer CONTINUAR aquele par, não achar a missão
+   * anterior. Só valem com terreno, senão seriam dígitos sem quadro. */
+  if (terrenoPedido?.grade) {
+    if (query.peca) inPecaPos.value = String(query.peca);
+    if (query.alvo) inAlvoPos.value = String(query.alvo);
+  }
+
+  atualizarQuadro();
 
   /* ── Interpretação das posições digitadas ── */
   function lerPos(input, altInput, rotulo) {
@@ -143,7 +358,40 @@ export function tiroPage() {
       if (!Number.isFinite(x) || !Number.isFinite(y)) throw new Error(`${rotulo}: "x,y" inválido`);
       return { tipo: 'local', x, y, alt };
     }
-    return { tipo: 'local', grid: txt, alt };
+    /* `terreno` é o que faz o motor ler a grade pelo config DAQUELE mundo em
+     * vez da convenção genérica. Vai só quando há terreno escolhido — mandar
+     * um id vazio faria o motor recusar, e sem ele a leitura é a antiga. */
+    const t = terrenoAtual();
+    return t
+      ? { tipo: 'local', grid: txt, terreno: t.id, alt }
+      : { tipo: 'local', grid: txt, alt };
+  }
+
+  /**
+   * Avisa quando a posição cai fora do terreno escolhido.
+   *
+   * Este é o sintoma de grade lida na convenção errada: inverter o northing
+   * num mapa de 30 km costuma jogar o ponto para fora dele. O aviso é de
+   * ATENÇÃO, não de erro — a conta continua válida, e o operador pode estar
+   * mesmo mirando fora dos limites do mundo.
+   *
+   * Quando o mundo não declara `mapSize`, `dentroDoMundo()` devolve `null` e
+   * nada é dito. Não saber não é o mesmo que estar fora.
+   */
+  function avisarForaDoMundo(pedido) {
+    const t = terrenoAtual();
+    if (!t) return;
+    for (const [rotulo, pos] of [['PEÇA', pedido.peca.pos], ['ALVO', pedido.alvo.pos]]) {
+      let p;
+      try { p = normalizarPosicao(pos, rotulo); } catch { continue; }
+      if (p.tipo !== 'local') continue;
+      if (dentroDoMundo(p, t) === false) {
+        saida.append(h('div', { className: 'vg-aviso' },
+          `ATENÇÃO: a ${rotulo} cai fora de ${t.nome} `
+          + `(${Math.round(p.x)}, ${Math.round(p.y)} m, mundo de ${t.tamanhoM} m). `
+          + 'Confira o terreno e o sentido do northing na carta.'));
+      }
+    }
   }
 
   /* ── Cálculo e renderização ── */
@@ -172,6 +420,8 @@ export function tiroPage() {
     estado.set(CHAVES.MIL, selMil.value);
     estado.set(CHAVES.AMBIENTE, pedido.ambiente);
 
+    avisarForaDoMundo(pedido);
+
     let r;
     try {
       r = resolverMissao(pedido);
@@ -187,8 +437,13 @@ export function tiroPage() {
       return;
     }
 
+    pedidoAtual = pedido;
     renderizar(r);
   }
+
+  /* O pedido que gerou a resposta na tela — a renderização precisa dele para
+   * reconverter a posição do alvo em grade e devolver a conferência. */
+  let pedidoAtual = null;
 
   function renderizar(r) {
     const pref = r.solucoes.find((s) => s.preferida);
@@ -229,7 +484,20 @@ export function tiroPage() {
       h('span', { className: 'tiro__chip-rot' }, rot),
       h('span', { className: 'tiro__chip-val' }, val));
 
+    /* Devolver a grade do ALVO reconvertida é conferência, não redundância:
+     * se o que aparece aqui não bate com o que o operador lê na carta, o
+     * terreno escolhido está errado — e ele descobre antes de atirar. */
+    const terr = terrenoAtual();
+    const gradeAlvo = terr && r.geometria.quadro === 'local' && (() => {
+      try {
+        const p = normalizarPosicao(pedidoAtual.alvo.pos, 'alvo');
+        return metrosParaGrade(p.x, p.y, terr);
+      } catch { return null; }
+    })();
+
     saida.append(h('div', { className: 'tiro__chips' },
+      terr && chip('TERRENO', terr.nome),
+      gradeAlvo && chip('ALVO (grade)', gradeAlvo),
       chip('TEMPO DE VOO', seg(pref.tempoVooS)),
       chip('DISTÂNCIA', dist(r.geometria.distanciaHorizontalM)),
       chip('Δ ALTITUDE', `${num(r.geometria.deltaAltM, 0)} m`),
@@ -285,10 +553,12 @@ export function tiroPage() {
   }
 
   /* Se já veio tudo do mapa, calcula de cara. */
-  if (pecaSalva && alvoSalvo) queueMicrotask(calcular);
+  if ((pecaSalva && alvoSalvo) || (inPecaPos.value && inAlvoPos.value)) queueMicrotask(calcular);
   else saida.append(h('div', { className: 'tiro__vazio' },
     h('p', null, 'Informe peça e alvo e calcule a solução.'),
     h('p', { className: 'u-mudo' }, 'Ou marque os dois no mapa — eles chegam aqui preenchidos.')));
 
-  return { elemento: raiz, desmontar: null };
+  /* A base de localidades é buscada em rede: sair da tela antes de ela voltar
+   * não pode fazer o `.then` mexer em DOM que já não existe. */
+  return { elemento: raiz, desmontar: () => { vivo = false; } };
 }
