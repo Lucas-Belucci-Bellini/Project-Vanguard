@@ -4,10 +4,11 @@
 > tático do Arma 3, trazidas para o mundo real. Funciona acoplado ao
 > [Projeto Baluarte](https://github.com/Lucas-Belucci-Bellini/Projeto-Baluarte).
 >
-> **Estado:** a Fase 1 deste plano já está entregue neste repositório (motor de
-> coordenadas, motor balístico, contrato de integração, design system e as
-> telas de mapa e de tiro). O que segue é o plano completo, com o que está
-> pronto marcado.
+> **Estado:** a base geográfica deste plano já estava entregue neste repositório.
+> A interface principal foi recriada como **Vanguard Field**, priorizando
+> navegação civil, bússola, registro local de trilha e preparação responsável
+> de coordenadas para socorro. O computador de tiro permanece isolado como
+> módulo legado, preservado apenas para compatibilidade histórica e testes.
 
 ---
 
