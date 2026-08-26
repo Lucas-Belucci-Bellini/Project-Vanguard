@@ -60,6 +60,33 @@ function rotuloDaLinha(valor, passo) {
   return String(Math.floor((valor % 100000) / passo) % 100).padStart(2, '0');
 }
 
+function tileX(lon, zoom) { return Math.floor(((lon + 180) / 360) * (2 ** zoom)); }
+function tileY(lat, zoom) {
+  const rad = Math.max(-85.0511, Math.min(85.0511, lat)) * Math.PI / 180;
+  return Math.floor(((1 - Math.asinh(Math.tan(rad)) / Math.PI) / 2) * (2 ** zoom));
+}
+function urlDoTile(template, x, y, z) {
+  return template.replace('{x}', x).replace('{y}', y).replace('{z}', z);
+}
+function tilesDoViewport(bounds, base) {
+  const zoomAtual = Math.max(0, Math.floor(base?.zoomAtual ?? 12));
+  const minimo = Math.max(5, zoomAtual - 1);
+  const maximo = Math.min(Number(base?.maxzoom ?? 16), zoomAtual + 1, 16);
+  const urls = new Set();
+  for (let z = minimo; z <= maximo; z++) {
+    const x0 = tileX(bounds.getWest(), z);
+    const x1 = tileX(bounds.getEast(), z);
+    const y0 = tileY(bounds.getNorth(), z);
+    const y1 = tileY(bounds.getSouth(), z);
+    for (let x = x0; x <= x1; x++) {
+      for (let y = y0; y <= y1; y++) {
+        for (const template of base.tiles ?? []) urls.add(urlDoTile(template, x, y, z));
+      }
+    }
+  }
+  return [...urls].slice(0, 256);
+}
+
 async function carregarMapLibre() {
   try {
     await import('maplibre-gl/dist/maplibre-gl.css');
@@ -82,6 +109,8 @@ export function mapaPage() {
   const routeButton = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR ROTA');
   const centerButton = h('button', { className: 'mapa__quick-button', type: 'button' }, '⌾ CENTRAR');
   const clearButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'LIMPAR TRILHA');
+  const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
+  const offlineStatus = h('p', { className: 'mapa__offline-status', role: 'status' }, 'Baixe a área visível antes de sair sem internet.');
   const selectBase = h('select', { className: 'mapa__select', ariaLabel: 'Base cartográfica' },
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
   );
@@ -104,6 +133,7 @@ export function mapaPage() {
     ),
     h('label', { className: 'mapa__uso-label' }, h('span', null, 'MODO DE USO'), selectUso),
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
+    h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus),
     h('div', { className: 'mapa__destino-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DESTINO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
       destinoInput,
@@ -341,6 +371,39 @@ export function mapaPage() {
     });
     mapa.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
     mapa.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
+
+    offlineButton.onclick = async () => {
+      if (!navigator.serviceWorker) {
+        offlineStatus.textContent = 'Service worker indisponível neste navegador; a rota local continua disponível.';
+        return;
+      }
+      const baseAtual = BASES[selectBase.value];
+      const urls = tilesDoViewport(mapa.getBounds(), { ...baseAtual, zoomAtual: mapa.getZoom() });
+      if (!urls.length) {
+        offlineStatus.textContent = 'Não foi possível calcular tiles para esta área.';
+        return;
+      }
+      offlineButton.disabled = true;
+      offlineButton.textContent = 'PREPARANDO…';
+      offlineStatus.textContent = `${urls.length} tiles serão guardados no aparelho. Não feche a tela.`;
+      try {
+        const registro = await navigator.serviceWorker.ready;
+        const alvo = navigator.serviceWorker.controller || registro.active;
+        if (!alvo) throw new Error('service worker ainda não está ativo');
+        const canal = new MessageChannel();
+        canal.port1.onmessage = (event) => {
+          const salvos = Number(event.data?.salvos ?? 0);
+          offlineStatus.textContent = `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}. Mova o mapa e prepare outra área se necessário.`;
+          offlineButton.disabled = false;
+          offlineButton.textContent = 'PREPARAR ÁREA OFFLINE';
+        };
+        alvo.postMessage({ type: 'CACHE_TILES', urls }, [canal.port2]);
+      } catch {
+        offlineStatus.textContent = 'Não foi possível preparar a área agora. Abra o app uma vez online e tente novamente.';
+        offlineButton.disabled = false;
+        offlineButton.textContent = 'TENTAR PREPARAR NOVAMENTE';
+      }
+    };
 
     mapa.on('load', () => {
       if (desmontado) return;
