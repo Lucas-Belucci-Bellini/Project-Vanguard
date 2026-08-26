@@ -90,6 +90,8 @@ export function inicioPage() {
           caminho('#/mapa', 'Mapa vivo', 'posição, trilha e pontos', '⊕'),
           caminho('#/bussola', 'Bússola', 'azimute e orientação', '◉'),
           caminho('#/socorro', 'Modo socorro', 'coordenadas e instruções', '!', 'inicio__atalho--danger'),
+          caminho('#/contexto', 'Modo de contexto', 'cidade, mar, desastre e conflito', '◈'),
+          caminho('#/sobrevivencia', 'Sobrevivência', 'manual offline e primeiros passos', '⌁'),
           caminho('#/doar', 'Apoiar projeto', 'transparência e doações', '＋', 'inicio__atalho--support')
         )
       ),
@@ -115,7 +117,7 @@ export function inicioPage() {
         h('ol', null,
           h('li', null, h('b', null, 'Ative o GPS.'), ' Aguarde a precisão melhorar antes de sair.'),
           h('li', null, h('b', null, 'Inicie a rota no mapa.'), ' Salve pontos importantes, como acampamento ou bifurcação.'),
-          h('li', null, h('b', null, 'Antes de entrar em área remota,'), ' abra Socorro e confira como compartilhar suas coordenadas.')
+          h('li', null, h('b', null, 'Antes de entrar em área remota,'), ' abra Contexto, Sobrevivência e Socorro; prepare o mapa e confira como compartilhar suas coordenadas.')
         )
       )
     )
