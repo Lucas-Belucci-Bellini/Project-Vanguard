@@ -11,7 +11,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | Área | Comportamento |
 |---|---|
 | **Início** | Painel de campo, ativação explícita do GPS, atalhos e tutorial de primeiro uso. |
-| **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. |
+| **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição** e **Cidade / Dia a dia**, com destino por coordenadas ou toque no mapa. |
 | **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. |
 | **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
 | **Socorro** | Captura da posição, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência. |
@@ -20,9 +20,9 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 
 ## Como usar em uma expedição
 
-Abra o Vanguard Field antes de sair e toque em **Ativar GPS**. Aguarde uma leitura com precisão adequada e confira se a posição exibida faz sentido. No **Mapa**, toque em **Iniciar rota** para registrar o caminho no armazenamento local do aparelho. Use **Marcar ponto** em acampamentos, bifurcações, travessias ou outros locais importantes.
+Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho.
 
-Na tela **Bússola**, toque em **Ativar sensor do aparelho**. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
+Na tela **Bússola**, toque em **Ativar sensor do aparelho**. A mesma ferramenta pode orientar uma caminhada no bairro, uma corrida ou uma travessia em área remota. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
 
 Antes de entrar em uma região sem sinal, abra **Modo socorro**, atualize a posição e prepare o alerta local. Isso cria um pacote de coordenadas no aparelho, mas **não contata uma equipe**. Quando houver rede móvel, Wi-Fi, rádio com dados ou um mensageiro via satélite compatível, toque em **Compartilhar coordenadas** e confirme o destinatário.
 

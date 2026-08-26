@@ -76,7 +76,7 @@ export function inicioPage() {
       h('div', { className: 'inicio__hero' },
         h('div', { className: 'inicio__eyebrow' }, 'VANGUARD FIELD / NAVEGAÇÃO DE EXPEDIÇÃO'),
         h('h1', null, 'Volte pelo mesmo caminho.'),
-        h('p', null, 'Um instrumento de navegação para lugares remotos: posição, direção e rota registradas localmente — mesmo quando o sinal de internet desaparece.'),
+        h('p', null, 'Um instrumento de navegação para a cidade e para lugares remotos: escolha um destino, registre sua rota e mantenha sua orientação mesmo quando o sinal de internet desaparece.'),
         statusCard,
         gpsButton,
         gpsFeedback
@@ -101,9 +101,9 @@ export function inicioPage() {
         ),
         h('div', { className: 'inicio__mini-card inicio__mini-card--amber' },
           h('span', { className: 'inicio__kicker' }, 'COMUNICAÇÃO'),
-          h('strong', null, 'SEM INTERNET NÃO É SEM GPS'),
-          h('span', null, 'O aparelho pode continuar calculando sua posição. Para enviar um alerta sem rede móvel, é necessário um comunicador ou serviço via satélite compatível.'),
-          h('button', { className: 'inicio__text-button', type: 'button', onclick: () => { location.hash = '#/socorro'; } }, 'VER PROTOCOLO →')
+          h('strong', null, 'URBANO OU REMOTO'),
+          h('span', null, 'No dia a dia, escolha um destino e compare direção e distância. Em uma trilha, use o mesmo fluxo para registrar o caminho e preparar sua posição.'),
+          h('button', { className: 'inicio__text-button', type: 'button', onclick: () => { location.hash = '#/mapa'; } }, 'ABRIR MAPA →')
         )
       ),
       h('section', { className: 'inicio__section inicio__tutorial', 'aria-labelledby': 'tutorial-titulo' },

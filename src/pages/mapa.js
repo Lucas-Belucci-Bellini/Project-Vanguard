@@ -2,7 +2,7 @@ import '../styles/mapa.css';
 import { h, empty, dist, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel } from '../core/localizacao.js';
-import { haversine } from '../engine/geo.js';
+import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 
@@ -86,14 +86,30 @@ export function mapaPage() {
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
   );
   selectBase.value = 'terreno' in BASES ? 'terreno' : Object.keys(BASES)[0];
+  const selectUso = h('select', { className: 'mapa__select', ariaLabel: 'Modo de uso' },
+    h('option', { value: 'trilha' }, 'TRILHA / EXPEDIÇÃO'),
+    h('option', { value: 'cidade' }, 'CIDADE / DIA A DIA')
+  );
+  selectUso.value = estado.get(CHAVES.MODO_USO, 'trilha');
+  const destinoInput = h('input', { className: 'mapa__destino-input', type: 'text', inputMode: 'decimal', placeholder: 'LAT, LON  ·  ex.: -23.55, -46.63', ariaLabel: 'Coordenadas do destino' });
+  const destinoButton = h('button', { className: 'mapa__destino-button', type: 'button' }, 'DEFINIR DESTINO');
+  const destinoMapButton = h('button', { className: 'mapa__destino-map-button', type: 'button' }, 'TOCAR NO MAPA');
+  const destinoInfo = h('p', { className: 'mapa__destino-info' }, 'Cole coordenadas ou toque no mapa para definir um destino.');
 
   const sheet = h('aside', { className: 'mapa__sheet' },
     h('div', { className: 'mapa__sheet-handle', ariaHidden: 'true' }),
     h('div', { className: 'mapa__sheet-header' },
-      h('div', null, h('span', { className: 'mapa__kicker' }, 'NAVEGAÇÃO AO VIVO'), h('h1', null, 'Mapa de campo')),
+      h('div', null, h('span', { className: 'mapa__kicker' }, 'NAVEGAÇÃO MULTIUSO'), h('h1', null, 'Mapa de campo')),
       h('label', { className: 'mapa__base-label' }, h('span', null, 'BASE'), selectBase)
     ),
+    h('label', { className: 'mapa__uso-label' }, h('span', null, 'MODO DE USO'), selectUso),
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
+    h('div', { className: 'mapa__destino-card' },
+      h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DESTINO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
+      destinoInput,
+      h('div', { className: 'mapa__destino-actions' }, destinoButton, destinoMapButton),
+      destinoInfo
+    ),
     h('div', { className: 'mapa__route-card' },
       h('div', { className: 'mapa__route-card-head' },
         h('span', { className: 'mapa__kicker' }, 'ROTA LOCAL'),
@@ -123,8 +139,10 @@ export function mapaPage() {
   let posicao = estado.get(CHAVES.LOCAL, null);
   let trilha = estado.get(CHAVES.TRILHA, []);
   let waypoints = estado.get(CHAVES.WAYPOINTS, []);
+  let destino = estado.get(CHAVES.DESTINO, null);
   let rotaAtiva = Boolean(estado.get(CHAVES.ROTA_ATIVA, false));
   let marcando = false;
+  let marcandoDestino = false;
   let primeiraPosicao = !posicao;
   let desmontado = false;
   let gradeAtual = { type: 'FeatureCollection', features: [], passo: 1000 };
@@ -147,6 +165,22 @@ export function mapaPage() {
     estadoGps.textContent = `GPS ${precisaoLabel(posicao.accuracy)}`;
   }
 
+  function atualizarDestino() {
+    if (!destino) {
+      destinoInfo.textContent = 'Cole latitude e longitude para ver direção e distância.';
+      return;
+    }
+    if (!posicao) {
+      destinoInfo.textContent = `DESTINO SALVO · ${num(destino.lat, 5)}, ${num(destino.lon, 5)} · aguardando GPS`;
+      return;
+    }
+    const medida = vincentyInverse(posicao, destino);
+    const rumo = bearingTo(posicao, destino);
+    destinoInfo.textContent = medida
+      ? `${dist(medida.distancia)} · rumo ${String(Math.round(rumo)).padStart(3, '0')}° · destino salvo`
+      : 'Destino salvo; distância indisponível nesta geometria.';
+  }
+
   function atualizarSheet() {
     sheet.querySelector('.mapa__route-distance').textContent = dist(distanciaTrilha());
     routeButton.textContent = rotaAtiva ? 'PAUSAR ROTA' : 'INICIAR ROTA';
@@ -158,6 +192,24 @@ export function mapaPage() {
         : 'Ative uma rota para registrar o caminho no aparelho.';
     modoBotao.textContent = marcando ? 'CANCELAR MARCAÇÃO' : 'MARCAR PONTO';
     modoBotao.classList.toggle('is-active', marcando);
+    destinoMapButton.textContent = marcandoDestino ? 'CANCELAR TOQUE' : 'TOCAR NO MAPA';
+    destinoMapButton.classList.toggle('is-active', marcandoDestino);
+    atualizarDestino();
+  }
+
+  function definirDestino() {
+    const partes = destinoInput.value.trim().split(/[;,\s]+/).filter(Boolean).map(Number);
+    const [lat, lon] = partes;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      destinoInfo.textContent = 'Formato inválido. Use latitude e longitude, por exemplo: -23.55, -46.63.';
+      return;
+    }
+    destino = { id: `d-${Date.now()}`, nome: 'Destino', lat, lon, createdAt: Date.now() };
+    estado.set(CHAVES.DESTINO, destino);
+    destinoInput.value = '';
+    destinoButton.textContent = 'DESTINO ATUALIZADO';
+    atualizarDestino();
+    atualizarMarcadores();
   }
 
   function atualizarMarcadores() {
@@ -165,8 +217,10 @@ export function mapaPage() {
     const features = [];
     if (posicao) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [posicao.lon, posicao.lat] }, properties: { tipo: 'voce' } });
     for (const ponto of waypoints) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [ponto.lon, ponto.lat] }, properties: { tipo: 'ponto' } });
+    if (destino) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [destino.lon, destino.lat] }, properties: { tipo: 'destino' } });
     mapa.getSource('vanguard-marcadores').setData({ type: 'FeatureCollection', features });
     mapa.getSource('vanguard-trilha').setData({ type: 'FeatureCollection', features: trilha.length > 1 ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: trilha.map((p) => [p.lon, p.lat]) }, properties: {} }] : [] });
+    mapa.getSource('vanguard-destino').setData({ type: 'FeatureCollection', features: posicao && destino ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: [[posicao.lon, posicao.lat], [destino.lon, destino.lat]] }, properties: {} }] : [] });
   }
 
   function centralizar() {
@@ -204,6 +258,16 @@ export function mapaPage() {
   }
 
   function adicionarPonto(e) {
+    if (marcandoDestino) {
+      destino = { id: `d-${Date.now()}`, nome: 'Destino', lat: e.lngLat.lat, lon: e.lngLat.lng, createdAt: Date.now() };
+      estado.set(CHAVES.DESTINO, destino);
+      marcandoDestino = false;
+      markerHint.classList.remove('is-visible');
+      sheetStatus.textContent = `Destino salvo localmente · ${num(destino.lat, 5)}, ${num(destino.lon, 5)}`;
+      atualizarSheet();
+      atualizarMarcadores();
+      return;
+    }
     if (!marcando) return;
     const ponto = { id: `p-${Date.now()}`, nome: `Ponto ${String(waypoints.length + 1).padStart(2, '0')}`, lat: e.lngLat.lat, lon: e.lngLat.lng, createdAt: Date.now() };
     waypoints = [...waypoints, ponto];
@@ -218,7 +282,28 @@ export function mapaPage() {
   routeButton.onclick = alternarRota;
   centerButton.onclick = centralizar;
   clearButton.onclick = limparTrilha;
-  modoBotao.onclick = () => { marcando = !marcando; markerHint.classList.toggle('is-visible', marcando); atualizarSheet(); };
+  destinoButton.onclick = definirDestino;
+  destinoMapButton.onclick = () => {
+    marcandoDestino = !marcandoDestino;
+    marcando = false;
+    markerHint.textContent = marcandoDestino ? 'Toque no mapa para definir o destino' : 'Toque no mapa para marcar um ponto';
+    markerHint.classList.toggle('is-visible', marcandoDestino);
+    atualizarSheet();
+  };
+  destinoInput.onkeydown = (event) => { if (event.key === 'Enter') definirDestino(); };
+  selectUso.onchange = () => {
+    estado.set(CHAVES.MODO_USO, selectUso.value);
+    sheetStatus.textContent = selectUso.value === 'cidade'
+      ? 'Modo cidade: defina um destino para ver rumo e distância.'
+      : 'Modo trilha: registre sua rota e pontos de referência localmente.';
+  };
+  modoBotao.onclick = () => {
+    marcando = !marcando;
+    marcandoDestino = false;
+    markerHint.textContent = 'Toque no mapa para marcar um ponto';
+    markerHint.classList.toggle('is-visible', marcando);
+    atualizarSheet();
+  };
 
   const pararGps = iniciarAcompanhamento({
     onPosition: (nova) => {
@@ -261,10 +346,12 @@ export function mapaPage() {
       if (desmontado) return;
       mapa.addSource('vanguard-grade', { type: 'geojson', data: gradeAtual });
       mapa.addSource('vanguard-trilha', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      mapa.addSource('vanguard-destino', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       mapa.addSource('vanguard-marcadores', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       mapa.addLayer({ id: 'vanguard-grade', type: 'line', source: 'vanguard-grade', paint: { 'line-color': '#b6c59b', 'line-opacity': 0.28, 'line-width': ['case', ['get', 'forte'], 1.5, 0.7] } });
       mapa.addLayer({ id: 'vanguard-trilha', type: 'line', source: 'vanguard-trilha', paint: { 'line-color': '#8bff3f', 'line-width': 4, 'line-opacity': 0.85 } });
-      mapa.addLayer({ id: 'vanguard-marcadores', type: 'circle', source: 'vanguard-marcadores', paint: { 'circle-radius': ['match', ['get', 'tipo'], 'voce', 8, 6], 'circle-color': ['match', ['get', 'tipo'], 'voce', '#80e0ff', '#ffb000'], 'circle-stroke-color': '#11150e', 'circle-stroke-width': 2 } });
+      mapa.addLayer({ id: 'vanguard-destino', type: 'line', source: 'vanguard-destino', paint: { 'line-color': '#ffb000', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.9 } });
+      mapa.addLayer({ id: 'vanguard-marcadores', type: 'circle', source: 'vanguard-marcadores', paint: { 'circle-radius': ['match', ['get', 'tipo'], 'voce', 8, 'destino', 7, 6], 'circle-color': ['match', ['get', 'tipo'], 'voce', '#80e0ff', 'destino', '#ffb000', '#ffb000'], 'circle-stroke-color': '#11150e', 'circle-stroke-width': 2 } });
       redesenharGrade();
       atualizarMarcadores();
     });
@@ -316,6 +403,7 @@ export function mapaPage() {
   })();
 
   atualizarHud();
+  atualizarDestino();
   atualizarSheet();
   return { elemento: raiz, desmontar: () => { desmontado = true; pararGps(); if (mapa) mapa.remove(); } };
 }
