@@ -1,0 +1,20 @@
+{
+  "name": "Vanguard Field",
+  "short_name": "Vanguard",
+  "description": "Navegação de expedição com GPS, bússola, trilha local e protocolo de posição para socorro.",
+  "lang": "pt-BR",
+  "start_url": "/#/inicio",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0f0a",
+  "theme_color": "#0c0f0a",
+  "categories": ["navigation", "utilities", "travel"],
+  "icons": [
+    {
+      "src": "/icons/vanguard.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

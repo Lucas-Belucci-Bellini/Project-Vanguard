@@ -1,0 +1,42 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { normalizarPosicao, precisaoLabel, velocidadeLabel } from '../src/core/localizacao.js';
+
+test('normalizarPosicao converte a leitura nativa para o contrato do app', () => {
+  const atual = normalizarPosicao({
+    timestamp: 1700000000000,
+    coords: {
+      latitude: -22.95,
+      longitude: -43.21,
+      accuracy: 8.4,
+      altitude: 31.2,
+      speed: 1.5,
+      heading: 271
+    }
+  });
+  assert.deepEqual(atual, {
+    lat: -22.95,
+    lon: -43.21,
+    accuracy: 8.4,
+    altitude: 31.2,
+    speed: 1.5,
+    heading: 271,
+    timestamp: 1700000000000
+  });
+});
+
+test('normalizarPosicao trata altitude, velocidade e rumo inválidos como indisponíveis', () => {
+  const atual = normalizarPosicao({ latitude: 1, longitude: 2, accuracy: null, altitude: null, speed: -1, heading: -1 });
+  assert.equal(atual.lat, 1);
+  assert.equal(atual.lon, 2);
+  assert.equal(atual.accuracy, null);
+  assert.equal(atual.altitude, null);
+  assert.equal(atual.speed, null);
+  assert.equal(atual.heading, null);
+});
+
+test('formatadores não inventam precisão ou velocidade quando faltam dados', () => {
+  assert.equal(precisaoLabel(null), 'precisão indisponível');
+  assert.equal(velocidadeLabel(null), '—');
+  assert.equal(velocidadeLabel(2), '7.2 km/h');
+});

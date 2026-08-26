@@ -1,112 +1,50 @@
-/* Mapa tático: o mapa ocupa tudo, HUD flutua, painel fica à direita. */
-
-/* `.mapa` compartilha o elemento com `.vg-pagina`, que já é
- * `position:absolute; inset:0; display:flex`. NÃO declarar `position` aqui.
- *
- * ⚠️ O contêiner do mapa é posicionado por FLEX, de propósito. O
- * `maplibre-gl.css` é importado em tempo de execução (junto com o motor), ou
- * seja, DEPOIS das folhas do app — e ele traz `.maplibregl-map{position:
- * relative}`. Qualquer `position:absolute` que a gente pusesse aqui perderia
- * a cascata para essa regra, e o contêiner colapsaria para largura zero.
- * Layout por flex não disputa `position` com ninguém. */
-
-.mapa__canvas { flex: 1 1 auto; min-width: 0; height: 100%; background: var(--color-bg); }
-
-/* Camada de rótulos: fica por cima do WebGL e é transparente ao mouse, senão
- * roubaria o arrasto do mapa. */
-.mapa__rotulos {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.mapa__painel {
-  flex: 0 0 320px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  padding: var(--space-sm);
-  overflow-y: auto;
-  background: var(--color-bg-elevated);
-  border-left: var(--border-base);
-}
-
-.mapa__hud {
-  position: absolute;
-  top: var(--space-sm);
-  left: var(--space-sm);
-  z-index: var(--z-overlay);
-  pointer-events: none;
-}
-
-.mapa__hud-bloco {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-overlay);
-  border: var(--border-base);
-  border-left: 3px solid var(--color-cyan);
-  border-radius: var(--radius-sm);
-  backdrop-filter: blur(3px);
-}
-
-.mapa__hud-rot {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  letter-spacing: var(--tracking-wider);
-}
-.mapa__hud-valor {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-cyan);
-  text-shadow: var(--shadow-glow-cyan);
-  letter-spacing: var(--tracking-wide);
-}
-.mapa__hud-sub { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-
-.mapa__botoes { display: flex; flex-direction: column; gap: var(--space-xs); }
-
-.mapa__info { font-size: var(--font-size-sm); }
-.mapa__info-mgrs {
-  color: var(--color-cyan);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-wide);
-  margin-bottom: var(--space-2xs);
-}
-
-.mapa__solucao { display: flex; flex-direction: column; gap: var(--space-sm); }
-
-.mapa__falha { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 480px; }
-
-/* Controles do MapLibre puxados para a paleta Mil-Spec. */
-.maplibregl-ctrl-group {
-  background: var(--color-surface) !important;
-  border: var(--border-base) !important;
-  border-radius: var(--radius-sm) !important;
-}
+.mapa { display: flex; flex-direction: column; background: var(--color-bg); }
+.mapa__canvas { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; background: #151b12; }
+.mapa__canvas .maplibregl-map { position: absolute; inset: 0; }
+.mapa__rotulos { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
+.mapa__hud { position: absolute; top: 12px; left: 12px; z-index: var(--z-overlay); display: flex; flex-direction: column; align-items: flex-start; gap: 7px; pointer-events: none; }
+.mapa__hud-card { display: flex; flex-direction: column; gap: 3px; max-width: calc(100vw - 110px); padding: 10px 12px; background: var(--color-overlay); border: var(--border-base); border-left: 3px solid var(--color-cyan); backdrop-filter: blur(7px); }
+.mapa__hud-label, .mapa__kicker { color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-wider); }
+.mapa__hud-coord { overflow: hidden; color: var(--color-cyan); font-size: 13px; font-weight: var(--font-weight-bold); letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
+.mapa__hud-meta { color: var(--color-text-secondary); font-size: 9px; }
+.mapa__gps-pill { display: flex; align-items: center; gap: 6px; padding: 6px 9px; background: var(--color-overlay); border: var(--border-base); color: var(--color-text-secondary); font-size: 9px; }
+.mapa__gps-dot { background: var(--color-cyan); box-shadow: 0 0 8px var(--color-cyan); }
+.mapa__hint { position: absolute; top: 82px; left: 50%; z-index: var(--z-overlay); display: none; transform: translateX(-50%); padding: 7px 10px; background: var(--color-cyan); color: var(--color-bg); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-wide); pointer-events: none; }
+.mapa__hint.is-visible { display: block; }
+.mapa__sheet { position: relative; z-index: 4; flex: 0 0 auto; max-height: min(46vh, 390px); overflow-y: auto; padding: 11px 14px calc(72px + env(safe-area-inset-bottom)); background: var(--color-bg-elevated); border-top: var(--border-base); }
+.mapa__sheet-handle { width: 36px; height: 3px; margin: 0 auto 12px; background: var(--color-text-muted); border-radius: 99px; }
+.mapa__sheet-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mapa__sheet-header h1 { margin-top: 5px; font-size: 20px; }
+.mapa__base-label { display: flex; flex-direction: column; gap: 4px; min-width: 112px; color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.mapa__select { padding: 8px 6px; color: var(--color-text-secondary); font-size: 9px; }
+.mapa__quick-actions, .mapa__map-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 11px; }
+.mapa__quick-button { min-height: 36px; padding: 7px; color: var(--color-text-secondary); background: var(--color-surface); font-size: 9px; }
+.mapa__quick-button--quiet { color: var(--color-text-muted); }
+.mapa__route-card { margin-top: 10px; padding: 12px; background: var(--color-surface); border: var(--border-base); }
+.mapa__route-card-head { display: flex; align-items: center; justify-content: space-between; }
+.mapa__privacy { color: var(--color-cyan); font-size: 9px; letter-spacing: .08em; }
+.mapa__route-distance { display: block; margin-top: 10px; color: var(--color-cyan); font-size: 29px; line-height: 1; text-shadow: var(--shadow-glow-cyan); }
+.mapa__route-caption { display: block; margin: 4px 0 10px; color: var(--color-text-muted); font-size: 9px; text-transform: uppercase; }
+.mapa__route-button { width: 100%; background: var(--color-cyan-soft); border-color: var(--color-cyan-edge); color: var(--color-cyan); font-weight: var(--font-weight-bold); }
+.mapa__route-button.is-active { background: var(--color-cyan); color: var(--color-bg); }
+.mapa__sheet-status { min-height: 17px; margin-top: 8px; color: var(--color-text-muted); font-size: 9px; line-height: 1.5; }
+.mapa__map-actions button { min-height: 36px; }
+.mapa__mode-button.is-active { background: var(--color-magenta); border-color: var(--color-magenta); color: var(--color-bg); }
+.mapa__socorro-button { background: var(--color-danger-soft); border-color: rgba(255,65,54,.4); color: var(--color-danger); }
+.mapa__falha { position: absolute; top: 50%; left: 50%; z-index: 3; width: min(90%, 420px); padding: 16px; transform: translate(-50%, -50%); background: var(--color-surface); border: var(--border-base); color: var(--color-text-secondary); font-size: 11px; line-height: 1.6; }
+.maplibregl-ctrl-group { background: var(--color-surface) !important; border: var(--border-base) !important; border-radius: var(--radius-sm) !important; }
 .maplibregl-ctrl-group button + button { border-top: var(--border-thin) !important; }
 .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(1) hue-rotate(60deg); }
-.maplibregl-ctrl-scale {
-  background: var(--color-overlay) !important;
-  border-color: var(--color-cyan-edge) !important;
-  color: var(--color-text-primary) !important;
-  font-family: var(--font-mono) !important;
-  font-size: var(--font-size-xs) !important;
-  border-radius: var(--radius-sm);
-}
-.maplibregl-ctrl-attrib {
-  background: var(--color-overlay) !important;
-  font-size: 9px !important;
-}
+.maplibregl-ctrl-scale { background: var(--color-overlay) !important; border-color: var(--color-cyan-edge) !important; color: var(--color-text-primary) !important; font-family: var(--font-mono) !important; font-size: 9px !important; }
+.maplibregl-ctrl-attrib { background: var(--color-overlay) !important; font-size: 8px !important; }
 .maplibregl-ctrl-attrib a { color: var(--color-text-muted) !important; }
 
-@media (max-width: 900px) {
-  .vg-pagina.mapa { flex-direction: column; }
-  .mapa__canvas { flex: 1 1 55%; height: auto; width: 100%; }
-  .mapa__painel { flex: 0 0 45%; width: 100%; height: auto; border-left: none; border-top: var(--border-base); }
+@media (min-width: 900px) {
+  .mapa { flex-direction: row; }
+  .mapa__canvas { order: 1; }
+  .mapa__sheet { order: 2; width: 340px; max-height: none; overflow-y: auto; padding: 18px; border-top: 0; border-left: var(--border-base); }
+  .mapa__sheet-handle { display: none; }
+  .mapa__sheet-header h1 { font-size: 24px; }
+  .mapa__hud { top: 18px; left: 18px; }
+  .mapa__hint { top: 18px; }
 }

@@ -1,147 +1,81 @@
-<div align="center">
+# VANGUARD FIELD
 
-# ⌖ PROJECT VANGUARD
+**Navegação de expedição para pessoas comuns em áreas remotas.** O Vanguard Field combina GPS/GNSS do aparelho, bússola, mapa com grade MGRS, registro local de trilha e um protocolo de compartilhamento de coordenadas para situações de emergência.
 
-**GPS topográfico tático + computador de tiro**
-Estética e funcionalidade do mapa do Arma 3, trazidas para o mundo real.
+A interface foi desenhada para uso em celular, com botões grandes, alto contraste, modo noturno vermelho e navegação instalável como PWA em Android, incluindo aparelhos Xiaomi com MIUI ou HyperOS. O projeto também mantém compatibilidade web para testes e evolução rápida.
 
-Parte do ecossistema [**Projeto Baluarte**](https://github.com/Lucas-Belucci-Bellini/Projeto-Baluarte)
+> O Vanguard Field ajuda a organizar uma navegação e a preparar uma posição para transmissão. **Ele não substitui treinamento de orientação, carta offline, bateria reserva, plano de viagem, equipe de emergência ou um comunicador via satélite.**
 
-`JavaScript puro (ES2022)` · `Vite 5` · `MapLibre GL` · `zero dependências no motor`
+## O que já está implementado
 
-</div>
+| Área | Comportamento |
+|---|---|
+| **Início** | Painel de campo, ativação explícita do GPS, atalhos e tutorial de primeiro uso. |
+| **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. |
+| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. |
+| **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
+| **Socorro** | Captura da posição, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência. |
+| **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
+| **Offline parcial** | A shell do app e os dados locais podem ser reabertos sem internet depois do primeiro carregamento. Tiles cartográficos precisam ser preparados para uso offline em uma etapa própria. |
 
----
+## Como usar em uma expedição
 
-## O que é
+Abra o Vanguard Field antes de sair e toque em **Ativar GPS**. Aguarde uma leitura com precisão adequada e confira se a posição exibida faz sentido. No **Mapa**, toque em **Iniciar rota** para registrar o caminho no armazenamento local do aparelho. Use **Marcar ponto** em acampamentos, bifurcações, travessias ou outros locais importantes.
 
-Duas ferramentas que compartilham um motor:
+Na tela **Bússola**, toque em **Ativar sensor do aparelho**. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
 
-**🗺️ Mapa tático** — mapa topográfico ou satélite com **grade MGRS sobreposta**,
-leitura de coordenadas ao vivo, marcação de peça e alvo, azimute de grade e
-distância. A grade não é um quadriculado decorativo: cada linha é uma linha
-real de easting/northing UTM convertida ponto a ponto de volta para lat/lon, e
-por isso **curva** conforme se afasta do meridiano central — como numa carta
-impressa.
+Antes de entrar em uma região sem sinal, abra **Modo socorro**, atualize a posição e prepare o alerta local. Isso cria um pacote de coordenadas no aparelho, mas **não contata uma equipe**. Quando houver rede móvel, Wi-Fi, rádio com dados ou um mensageiro via satélite compatível, toque em **Compartilhar coordenadas** e confirme o destinatário.
 
-**🎯 Computador de tiro** — elevação, azimute e tempo de voo para morteiro, a
-partir das posições e altitudes, com vento, seleção de carga e aviso de
-segurança. Solução exata em vácuo (forma fechada) e solução com arrasto
-quadrático por integração numérica.
+## GPS, satélite e resgate: o que o celular consegue fazer
 
-**🗺️ Terrenos do Arma 3** — o mesmo computador de tiro aceita a grade lida na
-carta do jogo, em **31 mundos** cuja grade foi medida do `CfgWorlds` de cada
-um. Dá para escolher o alvo pelo nome do lugar (Kavala, Athira, …) em vez de
-decorar seis dígitos.
+O GPS/GNSS é um sistema de **posicionamento**: o aparelho recebe sinais de satélites e calcula uma posição. Essa etapa pode continuar funcionando sem internet, embora relevo, cobertura do céu, interferência, bateria e qualidade do receptor alterem a precisão.
 
-> A grade de cada mundo traz **offset e SINAL do passo**, e o sinal importa: em
-> 30 dos 31 mundos o rótulo de northing cresce para o **sul**, ao contrário de
-> toda carta MGRS. Assumir a convenção MGRS espelha o eixo N-S e joga o azimute
-> 180° fora. Por isso o quadro "terreno do Arma 3" é explícito na tela, e não
-> um palpite — ver `src/engine/arma3-grid.js`.
+Um celular comum não transforma automaticamente essa posição em um pedido de resgate via satélite. **Posicionamento e comunicação são funções diferentes.** Para que uma equipe receba sua localização fora da rede móvel, é necessário um meio de transmissão compatível, como um comunicador via satélite ou rádio com dados. O aplicativo deixa essa distinção visível para evitar uma falsa sensação de segurança.
 
----
-
-## Rodar
+## Rodar localmente
 
 ```bash
 npm install
-npm run dev      # http://localhost:5174
-npm test         # 65 testes do motor
-npm run build    # dist/
+npm run dev       # http://localhost:5174
+npm test          # 65 testes do motor geográfico e legado
+npm run build     # gera dist/
 ```
 
-Node ≥ 22.
+Node.js 22 ou superior é recomendado.
 
----
+Para testar no Android ou em um Xiaomi, abra a versão publicada em um navegador compatível e use **Adicionar à tela inicial**. A permissão de localização deve ser concedida ao navegador ou ao atalho instalado. Uma futura etapa pode empacotar a mesma base em APK com Capacitor; o código atual já foi organizado para esse caminho, mas o diretório nativo ainda não faz parte deste protótipo.
 
-## Estrutura
+## Estrutura principal
 
-```
+```text
 src/
-  engine/          ← MOTOR: zero dependências, zero DOM
-    angles.js        conversão de ângulos (mil NATO ≠ MRAD!)
-    geo.js           WGS84, Vincenty direto/inverso, haversine
-    mgrs.js          lat/lon ⇄ UTM ⇄ MGRS + vetor de tiro na grade
-    gridref.js       grade local genérica (MGRS sobre um quadro local)
-    arma3-grid.js    grade REAL de cada mundo do Arma 3 (offset + sinal do passo)
-    ballistics.js    solucionadores de vácuo e de arrasto
-    charges.js       6 sistemas de armas, arrasto DERIVADO de dado publicado
-    fire-mission.js  o contrato GPS ⇄ computador de tiro
-  data/
-    arma3-terrenos.js   ⚠️ GERADO no Projeto Baluarte — não editar à mão
-  pages/           telas (#/mapa, #/tiro, #/sobre)
-  ui/ core/ styles/
-public/arma3/      localidades e aeroportos por terreno (carregado sob demanda)
-test/              65 testes (node --test)
-docs/              MEGA-PLANO · BALISTICA · DESIGN-SYSTEM · INTEGRACAO-BALUARTE
+  core/
+    estado.js          persistência local e chaves compartilhadas
+    localizacao.js     normalização do GPS e ciclo de acompanhamento
+  engine/
+    geo.js             distância e azimute geodésicos
+    mgrs.js            conversões UTM/MGRS
+    ...                motor geográfico e módulos legados
+  pages/
+    inicio.js          painel inicial e tutorial
+    mapa.js            mapa, trilha e pontos de referência
+    bussola.js         sensor de orientação e fallback de rumo
+    socorro.js         coordenadas e compartilhamento manual
+  styles/              identidade visual mobile-first
+public/
+  manifest.webmanifest instalação como PWA
+  sw.js                cache da shell do aplicativo
+  icons/vanguard.svg   ícone instalável
+
+test/                  testes determinísticos do motor
 ```
 
-O motor roda **igual** no navegador, no Node, num Web Worker e numa função
-serverless. É o que garante que a física do app, do site e da API seja
-literalmente o mesmo código — em vez de três implementações que divergem em
-silêncio.
+## Decisões de segurança do protótipo
 
----
+A localização permanece no dispositivo por padrão. O modo Socorro não chama serviços externos e não simula uma confirmação de recebimento. A mensagem compartilhada inclui coordenadas MGRS, latitude/longitude, precisão e horário para que a pessoa possa escolher o canal correto.
 
-## Documentação
+O mapa online usa fontes públicas com atribuição, mas isso não significa que as imagens estejam disponíveis offline. Para uma versão de campo mais robusta, a próxima etapa deve incluir pacotes de tiles pré-baixados por área, expiração e verificação de integridade, além de uma integração opt-in com um provedor real de mensagens via satélite.
 
-| Documento | O que tem |
-|---|---|
-| [`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md) | Stack, arquitetura, design system, roadmap em 4 fases, desafios técnicos |
-| [`docs/BALISTICA.md`](docs/BALISTICA.md) | A matemática completa, o contrato JSON, o design da interface de fogo |
-| [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) | Contrato visual Mil-Spec: tokens, componentes, os 3 modos de tela |
-| [`docs/INTEGRACAO-BALUARTE.md`](docs/INTEGRACAO-BALUARTE.md) | Como acoplar ao Baluarte: módulo, REST e WebSocket |
+## Observação sobre o código legado
 
----
-
-## Exemplo — o motor em 6 linhas
-
-```js
-import { resolverMissao } from './src/engine/fire-mission.js';
-
-const solucao = resolverMissao({
-  peca: { pos: { tipo: 'mgrs', valor: '23K PQ 83477 60685', alt: 30 },
-          sistema: 'm252_81mm' },
-  alvo: { pos: { tipo: 'mgrs', valor: '23K PQ 86000 63000', alt: 120 } },
-  ambiente: { ventoVelocidadeMs: 8, ventoDirecaoDeg: 270 }
-});
-
-// → azimute de grade 844 mil · elevação 1264 mil · carga 4 · voo 46,9 s
-```
-
----
-
-## Decisões que valem explicar
-
-**JS puro + Capacitor, não React Native.** O Baluarte proíbe framework e já
-publica Android via Capacitor. Adotar RN significaria duas UIs e dois builds em
-troca de ganho ~zero, já que o app é 90 % mapa (WebGL nos dois casos).
-
-**MapLibre, não Mapbox.** Mesma customização, sem chave de API e sem teto de
-uso. Para um app que um esquadrão inteiro pode abrir em campo, teto de uso é
-risco operacional. O Baluarte já usa MapLibre no `/mapa`.
-
-**Empacotado, não CDN.** Numa ferramenta de campo, depender de CDN significa
-que a navegação morre junto com o sinal — e a hora em que se precisa do mapa é
-exatamente a hora em que a rede falha.
-
-**Azimute de GRADE, não verdadeiro.** A doutrina de artilharia trabalha em
-coordenadas de grade. Os dois diferem pela convergência de meridianos: até 3°,
-que a 3 km são ~160 m de erro lateral.
-
-**Arrasto derivado, não inventado.** As tabelas guardam o par
-(velocidade inicial, alcance máximo publicado) — dado verificável — e o motor
-**deriva** o coeficiente. Um teste rejeita pares fisicamente impossíveis; foi
-assim que um erro real na carga 0 do 2B14 foi detectado.
-
----
-
-## ⚠️ Aviso
-
-Ferramenta de **treino e simulação**. Os dados de armamento são **valores de
-referência de modelo** compilados de fontes públicas — **não são tabela de tiro
-oficial e não substituem uma**. O modelo assume atmosfera uniforme, ignora
-Coriolis e spin drift, e trata a dispersão como ordem de grandeza.
-Os limites completos estão na tela `#/sobre` do app. **Não usar para emprego
-real de armamento.**
+O repositório original continha um computador de tiro e um motor balístico. Esses módulos foram preservados para não quebrar o histórico e os testes do projeto, mas **não fazem parte da nova navegação civil nem do fluxo recomendado para o usuário**. A interface principal agora prioriza orientação, retorno pela trilha e preparação responsável de coordenadas para socorro.

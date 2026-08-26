@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Project Vanguard — GPS topográfico tático + computador de tiro (estética Arma 3). Ecossistema Projeto Baluarte.",
+  "description": "Vanguard Field — navegação de expedição com GPS, bússola, trilha local e protocolo de posição para socorro.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

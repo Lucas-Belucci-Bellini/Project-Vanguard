@@ -1,0 +1,44 @@
+.bussola { background: var(--color-bg); }
+.bussola__scroll { height: 100%; overflow-y: auto; padding: 0 14px calc(86px + env(safe-area-inset-bottom)); }
+.bussola__head, .bussola__cards, .bussola__status, .bussola__ativar, .bussola__mapa { width: min(100%, 760px); margin-right: auto; margin-left: auto; }
+.bussola__head { padding: 28px 0 18px; }
+.bussola__eyebrow, .bussola__kicker { display: block; color: var(--color-cyan); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-widest); }
+.bussola__eyebrow { margin-bottom: 13px; }
+.bussola__head h1 { margin-bottom: 10px; }
+.bussola__head p { max-width: 620px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.7; }
+.bussola__instrumento { display: grid; grid-template-columns: minmax(190px, 280px) 1fr; align-items: center; justify-content: center; gap: clamp(20px, 8vw, 80px); width: min(100%, 760px); margin: 0 auto; padding: 18px 0 24px; }
+.bussola__rosa { --heading: 0deg; position: relative; width: min(66vw, 260px); aspect-ratio: 1; margin: auto; border: 1px solid var(--color-cyan-edge); border-radius: 50%; background: radial-gradient(circle, transparent 0 35%, rgba(139,255,63,.04) 35% 36%, transparent 36% 64%, rgba(139,255,63,.07) 64% 65%, transparent 65%), repeating-conic-gradient(from 0deg, rgba(139,255,63,.25) 0deg 1deg, transparent 1deg 15deg); box-shadow: 0 0 0 7px rgba(139,255,63,.03), 0 0 34px rgba(139,255,63,.08); }
+.bussola__rosa::before, .bussola__rosa::after { content: ''; position: absolute; background: var(--color-cyan-edge); }
+.bussola__rosa::before { top: 12%; bottom: 12%; left: calc(50% - .5px); width: 1px; }
+.bussola__rosa::after { top: calc(50% - .5px); right: 12%; left: 12%; height: 1px; }
+.bussola__anel { position: absolute; inset: 12%; border: 1px dashed var(--color-cyan-edge); border-radius: 50%; transform: rotate(var(--heading)); transition: transform 180ms ease-out; }
+.bussola__marca { position: absolute; top: 0; left: calc(50% - 1px); width: 2px; height: 10px; background: var(--color-cyan); transform-origin: 50% calc(50% + 102px); }
+.bussola__marca--2 { transform: rotate(90deg); }
+.bussola__marca--3 { transform: rotate(180deg); }
+.bussola__marca--4 { transform: rotate(270deg); }
+.bussola__ponto-norte, .bussola__ponto-leste, .bussola__ponto-sul, .bussola__ponto-oeste { position: absolute; z-index: 1; color: var(--color-text-secondary); font-size: 11px; font-weight: var(--font-weight-bold); }
+.bussola__ponto-norte { top: 7%; left: calc(50% - 4px); color: var(--color-danger); }
+.bussola__ponto-leste { top: calc(50% - 7px); right: 7%; }
+.bussola__ponto-sul { bottom: 7%; left: calc(50% - 4px); }
+.bussola__ponto-oeste { top: calc(50% - 7px); left: 7%; }
+.bussola__ponteiro { position: absolute; top: 19%; left: calc(50% - 8px); z-index: 2; color: var(--color-danger); font-size: 17px; text-shadow: 0 0 9px rgba(255,65,54,.7); transform: rotate(var(--heading)); transform-origin: 8px 82px; transition: transform 180ms ease-out; }
+.bussola__readout { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 18px 0; border-top: var(--border-base); border-bottom: var(--border-base); }
+.bussola__readout-label { color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-widest); }
+.bussola__grau { color: var(--color-cyan); font-size: clamp(42px, 11vw, 68px); line-height: .95; letter-spacing: .04em; text-shadow: var(--shadow-glow-cyan); }
+.bussola__cardinal { color: var(--color-text-primary); font-size: 20px; font-weight: var(--font-weight-bold); }
+.bussola__origem { color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.bussola__status { display: flex; align-items: center; gap: 8px; min-height: 42px; margin-top: 2px; padding: 10px 12px; background: var(--color-surface); color: var(--color-text-secondary); border: var(--border-base); font-size: 10px; line-height: 1.5; }
+.bussola__status-dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-muted); }
+.bussola__status.is-ready { border-color: var(--color-cyan-edge); }
+.bussola__status.is-ready .bussola__status-dot { background: var(--color-cyan); box-shadow: 0 0 8px var(--color-cyan); }
+.bussola__ativar { margin-top: 10px; background: var(--color-cyan-soft); border-color: var(--color-cyan-edge); color: var(--color-cyan); }
+.bussola__cards { display: grid; gap: 8px; margin-top: 22px; }
+.bussola__card { padding: 14px; background: var(--color-surface); border: var(--border-base); }
+.bussola__card--amber { border-color: var(--color-magenta-edge); }
+.bussola__card--amber .bussola__kicker { color: var(--color-magenta); }
+.bussola__card strong { display: block; margin: 7px 0 4px; font-size: 12px; }
+.bussola__card p { color: var(--color-text-muted); font-size: 10px; line-height: 1.6; }
+.bussola__mapa { display: block; margin-top: 10px; margin-bottom: 20px; background: transparent; color: var(--color-text-primary); }
+
+@media (max-width: 560px) { .bussola__instrumento { grid-template-columns: 1fr; gap: 17px; } .bussola__readout { align-items: center; text-align: center; } }
+@media (min-width: 700px) { .bussola__cards { grid-template-columns: 1fr 1fr; } }
