@@ -47,6 +47,14 @@
 .contexto__zona-copy small { overflow: hidden; color: var(--color-text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .contexto__zona-remove { min-width: 28px; padding: 4px; color: var(--color-danger); background: transparent; border: 0; font-size: 16px; }
 .contexto__empty { margin-bottom: 0; color: var(--color-text-muted) !important; font-size: 10px; }
+.contexto__card--wide { margin-top: 16px; }
+.contexto__equip-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.contexto__equip { display: flex; align-items: flex-start; gap: 9px; padding: 10px; background: var(--color-surface); border: var(--border-base); }
+.contexto__equip-dot { flex: 0 0 auto; width: 7px; height: 7px; margin-top: 4px; border-radius: 50%; background: var(--color-text-muted); }
+.contexto__equip-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 4px; }
+.contexto__equip-copy strong { color: var(--color-text-primary); font-size: 10px; }
+.contexto__equip-copy small { color: var(--color-text-muted); font-size: 9px; line-height: 1.45; }
+.contexto__equip-state { color: var(--color-text-muted); font-size: 8px; letter-spacing: .06em; white-space: nowrap; }
 .contexto__limits { margin-top: 16px; padding: 13px 15px; color: var(--color-text-muted); border: var(--border-base); background: var(--color-surface); font-size: 10px; line-height: 1.6; }
 .contexto__limits strong { color: var(--color-ambar); }
 
@@ -57,5 +65,6 @@
   .contexto__grid { display: block; }
   .contexto__card { margin-bottom: 12px; padding: 16px; }
   .contexto__lista { grid-template-columns: 1fr; }
+  .contexto__equip-list { grid-template-columns: 1fr; }
   .contexto__form-grid { grid-template-columns: 1fr; }
 }

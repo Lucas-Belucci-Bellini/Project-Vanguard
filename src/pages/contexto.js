@@ -9,6 +9,7 @@ import { h } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { solicitarPosicao, precisaoLabel } from '../core/localizacao.js';
 import { CONTEXTOS, contextoPorId, detectarContexto, normalizarZona, zonasAtivas } from '../core/contexto.js';
+import { EQUIPAMENTOS_EXTERNOS } from '../core/equipamentos.js';
 import '../styles/contexto.css';
 
 const PADRAO = 'cidade';
@@ -142,6 +143,15 @@ export function contextoPage() {
     renderZonas();
   };
 
+  const equipamentosCard = h('section', { className: 'contexto__card contexto__card--wide' },
+    h('div', { className: 'contexto__eyebrow' }, 'EQUIPAMENTOS EXTERNOS'),
+    h('h2', null, 'Capacidades preparadas'),
+    h('p', null, 'Estas integrações podem ser adicionadas no futuro. Nenhuma delas é simulada pelo aparelho.'),
+    h('div', { className: 'contexto__equip-list' }, ...EQUIPAMENTOS_EXTERNOS.map((item) => h('div', { className: 'contexto__equip' },
+      h('span', { className: 'contexto__equip-dot' }),
+      h('span', { className: 'contexto__equip-copy' }, h('strong', null, item.nome), h('small', null, `${item.uso} Requer: ${item.requer}.`)),
+      h('span', { className: 'contexto__equip-state' }, 'NÃO CONECTADO')))));
+
   const zonasCard = h('section', { className: 'contexto__card' },
     h('div', { className: 'contexto__eyebrow' }, 'ZONAS LOCAIS / OFFLINE'),
     h('h2', null, 'Fontes de risco conhecidas'),
@@ -166,6 +176,7 @@ export function contextoPage() {
         alerta,
         h('div', { className: 'contexto__recursos' }, ...contextoAtual.recursos.map((recurso) => h('span', null, recurso)))),
       zonasCard),
+    equipamentosCard,
     h('section', { className: 'contexto__limits' },
       h('strong', null, 'Limites importantes'),
       ' Este recurso não detecta drones, tropas, minas ou radiação por conta própria. Para essas capacidades, use fontes oficiais e equipamentos externos adequados.'));
