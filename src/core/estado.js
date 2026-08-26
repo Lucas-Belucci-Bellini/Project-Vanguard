@@ -56,6 +56,8 @@ export const CHAVES = {
   ROTA_ATIVA: 'rotaAtiva',
   DESTINO: 'destino',
   MODO_USO: 'modoUso',
+  CONTEXTO: 'contexto',
+  ZONAS: 'zonas',
   ALERTA: 'alerta',
   CONTATOS: 'contatos',
   /* Chaves legadas: mantidas para não quebrar os módulos de cálculo existentes. */

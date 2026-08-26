@@ -14,6 +14,8 @@ const ROTAS = [
   { hash: '#/bussola', titulo: 'Bússola', icone: '◉', carregar: () => import('./pages/bussola.js').then((m) => m.bussolaPage) },
   { hash: '#/socorro', titulo: 'Socorro', icone: '!', carregar: () => import('./pages/socorro.js').then((m) => m.socorroPage) },
   { hash: '#/doar', titulo: 'Apoiar', icone: '＋', carregar: () => import('./pages/doar.js').then((m) => m.doarPage), secundária: true },
+  { hash: '#/contexto', titulo: 'Contexto', icone: '◈', carregar: () => import('./pages/contexto.js').then((m) => m.contextoPage), secundária: true },
+  { hash: '#/sobrevivencia', titulo: 'Sobrevivência', icone: '⌁', carregar: () => import('./pages/sobrevivencia.js').then((m) => m.sobrevivenciaPage), secundária: true },
   { hash: '#/sobre', titulo: 'Sobre', icone: 'i', carregar: () => import('./pages/sobre.js').then((m) => m.sobrePage), secundária: true },
   /* A tela legada continua acessível por link direto enquanto o app migra. */
   { hash: '#/tiro', titulo: 'Cálculo legado', carregar: () => import('./pages/tiro.js').then((m) => m.tiroPage), legada: true }
@@ -55,6 +57,17 @@ function montarShell() {
   const gpsStatus = h('span', { className: 'vg-status__text' }, 'GPS LOCAL');
   const status = h('div', { className: 'vg-status', title: 'A localização é mantida no dispositivo por padrão' },
     h('span', { className: 'vg-status__dot', ariaHidden: 'true' }), gpsStatus);
+  const atualizarConectividade = () => {
+    const online = navigator.onLine !== false;
+    gpsStatus.textContent = online ? 'ONLINE · GPS LOCAL' : 'OFFLINE · GPS LOCAL';
+    status.classList.toggle('is-offline', !online);
+    status.title = online
+      ? 'Internet disponível; a posição continua local por padrão.'
+      : 'Sem internet; recursos locais continuam disponíveis, mas sincronização e envio ficam pendentes.';
+  };
+  addEventListener('online', atualizarConectividade);
+  addEventListener('offline', atualizarConectividade);
+  atualizarConectividade();
 
   const header = h('header', { className: 'vg-header' },
     h('div', { className: 'vg-marca' },

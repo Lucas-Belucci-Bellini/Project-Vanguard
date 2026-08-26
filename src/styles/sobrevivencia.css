@@ -1,0 +1,48 @@
+.sobrevivencia { display: block; overflow-y: auto; padding: 24px; }
+.sobrevivencia__wrap { width: min(1180px, 100%); margin: 0 auto; }
+.sobrevivencia__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 17px; }
+.sobrevivencia__eyebrow { color: var(--color-cyan); font-size: 9px; letter-spacing: var(--tracking-widest); font-weight: var(--font-weight-bold); }
+.sobrevivencia h1 { margin: 8px 0 10px; color: var(--color-text-primary); font-size: clamp(27px, 4vw, 46px); letter-spacing: .04em; }
+.sobrevivencia h2 { color: var(--color-text-primary); }
+.sobrevivencia p { color: var(--color-text-secondary); line-height: 1.65; }
+.sobrevivencia__header p { max-width: 760px; margin: 0; font-size: 13px; }
+.sobrevivencia__back, .sobrevivencia__text-button { min-height: 36px; padding: 8px 12px; color: var(--color-text-secondary); background: var(--color-surface); }
+.sobrevivencia__checklist { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; padding: 12px 14px; background: var(--color-cyan-soft); border: 1px solid var(--color-cyan-edge); }
+.sobrevivencia__checklist span { color: var(--color-cyan); font-size: 9px; letter-spacing: var(--tracking-wide); font-weight: var(--font-weight-bold); }
+.sobrevivencia__checklist strong { color: var(--color-text-primary); font-size: 11px; letter-spacing: .05em; }
+.sobrevivencia__notice { display: flex; gap: 12px; margin-bottom: 18px; padding: 13px 15px; background: var(--color-ambar-soft); border: var(--border-amber); }
+.sobrevivencia__notice strong { flex: 0 0 auto; color: var(--color-ambar); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.sobrevivencia__notice p { margin: 0; font-size: 11px; }
+.sobrevivencia__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sobrevivencia__guia { background: var(--color-panel); border: var(--border-base); box-shadow: var(--shadow-panel); }
+.sobrevivencia__guia summary { display: flex; align-items: center; gap: 10px; min-height: 66px; padding: 10px 12px; cursor: pointer; list-style: none; }
+.sobrevivencia__guia summary::-webkit-details-marker { display: none; }
+.sobrevivencia__guia summary strong { flex: 1; color: var(--color-text-primary); font-size: 12px; letter-spacing: .04em; }
+.sobrevivencia__guia-arrow { color: var(--color-cyan); font-size: 18px; }
+.sobrevivencia__guia[open] .sobrevivencia__guia-arrow { transform: rotate(45deg); }
+.sobrevivencia__guia-tag { padding: 5px 6px; color: var(--color-cyan); border: 1px solid var(--color-cyan-edge); font-size: 8px; letter-spacing: var(--tracking-wide); white-space: nowrap; }
+.sobrevivencia__guia-resumo { margin: 0; padding: 0 12px 10px; color: var(--color-text-muted) !important; font-size: 11px; }
+.sobrevivencia__guia ol { display: grid; gap: 8px; margin: 0; padding: 12px 18px 15px 32px; border-top: var(--border-base); background: var(--color-surface); color: var(--color-text-secondary); font-size: 11px; line-height: 1.55; }
+.sobrevivencia__guia li::marker { color: var(--color-cyan); font-weight: var(--font-weight-bold); }
+.sobrevivencia__guia--perigo { border-color: var(--color-ambar-edge); }
+.sobrevivencia__guia--perigo .sobrevivencia__guia-tag, .sobrevivencia__guia--perigo .sobrevivencia__guia-arrow { color: var(--color-ambar); border-color: var(--color-ambar-edge); }
+.sobrevivencia__guia--critico { border-color: var(--color-danger-edge); }
+.sobrevivencia__guia--critico .sobrevivencia__guia-tag, .sobrevivencia__guia--critico .sobrevivencia__guia-arrow { color: var(--color-danger); border-color: var(--color-danger-edge); }
+.sobrevivencia__guia--mar { border-color: var(--color-blue-edge); }
+.sobrevivencia__guia--mar .sobrevivencia__guia-tag, .sobrevivencia__guia--mar .sobrevivencia__guia-arrow { color: var(--color-blue); border-color: var(--color-blue-edge); }
+.sobrevivencia__footer { margin-top: 18px; padding: 15px; border: var(--border-base); background: var(--color-surface); }
+.sobrevivencia__footer strong { color: var(--color-text-primary); font-size: 10px; letter-spacing: var(--tracking-wide); }
+.sobrevivencia__footer p { margin: 8px 0 7px; color: var(--color-text-muted); font-size: 10px; }
+.sobrevivencia__text-button { padding-left: 0; border: 0; background: transparent; color: var(--color-cyan); }
+
+@media (max-width: 760px) {
+  .sobrevivencia { padding: 16px; }
+  .sobrevivencia__header { display: block; }
+  .sobrevivencia__back { margin-top: 13px; }
+  .sobrevivencia__checklist, .sobrevivencia__notice { display: block; }
+  .sobrevivencia__checklist strong { display: block; margin-top: 6px; line-height: 1.5; }
+  .sobrevivencia__notice strong { display: block; margin-bottom: 6px; }
+  .sobrevivencia__grid { grid-template-columns: 1fr; }
+  .sobrevivencia__guia summary { min-height: 60px; }
+  .sobrevivencia__guia-tag { display: none; }
+}

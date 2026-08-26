@@ -39,6 +39,8 @@ input, select { background: var(--color-bg); border: var(--border-base); border-
 .vg-status { display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 9px; letter-spacing: var(--tracking-wide); white-space: nowrap; }
 .vg-status__dot, .mapa__gps-dot { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: var(--color-text-muted); }
 .vg-status__dot { background: var(--color-cyan); box-shadow: 0 0 8px var(--color-cyan); }
+.vg-status.is-offline { color: var(--color-ambar); }
+.vg-status.is-offline .vg-status__dot { background: var(--color-ambar); box-shadow: 0 0 8px var(--color-ambar); }
 .vg-modo { width: auto; background: var(--color-surface); padding: 8px 6px; font-size: 9px; }
 .vg-abas { position: fixed; z-index: var(--z-sticky); right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 8px max(7px, env(safe-area-inset-bottom)); gap: 4px; background: color-mix(in srgb, var(--color-bg-elevated) 96%, transparent); border-top: var(--border-base); backdrop-filter: blur(10px); }
 .vg-aba { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; padding: 5px 2px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-muted); font-size: 8px; letter-spacing: .08em; }

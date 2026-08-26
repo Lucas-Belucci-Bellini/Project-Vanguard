@@ -1,0 +1,61 @@
+.contexto { display: block; overflow-y: auto; padding: 24px; }
+.contexto__wrap { width: min(1180px, 100%); margin: 0 auto; }
+.contexto__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.contexto__eyebrow { color: var(--color-cyan); font-size: 9px; letter-spacing: var(--tracking-widest); font-weight: var(--font-weight-bold); }
+.contexto h1 { margin: 8px 0 8px; color: var(--color-text-primary); font-size: clamp(26px, 4vw, 44px); letter-spacing: .05em; }
+.contexto h2 { margin: 8px 0 9px; color: var(--color-text-primary); font-size: 18px; }
+.contexto p { color: var(--color-text-secondary); line-height: 1.6; }
+.contexto__lead { max-width: 700px; margin: 0; font-size: 13px; }
+.contexto__header-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.contexto__badge { padding: 7px 9px; border: 1px solid; font-size: 9px; letter-spacing: var(--tracking-wide); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.contexto__badge--normal, .contexto__badge--expedicao { color: var(--color-cyan); border-color: var(--color-cyan-edge); background: var(--color-cyan-soft); }
+.contexto__badge--mar { color: var(--color-blue); border-color: var(--color-blue-edge); background: var(--color-blue-soft); }
+.contexto__badge--perigo { color: var(--color-ambar); border-color: var(--color-ambar-edge); background: var(--color-ambar-soft); }
+.contexto__badge--critico { color: var(--color-danger); border-color: var(--color-danger-edge); background: var(--color-danger-soft); }
+.contexto__back, .contexto__secondary { min-height: 36px; padding: 8px 12px; color: var(--color-text-secondary); background: var(--color-surface); }
+.contexto__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(310px, .75fr); gap: 16px; align-items: start; }
+.contexto__card { padding: 20px; background: var(--color-panel); border: var(--border-base); box-shadow: var(--shadow-panel); }
+.contexto__card--main { border-color: var(--color-cyan-edge); }
+.contexto__lista { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0; }
+.contexto__item { display: flex; align-items: center; gap: 9px; min-height: 62px; padding: 9px; text-align: left; background: var(--color-surface); border-color: rgba(139,255,63,.15); }
+.contexto__item:hover, .contexto__item.is-active { border-color: var(--color-cyan); background: var(--color-cyan-soft); }
+.contexto__item-index { color: var(--color-text-muted); font-size: 11px; }
+.contexto__item-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 4px; }
+.contexto__item-copy strong { color: var(--color-text-primary); font-size: 10px; letter-spacing: var(--tracking-wide); }
+.contexto__item-copy small { color: var(--color-text-muted); font-size: 9px; line-height: 1.35; }
+.contexto__item-arrow { color: var(--color-cyan); }
+.contexto__primary { width: 100%; min-height: 44px; color: var(--color-bg); background: var(--color-cyan); border-color: var(--color-cyan); font-weight: var(--font-weight-bold); }
+.contexto__status { min-height: 18px; margin: 9px 0; color: var(--color-text-muted); font-size: 10px; }
+.contexto__alerta { margin-top: 12px; padding: 12px; border: var(--border-amber); background: var(--color-ambar-soft); }
+.contexto__alerta strong { color: var(--color-ambar); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.contexto__alerta p { margin: 7px 0 0; color: var(--color-text-secondary); font-size: 11px; }
+.contexto__recursos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+.contexto__recursos span { padding: 5px 7px; color: var(--color-text-muted); background: var(--color-surface); border: var(--border-base); font-size: 9px; }
+.contexto__form { display: grid; gap: 8px; margin-top: 14px; }
+.contexto__input { width: 100%; min-height: 38px; padding: 8px 9px; color: var(--color-text-primary); background: var(--color-surface); border: var(--border-base); font: inherit; font-size: 10px; }
+.contexto__input::placeholder { color: var(--color-text-muted); }
+.contexto__form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.contexto__form-feedback { min-height: 18px; margin: 0; color: var(--color-ambar) !important; font-size: 10px; }
+.contexto__zonas-lista { display: grid; gap: 8px; margin-top: 18px; }
+.contexto__zona { display: flex; align-items: center; gap: 9px; padding: 9px; background: var(--color-surface); border: var(--border-base); }
+.contexto__zona-dot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; }
+.contexto__zona-dot--normal, .contexto__zona-dot--expedicao, .contexto__zona-dot--mar { background: var(--color-cyan); }
+.contexto__zona-dot--perigo { background: var(--color-ambar); }
+.contexto__zona-dot--critico { background: var(--color-danger); }
+.contexto__zona-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 3px; }
+.contexto__zona-copy strong { overflow: hidden; color: var(--color-text-primary); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.contexto__zona-copy small { overflow: hidden; color: var(--color-text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.contexto__zona-remove { min-width: 28px; padding: 4px; color: var(--color-danger); background: transparent; border: 0; font-size: 16px; }
+.contexto__empty { margin-bottom: 0; color: var(--color-text-muted) !important; font-size: 10px; }
+.contexto__limits { margin-top: 16px; padding: 13px 15px; color: var(--color-text-muted); border: var(--border-base); background: var(--color-surface); font-size: 10px; line-height: 1.6; }
+.contexto__limits strong { color: var(--color-ambar); }
+
+@media (max-width: 760px) {
+  .contexto { padding: 16px; }
+  .contexto__header { display: block; }
+  .contexto__header-side { flex-direction: row; align-items: center; justify-content: space-between; margin-top: 13px; }
+  .contexto__grid { display: block; }
+  .contexto__card { margin-bottom: 12px; padding: 16px; }
+  .contexto__lista { grid-template-columns: 1fr; }
+  .contexto__form-grid { grid-template-columns: 1fr; }
+}

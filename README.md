@@ -18,6 +18,14 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
 | **Offline parcial** | A shell do app e os dados locais podem ser reabertos sem internet depois do primeiro carregamento. Tiles cartográficos precisam ser preparados para uso offline em uma etapa própria. |
 | **Apoiar projeto** | Tela pública em modo preparado para futuras doações via checkout hospedado do Asaas com PIX e cartão, sem cobrança real enquanto as credenciais não forem configuradas. |
+| **Contexto** | Modos Cidade, Expedição, Mar, Zona de Desastre, Área Contaminada e Área de Conflito, com zonas locais e avisos por fonte. |
+| **Sobrevivência** | Manual offline de primeiros passos, abrigo, água, primeiros socorros, sinalização, alimentação e conduta em áreas com possíveis explosivos. |
+
+## Modo offline-first
+
+Depois do primeiro carregamento, a shell do Vanguard, as telas, a posição, a bússola, as rotas, os pontos, os destinos e o manual de sobrevivência podem continuar funcionando sem internet. No mapa, mova-se até a área desejada, escolha a base cartográfica e toque em **Preparar área offline** enquanto ainda estiver conectado. O aplicativo guarda os tiles da área visível e de níveis próximos; prepare novamente depois de mover o mapa ou trocar de base.
+
+A internet continua sendo necessária para obter tiles que ainda não foram baixados, receber avisos novos, enviar e-mail, sincronizar eventos, abrir o futuro checkout Asaas e transmitir um SOS por serviço externo. O GPS/GNSS e a bússola podem fornecer dados locais sem rede, mas nenhum dos dois transmite um pedido de socorro sozinho.
 
 ## Como usar em uma expedição
 
@@ -53,6 +61,8 @@ src/
   core/
     estado.js          persistência local e chaves compartilhadas
     localizacao.js     normalização do GPS e ciclo de acompanhamento
+    contexto.js        detecção por zonas e modos civis
+    fila-offline.js    fila local para sincronização posterior
   engine/
     geo.js             distância e azimute geodésicos
     mgrs.js            conversões UTM/MGRS
@@ -63,10 +73,12 @@ src/
     bussola.js         sensor de orientação e fallback de rumo
     socorro.js         coordenadas e compartilhamento manual
     doar.js            apoio, transparência e modo preparado de pagamento
+    contexto.js        modos e zonas de proteção civil
+    sobrevivencia.js   manual local de primeiros passos
   styles/              identidade visual mobile-first
 public/
   manifest.webmanifest instalação como PWA
-  sw.js                cache da shell do aplicativo
+  sw.js                cache da shell e pré-cache de tiles
   icons/vanguard.svg   ícone instalável
 
 docs/
