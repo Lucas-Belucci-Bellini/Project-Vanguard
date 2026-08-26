@@ -31,6 +31,9 @@
 .inicio__atalho--danger { border-color: rgba(255,65,54,.35); }
 .inicio__atalho--danger .inicio__atalho-icone { color: var(--color-danger); background: var(--color-danger-soft); border-color: rgba(255,65,54,.4); }
 .inicio__atalho--danger .inicio__atalho-seta { color: var(--color-danger); }
+.inicio__atalho--support { border-color: var(--color-ambar-edge); }
+.inicio__atalho--support .inicio__atalho-icone { color: var(--color-ambar); background: var(--color-ambar-soft); border-color: var(--color-ambar-edge); }
+.inicio__atalho--support .inicio__atalho-seta { color: var(--color-ambar); }
 .inicio__section--split { display: grid; gap: 8px; }
 .inicio__mini-card { display: flex; flex-direction: column; gap: 7px; padding: 16px; border: var(--border-base); background: var(--color-surface); }
 .inicio__mini-card strong { font-size: 12px; color: var(--color-text-primary); }

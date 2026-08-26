@@ -1,6 +1,6 @@
 # VANGUARD FIELD
 
-**Navegação de expedição para pessoas comuns em áreas remotas.** O Vanguard Field combina GPS/GNSS do aparelho, bússola, mapa com grade MGRS, registro local de trilha e um protocolo de compartilhamento de coordenadas para situações de emergência.
+**Navegação multiuso para cidade, caminhadas e áreas remotas.** O Vanguard Field combina GPS/GNSS do aparelho, bússola, mapa com grade MGRS, registro local de trilha, destinos urbanos e um protocolo de compartilhamento de coordenadas para situações de emergência.
 
 A interface foi desenhada para uso em celular, com botões grandes, alto contraste, modo noturno vermelho e navegação instalável como PWA em Android, incluindo aparelhos Xiaomi com MIUI ou HyperOS. O projeto também mantém compatibilidade web para testes e evolução rápida.
 
@@ -17,6 +17,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Socorro** | Captura da posição, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência. |
 | **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
 | **Offline parcial** | A shell do app e os dados locais podem ser reabertos sem internet depois do primeiro carregamento. Tiles cartográficos precisam ser preparados para uso offline em uma etapa própria. |
+| **Apoiar projeto** | Tela pública em modo preparado para futuras doações via checkout hospedado do Asaas com PIX e cartão, sem cobrança real enquanto as credenciais não forem configuradas. |
 
 ## Como usar em uma expedição
 
@@ -37,7 +38,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 65 testes do motor geográfico e legado
+npm test          # 68 testes do motor geográfico e legado
 npm run build     # gera dist/
 ```
 
@@ -61,14 +62,26 @@ src/
     mapa.js            mapa, trilha e pontos de referência
     bussola.js         sensor de orientação e fallback de rumo
     socorro.js         coordenadas e compartilhamento manual
+    doar.js            apoio, transparência e modo preparado de pagamento
   styles/              identidade visual mobile-first
 public/
   manifest.webmanifest instalação como PWA
   sw.js                cache da shell do aplicativo
   icons/vanguard.svg   ícone instalável
 
+docs/
+  ASAAS-INTEGRACAO.md  contrato, auditoria, webhook e ativação futura
+
 test/                  testes determinísticos do motor
 ```
+
+## Doações e auditoria financeira
+
+A tela `#/doar` está em **modo preparado**. Ela não abre checkout, não cria cobrança, não simula pagamento aprovado e não usa credenciais fictícias. Quando a conta Asaas existir, a integração deverá usar checkout hospedado com `PIX` e `CREDIT_CARD`, mantendo os dados do cartão fora do Vanguard.
+
+Cada transação futura deverá ser vinculada a uma referência interna e aos identificadores retornados pelo Asaas. O registro previsto inclui origem da campanha ou botão, valor bruto, tarifas, líquido, método, status, horários, estornos, chargebacks, recibo e evento de Webhook. Um resumo operacional será enviado para `lucasbb2007@gmail.com` depois do processamento. O sistema não solicitará CPF/CNPJ do doador apenas para identificar a origem financeira.
+
+O histórico e o CSV são instrumentos de organização e auditoria. Eles não constituem declaração automática à Receita Federal nem determinam o tratamento tributário da pessoa física; essa classificação deve ser conferida com um contador antes da ativação em produção. O contrato técnico completo está em [`docs/ASAAS-INTEGRACAO.md`](docs/ASAAS-INTEGRACAO.md).
 
 ## Decisões de segurança do protótipo
 

@@ -89,7 +89,8 @@ export function inicioPage() {
         h('div', { className: 'inicio__atalhos' },
           caminho('#/mapa', 'Mapa vivo', 'posição, trilha e pontos', '⊕'),
           caminho('#/bussola', 'Bússola', 'azimute e orientação', '◉'),
-          caminho('#/socorro', 'Modo socorro', 'coordenadas e instruções', '!', 'inicio__atalho--danger')
+          caminho('#/socorro', 'Modo socorro', 'coordenadas e instruções', '!', 'inicio__atalho--danger'),
+          caminho('#/doar', 'Apoiar projeto', 'transparência e doações', '＋', 'inicio__atalho--support')
         )
       ),
       h('section', { className: 'inicio__section inicio__section--split' },

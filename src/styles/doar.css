@@ -1,0 +1,46 @@
+.doar { display: block; overflow-y: auto; padding: 24px; }
+.doar__wrap { width: min(1120px, 100%); margin: 0 auto; }
+.doar__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.doar__kicker, .doar__eyebrow { color: var(--color-cyan); font-size: 10px; letter-spacing: var(--tracking-wide); font-weight: var(--font-weight-bold); }
+.doar__back { min-height: 36px; padding: 8px 12px; color: var(--color-text-secondary); background: var(--color-surface); }
+.doar__aviso { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 16px; padding: 13px 16px; }
+.doar__aviso p { margin: 0; color: var(--color-text-secondary); line-height: 1.55; }
+.doar__grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); gap: 16px; align-items: start; }
+.doar__card { padding: 22px; background: var(--color-panel); border: var(--border-base); box-shadow: var(--shadow-panel); }
+.doar__card--principal { grid-row: span 2; border-color: var(--color-cyan-edge); }
+.doar h1, .doar h2 { margin: 7px 0 10px; color: var(--color-text-primary); }
+.doar h1 { font-size: clamp(26px, 4vw, 42px); letter-spacing: .02em; }
+.doar h2 { font-size: 18px; }
+.doar p { color: var(--color-text-secondary); line-height: 1.65; }
+.doar__lead { max-width: 650px; font-size: 15px; }
+.doar__label { display: block; margin-top: 25px; color: var(--color-text-muted); font-size: 10px; letter-spacing: var(--tracking-wide); }
+.doar__sugestoes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+.doar__sugestao { min-height: 42px; color: var(--color-text-secondary); background: var(--color-surface); }
+.doar__sugestao.is-active, .doar__sugestao:hover { color: var(--color-bg); background: var(--color-cyan); border-color: var(--color-cyan); }
+.doar__valor-wrap { display: flex; align-items: center; gap: 9px; margin-top: 9px; padding: 0 12px; border: var(--border-base); background: var(--color-surface); }
+.doar__valor-wrap > span:first-child { color: var(--color-text-muted); font-size: 13px; }
+.doar__valor { width: 100%; min-height: 45px; padding: 9px 0; border: 0; background: transparent; color: var(--color-text-primary); font-size: 20px; font-weight: var(--font-weight-bold); outline: 0; }
+.doar__valor-resumo { min-width: 76px; color: var(--color-cyan); text-align: right; font-size: 12px; }
+.doar__checkout { width: 100%; min-height: 48px; margin-top: 14px; color: var(--color-bg); background: var(--color-ambar); border-color: var(--color-ambar); font-weight: var(--font-weight-bold); }
+.doar__checkout:hover { filter: brightness(1.1); }
+.doar__status { min-height: 18px; margin: 10px 0 0; color: var(--color-text-muted); font-size: 11px; }
+.doar__status--alerta { color: var(--color-ambar); }
+.doar__microcopy { margin-bottom: 0; color: var(--color-text-muted) !important; font-size: 11px; }
+.doar__linhas { margin-top: 18px; border-top: var(--border-base); }
+.doar__linha { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 10px 0; border-bottom: var(--border-base); font-size: 11px; }
+.doar__linha strong { color: var(--color-text-primary); }
+.doar__linha span { color: var(--color-text-muted); line-height: 1.5; }
+.doar__privacy, .doar__fiscal { margin-bottom: 0; color: var(--color-text-muted) !important; font-size: 11px; }
+.doar__passos { display: grid; gap: 10px; margin: 16px 0 0; padding-left: 22px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.5; }
+.doar__passos li::marker { color: var(--color-cyan); font-weight: var(--font-weight-bold); }
+
+@media (max-width: 760px) {
+  .doar { padding: 16px; }
+  .doar__header { align-items: flex-start; }
+  .doar__grid { display: block; }
+  .doar__card { margin-bottom: 12px; padding: 17px; }
+  .doar__card--principal { margin-bottom: 12px; }
+  .doar__aviso { display: block; }
+  .doar__aviso .vg-badge { display: inline-block; margin-bottom: 8px; }
+  .doar__sugestoes { grid-template-columns: repeat(2, 1fr); }
+}
