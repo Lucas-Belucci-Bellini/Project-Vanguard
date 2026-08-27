@@ -8,7 +8,7 @@
 import { h } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { solicitarPosicao, precisaoLabel } from '../core/localizacao.js';
-import { CONTEXTOS, contextoPorId, detectarContexto, normalizarZona, zonasAtivas } from '../core/contexto.js';
+import { CONTEXTOS, contextoPorId, detectarContexto, exportarZonas, importarZonas, normalizarZona, zonasAtivas } from '../core/contexto.js';
 import { EQUIPAMENTOS_EXTERNOS } from '../core/equipamentos.js';
 import '../styles/contexto.css';
 
@@ -47,6 +47,8 @@ export function contextoPage() {
     : 'Sem fixo GPS local. O contexto escolhido continua salvo no aparelho.');
   const itens = h('div', { className: 'contexto__lista' });
   const zonaLista = h('div', { className: 'contexto__zonas-lista' });
+  const zonaArquivo = h('input', { className: 'contexto__file', type: 'file', accept: 'application/json,.json', ariaLabel: 'Importar zonas JSON' });
+  const zonaDadosFeedback = h('p', { className: 'contexto__form-feedback', role: 'status' });
 
   function renderContexto() {
     contextoAtual = contextoPorId(estado.get(CHAVES.CONTEXTO, PADRAO));
@@ -81,6 +83,36 @@ export function contextoPage() {
         renderZonas();
       } }, '×'))));
   }
+
+  const exportarButton = h('button', { className: 'contexto__secondary', type: 'button' }, 'EXPORTAR ZONAS JSON');
+  exportarButton.onclick = () => {
+    const blob = new Blob([exportarZonas(zonas)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `vanguard-zonas-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    zonaDadosFeedback.textContent = `${zonas.length} zona(s) exportada(s). Guarde o arquivo em local seguro.`;
+  };
+
+  zonaArquivo.onchange = async () => {
+    const arquivo = zonaArquivo.files?.[0];
+    if (!arquivo) return;
+    try {
+      const importadas = importarZonas(await arquivo.text());
+      const porId = new Map(zonas.map((zona) => [zona.id, zona]));
+      importadas.forEach((zona) => porId.set(zona.id, zona));
+      zonas = [...porId.values()];
+      estado.set(CHAVES.ZONAS, zonas);
+      renderZonas();
+      zonaDadosFeedback.textContent = `${importadas.length} zona(s) importada(s) ou atualizada(s). O arquivo foi apenas validado e salvo localmente.`;
+    } catch (erro) {
+      zonaDadosFeedback.textContent = `Importação recusada: ${erro.message}.`;
+    } finally {
+      zonaArquivo.value = '';
+    }
+  };
 
   const gpsButton = h('button', { className: 'contexto__primary', type: 'button' }, 'ATUALIZAR GPS E DETECTAR');
   gpsButton.onclick = () => {
@@ -162,6 +194,8 @@ export function contextoPage() {
     h('div', { className: 'contexto__form' }, zonaNome, zonaTipo,
       h('div', { className: 'contexto__form-grid' }, zonaLat, zonaLon, zonaRaio),
       zonaFonte, zonaValidade, salvarZona, zonaFeedback),
+    h('div', { className: 'contexto__data-actions' }, exportarButton, zonaArquivo),
+    zonaDadosFeedback,
     zonaLista);
 
   const raizConteudo = h('div', { className: 'contexto__wrap' },

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { contextoPorId, detectarContexto, normalizarZona, zonasAtivas } from '../src/core/contexto.js';
+import { contextoPorId, detectarContexto, exportarZonas, importarZonas, normalizarZona, zonasAtivas } from '../src/core/contexto.js';
 
 test('normalizarZona exige coordenadas, limita o raio e preserva a fonte', () => {
   const zona = normalizarZona({
@@ -50,4 +50,13 @@ test('detectarContexto mantém o padrão quando a posição não é válida', ()
   const resultado = detectarContexto({ lat: 'sem GPS', lon: 0 }, [], 'expedicao');
   assert.equal(resultado.contexto.id, 'expedicao');
   assert.equal(resultado.confianca, 'sem posição válida');
+});
+
+test('exportarZonas e importarZonas usam schema versionado e deduplicam por id', () => {
+  const pacote = exportarZonas([{ id: 'z1', lat: 1, lon: 2, raioM: 100, contexto: 'mar', fonte: 'CHM' }]);
+  const importadas = importarZonas(pacote);
+  assert.equal(importadas.length, 1);
+  assert.equal(importadas[0].id, 'z1');
+  assert.throws(() => importarZonas('{"schema":"outro","version":1,"zonas":[]}'), /incompatível/);
+  assert.throws(() => importarZonas('não json'), /JSON inválido/);
 });

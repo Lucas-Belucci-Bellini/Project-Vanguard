@@ -70,6 +70,8 @@ export const CONTEXTOS = [
 ];
 
 const POR_ID = new Map(CONTEXTOS.map((contexto) => [contexto.id, contexto]));
+export const SCHEMA_ZONAS = 'vanguard-zonas';
+export const VERSAO_ZONAS = 1;
 
 export function contextoPorId(id) {
   return POR_ID.get(id) ?? POR_ID.get('cidade');
@@ -105,6 +107,34 @@ function distanciaM(a, b) {
   const dLon = (Number(b.lon) - Number(a.lon)) * Math.PI / 180;
   const seno = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
   return 2 * raioTerra * Math.atan2(Math.sqrt(seno), Math.sqrt(1 - seno));
+}
+
+export function exportarZonas(zonas = []) {
+  const normalizadas = zonas.map(normalizarZona).filter(Boolean);
+  return JSON.stringify({
+    schema: SCHEMA_ZONAS,
+    version: VERSAO_ZONAS,
+    exportadoEm: new Date().toISOString(),
+    zonas: normalizadas,
+  }, null, 2);
+}
+
+export function importarZonas(texto) {
+  let pacote;
+  try {
+    pacote = JSON.parse(texto);
+  } catch {
+    throw new Error('JSON inválido');
+  }
+  if (!pacote || pacote.schema !== SCHEMA_ZONAS || pacote.version !== VERSAO_ZONAS || !Array.isArray(pacote.zonas)) {
+    throw new Error('arquivo incompatível com o Vanguard Field');
+  }
+  const unicas = new Map();
+  for (const item of pacote.zonas) {
+    const zona = normalizarZona(item);
+    if (zona) unicas.set(zona.id, zona);
+  }
+  return [...unicas.values()];
 }
 
 export function zonasAtivas(zonas = []) {
