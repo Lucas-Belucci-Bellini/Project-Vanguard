@@ -9,7 +9,7 @@
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
 | **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
 | **Current Task** | Manter a memória Omega completa e preparar os gates de dispositivo, lifecycle, offline, assinatura e distribuição |
-| **Last Completed** | Suporte KML 2.2 local seguro, publicado em `431449e`, com documentação no `d3175a0` |
+| **Last Completed** | Validação defensiva de extensão/MIME para importação JSON/GPX/KML, publicada em `1e0da64` com ADR-0022 |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
@@ -36,7 +36,7 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `d3175a0 docs(v2): registrar suporte kml`; CI `33124273565` concluído com sucesso; worktree limpa e alinhada |
+| **Main** | `1e0da64 feat(v2): validar formato de registros`; CI `33124902546` concluído com sucesso; worktree limpa e alinhada |
 | **Next Task** | Executar os gates de `MOBILE_V2_DEVICE_MATRIX.md` e, depois, revisar assinatura/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
@@ -49,7 +49,8 @@
 6. Estados GPS foreground-only — `478e2cf`.
 7. Tracking local Start/Pause/Resume/Stop — `3d859f6`.
 8. Importação/exportação KML 2.2 local — `431449e`.
-9. Memória Omega consolidada — arquivos `MOBILE_V2_*` criados nesta execução.
+9. Memória Omega consolidada — `ddd2e86`/`3f6945c`.
+10. Validação defensiva de formato JSON/GPX/KML — `1e0da64`, CI `33124902546`.
 
 ## Regra de evidência
 

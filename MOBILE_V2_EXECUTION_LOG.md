@@ -44,6 +44,8 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 
 ## 2026-08-27 — unidade nova: validação defensiva de formato de registro
 
+- **Commit:** `1e0da64 feat(v2): validar formato de registros`.
+- **CI:** run `33124902546` concluído com sucesso.
 - **Escopo:** `src/core/registro-arquivo.js`, integração do handler em `src/pages/mapa.js` e `test/registro-arquivo.test.js`.
 - **Comportamento:** normaliza extensão/MIME, aceita JSON/GPX/KML conhecidos, aceita um único sinal quando o outro é omitido e rejeita conflito específico antes de `arquivo.text()`.
 - **Segurança preservada:** o módulo não abre arquivo, não executa XML, não faz rede e não substitui a validação geométrica/schema dos parsers existentes. A substituição continua confirmada e a rota importada continua pausada.
