@@ -523,17 +523,35 @@ export function mapaPage() {
       });
     }
 
+    function resumoUltimaPreparacao(meta) {
+      if (!meta?.preparadoEm) return '';
+      const data = new Date(meta.preparadoEm).toLocaleString();
+      const base = meta.baseNome || meta.base || 'base não identificada';
+      const salvos = Number(meta.tilesSalvos);
+      const solicitados = Number(meta.urlsSolicitadas);
+      const proporcao = Number.isFinite(salvos) && Number.isFinite(solicitados) ? ` · ${salvos}/${solicitados} salvos na última tentativa` : '';
+      const bounds = meta.bounds && [meta.bounds.south, meta.bounds.west, meta.bounds.north, meta.bounds.east].every((valor) => Number.isFinite(Number(valor)))
+        ? ` · área ${num(meta.bounds.south, 2)},${num(meta.bounds.west, 2)} → ${num(meta.bounds.north, 2)},${num(meta.bounds.east, 2)}`
+        : '';
+      const zoom = meta.zoom ? ` · zoom ${num(meta.zoom.minimo, 0)}–${num(meta.zoom.maximo, 0)}` : '';
+      return `Último preparo: ${base}${proporcao}${zoom}${bounds} · ${data}.`;
+    }
+
     async function atualizarCacheOffline() {
       try {
         const status = await mensagemOffline('CACHE_STATUS');
         const meta = estado.get(CHAVES.MAPAS_OFFLINE, null);
-        if (Number(status?.tiles) > 0) {
-          const ultima = meta?.preparadoEm ? ` Última preparação: ${new Date(meta.preparadoEm).toLocaleString()}.` : '';
-          offlineStatus.textContent = `${status.tiles} tiles preparados neste aparelho.${ultima} Prepare novamente ao mudar de área ou base.`;
+        const tiles = Number(status?.tiles) || 0;
+        if (tiles > 0) {
+          offlineStatus.textContent = `${tiles} tiles no cache local deste aparelho. ${resumoUltimaPreparacao(meta)} O total é agregado; prepare novamente ao mudar de área ou base.`;
         } else if (meta?.preparadoEm) {
-          offlineStatus.textContent = `O último registro de preparo é de ${new Date(meta.preparadoEm).toLocaleString()}, mas o cache está vazio; ele pode ter sido limpo pelo sistema. Prepare novamente.`;
+          offlineStatus.textContent = `${resumoUltimaPreparacao(meta)} O cache está vazio; ele pode ter sido limpo pelo sistema. Prepare novamente.`;
+        } else {
+          offlineStatus.textContent = 'Nenhum tile confirmado no cache local. Prepare a área visível enquanto estiver conectado.';
         }
-      } catch { /* o preparo continuará disponível quando o worker responder */ }
+      } catch {
+        offlineStatus.textContent = 'Status do cache indisponível. A preparação de área continuará disponível quando o worker responder.';
+      }
     }
 
     offlineButton.onclick = async () => {
