@@ -66,3 +66,17 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Git:** `main` e `origin/main` alinhadas; worktree limpa após o push.
 - **Release:** nenhuma tag `v1.0.0` criada e nenhuma release publicada nesta rodada. `v1.0.0-rc.2` permanece a única release pública registrada.
 - **Conclusão:** a rodada fechou exatamente uma unidade nova de software, com testes, documentação, build e CI; os gates físicos e de distribuição permanecem bloqueados conforme a matriz Omega.
+
+## 2026-08-27 — correção de escopo cartográfico e do legado Arma 3
+
+- **Motivo:** o usuário esclareceu que a API de imagens de satélite foi inserida pelo fluxo do Claude Code como contingência porque os mapas/terrenos do jogo ainda não estavam disponíveis; isso não foi uma solicitação para colocar mapa GPS real no simulador/wiki.
+- **Correção documental:** `SECURITY.md`, `README.md`, `CLAUDE.md`, `V2_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_DECISIONS.md`, `V2_ARCHITECTURE_MAP.md`, `docs/BALISTICA.md`, `docs/INTEGRACAO-BALUARTE.md` e `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md` agora distinguem mapa real do Vanguard Field civil e terrenos virtuais do Arma 3.
+- **Regra:** a API de satélite real não representa mapa do jogo e não deve ser usada como substituto silencioso de terreno virtual. Os módulos balísticos permanecem restritos a testes/simulação no videogame e nunca a ambientes reais.
+- **Escopo:** somente documentação e memória; nenhum código balístico, terreno ou provedor foi alterado nesta correção.
+
+## 2026-08-27 — publicação da correção de escopo
+
+- **Commit:** `6b7d9d9 docs(v2): separar mapas reais e arma3`.
+- **Push:** `origin/main` atualizado com sucesso; a entrada complementar deste log será publicada após a confirmação do CI.
+- **Arquivos centrais:** `SECURITY.md`, `README.md`, `CLAUDE.md`, `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`, `docs/adr/ADR-0023-separacao-mapas-real-e-arma3.md` e memórias V2/Omega.
+- **Limite:** nenhuma camada de mapa, provedor ou módulo balístico foi alterada; esta rodada apenas corrigiu a descrição e a separação de contexto.
