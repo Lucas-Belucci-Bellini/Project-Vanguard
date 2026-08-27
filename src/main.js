@@ -18,6 +18,7 @@ const ROTAS = [
   { hash: '#/contexto', titulo: 'Contexto', icone: '◈', carregar: () => import('./pages/contexto.js').then((m) => m.contextoPage), secundária: true },
   { hash: '#/sobrevivencia', titulo: 'Sobrevivência', icone: '⌁', carregar: () => import('./pages/sobrevivencia.js').then((m) => m.sobrevivenciaPage), secundária: true },
   { hash: '#/sobre', titulo: 'Sobre', icone: 'i', carregar: () => import('./pages/sobre.js').then((m) => m.sobrePage), secundária: true },
+  { hash: '#/diagnostico', titulo: 'Diagnóstico', icone: '⌁', carregar: () => import('./pages/diagnostico.js').then((m) => m.diagnosticoPage), secundária: true },
   /* A tela legada continua acessível por link direto enquanto o app migra. */
   { hash: '#/tiro', titulo: 'Cálculo legado', carregar: () => import('./pages/tiro.js').then((m) => m.tiroPage), legada: true }
 ];

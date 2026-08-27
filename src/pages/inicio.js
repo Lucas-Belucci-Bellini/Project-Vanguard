@@ -127,6 +127,7 @@ export function inicioPage() {
           caminho('#/socorro', 'Modo socorro', 'coordenadas e instruções', '!', 'inicio__atalho--danger'),
           caminho('#/contexto', 'Modo de contexto', 'cidade, mar, desastre e conflito', '◈'),
           caminho('#/sobrevivencia', 'Sobrevivência', 'manual offline e primeiros passos', '⌁'),
+          caminho('#/diagnostico', 'Diagnóstico', 'estado local e bateria', '⌗'),
           caminho('#/doar', 'Apoiar projeto', 'transparência e doações', '＋', 'inicio__atalho--support')
         )
       ),

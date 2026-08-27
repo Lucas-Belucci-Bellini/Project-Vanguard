@@ -28,6 +28,13 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Bateria e GPS** | Operação de quatro dias, perfis de localização, medição em campo e limitações de background em [`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](docs/OPERACAO-BATERIA-GPS-4-DIAS.md). |
 | **Tag final** | Comandos seguros para revisar, assinar, verificar e publicar a futura `v1.0.0` em [`docs/COMANDOS-TAG-V1.0.0.md`](docs/COMANDOS-TAG-V1.0.0.md). |
 | **Performance futura** | Direção para linguagens leves, profiling e camadas nativas somente quando justificadas em [`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md#7-direção-futura-de-performance-e-linguagens-leves). |
+| **Diagnóstico** | Estado local de versão, rede, GPS, frescor, cache, armazenamento, bateria e sensores em `#/diagnostico`; a validação de aparelhos permanece pendente. |
+
+## Estado da construção V2
+
+O prompt contínuo da V2 é executado sobre o estado real sem reiniciar o projeto. A memória persistente está em [`V2_STATUS.md`](V2_STATUS.md), [`V2_MASTER_CHECKLIST.md`](V2_MASTER_CHECKLIST.md), [`V2_PROGRESS.md`](V2_PROGRESS.md), [`V2_BLOCKERS.md`](V2_BLOCKERS.md), [`V2_DECISIONS.md`](V2_DECISIONS.md), [`V2_CHANGELOG.md`](V2_CHANGELOG.md), [`V2_RISK_REGISTER.md`](V2_RISK_REGISTER.md), [`V2_TEST_MATRIX.md`](V2_TEST_MATRIX.md), [`V2_FEATURE_MATRIX.md`](V2_FEATURE_MATRIX.md) e [`V2_ARCHITECTURE_MAP.md`](V2_ARCHITECTURE_MAP.md). Itens não necessários para a V2 ficam em [`V3_BACKLOG.md`](V3_BACKLOG.md). O estado atual é **V2 IN PROGRESS**; o próximo gargalo civil escolhido é um diagnóstico local observável, sem telemetria escondida.
+
+A stack atual permanece JavaScript ES2022, Vite, Capacitor e MapLibre até que profiling real justifique Kotlin, Swift ou Rust/WASM. O módulo legado balístico é `LEGACY-RESTRICTED` e não recebe novas capacidades operacionais.
 
 ## Modo offline-first
 
@@ -73,6 +80,7 @@ src/
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
     registro-offline.js backup JSON e exportação GPX local
     atualizacao.js     comparação de versões e URL oficial de atualização
+    diagnostico.js     estado local de versão, rede, GPS, cache e bateria
     trilha.js          resumo de distância, tempo e velocidade local
     fila-offline.js    fila local para sincronização posterior
   engine/
@@ -109,6 +117,11 @@ docs/
   COMANDOS-TAG-V1.0.0.md comandos para assinatura e publicação futura
   CHECKLIST-MOBILE-V1.0.0.md validação final em Android/iOS
   SIMULACAO-MODO-SOCORRO.md simulação sem acionamento real
+  SECURITY-RESPONSE.md resposta a incidentes de segurança
+  V2_*.md              memória persistente da construção V2
+  LIMITATIONS.md       limites de GPS, offline, sensores e comunicação
+  SECURITY.md          política de segurança do repositório
+  V3_BACKLOG.md        ideias e dependências fora do escopo V2
   FONTES-MODO-MAR-2026-08.md fontes oficiais para o modo Mar
 
 test/                  testes determinísticos do motor
