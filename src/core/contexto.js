@@ -76,7 +76,9 @@ export function contextoPorId(id) {
 }
 
 export function normalizarZona(zona) {
-  if (!zona || !Number.isFinite(Number(zona.lat)) || !Number.isFinite(Number(zona.lon))) return null;
+  const lat = Number(zona?.lat);
+  const lon = Number(zona?.lon);
+  if (!zona || !Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
   const contexto = POR_ID.has(zona.contexto) ? zona.contexto : 'cidade';
   const raioBruto = Number(zona.raioM);
   if (!Number.isFinite(raioBruto) || raioBruto <= 0) return null;
@@ -85,11 +87,12 @@ export function normalizarZona(zona) {
     id: String(zona.id || `zona-${Date.now()}`),
     nome: String(zona.nome || contextoPorId(contexto).nome).slice(0, 120),
     contexto,
-    lat: Number(zona.lat),
-    lon: Number(zona.lon),
+    lat,
+    lon,
     raioM,
     fonte: String(zona.fonte || 'não informado').slice(0, 160),
     atualizadoEm: zona.atualizadoEm || new Date().toISOString(),
+    validadeEm: zona.validadeEm || null,
     ativo: zona.ativo !== false,
   };
 }
@@ -105,12 +108,24 @@ function distanciaM(a, b) {
 }
 
 export function zonasAtivas(zonas = []) {
-  return zonas.map(normalizarZona).filter(Boolean).filter((zona) => zona.ativo && zona.raioM > 0);
+  const agora = Date.now();
+  return zonas.map(normalizarZona).filter(Boolean).filter((zona) => {
+    if (!zona.ativo || zona.raioM <= 0) return false;
+    if (!zona.validadeEm) return true;
+    const validade = Date.parse(zona.validadeEm);
+    return Number.isFinite(validade) && validade >= agora;
+  });
+}
+
+function posicaoValida(posicao) {
+  const lat = Number(posicao?.lat);
+  const lon = Number(posicao?.lon);
+  return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 }
 
 export function detectarContexto(posicao, zonas = [], padrao = 'cidade') {
   const base = contextoPorId(padrao);
-  if (!posicao) return { contexto: base, zona: null, distanciaM: null, confianca: 'sem posição' };
+  if (!posicaoValida(posicao)) return { contexto: base, zona: null, distanciaM: null, confianca: 'sem posição válida' };
   const candidatas = zonasAtivas(zonas)
     .map((zona) => ({ zona, distanciaM: distanciaM(posicao, zona) }))
     .filter(({ zona, distanciaM: distancia }) => distancia <= zona.raioM)

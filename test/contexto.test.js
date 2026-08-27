@@ -19,6 +19,13 @@ test('normalizarZona exige coordenadas, limita o raio e preserva a fonte', () =>
   assert.equal(normalizarZona({ lat: 'não', lon: 1 }), null);
 });
 
+test('normalizarZona recusa coordenadas fora do planeta e zonas expiradas não ficam ativas', () => {
+  assert.equal(normalizarZona({ lat: 91, lon: 0, raioM: 100, fonte: 'fonte' }), null);
+  assert.equal(normalizarZona({ lat: 0, lon: 181, raioM: 100, fonte: 'fonte' }), null);
+  const vencida = normalizarZona({ id: 'vencida', lat: 0, lon: 0, raioM: 100, fonte: 'fonte', validadeEm: '2020-01-01T00:00:00.000Z' });
+  assert.deepEqual(zonasAtivas([vencida]), []);
+});
+
 test('detectarContexto ativa uma zona crítica somente quando a posição está dentro do raio', () => {
   const zonas = [{ id: 'z1', nome: 'Zona de teste', contexto: 'conflito', lat: 0, lon: 0, raioM: 1000, fonte: 'autoridade · hoje' }];
   const dentro = detectarContexto({ lat: 0, lon: 0.002 }, zonas, 'cidade');
@@ -37,4 +44,10 @@ test('zonasAtivas descarta zonas desativadas e raios inválidos', () => {
   ]);
   assert.deepEqual(ativas.map((zona) => zona.id), ['ok']);
   assert.equal(contextoPorId('inexistente').id, 'cidade');
+});
+
+test('detectarContexto mantém o padrão quando a posição não é válida', () => {
+  const resultado = detectarContexto({ lat: 'sem GPS', lon: 0 }, [], 'expedicao');
+  assert.equal(resultado.contexto.id, 'expedicao');
+  assert.equal(resultado.confianca, 'sem posição válida');
 });

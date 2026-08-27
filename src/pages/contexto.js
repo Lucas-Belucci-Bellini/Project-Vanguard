@@ -113,6 +113,7 @@ export function contextoPage() {
   const zonaLon = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Longitude', ariaLabel: 'Longitude da zona' });
   const zonaRaio = h('input', { className: 'contexto__input', type: 'number', min: '50', max: '100000', step: '50', placeholder: 'Raio em metros', ariaLabel: 'Raio em metros' });
   const zonaFonte = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Fonte/data do aviso', ariaLabel: 'Fonte e data do aviso' });
+  const zonaValidade = h('input', { className: 'contexto__input', type: 'date', ariaLabel: 'Validade da zona, opcional' });
   const zonaTipo = h('select', { className: 'contexto__input', ariaLabel: 'Tipo de contexto da zona' },
     ...CONTEXTOS.map((item) => h('option', { value: item.id }, item.nome)));
   const zonaFeedback = h('p', { className: 'contexto__form-feedback', role: 'status' });
@@ -126,6 +127,7 @@ export function contextoPage() {
       lon: zonaLon.value,
       raioM: zonaRaio.value,
       fonte: zonaFonte.value.trim(),
+      validadeEm: zonaValidade.value ? new Date(`${zonaValidade.value}T23:59:59`).toISOString() : null,
       atualizadoEm: new Date().toISOString(),
     });
     if (!zona || !zona.nome || zona.raioM <= 0 || !zona.fonte) {
@@ -139,7 +141,8 @@ export function contextoPage() {
     zonaLon.value = '';
     zonaRaio.value = '';
     zonaFonte.value = '';
-    zonaFeedback.textContent = 'Zona salva no aparelho. Ela só ativará o modo quando o GPS entrar no raio informado.';
+    zonaValidade.value = '';
+    zonaFeedback.textContent = 'Zona salva no aparelho. Ela só ativará o modo quando o GPS entrar no raio informado e até a validade definida.';
     renderZonas();
   };
 
@@ -158,7 +161,7 @@ export function contextoPage() {
     h('p', null, 'Cadastre apenas áreas verificadas por uma fonte responsável. O app usa o ponto e o raio como aviso, não como detecção de ameaça.'),
     h('div', { className: 'contexto__form' }, zonaNome, zonaTipo,
       h('div', { className: 'contexto__form-grid' }, zonaLat, zonaLon, zonaRaio),
-      zonaFonte, salvarZona, zonaFeedback),
+      zonaFonte, zonaValidade, salvarZona, zonaFeedback),
     zonaLista);
 
   const raizConteudo = h('div', { className: 'contexto__wrap' },
