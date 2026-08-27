@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import {
   exportarRegistroLocal,
   exportarRegistroGpx,
+  exportarRegistroKml,
   importarRegistroGpx,
+  importarRegistroKml,
   importarRegistroLocal,
   REGISTRO_SCHEMA,
   REGISTRO_VERSION,
@@ -94,6 +96,40 @@ test('exportarRegistroGpx aceita dados vazios sem inventar uma trilha', () => {
   assert.match(gpx, /<gpx version="1\.1"/);
   assert.doesNotMatch(gpx, /<trk>/);
   assert.doesNotMatch(gpx, /<wpt>/);
+});
+
+test('exportarRegistroKml cria Point e LineString com XML escapado', () => {
+  const kml = exportarRegistroKml({
+    trilha: [{ ...ponto(1), altitude: 742 }],
+    waypoints: [{ ...ponto(2), nome: 'Abrigo & retorno <A>' }],
+    destino: { ...ponto(3), nome: 'Destino' },
+    nome: 'Rota de teste',
+  });
+  assert.match(kml, /<kml xmlns="http:\/\/www\.opengis\.net\/kml\/2\.2">/);
+  assert.match(kml, /<LineString><tessellate>1<\/tessellate><coordinates>-46\.631,-23\.549,742<\/coordinates>/);
+  assert.match(kml, /Abrigo &amp; retorno &lt;A&gt;/);
+  assert.match(kml, /<name>Destino<\/name><Point><coordinates>-46\.633,-23\.547<\/coordinates>/);
+});
+
+test('importarRegistroKml normaliza Point e LineString sem executar XML', () => {
+  const kml = `<?xml version="1.0"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+    <Placemark><name>Abrigo &amp; retorno</name><Point><coordinates>-46.632,-23.548,740</coordinates></Point></Placemark>
+    <Placemark><name>Rota &lt;local&gt;</name><LineString><coordinates>-46.631,-23.549,742 -46.630,-23.550</coordinates></LineString></Placemark>
+  </Document></kml>`;
+  const registro = importarRegistroKml(kml);
+  assert.equal(registro.waypoints[0].nome, 'Abrigo & retorno');
+  assert.equal(registro.waypoints[0].altitude, 740);
+  assert.equal(registro.trilha.length, 2);
+  assert.equal(registro.trilha[0].lat, -23.549);
+  assert.equal(registro.trilha[0].lon, -46.631);
+  assert.equal(registro.trilha[0].nome, 'Rota <local>');
+  assert.equal(registro.trilha[1].altitude, undefined);
+});
+
+test('importarRegistroKml rejeita raiz, pontos ausentes e coordenadas inválidas', () => {
+  assert.throws(() => importarRegistroKml('<xml />'), /raiz válida/);
+  assert.throws(() => importarRegistroKml('<kml><Document><Placemark><name>vazio</name></Placemark></Document></kml>'), /sem pontos/);
+  assert.throws(() => importarRegistroKml('<kml><Placemark><Point><coordinates>-181,0</coordinates></Point></Placemark></kml>'), /Coordenada KML inválida/);
 });
 
 test('importarRegistroLocal exige arrays de dados', () => {

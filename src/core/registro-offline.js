@@ -95,6 +95,76 @@ ${wpts}${wpts && track ? '\n' : ''}${track}
 `;
 }
 
+/**
+ * Gera KML 2.2 local. Trilhas viram LineString e waypoints/destino viram
+ * Placemark de ponto; nenhum dado é enviado para fora do aparelho.
+ */
+export function exportarRegistroKml({ trilha = [], waypoints = [], destino = null, nome = 'Vanguard Field' } = {}) {
+  const pontosTrilha = validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha');
+  const pontosWaypoint = validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint');
+  const todosWaypoints = destino == null
+    ? pontosWaypoint
+    : [...pontosWaypoint, normalizarPonto(destino, pontosWaypoint.length, { nomePadrao: 'Destino' })];
+  const coordenada = (ponto) => `${ponto.lon},${ponto.lat}${Number.isFinite(ponto.altitude) ? `,${ponto.altitude}` : ''}`;
+  const placemarks = todosWaypoints.map((ponto) => `    <Placemark><name>${escaparXml(ponto.nome)}</name><Point><coordinates>${coordenada(ponto)}</coordinates></Point></Placemark>`).join('\n');
+  const track = pontosTrilha.length
+    ? `    <Placemark><name>${escaparXml(nome)}</name><LineString><tessellate>1</tessellate><coordinates>${pontosTrilha.map(coordenada).join(' ')}</coordinates></LineString></Placemark>`
+    : '';
+  const conteudo = [placemarks, track].filter(Boolean).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+${conteudo}
+</Document></kml>
+`;
+}
+
+function coordenadasKml(valor) {
+  const tokens = String(valor ?? '').trim().split(/\s+/).filter(Boolean);
+  return tokens.map((token, indice) => {
+    const partes = token.split(',').map((parte) => parte.trim());
+    const [lon, lat, altitude] = partes;
+    if (!numeroValido(lon, -180, 180) || !numeroValido(lat, -90, 90)) throw new Error(`Coordenada KML inválida no ponto ${indice + 1}.`);
+    const ponto = { lon: Number(lon), lat: Number(lat) };
+    if (altitude !== undefined && altitude !== '' && Number.isFinite(Number(altitude))) ponto.altitude = Number(altitude);
+    return ponto;
+  });
+}
+
+/**
+ * Importa um subconjunto seguro de KML 2.2: Point para waypoints e LineString
+ * para trilhas. O texto é tratado como dados e nunca como markup executável.
+ */
+export function importarRegistroKml(entrada) {
+  if (typeof entrada !== 'string' || entrada.length > 2_000_000) throw new Error('Arquivo KML inválido ou acima do limite local.');
+  if (!/<kml\b/i.test(entrada)) throw new Error('Arquivo KML sem uma raiz válida.');
+  const trilha = [];
+  const waypoints = [];
+  const placemarks = [...entrada.matchAll(/<Placemark\b[^>]*>[\s\S]*?<\/Placemark>/gi)];
+  for (const [indice, encontrado] of placemarks.entries()) {
+    const tag = encontrado[0];
+    const nome = conteudoXml(tag, 'name');
+    const coordenadas = tag.match(/<coordinates\b[^>]*>([\s\S]*?)<\/coordinates>/i)?.[1];
+    if (coordenadas == null) continue;
+    const pontos = coordenadasKml(decodificarXml(coordenadas));
+    if (!pontos.length) continue;
+    if (/<LineString\b/i.test(tag)) {
+      trilha.push(...pontos.map((ponto, pontoIndice) => normalizarPonto({ ...ponto, nome: nome || `Ponto da trilha ${pontoIndice + 1}` }, trilha.length + pontoIndice, { nomePadrao: 'Ponto da trilha' })));
+    } else {
+      const ponto = pontos[0];
+      waypoints.push(normalizarPonto({ ...ponto, nome: nome || `Waypoint ${indice + 1}` }, waypoints.length, { nomePadrao: 'Waypoint' }));
+    }
+  }
+  if (!trilha.length && !waypoints.length) throw new Error('KML sem pontos de trilha ou waypoints válidos.');
+  return {
+    schema: REGISTRO_SCHEMA,
+    version: REGISTRO_VERSION,
+    exportadoEm: null,
+    trilha: validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha'),
+    waypoints: validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint'),
+    destino: null,
+  };
+}
+
 function decodificarXml(valor) {
   return String(valor ?? '')
     .replaceAll('&lt;', '<')

@@ -10,7 +10,7 @@ import { resumoTrilha } from '../core/trilha.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
-import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
+import { exportarRegistroLocal, exportarRegistroGpx, exportarRegistroKml, importarRegistroGpx, importarRegistroKml, importarRegistroLocal } from '../core/registro-offline.js';
 import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
@@ -114,8 +114,9 @@ export function mapaPage() {
   const offlineClearButton = h('button', { className: 'mapa__offline-clear', type: 'button' }, 'LIMPAR ÁREA PREPARADA');
   const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR JSON');
   const registroGpxButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR GPX');
-  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR JSON/GPX');
-  const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json,application/gpx+xml,.gpx', 'aria-label': 'Importar registro local JSON ou GPX' });
+  const registroKmlButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR KML');
+  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR JSON/GPX/KML');
+  const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json,application/gpx+xml,.gpx,application/vnd.google-earth.kml+xml,.kml', 'aria-label': 'Importar registro local JSON, GPX ou KML' });
   const registroStatus = h('p', { className: 'mapa__registro-status', role: 'status' }, 'Backup local de rota, pontos e destino; sem sincronização.');
   const selectBase = h('select', { className: 'mapa__select', 'aria-label': 'Base cartográfica' },
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
@@ -153,7 +154,7 @@ export function mapaPage() {
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
     h('div', { className: 'mapa__registro-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DADOS LOCAIS'), h('span', { className: 'mapa__privacy' }, '⌖ JSON')),
-      h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroGpxButton, registroImportarButton),
+      h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroGpxButton, registroKmlButton, registroImportarButton),
       registroArquivo,
       registroStatus
     ),
@@ -425,6 +426,21 @@ export function mapaPage() {
     }
   }
 
+  async function exportarRegistroKmlLocal() {
+    try {
+      const conteudo = exportarRegistroKml({ trilha, waypoints, destino });
+      const resultado = await compartilharArquivo({
+        blob: new Blob([conteudo], { type: 'application/vnd.google-earth.kml+xml;charset=utf-8' }),
+        fileName: `vanguard-trilha-${new Date().toISOString().slice(0, 10)}.kml`,
+        title: 'Trilha Vanguard Field',
+        texto: 'Backup KML local de navegação Vanguard Field.',
+      });
+      registroStatus.textContent = textoResultadoCompartilhamento(resultado, 'KML');
+    } catch (erro) {
+      registroStatus.textContent = erro?.message ?? 'Não foi possível exportar o KML local.';
+    }
+  }
+
   async function exportarRegistroGpxLocal() {
     try {
       const conteudo = exportarRegistroGpx({ trilha, waypoints, destino });
@@ -444,7 +460,12 @@ export function mapaPage() {
     if (!arquivo) return;
     try {
       const texto = await arquivo.text();
-      const registro = /\.gpx$/i.test(arquivo.name ?? '') ? importarRegistroGpx(texto) : importarRegistroLocal(texto);
+      const nomeArquivo = arquivo.name ?? '';
+      const registro = /\.gpx$/i.test(nomeArquivo)
+        ? importarRegistroGpx(texto)
+        : /\.kml$/i.test(nomeArquivo)
+          ? importarRegistroKml(texto)
+          : importarRegistroLocal(texto);
       if (!window.confirm('Substituir a rota, os waypoints e o destino atuais pelo registro importado?')) return;
       trilha = registro.trilha;
       waypoints = registro.waypoints;
@@ -497,6 +518,7 @@ export function mapaPage() {
   clearButton.onclick = limparTrilha;
   registroExportarButton.onclick = exportarRegistro;
   registroGpxButton.onclick = exportarRegistroGpxLocal;
+  registroKmlButton.onclick = exportarRegistroKmlLocal;
   registroImportarButton.onclick = () => registroArquivo.click();
   registroArquivo.onchange = () => importarRegistro(registroArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;
