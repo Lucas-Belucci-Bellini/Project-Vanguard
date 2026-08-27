@@ -15,7 +15,7 @@
 
 O resumo público das mudanças da futura versão está em [`docs/NOTAS-DE-LANCAMENTO-V1.0.0.md`](./NOTAS-DE-LANCAMENTO-V1.0.0.md). O roteiro falado está em [`docs/ROTEIRO-APRESENTACAO-V1.0.0.md`](./ROTEIRO-APRESENTACAO-V1.0.0.md), o checklist móvel em [`docs/CHECKLIST-MOBILE-V1.0.0.md`](./CHECKLIST-MOBILE-V1.0.0.md), os comandos de tag em [`docs/COMANDOS-TAG-V1.0.0.md`](./COMANDOS-TAG-V1.0.0.md) e a simulação segura em [`docs/SIMULACAO-MODO-SOCORRO.md`](./SIMULACAO-MODO-SOCORRO.md).
 
-A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com exportação/importação JSON offline, persistência versionada, exportação/importação GPX, documentação do contrato build versus release, workflow móvel separado, modo Mar responsável, contexto civil no mapa, prontidão offline, resumo da trilha, status detalhado do cache cartográfico e indicação da idade do último fixo GPS. O código de `main` continua avançando depois do snapshot e essas mudanças são publicadas e validadas como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. O commit exato da futura aprovação deve ser registrado no momento em que todos os gates forem concluídos. Para distribuí-las como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
+A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com exportação/importação JSON offline, persistência versionada, exportação/importação GPX, documentação do contrato build versus release, workflow móvel separado, modo Mar responsável, contexto civil no mapa, prontidão offline, resumo da trilha, status detalhado do cache cartográfico e indicação da idade do último fixo GPS. O código de `main` continua avançando depois do snapshot e essas mudanças são publicadas e validadas como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Nesta entrega, o commit de main é `1415dcb`; ele ainda não representa aprovação dos gates físicos da release final. Para distribuí-las como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
 
 ## O que está entregue
 
@@ -38,7 +38,7 @@ O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, preci
 | APK | `android/app/build/outputs/apk/debug/app-debug.apk`, aproximadamente 4,4 MB. |
 | Preview HTTPS | `#/inicio` e `#/mapa` carregaram; MapLibre renderizou base topográfica; nenhum GPS fictício foi criado. |
 | Service worker | Registro ativo; `CACHE_STATUS` respondeu com cache `vanguard-field-tiles-v2` e 25 tiles observados no preview. |
-| `CI / PR` | CI da `main` deve ser verificado novamente após este conjunto de mudanças; a execução reproduzida anteriormente foi aprovada. |
+| `CI / PR` | Execução `33102692073` da `main` concluída com sucesso no commit `1415dcb`. |
 
 ## Checklist antes da tag final
 

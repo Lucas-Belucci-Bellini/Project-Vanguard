@@ -51,7 +51,7 @@ A aplicação também possui atualização confirmada: no PWA, um service worker
 | `node --check public/sw.js` | Aprovado |
 | `npm run mobile:android:debug` | Aprovado; `BUILD SUCCESSFUL` |
 | APK debug | `android/app/build/outputs/apk/debug/app-debug.apk`, aproximadamente 4,4 MB; artifact técnico, não release |
-| CI de `main` | A validar novamente após este conjunto de mudanças; as execuções anteriores foram concluídas com sucesso |
+| CI de `main` | Execução `33102692073` concluída com sucesso no commit `1415dcb` |
 
 ## Limitações e itens fora do escopo da v1.0.0
 
@@ -61,7 +61,7 @@ A tela de doações permanece preparada, sem cobrança real nem credenciais de p
 
 ## Gate para a release final
 
-Antes de criar a tag `v1.0.0`, ainda é necessário validar em aparelhos reais Android/Xiaomi e iPhone: instalação, permissões, perda e retorno da rede, cobertura efetiva de mapas preparados, persistência da trilha, consumo em rota e pausa, compartilhamento manual, acessibilidade e assinatura/distribuição. Até esses gates serem concluídos, este documento deve ser tratado como **resumo de release planejada**, e não como anúncio de uma release final já publicada.
+Antes de criar a tag `v1.0.0`, ainda é necessário validar em aparelhos reais Android/Xiaomi e iPhone: instalação, permissões, perda e retorno da rede, cobertura efetiva de mapas preparados, persistência da trilha, consumo em rota e pausa, compartilhamento manual, acessibilidade, atualização confirmada e assinatura/distribuição. Até esses gates serem concluídos, este documento deve ser tratado como **resumo de release planejada**, e não como anúncio de uma release final já publicada.
 
 ## Referências internas
 
