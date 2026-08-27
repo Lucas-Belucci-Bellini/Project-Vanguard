@@ -1,5 +1,11 @@
 # Project Vanguard V2 — changelog de construção
 
+## 2026-08-27 — Diagnóstico de performance local
+
+O Diagnóstico passou a mostrar `Startup DOM`, `Carga completa` e `Memória JS` quando as APIs locais fornecem dados. A implementação usa Navigation Timing sem polling e trata `performance.memory` como opcional; nenhuma métrica é persistida ou enviada. Foram adicionados testes para valores válidos, API ausente, lista array-like e exceção.
+
+Evidência local: `npm test` com 126 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS, APK debug e preview HTTPS do grupo `DESEMPENHO`. Isso não mede FPS, bateria, memória total, suspensão nativa ou operação de quatro dias. Decisão em `ADR-0008-diagnostico-performance-local.md`; referências em `REFERENCIAS-PERFORMANCE-V2-2026-08.md`. Publicado em `main` como `3d171e8 perf(v2): expor diagnostico de performance`; CI `33114175983` concluído com sucesso.
+
 ## 2026-08-27 — Update confirmado com destino seguro
 
 O núcleo de atualização agora aceita somente assets e páginas HTTPS no caminho oficial `github.com/Lucas-Belucci-Bellini/Project-Vanguard/`; payloads externos, esquemas inseguros ou caminhos parecidos voltam à página fixa de releases. O fluxo PWA waiting foi coberto com teste determinístico para detecção, negar, confirmar, `SKIP_WAITING`, `controllerchange`, reload e remoção de listeners. O APK continua sem auto-instalação e nenhuma release foi criada nesta unidade.
