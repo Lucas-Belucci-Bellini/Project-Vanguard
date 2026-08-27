@@ -9,11 +9,11 @@
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
 | **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
 | **Current Task** | Manter a memória Omega completa e preparar os gates de dispositivo, lifecycle, offline, assinatura e distribuição |
-| **Last Completed** | Correção cartográfica sem CARTO/API key, rótulos públicos e preparo offline conjunto; aguardando commit desta rodada |
+| **Last Completed** | Catálogo informativo de rotas de peregrinação e seletor no mapa; sem traçados inventados; aguardando commit desta rodada |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
-| **Tests** | `npm test`: 170 testes aprovados; configuração, atualização, camadas, Service Worker, registros e diagnóstico cobertos |
+| **Tests** | `npm test`: 173 testes aprovados; configuração, atualização, camadas, Service Worker, catálogo de rotas, registros e diagnóstico cobertos |
 | **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
 | **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
 | **GPS** | Capacitor foreground + fallback Web/PWA; estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; posição normalizada `lat/lon`; background não implementado |
@@ -23,7 +23,7 @@
 | **Storage** | `localStorage` com envelope versionado; Cache Storage para shell/tiles; última persistência distingue `PERSISTIDO`/`FALHA`; quota física pendente |
 | **Tracking** | `STOPPED`/`ACTIVE`/`PAUSED`, Start/Pause/Resume/Stop local; pontos preservados e Stop não exporta/apaga automaticamente |
 | **Waypoints** | Criar, persistir, visualizar e exportar localmente; uso touch físico pendente |
-| **Routes** | Trilha local, destino, JSON/GPX/KML e resumo de distância/tempo/pontos; interoperabilidade física pendente |
+| **Routes** | Trilha local, destino, JSON/GPX/KML e catálogo informativo de peregrinações; Caminhos dos Anjos, Caminho da Fé, Rota do Rosário e Caminho Sagrado sem geometria local ainda; Rota do Carvalho não confirmada |
 | **Sharing** | Texto, coordenadas, JSON, GPX e KML via ação explícita, com Web Share/clipboard/download fallback; Share Sheet/Files físico pendente |
 | **Emergency Preparation** | Socorro prepara coordenadas/pacote e compartilha manualmente; não envia SOS, não confirma entrega/resgate e não transmite via satélite |
 | **Security** | Civil/local-first; sem telemetria automática, hardware falso, integração militar ou expansão do legado balístico. O legado é uma wiki separada de Arma 3, criada apenas para testes/simulação no videogame e nunca para uso real. A API de satélite real foi contingência histórica do processo de construção, não pedido do usuário nem mapa do jogo |
@@ -37,7 +37,7 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `09aff1d docs(v2): fechar configuracao publica`; CI `33126141662` concluído com sucesso; correção cartográfica está no worktree e aguarda commit separado |
+| **Main** | `c6dbb59 fix(v2): restaurar camadas cartograficas`; CI `33127120249` concluído com sucesso; catálogo de rotas está no worktree e aguarda commit separado |
 | **Next Task** | Executar os gates de `MOBILE_V2_DEVICE_MATRIX.md` e, depois, revisar assinatura/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
@@ -53,7 +53,8 @@
 9. Memória Omega consolidada — `ddd2e86`/`3f6945c`.
 10. Validação defensiva de formato JSON/GPX/KML — `1e0da64`, CI `33124902546`.
 11. Configuração pública compartilhada sem segredos — `54d6c72`, CI `33126077429`, ADR-0024.
-12. Correção cartográfica sem CARTO/API key e preparo offline de rótulos — testes locais, ADR-0025; commit pendente.
+12. Correção cartográfica sem CARTO/API key e preparo offline de rótulos — `c6dbb59`, CI `33127120249`, ADR-0025.
+13. Catálogo de rotas de peregrinação sem geometria inventada — testes locais, ADR-0026; commit pendente.
 
 ## Regra de evidência
 

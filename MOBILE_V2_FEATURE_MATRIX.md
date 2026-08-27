@@ -8,7 +8,7 @@
 | Tracking | Start, Pause, Resume, Stop, Save, Restore, Export | Implementado | máquina `trilha-sessao`, registro JSON/GPX/KML | lifecycle, tela bloqueada e bateria |
 | Pontos | Waypoints e destino | Implementado | validação, estado e serialização | uso touch em dispositivo |
 | Mapas | MapLibre, quatro bases, nomes/limites, centralização, grade e tiles preparados | Implementado | contratos das camadas, build, planner e política do SW; OSM/ArcGIS sem CARTO/API key | provedor, cobertura, quota e modo avião; cidades de referência não são uma rota oficial |
-| Offline | shell, estado local, manual de sobrevivência e contexto | Implementado | build/testes locais | persistência física e reabertura sem rede |
+| Rotas | Catálogo de referências de peregrinação, fontes e estados de evidência | Implementado | testes do catálogo e imutabilidade; seletor no Mapa | GPX/KML oficial/autorizado, traçado, atualização e validação física |
 | Import/export | JSON, GPX 1.1 e subconjunto KML 2.2 | Implementado | parsers, limites/XML seguro e classificador de extensão/MIME | MIME pode ser omitido; conteúdo ainda requer parser e Files/Share Sheet físico |
 | Compartilhamento | texto, coordenadas, JSON, GPX e KML | Implementado | Web Share, clipboard e download fallback | Share Sheet/Files físico |
 | Socorro | preparação manual de posição/pacote | Implementado | contrato local | não envia SOS nem confirma entrega/resgate |

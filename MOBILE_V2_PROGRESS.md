@@ -114,3 +114,11 @@ As capturas de tela mostraram que a base escura estava recebendo o watermark `AP
 A base escura agora usa tiles públicos do OpenStreetMap com tratamento visual local; o overlay usa `World_Boundaries_and_Places` do ArcGIS, com atribuição. O Service Worker permitiu `tile.openstreetmap.org`, removeu hosts CARTO sem uso e passou o cache de tiles para `v3` para descartar tiles antigos com watermark. O preparo offline inclui a base selecionada e o overlay de nomes/limites dentro do limite local de 256 URLs.
 
 A pesquisa documentada em `docs/ROTAS-CAMINHOS-DOS-ANJOS.md` confirma a lista publicada pela associação e a Lei Estadual nº 22.530/2025, mas mantém cidades como referência, não como uma linha aproximada. Um GPX/KML oficial ou autorizado ainda é necessário para inserir o traçado navegável. A precisão do GPS dentro de prédios continua sendo um gargalo físico separado, sem promessa de correção por software.
+
+## Marco de catálogo de rotas de peregrinação — 2026-08-27
+
+A pesquisa verificou fontes institucionais do Caminhos dos Anjos, Caminho da Fé, Rota do Rosário e Caminho Sagrado. A expressão Rota do Carvalho não foi confirmada como peregrinação oficial; permaneceu fora da navegação. Foi criado `src/data/rotas-peregrinacao.js` com estados de evidência e sem geometria inventada, além de um seletor informativo no Mapa.
+
+O catálogo mostra nomes, tipo, região, fontes e cidades publicadas quando disponíveis. Todas as rotas confirmadas continuam como `REFERÊNCIA · TRAÇADO LOCAL NECESSÁRIO`, pois a existência de cidades ou uma lei de reconhecimento não fornece automaticamente um GPX/KML navegável. A Rota do Carvalho aparece como `NÃO CONFIRMADA · FORA DA NAVEGAÇÃO`.
+
+Foram adicionados `test/rotas-peregrinacao.test.js`, `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md` e `docs/adr/ADR-0026-catalogo-rotas-peregrinacao.md`. O total local chegou a 173 testes aprovados. A funcionalidade é civil, local-first e permanece separada da wiki virtual de Arma 3 e de seus módulos balísticos legados.

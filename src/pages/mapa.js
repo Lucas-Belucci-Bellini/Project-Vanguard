@@ -5,6 +5,7 @@ import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel
 import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE, CAMADAS_OVERLAY } from '../data/camadas-mapa.js';
+import { ROTAS_PEREGRINACAO, rotaPorId, statusRotaLabel } from '../data/rotas-peregrinacao.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha } from '../core/trilha.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
@@ -130,6 +131,19 @@ export function mapaPage() {
     h('option', { value: 'mar' }, 'MAR / REFERÊNCIA')
   );
   selectUso.value = estado.get(CHAVES.MODO_USO, 'trilha');
+  const selectRota = h('select', { className: 'mapa__select', 'aria-label': 'Rota de peregrinação' },
+    ...ROTAS_PEREGRINACAO.map((rota) => h('option', { value: rota.id }, rota.nome.toUpperCase()))
+  );
+  selectRota.value = 'caminhos-dos-anjos';
+  const rotaReferenciaStatus = h('p', { className: 'mapa__rota-reference-status', role: 'note' });
+  function atualizarRotaReferencia() {
+    const rota = rotaPorId(selectRota.value);
+    const cidades = rota.cidades.length ? ` Cidades: ${rota.cidades.join(', ')}.` : '';
+    rotaReferenciaStatus.textContent = `${rota.tipo} · ${statusRotaLabel(rota)}. ${rota.resumo}${cidades}`;
+    rotaReferenciaStatus.classList.toggle('is-unconfirmed', rota.estado === 'NAO_CONFIRMADA');
+  }
+  selectRota.onchange = atualizarRotaReferencia;
+  atualizarRotaReferencia();
   const modoMarInfo = h('aside', { className: 'mapa__mar-info', role: 'note', 'aria-label': 'Limites do modo Mar' },
     h('strong', null, 'MODO MAR · REFERÊNCIA'),
     h('p', null, 'Satélite e topografia ajudam a orientar, mas não mostram profundidade segura nem substituem carta náutica oficial atualizada, avisos aos navegantes, marés, sonar ou julgamento local.')
@@ -148,6 +162,11 @@ export function mapaPage() {
     ),
     h('label', { className: 'mapa__uso-label' }, h('span', null, 'MODO DE USO'), selectUso),
     modoMarInfo,
+    h('div', { className: 'mapa__rota-reference-card' },
+      h('span', { className: 'mapa__kicker' }, 'ROTAS DE PEREGRINAÇÃO'),
+      h('label', { className: 'mapa__rota-reference-label' }, h('span', null, 'ROTA DE REFERÊNCIA'), selectRota),
+      rotaReferenciaStatus
+    ),
     h('div', { className: 'mapa__contexto-card' },
       h('span', { className: 'mapa__kicker' }, 'CONTEXTO CIVIL'),
       contextoStatus

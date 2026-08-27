@@ -22,6 +22,7 @@
 | OMEGA-016 | Performance | Battery | Precisão e wake lock econômicos | política documentada, wake lock opcional | build/local | nenhum profiling físico | `docs/OPERACAO-BATERIA-GPS-4-DIAS.md` | IN_PROGRESS | medição de quatro dias |
 | OMEGA-017 | Security | Civil/privacy | Sem telemetria, background GPS presumido ou SOS falso | limites documentados | auditoria/CI | código e docs | `V2_BLOCKERS.md` | TESTED | revisão física e operacional |
 | OMEGA-018 | Release | Distribution | Debug → release → signed → installed → validated → AAB/store-ready | workflow artifact-only, sem signing | workflow `33121937373` | APK/AAB hashes registrados | `MOBILE_V2_RELEASE.md`, ADR-0018 | BLOCKED | keystore, Apple signing e gates físicos |
+| OMEGA-019 | Shared | Route catalog | Catálogo informativo de rotas de peregrinação com fontes e estados de evidência | `src/data/rotas-peregrinacao.js`, seletor no Mapa; sem geometria inventada | testes do catálogo e imutabilidade | Node/CI e fontes públicas | `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md`, ADR-0026 | IN_PROGRESS | GPX/KML oficial/autorizado e validação de rota física |
 
 ## Regra de encerramento
 

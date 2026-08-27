@@ -8,18 +8,18 @@
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: capacidades observáveis, estado, observabilidade, offline-first e validação mobile |
 | **Current Task** | Validar KML, sessão Start/Pause/Resume/Stop, estados GPS, pausa/retomada ao ocultar o app, permissões, posição/frescor, modo avião, persistência, mapas preparados, lifecycle, sensores, performance e bateria em Android/Xiaomi/MIUI/HyperOS/iPhone; não assumir background GPS |
-| **Last Completed Task** | Correção cartográfica sem CARTO/API key, rótulos públicos e preparo offline conjunto; aguardando publicação desta unidade |
+| **Last Completed Task** | Catálogo informativo de rotas de peregrinação e seletor no mapa, sem traçados inventados; aguardando publicação desta unidade |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
 | **Next Task** | Executar `MOBILE_V2_TEST_MATRIX.md` em aparelhos reais; priorizar KML/JSON/GPX, sessão da trilha, tela bloqueada, pausa/retomada do watcher, permissões, modo avião, bússola, update posterior e bateria |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 170 testes aprovados; configuração pública, atualização, camadas, Service Worker, registros e diagnóstico cobertos |
+| **Tests** | `npm test`: 173 testes aprovados; configuração pública, atualização, camadas, Service Worker, catálogo de rotas, registros e diagnóstico cobertos |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles `v3` inclui base + rótulos preparados, mas não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico. O legado pertence a uma wiki separada de Arma 3, somente virtual/teste e nunca destinado a uso real |
-| **Documentation** | README, `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`, `docs/ROTAS-CAMINHOS-DOS-ANJOS.md`, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021/0022/0023/0024/0025, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
+| **Documentation** | README, `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`, `docs/ROTAS-CAMINHOS-DOS-ANJOS.md`, `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md`, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021/0022/0023/0024/0025/0026, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `09aff1d docs(v2): fechar configuracao publica`; CI `33126141662` concluído com sucesso; correção cartográfica está no worktree e aguarda commit separado |
+| **Main** | `c6dbb59 fix(v2): restaurar camadas cartograficas`; CI `33127120249` concluído com sucesso; catálogo de rotas está no worktree e aguarda commit separado |
 
 ## Regra de conclusão
 

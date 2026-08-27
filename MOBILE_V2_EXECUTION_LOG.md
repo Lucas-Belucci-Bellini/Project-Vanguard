@@ -98,3 +98,13 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Testes:** `npm test` chegou a 170 aprovados, 0 falhas; `test/camadas-mapa.test.js` cobre as quatro bases, ausência de CARTO/API key e composição de rótulos.
 - **Revisão visual:** prévia Vite na rota `#/mapa`; Topográfico, Tático escuro e Satélite carregaram sem watermark CARTO; nomes/limites permaneceram visíveis após o carregamento assíncrono da imagem. Evidência detalhada em `docs/visual-check-map-2026-08-27.md`.
 - **Limite:** esta unidade não cria rota oficial, não transforma cidades em linha aproximada e não corrige a precisão física dentro de prédios; GPS interno permanece uma unidade posterior dependente de aparelho, céu, ambiente e permissões.
+
+## 2026-08-27 — unidade nova: catálogo de rotas de peregrinação
+
+- **Motivo:** o usuário pediu outras rotas e mencionou a possível Rota do Carvalho; a classificação dessa rota precisava ser verificada antes de qualquer inclusão.
+- **Pesquisa:** fontes institucionais confirmaram o Caminho da Fé, a Rota do Rosário e o Caminho Sagrado como referências de peregrinação/roteiro religioso. A Rota do Carvalho não foi confirmada como peregrinação oficial e não recebeu fonte no catálogo.
+- **Implementação:** `src/data/rotas-peregrinacao.js` e seletor informativo no `mapaPage`; catálogo imutável com nome, tipo, região, cidades quando publicadas, fontes, estado de evidência e `navegacaoDisponivel: false`.
+- **Regra:** nenhuma cidade é ligada por linha aproximada. Uma rota só poderá entrar na navegação com GPX/KML oficial ou explicitamente autorizado, versão/data, fonte e validação física.
+- **Testes:** `npm test` chegou a 173 aprovados, 0 falhas; `test/rotas-peregrinacao.test.js` cobre catálogo, Rota do Carvalho não confirmada e imutabilidade.
+- **Documentação:** `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md` e `docs/adr/ADR-0026-catalogo-rotas-peregrinacao.md`.
+- **Limite:** esta unidade não cria navegação turn-by-turn, não incorpora geometrias de terceiros, não valida segurança de percurso e não muda a classificação da Rota do Carvalho sem nova fonte confiável.

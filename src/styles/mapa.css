@@ -23,6 +23,10 @@
 .mapa__mar-info.is-visible { display: block; }
 .mapa__mar-info strong { display: block; color: var(--color-amber); font-size: 9px; letter-spacing: .06em; }
 .mapa__mar-info p { margin: 5px 0 0; }
+.mapa__rota-reference-card { margin-top: 9px; padding: 9px 10px; background: var(--color-surface); border: var(--border-base); }
+.mapa__rota-reference-label { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; color: var(--color-text-muted); font-size: 8px; letter-spacing: var(--tracking-wide); }
+.mapa__rota-reference-status { min-height: 30px; margin: 6px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
+.mapa__rota-reference-status.is-unconfirmed { color: var(--color-amber); }
 .mapa__contexto-card { margin-top: 9px; padding: 9px 10px; background: var(--color-surface); border: var(--border-base); }
 .mapa__contexto-status { min-height: 15px; margin: 5px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
 .mapa__contexto-status.is-zone { color: var(--color-amber); }
