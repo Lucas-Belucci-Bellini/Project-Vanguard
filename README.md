@@ -27,6 +27,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Atualização** | Quando houver uma versão nova, o botão **ATUALIZAÇÃO PRONTA** pede confirmação. No PWA, ativa o service worker aguardando; no APK, abre a página oficial e deixa a instalação para a confirmação do sistema. O fluxo completo está em [`docs/ATUALIZACAO-CONFIRMADA.md`](docs/ATUALIZACAO-CONFIRMADA.md). |
 | **Bateria e GPS** | Operação de quatro dias, perfis de localização, medição em campo e limitações de background em [`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](docs/OPERACAO-BATERIA-GPS-4-DIAS.md). |
 | **Tag final** | Comandos seguros para revisar, assinar, verificar e publicar a futura `v1.0.0` em [`docs/COMANDOS-TAG-V1.0.0.md`](docs/COMANDOS-TAG-V1.0.0.md). |
+| **Performance futura** | Direção para linguagens leves, profiling e camadas nativas somente quando justificadas em [`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md#7-direção-futura-de-performance-e-linguagens-leves). |
 
 ## Modo offline-first
 
@@ -53,7 +54,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 107 testes do motor geográfico e contratos civis
+npm test          # 112 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 

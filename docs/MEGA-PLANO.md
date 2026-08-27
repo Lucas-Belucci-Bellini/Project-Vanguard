@@ -350,3 +350,19 @@ npm run dev      # http://localhost:5174
 npm test         # 74 testes do motor e dos contratos civis
 npm run build    # dist/
 ```
+
+## 7. Direção futura de performance e linguagens leves
+
+A preferência do projeto para a evolução pós-`v1.0.0` é priorizar baixo consumo, inicialização rápida e uso eficiente de memória. A decisão não autoriza uma reescrita prematura: o Vanguard Field deve primeiro ser medido em aparelhos reais e manter a base JS/Capacitor estável até que um gargalo verificável justifique uma camada nativa.
+
+| Área | Direção preferida | Regra de adoção |
+|---|---|---|
+| **UI e PWA** | JavaScript ES2022 enxuto, Vite e carregamento sob demanda | Preservar a base atual; remover custo somente após medir bundle, startup e memória. |
+| **Android nativo** | Kotlin para plugins de localização, ciclo de vida e bateria | Introduzir apenas quando o teste demonstrar que WebView/Capacitor não atende ao comportamento necessário. |
+| **iOS nativo** | Swift para permissões, localização e background | Exigir validação no Xcode e documentação de privacidade; não prometer background antes do teste físico. |
+| **Motor geográfico compartilhado** | JavaScript puro como referência; Rust/WASM como possibilidade futura | Considerar Rust somente após profiling, mantendo os mesmos testes e resultados do motor JS. |
+| **Dependências** | Preferir bibliotecas pequenas e empacotadas localmente | Não trocar segurança offline por dependência de CDN ou serviço externo. |
+
+A ordem de decisão é: medir, identificar o gargalo, escolher a menor camada necessária, comparar consumo e desempenho em Android/iOS reais, repetir os testes offline e só então aceitar a migração. C++/NDK, Flutter ou uma reescrita completa em React Native não entram como padrão; exigem justificativa, custo de manutenção e evidência de ganho.
+
+O planejamento de performance deve ser lido junto de [`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](OPERACAO-BATERIA-GPS-4-DIAS.md), [`docs/CHECKLIST-MOBILE-V1.0.0.md`](CHECKLIST-MOBILE-V1.0.0.md) e [`docs/BUILD-MOBILE.md`](BUILD-MOBILE.md).
