@@ -31,6 +31,8 @@ button.primario { background: var(--color-cyan-soft); border-color: var(--color-
 input, select { background: var(--color-bg); border: var(--border-base); border-radius: var(--radius-sm); padding: 10px; width: 100%; }
 
 /* Shell */
+.vg-salto-conteudo { position: fixed; z-index: calc(var(--z-sticky) + 2); top: 8px; left: 8px; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.vg-salto-conteudo:focus { width: auto; height: auto; overflow: visible; clip: auto; clip-path: none; padding: 10px 12px; background: var(--color-bg-elevated); border: 2px solid var(--color-cyan); color: var(--color-cyan); }
 .vg-header { position: relative; z-index: var(--z-sticky); flex: 0 0 64px; display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: max(8px, env(safe-area-inset-top)) clamp(14px, 4vw, 32px) 8px; background: color-mix(in srgb, var(--color-bg-elevated) 94%, transparent); border-bottom: var(--border-base); }
 .vg-marca { display: flex; align-items: center; gap: 9px; color: var(--color-cyan); font-size: 14px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-widest); text-shadow: var(--shadow-glow-cyan); white-space: nowrap; }
 .vg-marca__sigla { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid var(--color-cyan); color: var(--color-bg); background: var(--color-cyan); text-shadow: none; font-size: 16px; }

@@ -34,6 +34,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | Release → APK | GitHub release HTTPS → botão → instalador do sistema | APK não se auto-instala; nova versão deve ser maior |
 | Lifecycle → diagnóstico | `@capacitor/app` `appStateChange` ou `visibilitychange` → `ciclo-vida.js` → diagnóstico | Mede foreground/background; não garante execução nem GPS contínuo |
 | Diagnóstico → observabilidade | APIs locais → `src/core/diagnostico.js`/`src/core/ciclo-vida.js` → `src/pages/diagnostico.js` → estado local | Sem telemetria oculta; bateria, sensores e lifecycle podem estar indisponíveis |
+| Shell → acessibilidade | `src/main.js` cria skip link, `<main>` focável e estados ARIA → `src/ui/helpers.js` serializa atributos → `src/styles/base.css` mantém foco visível | Melhora navegação sem declarar conformidade WCAG; TalkBack/VoiceOver e contraste ainda exigem campo |
 
 ## Armazenamento
 

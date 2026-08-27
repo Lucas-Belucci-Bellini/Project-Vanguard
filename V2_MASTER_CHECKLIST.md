@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|---|---|
 | V2-001 | Arquitetura | Separar UI, aplicação, core, engine e dados | Estrutura atual preservada; `src/engine` sem DOM | Importações e testes existentes | `CLAUDE.md`, `docs/MEGA-PLANO.md` | TESTED | CI e suíte Node |
 | V2-002 | Build | Build reprodutível | Vite, `npm ci`, scripts mobile | `npm run build` | README, `docs/BUILD-VS-RELEASE.md` | TESTED | CI `main` |
-| V2-003 | GPS/GNSS | Posição, erro e indisponibilidade | `src/core/localizacao.js` | Testes de normalização/idade; aparelho real pendente | README, checklist mobile | IN_PROGRESS | 112 testes; hardware pendente |
+| V2-003 | GPS/GNSS | Posição, erro e indisponibilidade | `src/core/localizacao.js` | Testes de normalização/idade; aparelho real pendente | README, checklist mobile | IN_PROGRESS | 122 testes; hardware pendente |
 | V2-004 | MGRS | Converter e exibir referência local | `src/engine/mgrs.js`, HUD do mapa | Testes geográficos | README, mapa de funcionalidades | TESTED | Suíte determinística |
 | V2-005 | Compass | Sensor/fallback/indisponibilidade | Página de bússola | Teste físico de sensor pendente | README | IN_PROGRESS | Web e hardware pendentes |
 | V2-006 | Map | MapLibre, camadas, destino e waypoints | `src/pages/mapa.js` | Preview; aparelhos e rede real pendentes | README, docs mapa | IN_PROGRESS | Preview + CI |
@@ -22,8 +22,8 @@
 | V2-016 | PWA | Manifest, cache e atualização | Service worker + confirmação | Teste de update posterior pendente | `ATUALIZACAO-CONFIRMADA.md` | IN_PROGRESS | Implementado; campo pendente |
 | V2-017 | Android | Instalação, lifecycle, bateria e update | Capacitor; debug | Android/Xiaomi físico pendente | checklist mobile | IN_PROGRESS | APK debug |
 | V2-018 | iOS | Build, permissões, lifecycle e update | Projeto Capacitor gerado | Mac/Xcode/iPhone pendente | checklist mobile | BLOCKED | PHYSICAL VALIDATION REQUIRED |
-| V2-019 | Diagnostics | Mostrar estado de app, GPS, rede, cache e bateria | `src/core/diagnostico.js`, `src/pages/diagnostico.js`, rota `#/diagnostico` | 5 testes determinísticos; validação física pendente | `V2_STATUS.md`, README | IN_PROGRESS | 117 testes totais; browser/device pending |
-| V2-020 | Accessibility | Labels, foco, leitores de tela | Parcial na UI atual | TalkBack/VoiceOver pendentes | checklist mobile | IN_PROGRESS | Revisão física pendente |
+| V2-019 | Diagnostics | Mostrar estado de app, GPS, rede, cache, bateria e lifecycle | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico` | 8 testes de diagnóstico/lifecycle + preview; validação física pendente | `V2_STATUS.md`, ADR-0005, README | IN_PROGRESS | 123 testes totais; browser validado; device pending |
+| V2-020 | Accessibility | Labels, salto de conteúdo, foco e leitores de tela | Shell com link de salto, `<main>` focável, ARIA explícito e foco pós-rota | DOM do preview validado; TalkBack/VoiceOver pendentes | ADR-0006, checklist mobile | IN_PROGRESS | Preview semântico; PHYSICAL VALIDATION REQUIRED |
 | V2-021 | Performance | Medir startup, mapa, memória e bundle | Métricas locais/documentais | Profiling real pendente | `MEGA-PLANO.md` | IN_PROGRESS | Bundle/build; sem profiling completo |
 | V2-022 | Updates | Detectar, confirmar, recarregar/abrir release | `atualizacao.js`, UI e SW | Teste com versão posterior pendente | atualização confirmada | IN_PROGRESS | Build local |
 | V2-023 | Release | Tag assinada e artefatos distribuíveis | Workflow separado; signing externo | GPG/SSH, APK/AAB/IPA reais pendentes | comandos de tag | BLOCKED | Candidate `rc.2` |

@@ -57,7 +57,7 @@ function montarShell() {
   document.documentElement.dataset.modo = seletorModo.value;
 
   const gpsStatus = h('span', { className: 'vg-status__text' }, 'GPS LOCAL');
-  const status = h('div', { className: 'vg-status', title: 'A localização é mantida no dispositivo por padrão' },
+  const status = h('div', { className: 'vg-status', title: 'A localização é mantida no dispositivo por padrão', 'aria-label': 'Status de conectividade e localização local', 'aria-live': 'polite' },
     h('span', { className: 'vg-status__dot', ariaHidden: 'true' }), gpsStatus);
   const atualizarConectividade = () => {
     const online = navigator.onLine !== false;
@@ -73,6 +73,7 @@ function montarShell() {
 
   const controleAtualizacao = criarControleAtualizacao();
 
+  const salto = h('a', { className: 'vg-salto-conteudo', href: '#vg-main' }, 'Pular para o conteúdo principal');
   const header = h('header', { className: 'vg-header' },
     h('div', { className: 'vg-marca' },
       h('span', { className: 'vg-marca__sigla' }, 'V'),
@@ -83,8 +84,12 @@ function montarShell() {
   );
 
   const nav = h('nav', { className: 'vg-abas', 'aria-label': 'Navegação principal' }, abas);
-  const main = h('main', { className: 'vg-main', id: 'vg-main' });
-  document.body.append(header, main, nav);
+  const main = h('main', { className: 'vg-main', id: 'vg-main', tabindex: '-1', 'aria-label': 'Conteúdo principal', 'aria-busy': 'false' });
+  salto.onclick = (evento) => {
+    evento.preventDefault();
+    main.focus({ preventScroll: false });
+  };
+  document.body.append(salto, header, main, nav);
   return { abas, main, gpsStatus, status, desmontarAtualizacao: controleAtualizacao.desmontar };
 }
 
@@ -112,6 +117,7 @@ async function navegar({ abas, main }) {
     desmontarAtual = null;
   }
   empty(main);
+  main.setAttribute('aria-busy', 'true');
   try {
     const pagina = await rota.carregar();
     const resultado = pagina({ query });
@@ -119,9 +125,12 @@ async function navegar({ abas, main }) {
     main.append(resultado.elemento);
   } catch (erro) {
     main.append(h('div', { className: 'vg-pagina vg-erro-pagina' },
-      h('div', { className: 'vg-aviso vg-aviso--perigo' },
+      h('div', { className: 'vg-aviso vg-aviso--perigo', role: 'alert' },
         `Falha ao carregar a tela “${rota.titulo}”: ${erro.message}`)
     ));
+  } finally {
+    main.setAttribute('aria-busy', 'false');
+    main.focus({ preventScroll: true });
   }
 }
 

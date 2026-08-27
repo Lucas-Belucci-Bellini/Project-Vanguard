@@ -16,6 +16,14 @@ export const $$ = (sel, escopo = document) => Array.from(escopo.querySelectorAll
  * Valores `null`/`false`/`undefined` são ignorados, o que deixa filhos e
  * atributos condicionais legíveis sem ternário.
  */
+const ATRIBUTOS_ARIA = {
+  ariaLabel: 'aria-label',
+  ariaHidden: 'aria-hidden',
+  ariaCurrent: 'aria-current',
+  ariaLive: 'aria-live',
+  ariaBusy: 'aria-busy',
+};
+
 export function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
 
@@ -27,6 +35,7 @@ export function h(tag, attrs = {}, ...children) {
     else if (key.startsWith('on') && typeof value === 'function') {
       el.addEventListener(key.slice(2).toLowerCase(), value);
     } else if (key === 'html') el.innerHTML = value;
+    else if (ATRIBUTOS_ARIA[key]) el.setAttribute(ATRIBUTOS_ARIA[key], value);
     else if (key in el && typeof value !== 'object') el[key] = value;
     else el.setAttribute(key, value);
   }

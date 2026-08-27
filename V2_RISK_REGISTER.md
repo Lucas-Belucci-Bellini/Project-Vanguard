@@ -16,6 +16,7 @@
 | R-012 | Telemetria ou sincronização silenciosa expõe localização | Baixa | Crítico | Armazenamento local por padrão e ação explícita para compartilhar | Mitigado/documentado |
 | R-013 | Dependências de desenvolvimento reportam vulnerabilidades no audit completo | Média | Médio | `npm audit --omit=dev` sem vulnerabilidades de produção; revisar audit completo antes de release e não aplicar `--force` sem análise | Audit de produção: 0; audit completo requer acompanhamento |
 | R-014 | Lifecycle observável é confundido com GPS ou processo contínuo em background | Média | Alto | Rótulos `CAPACITOR APP`/`VISIBILITY API`, texto explícito no Diagnóstico, ADR-0005 e nenhum serviço/permissão de background | Mitigado no código; validação física pendente |
+| R-015 | Semântica de foco/ARIA no preview é confundida com acessibilidade completa em leitores de tela | Média | Alto | Link de salto, foco visível, landmark e atributos ARIA explícitos; teste DOM; manter TalkBack/VoiceOver/contraste como bloqueios físicos | Mitigado parcialmente; validação de assistência e contraste pendente |
 
 ## Critério
 

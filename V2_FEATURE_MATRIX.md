@@ -29,6 +29,6 @@
 | DONATIONS | Tela preparada | NOT_CONFIGURED | Sem checkout/credenciais | Não ativar sem integração real |
 | DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, 8 testes | Validar em navegador e aparelhos reais; sem telemetria oculta |
 | SETTINGS | Configuração/tema local | IMPLEMENTED | Shell e estado | Expandir somente com necessidade |
-| ACCESSIBILITY | Labels, contraste e foco | IN_PROGRESS | UI atual | TalkBack/VoiceOver pendentes |
+| ACCESSIBILITY | Labels, salto de conteúdo, foco e contraste | IN_PROGRESS | Shell com link de salto, `<main>` focável, ARIA explícito, foco pós-rota e preview DOM | TalkBack/VoiceOver, contraste e aparelhos reais pendentes |
 | EXTERNAL_HARDWARE | Satélite, beacon, rádio, Geiger, sonar | NOT_CONFIGURED | Contratos/documentação | Não simular hardware |
 | LEGACY_BALLISTICS | Módulos antigos | LEGACY-RESTRICTED | Mantidos isolados | Não expandir |

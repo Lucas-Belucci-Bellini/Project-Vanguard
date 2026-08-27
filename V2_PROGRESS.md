@@ -5,7 +5,7 @@ EXECUTION REPORT
 
 Current Version: 2.x em construção; pacote atual 1.0.0
 Current Phase: Fase 2 — Engine/GPS mobile foundation + lifecycle observability
-Current Milestone: Foundation Hardening
+Current Milestone: Foundation Hardening + acessibilidade da shell
 
 Completed:
 - O prompt V2 foi lido e decomposto sem reiniciar o trabalho existente.
@@ -21,6 +21,7 @@ Implemented:
 - Diagnóstico local em `#/diagnostico`, com versão, plataforma, rede, GPS, frescor, cache, armazenamento, bateria quando disponível, service worker e bússola.
 - Driver opcional `@capacitor/geolocation@8.2.2` para foreground nativo, com fallback Web/PWA e política de energia compartilhada.
 - Observador de lifecycle com `@capacitor/app@8.1.1`, usando `appStateChange` nativo ou `visibilitychange` na Web; o estado aparece no Diagnóstico sem prometer background GPS.
+- Hardening de acessibilidade na shell: link de salto, landmark `<main>` focável, foco após troca de rota, `aria-busy`, status ao vivo, alertas e serialização explícita de atalhos ARIA no helper.
 
 Fixed:
 - Idade do último fixo visível no HUD.
@@ -28,7 +29,7 @@ Fixed:
 - Versão Android alinhada a `versionCode 100` e `versionName 1.0.0`.
 
 Tests:
-- `npm test`: 122 passados.
+- `npm test`: 123 passados.
 - `npm audit --omit=dev`: 0 vulnerabilidades de produção.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
@@ -62,11 +63,12 @@ Files Modified:
 - `src/core/diagnostico.js`, `src/pages/diagnostico.js`, `src/styles/diagnostico.css` e `test/diagnostico.test.js`.
 - `src/core/localizacao.js` com driver nativo opcional e teste de fonte.
 - `src/core/ciclo-vida.js` com testes de estado e limpeza de listeners.
+- `src/ui/helpers.js` com serialização ARIA explícita e `test/helpers.test.js` cobrindo os atributos.
 - Android/iOS sincronizados com `@capacitor/geolocation@8.2.2` e `@capacitor/app@8.1.1`; permissões Android foreground e descrições iOS atualizadas.
 - A rota `#/diagnostico` e o atalho correspondente foram adicionados ao app.
 
 Blockers:
-- Validação física do diagnóstico, driver foreground e lifecycle em Android, Xiaomi/MIUI/HyperOS e iPhone.
+- Validação física do diagnóstico, driver foreground, lifecycle e acessibilidade em Android/Xiaomi/MIUI/HyperOS e iPhone.
 - Background GPS real, consumo e quota de cache.
 - Assinatura Android/iOS e distribuição.
 
@@ -75,6 +77,7 @@ Next Task:
 - Commit anterior publicado: `bb240e7`; CI `33108661603` passou.
 - Unidade publicada: `2bfd797 feat(v2): observar ciclo de vida mobile`; CI `33110246185` concluído com sucesso.
 - Preview limpo confirmou `FOREGROUND · VISIBILITY API`; a primeira tentativa presa em loading levou à correção não bloqueante de `getRegistration()`. Isso não substitui validação nativa.
+- Unidade atual validada localmente com 123 testes, build web, audit de produção, DOM/foco no preview e APK debug; commit/CI serão registrados após o push.
 
 V2 Completion:
 IN PROGRESS

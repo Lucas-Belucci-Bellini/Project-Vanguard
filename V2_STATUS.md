@@ -7,19 +7,19 @@
 | **Version** | `2.x` em construção; pacote atual `1.0.0` |
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: estado, observabilidade, offline-first e validação mobile |
-| **Current Task** | Validar em aparelhos o driver foreground e o observador de lifecycle; medir consumo antes de decidir background GPS |
-| **Last Completed Task** | Driver `@capacitor/geolocation@8.2.2` e observador `@capacitor/app@8.1.1`, permissões foreground e lifecycle observável no Diagnóstico |
+| **Current Task** | Validar em aparelhos GPS foreground, lifecycle e acessibilidade; medir consumo antes de decidir background GPS |
+| **Last Completed Task** | Hardening da shell: skip link, foco pós-rota, `<main>` semântico, estados ARIA explícitos e teste do helper |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
-| **Next Task** | Executar validação física de foreground/lifecycle em Android, Xiaomi/MIUI/HyperOS e iPhone; somente depois decidir sobre background GPS nativo |
+| **Next Task** | Executar validação física de GPS foreground, lifecycle e acessibilidade em Android, Xiaomi/MIUI/HyperOS e iPhone; somente depois decidir sobre background GPS nativo |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 122 testes aprovados; `node --check public/sw.js`: aprovado |
+| **Tests** | `npm test`: 123 testes aprovados; `node --check public/sw.js`: aprovado; preview DOM e foco validados |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
-| **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
+| **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, simulação, limitações, segurança, memória V2 e skill versionados |
+| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006 e referências WCAG versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `2bfd797 feat(v2): observar ciclo de vida mobile`; CI `33110246185` concluído com sucesso |
+| **Main** | Nova unidade de acessibilidade validada localmente; commit/CI desta continuação serão registrados após o push |
 
 ## Regra de conclusão
 
