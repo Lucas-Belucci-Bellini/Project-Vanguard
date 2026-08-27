@@ -61,9 +61,6 @@ export function exportarRegistroLocal({ trilha = [], waypoints = [], destino = n
   return JSON.stringify(dados, null, 2);
 }
 
-/**
- * Valida e normaliza um arquivo importado. Nunca executa campos do JSON.
- */
 function escaparXml(valor) {
   return String(valor ?? '')
     .replaceAll('&', '&amp;')
@@ -96,6 +93,66 @@ export function exportarRegistroGpx({ trilha = [], waypoints = [], destino = nul
 ${wpts}${wpts && track ? '\n' : ''}${track}
 </gpx>
 `;
+}
+
+function decodificarXml(valor) {
+  return String(valor ?? '')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&apos;', "'")
+    .replaceAll('&amp;', '&');
+}
+
+function atributoXml(tag, nome) {
+  const encontrado = tag.match(new RegExp(`${nome}=["']([^"']+)["']`, 'i'));
+  return encontrado?.[1] ?? null;
+}
+
+const PADROES_CONTEUDO_GPX = {
+  ele: /<ele[^>]*>([\s\S]*?)<\/ele>/i,
+  time: /<time[^>]*>([\s\S]*?)<\/time>/i,
+  name: /<name[^>]*>([\s\S]*?)<\/name>/i,
+};
+
+function conteudoXml(tag, nome) {
+  const encontrado = PADROES_CONTEUDO_GPX[nome]?.exec(tag);
+  return encontrado ? decodificarXml(encontrado[1].trim()) : null;
+}
+
+/**
+ * Importa GPX 1.1 de forma conservadora. Waypoints e pontos de track são
+ * tratados como dados locais; nenhum campo do XML é executado.
+ */
+export function importarRegistroGpx(entrada) {
+  if (typeof entrada !== 'string' || entrada.length > 2_000_000) throw new Error('Arquivo GPX inválido ou acima do limite local.');
+  if (!/<gpx\b/i.test(entrada)) throw new Error('Arquivo GPX sem uma raiz válida.');
+  const trilha = [...entrada.matchAll(/<trkpt\b[^>]*(?:\/>|>[\s\S]*?<\/trkpt>)/gi)].map((encontrado, indice) => {
+    const tag = encontrado[0];
+    const lat = atributoXml(tag, 'lat');
+    const lon = atributoXml(tag, 'lon');
+    const altitude = conteudoXml(tag, 'ele');
+    const time = conteudoXml(tag, 'time');
+    const createdAt = time && Number.isFinite(Date.parse(time)) ? Date.parse(time) : undefined;
+    return normalizarPonto({ lat, lon, altitude: altitude == null ? undefined : Number(altitude), createdAt }, indice, { nomePadrao: 'Ponto da trilha' });
+  });
+  const waypoints = [...entrada.matchAll(/<wpt\b[^>]*(?:\/>|>[\s\S]*?<\/wpt>)/gi)].map((encontrado, indice) => {
+    const tag = encontrado[0];
+    const lat = atributoXml(tag, 'lat');
+    const lon = atributoXml(tag, 'lon');
+    const altitude = conteudoXml(tag, 'ele');
+    const nome = conteudoXml(tag, 'name');
+    return normalizarPonto({ lat, lon, altitude: altitude == null ? undefined : Number(altitude), nome }, indice, { nomePadrao: 'Waypoint' });
+  });
+  if (!trilha.length && !waypoints.length) throw new Error('GPX sem pontos de trilha ou waypoints válidos.');
+  return {
+    schema: REGISTRO_SCHEMA,
+    version: REGISTRO_VERSION,
+    exportadoEm: null,
+    trilha: validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha'),
+    waypoints: validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint'),
+    destino: null,
+  };
 }
 
 export function importarRegistroLocal(entrada) {

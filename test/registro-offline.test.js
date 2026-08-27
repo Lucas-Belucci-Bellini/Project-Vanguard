@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   exportarRegistroLocal,
   exportarRegistroGpx,
+  importarRegistroGpx,
   importarRegistroLocal,
   REGISTRO_SCHEMA,
   REGISTRO_VERSION,
@@ -63,6 +64,29 @@ test('exportarRegistroGpx cria trilha e waypoints com XML escapado', () => {
   assert.match(gpx, /Abrigo &amp; retorno &lt;A&gt;/);
   assert.match(gpx, /<wpt lat="-23\.547" lon="-46\.633"><name>Destino<\/name>/);
   assert.doesNotMatch(gpx, /\\\\n/);
+});
+
+test('importarRegistroGpx normaliza trilha e waypoints sem executar XML', () => {
+  const gpx = `<?xml version="1.0"?><gpx version="1.1">
+    <wpt lat="-23.548" lon="-46.632"><name>Abrigo &amp; retorno</name><ele>740</ele></wpt>
+    <trk><trkseg>
+      <trkpt lat="-23.549" lon="-46.631"><ele>742</ele><time>2023-11-14T22:13:20.001Z</time></trkpt>
+      <trkpt lat="-23.550" lon="-46.630" />
+    </trkseg></trk>
+  </gpx>`;
+  const registro = importarRegistroGpx(gpx);
+  assert.equal(registro.trilha.length, 2);
+  assert.equal(registro.trilha[0].altitude, 742);
+  assert.equal(registro.trilha[0].createdAt, Date.parse('2023-11-14T22:13:20.001Z'));
+  assert.equal(registro.waypoints[0].nome, 'Abrigo & retorno');
+  assert.equal(registro.waypoints[0].altitude, 740);
+  assert.equal(registro.destino, null);
+});
+
+test('importarRegistroGpx rejeita raiz ausente, ausência de pontos e coordenada inválida', () => {
+  assert.throws(() => importarRegistroGpx('<xml />'), /raiz válida/);
+  assert.throws(() => importarRegistroGpx('<gpx version="1.1"><trk /></gpx>'), /sem pontos/);
+  assert.throws(() => importarRegistroGpx('<gpx><wpt lat="-91" lon="0"><name>inválido</name></wpt></gpx>'), /fora dos limites/);
 });
 
 test('exportarRegistroGpx aceita dados vazios sem inventar uma trilha', () => {

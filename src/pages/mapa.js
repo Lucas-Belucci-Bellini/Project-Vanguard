@@ -6,7 +6,7 @@ import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
-import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
+import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const CENTRO_FALLBACK = [-43.21, -22.95];
@@ -92,8 +92,8 @@ export function mapaPage() {
   const offlineClearButton = h('button', { className: 'mapa__offline-clear', type: 'button' }, 'LIMPAR ÁREA PREPARADA');
   const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR JSON');
   const registroGpxButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR GPX');
-  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR JSON');
-  const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json', 'aria-label': 'Importar registro local JSON' });
+  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR JSON/GPX');
+  const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json,application/gpx+xml,.gpx', 'aria-label': 'Importar registro local JSON ou GPX' });
   const registroStatus = h('p', { className: 'mapa__registro-status', role: 'status' }, 'Backup local de rota, pontos e destino; sem sincronização.');
   const selectBase = h('select', { className: 'mapa__select', 'aria-label': 'Base cartográfica' },
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
@@ -345,7 +345,8 @@ export function mapaPage() {
   async function importarRegistro(arquivo) {
     if (!arquivo) return;
     try {
-      const registro = importarRegistroLocal(await arquivo.text());
+      const texto = await arquivo.text();
+      const registro = /\.gpx$/i.test(arquivo.name ?? '') ? importarRegistroGpx(texto) : importarRegistroLocal(texto);
       if (!window.confirm('Substituir a rota, os waypoints e o destino atuais pelo registro importado?')) return;
       trilha = registro.trilha;
       waypoints = registro.waypoints;
