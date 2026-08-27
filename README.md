@@ -22,7 +22,11 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Sobrevivência** | Manual offline versionado com fonte/data de revisão, busca, filtros por tema, abrigo, água, primeiros socorros, sinalização, alimentação e conduta em áreas com possíveis explosivos. |
 | **Mapa de funcionalidades** | Inventário completo da visão do produto, com status, dependências, limites e próximos passos em [`docs/MAPA-DE-FUNCIONALIDADES.md`](docs/MAPA-DE-FUNCIONALIDADES.md). |
 | **Notas de lançamento** | Resumo da futura `v1.0.0`, mudanças desde a `v1.0.0-rc.2`, validações reproduzidas e gates restantes em [`docs/NOTAS-DE-LANCAMENTO-V1.0.0.md`](docs/NOTAS-DE-LANCAMENTO-V1.0.0.md). |
+| **Roteiro e validação** | Roteiro falado, checklist mobile e simulação segura de Socorro em [`docs/ROTEIRO-APRESENTACAO-V1.0.0.md`](docs/ROTEIRO-APRESENTACAO-V1.0.0.md), [`docs/CHECKLIST-MOBILE-V1.0.0.md`](docs/CHECKLIST-MOBILE-V1.0.0.md) e [`docs/SIMULACAO-MODO-SOCORRO.md`](docs/SIMULACAO-MODO-SOCORRO.md). |
 | **Teste de campo** | Procedimento de backup GPX/JSON, teste offline, bateria e preparação para a peregrinação em [`docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md`](docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md). |
+| **Atualização** | Quando houver uma versão nova, o botão **ATUALIZAÇÃO PRONTA** pede confirmação. No PWA, ativa o service worker aguardando; no APK, abre a página oficial e deixa a instalação para a confirmação do sistema. O fluxo completo está em [`docs/ATUALIZACAO-CONFIRMADA.md`](docs/ATUALIZACAO-CONFIRMADA.md). |
+| **Bateria e GPS** | Operação de quatro dias, perfis de localização, medição em campo e limitações de background em [`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](docs/OPERACAO-BATERIA-GPS-4-DIAS.md). |
+| **Tag final** | Comandos seguros para revisar, assinar, verificar e publicar a futura `v1.0.0` em [`docs/COMANDOS-TAG-V1.0.0.md`](docs/COMANDOS-TAG-V1.0.0.md). |
 
 ## Modo offline-first
 
@@ -67,6 +71,7 @@ src/
     contexto.js        detecção por zonas, validade e JSON versionado
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
     registro-offline.js backup JSON e exportação GPX local
+    atualizacao.js     comparação de versões e URL oficial de atualização
     trilha.js          resumo de distância, tempo e velocidade local
     fila-offline.js    fila local para sincronização posterior
   engine/
@@ -95,9 +100,14 @@ docs/
   MAPA-DE-FUNCIONALIDADES.md inventário completo da visão e do estado do produto
   BUILD-MOBILE.md       builds Android/iOS, Capacitor e política de bateria
   MOBILE-E-BATERIA.md   referências de energia da Apple e Android
+  OPERACAO-BATERIA-GPS-4-DIAS.md operação de quatro dias e monitoramento em campo
   REVISAO-INTERFACE-OFFLINE.md roteiro de teste offline e revisão visual
+  ATUALIZACAO-CONFIRMADA.md atualização manual no PWA/APK
   BUILD-VS-RELEASE.md  separação entre compilação, artefato e release
   RELEASE-1.0.0.md     checklist da release candidate e gates finais
+  COMANDOS-TAG-V1.0.0.md comandos para assinatura e publicação futura
+  CHECKLIST-MOBILE-V1.0.0.md validação final em Android/iOS
+  SIMULACAO-MODO-SOCORRO.md simulação sem acionamento real
   FONTES-MODO-MAR-2026-08.md fontes oficiais para o modo Mar
 
 test/                  testes determinísticos do motor
@@ -105,7 +115,7 @@ test/                  testes determinísticos do motor
 
 ## Build, artefato e release
 
-`npm run build` é uma **compilação técnica** e gera `dist/`; `npm run mobile:android:debug` gera um **APK de teste**. Nenhum desses comandos publica uma versão oficial. A release exige tag, notas, checks e decisão explícita de distribuição. O contrato operacional está em [`docs/BUILD-VS-RELEASE.md`](docs/BUILD-VS-RELEASE.md).
+`npm run build` é uma **compilação técnica** e gera `dist/`; `npm run mobile:android:debug` gera um **APK de teste**. Nenhum desses comandos publica uma versão oficial. A release exige tag, notas, checks e decisão explícita de distribuição. O contrato operacional está em [`docs/BUILD-VS-RELEASE.md`](docs/BUILD-VS-RELEASE.md). Para uma versão posterior publicada, o botão de atualização aparece somente após detecção de release oficial ou service worker pendente; ele sempre pede confirmação. O APK não se auto-instala: abre o download oficial e depende do instalador do sistema.
 
 ## Doações e auditoria financeira
 

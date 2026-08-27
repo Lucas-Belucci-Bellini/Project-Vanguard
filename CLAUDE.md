@@ -11,6 +11,7 @@ ecossistema **Projeto Baluarte** — repo irmão, mesmas regras.
 - 👉 [`docs/BALISTICA.md`](docs/BALISTICA.md) — a matemática e o contrato JSON
 - 👉 [`docs/INTEGRACAO-BALUARTE.md`](docs/INTEGRACAO-BALUARTE.md) — como acopla no Baluarte
 - 👉 [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) — **contrato visual**; todo design novo sai daqui
+- 👉 [`.claude/skills/vanguard-field-release-ops/SKILL.md`](.claude/skills/vanguard-field-release-ops/SKILL.md) — fluxo reutilizável de testes, campo, atualização e release
 
 ## A regra mais importante deste repositório
 
@@ -28,7 +29,8 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/styles/` — 1 CSS por tela + tokens em `variables.css`
 - `src/ui/helpers.js` — hyperscript `h()`, **API idêntica** à do Baluarte de propósito
 - `src/core/estado.js` — estado persistido (`vanguard:` no localStorage)
-- `test/` — `node --test`, 65 testes
+- `test/` — `node --test`, testes determinísticos
+- `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
 
 ## Regras do projeto
 

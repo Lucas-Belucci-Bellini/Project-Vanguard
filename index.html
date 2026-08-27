@@ -25,7 +25,11 @@
     <script type="module" src="/src/main.js"></script>
     <script>
       if ('serviceWorker' in navigator && location.protocol === 'https:') {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').then((registration) => {
+          window.__vanguardServiceWorkerRegistration = registration;
+          window.dispatchEvent(new CustomEvent('vanguard:sw-ready', { detail: { registration } }));
+          registration.update().catch(() => {});
+        }).catch(() => {});
       }
     </script>
   </body>

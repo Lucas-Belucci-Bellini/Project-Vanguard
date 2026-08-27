@@ -7,6 +7,7 @@
 
 import { h, empty } from './ui/helpers.js';
 import { estado, CHAVES } from './core/estado.js';
+import { criarControleAtualizacao } from './core/atualizacao-ui.js';
 
 const ROTAS = [
   { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
@@ -69,19 +70,21 @@ function montarShell() {
   addEventListener('offline', atualizarConectividade);
   atualizarConectividade();
 
+  const controleAtualizacao = criarControleAtualizacao();
+
   const header = h('header', { className: 'vg-header' },
     h('div', { className: 'vg-marca' },
       h('span', { className: 'vg-marca__sigla' }, 'V'),
       h('span', null, 'ANGUARD'),
       h('small', null, 'FIELD NAVIGATION')
     ),
-    h('div', { className: 'vg-header__meta' }, status, seletorModo)
+    h('div', { className: 'vg-header__meta' }, status, controleAtualizacao.elemento, seletorModo)
   );
 
   const nav = h('nav', { className: 'vg-abas', 'aria-label': 'Navegação principal' }, abas);
   const main = h('main', { className: 'vg-main', id: 'vg-main' });
   document.body.append(header, main, nav);
-  return { abas, main, gpsStatus, status };
+  return { abas, main, gpsStatus, status, desmontarAtualizacao: controleAtualizacao.desmontar };
 }
 
 function lerHash(bruto) {

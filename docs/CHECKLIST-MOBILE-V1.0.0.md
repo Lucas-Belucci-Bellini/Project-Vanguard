@@ -11,6 +11,7 @@ A validação em Android deve incluir um aparelho padrão (ex: Samsung/Motorola)
 | **Instalação e Permissões** | O aplicativo deve solicitar a permissão de localização apenas quando o usuário ativar o GPS explicitamente. Em caso de recusa, o sistema deve exibir a mensagem "PERMISSÃO NEGADA" sem causar travamentos. |
 | **Ciclo de Vida e Bateria** | O modo "Cidade" deve reduzir a frequência de atualização do GPS, enquanto o modo "Trilha" deve manter a alta precisão durante a gravação. Ao minimizar o aplicativo com uma rota ativa, o sistema operacional (especialmente MIUI/HyperOS) não deve matar o processo imediatamente; se necessário, documentar a exigência de ignorar a otimização de bateria. A renderização do MapLibre deve pausar corretamente em segundo plano. |
 | **Armazenamento e Cache** | Os tiles preparados para uso offline devem persistir após o fechamento e a reabertura do aplicativo. A exportação de JSON e GPX deve salvar os arquivos em um diretório acessível (Downloads ou Documentos). A importação deve conseguir ler os arquivos armazenados no dispositivo. |
+| **Atualização confirmada** | Publicar uma versão de teste posterior, abrir o app conectado e confirmar que o botão **ATUALIZAÇÃO PRONTA** ou **ATUALIZAÇÃO · vX.Y.Z** aparece. Tocar nele deve pedir confirmação; no PWA, ativar o service worker pendente e recarregar. No APK, abrir a página oficial e deixar a instalação para a confirmação nativa. Sem rede, o botão não deve impedir o uso offline. |
 | **Sensores** | A bússola (magnetômetro e giroscópio) deve responder corretamente aos movimentos físicos do aparelho. |
 
 ## 2. iOS (iPhone)
@@ -34,4 +35,4 @@ A validação no iOS exige a compilação do projeto Capacitor no Xcode usando u
 
 ## Critério de Bloqueio
 
-Qualquer falha nos itens de **Ciclo de Vida**, **Modo Offline Real** ou **Idade do Fixo** bloqueia a release `v1.0.0`. Falhas de background no iOS devem ser corrigidas no projeto Capacitor ou documentadas explicitamente como limitações conhecidas no README antes da publicação.
+Qualquer falha nos itens de **Ciclo de Vida**, **Modo Offline Real**, **Idade do Fixo** ou **Atualização confirmada** bloqueia a release `v1.0.0`. Falhas de background no iOS devem ser corrigidas no projeto Capacitor ou documentadas explicitamente como limitações conhecidas no README antes da publicação.

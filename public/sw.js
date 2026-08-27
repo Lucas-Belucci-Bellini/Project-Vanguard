@@ -1,4 +1,4 @@
-const CACHE = 'vanguard-field-shell-v8';
+const CACHE = 'vanguard-field-shell-v9';
 const TILE_CACHE = 'vanguard-field-tiles-v2';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/vanguard.svg'];
 const TILE_HOSTS = new Set([
@@ -63,12 +63,18 @@ async function tileCacheStatus() {
 }
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  /* Em atualizações, aguarda o botão do app enviar SKIP_WAITING. */
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)));
 });
 
 self.addEventListener('message', (event) => {
   const tipo = event.data?.type;
   if (!tipo) return;
+
+  if (tipo === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
 
   if (tipo === 'CACHE_TILES') {
     const urls = allowedTileUrls(Array.isArray(event.data.urls) ? event.data.urls : []);

@@ -11,7 +11,7 @@ A base web do Vanguard foi empacotada com Capacitor e os projetos nativos foram 
 | Android release | Ainda requer assinatura própria, keystore e configuração de publicação. |
 | iPhone/iOS | Projeto Xcode gerado em `ios/`; a compilação final exige macOS, Xcode, CocoaPods quando necessário, conta Apple e assinatura. |
 
-O arquivo `android/local.properties` é específico do ambiente local e não deve ser versionado. O caminho do SDK deve ser configurado em cada máquina de build.
+O arquivo `android/local.properties` é específico do ambiente local e não deve ser versionado. O caminho do SDK deve ser configurado em cada máquina de build. Para a política de atualização após a instalação, consulte [`ATUALIZACAO-CONFIRMADA.md`](./ATUALIZACAO-CONFIRMADA.md).
 
 ## Comandos Android
 
@@ -25,7 +25,7 @@ cd android
 
 O APK de desenvolvimento é criado em `android/app/build/outputs/apk/debug/app-debug.apk`. Ele serve para testes locais e não é um pacote de distribuição para a Play Store.
 
-Para uma versão de distribuição, configurar keystore e assinatura em um ambiente seguro, revisar o `applicationId`, definir versão, habilitar as regras de release e executar `./gradlew bundleRelease` ou `./gradlew assembleRelease`.
+Para uma versão de distribuição, configurar keystore e assinatura em um ambiente seguro, revisar o `applicationId`, manter `versionCode`/`versionName` coerentes, habilitar as regras de release e executar `./gradlew bundleRelease` ou `./gradlew assembleRelease`. Os comandos de revisão, assinatura da tag e publicação estão em [`COMANDOS-TAG-V1.0.0.md`](./COMANDOS-TAG-V1.0.0.md).
 
 ## Comandos iPhone
 
@@ -52,6 +52,10 @@ O app usa perfis adaptativos: consulta pontual, cidade econômica, trilha ativa,
 No iOS nativo, a integração futura deve usar o serviço de localização mais econômico que atenda ao caso, `distanceFilter`, precisão mínima suficiente, pausas automáticas e localização em segundo plano somente quando explicitamente necessária. No Android, o acompanhamento em segundo plano também deve ser opt-in e limitado ao período real da trilha. Em aparelhos Xiaomi, a documentação de configuração de bateria e execução em segundo plano precisa ser apresentada ao usuário sem recomendar desativar proteções do sistema de forma indiscriminada.
 
 No mapa web atual, a tela inicia no perfil econômico de cidade; o perfil de alta precisão só entra quando a pessoa inicia a gravação da rota. Pausar ou limpar a rota retorna ao modo econômico. A vigília de tela é opcional, só aparece durante uma rota ativa e é liberada ao sair dela; ocultar a tela interrompe a atualização visual do mapa. A duração da bateria não pode ser garantida: depende do aparelho, temperatura, recepção GNSS, brilho, tela, mapas, rede e sensores. O iPhone não é automaticamente pior; GPS contínuo, mapa renderizado e localização em segundo plano consomem energia em qualquer plataforma.
+
+## Atualização confirmada
+
+O APK não se auto-instala. Quando uma release posterior estiver disponível, o aplicativo pode abrir a página oficial para download após confirmação do usuário; o instalador do Android continua responsável pela instalação e por suas confirmações. No PWA, um service worker novo fica aguardando até a pessoa confirmar o botão de atualização. O fluxo detalhado está em [`ATUALIZACAO-CONFIRMADA.md`](./ATUALIZACAO-CONFIRMADA.md).
 
 ## Operação offline
 

@@ -1,6 +1,6 @@
 # Vanguard Field v1.0.0 — Notas de lançamento
 
-> **Status:** notas preparadas para a futura versão `v1.0.0`. A tag e a release final ainda não foram criadas. O estado publicado atualmente continua sendo a pré-release `v1.0.0-rc.2`; estas notas descrevem o código mais recente de `main`, no commit `52f13c2`.
+> **Status:** notas preparadas para a futura versão `v1.0.0`. A tag e a release final ainda não foram criadas. O estado publicado atualmente continua sendo a pré-release `v1.0.0-rc.2`; estas notas descrevem o código mais recente de `main`.
 
 ## Resumo
 
@@ -12,7 +12,7 @@ O Vanguard Field é uma aplicação civil, multiuso e offline-first para cidade,
 
 O mapa reúne GPS/GNSS do aparelho, grade MGRS, rumo e distância até um destino, marcação de waypoints e registro local de trilha. Os modos **Cidade / Dia a dia**, **Trilha / Expedição** e **Mar / Referência** adaptam a orientação da interface ao contexto de uso. A precisão permanece aquela informada pelo aparelho; o HUD também mostra a idade do último fixo, atualiza esse dado enquanto a tela está aberta e sinaliza posições antigas como atenção.
 
-A política de bateria mantém o perfil econômico no uso cotidiano. A alta precisão é reservada para gravação ativa de rota ou pedido explícito de posição de emergência, e a opção de manter a tela ativa é voluntária e limitada à rota ativa.
+A política de bateria mantém o perfil econômico no uso cotidiano. A alta precisão é reservada para gravação ativa de rota ou pedido explícito de posição de emergência, e a opção de manter a tela ativa é voluntária e limitada à rota ativa. O guia de campo registra que a frequência efetiva do GPS depende do sistema operacional e não é um intervalo garantido.
 
 ### Offline-first e mapas preparados
 
@@ -38,18 +38,20 @@ A fila offline bloqueia operações que não podem ser simuladas com segurança,
 
 ### Mobile e processo de entrega
 
-Os projetos Android e iOS via Capacitor estão gerados. O Android debug é compilável no ambiente atual. A compilação e assinatura final do iOS exigem macOS, Xcode e conta Apple. O fluxo móvel mantém separados artifacts técnicos, como APK debug e AAB não assinado, de releases publicadas. Um build aprovado ou um artifact baixável não cria uma release por si só.
+Os projetos Android e iOS via Capacitor estão gerados. O Android debug é compilável no ambiente atual e o `versionName` nativo está alinhado a `1.0.0`. A compilação e assinatura final do iOS exigem macOS, Xcode e conta Apple. O fluxo móvel mantém separados artifacts técnicos, como APK debug e AAB não assinado, de releases publicadas. Um build aprovado ou um artifact baixável não cria uma release por si só.
+
+A aplicação também possui atualização confirmada: no PWA, um service worker novo aguarda o usuário tocar em **ATUALIZAÇÃO PRONTA**; no APK, uma release posterior abre a página oficial para download e deixa a instalação sob confirmação do sistema. O botão não baixa APK em silêncio e não bloqueia o uso offline.
 
 ## Validação reproduzida
 
 | Verificação | Resultado |
 |---|---|
-| `npm test` | **107 testes aprovados**, 0 falhas |
+| `npm test` | **112 testes aprovados**, 0 falhas |
 | `npm run build` | Aprovado; bundle web gerado |
 | `node --check public/sw.js` | Aprovado |
 | `npm run mobile:android:debug` | Aprovado; `BUILD SUCCESSFUL` |
 | APK debug | `android/app/build/outputs/apk/debug/app-debug.apk`, aproximadamente 4,4 MB; artifact técnico, não release |
-| CI de `main` | Execução `33032317555` concluída com sucesso no commit `52f13c2` |
+| CI de `main` | A validar novamente após este conjunto de mudanças; as execuções anteriores foram concluídas com sucesso |
 
 ## Limitações e itens fora do escopo da v1.0.0
 
@@ -67,3 +69,7 @@ Antes de criar a tag `v1.0.0`, ainda é necessário validar em aparelhos reais A
 - [`docs/RELEASE-1.0.0.md`](./RELEASE-1.0.0.md) — checklist e gates da release candidate.
 - [`docs/BUILD-VS-RELEASE.md`](./BUILD-VS-RELEASE.md) — distinção entre build, artifact e release.
 - [`docs/MAPA-DE-FUNCIONALIDADES.md`](./MAPA-DE-FUNCIONALIDADES.md) — inventário de escopo, dependências e limitações.
+- [`docs/ATUALIZACAO-CONFIRMADA.md`](./ATUALIZACAO-CONFIRMADA.md) — fluxo de atualização manual do PWA/APK.
+- [`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](./OPERACAO-BATERIA-GPS-4-DIAS.md) — monitoramento de bateria e GPS na caminhada.
+- [`docs/COMANDOS-TAG-V1.0.0.md`](./COMANDOS-TAG-V1.0.0.md) — comandos para assinar e publicar a tag futura.
+- [`.claude/skills/vanguard-field-release-ops/SKILL.md`](../.claude/skills/vanguard-field-release-ops/SKILL.md) — fluxo reutilizável para o Claude Code.
