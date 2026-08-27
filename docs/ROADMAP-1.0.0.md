@@ -1,5 +1,7 @@
 # Project Vanguard — Plano mestre até a 1.0.0
 
+> **Status em 2026-08-27:** a evolução civil/offline-first foi integrada à branch padrão `main` via pull request #2. O branch passou por 86 testes, build web, sintaxe do service worker, preview HTTPS e geração do APK Android debug. A versão declarada do pacote está em `1.0.0`; a tag de release só deve ser criada depois dos gates de dispositivo real, revisão final e confirmação de distribuição.
+
 ## 1. Visão da versão 1.0.0
 
 A versão 1.0.0 do **Vanguard Field** será uma aplicação civil, offline-first e multiplataforma para navegação urbana, caminhadas, expedições, mar e preparação para situações de emergência. O objetivo é transformar o celular em um instrumento de referência local, sem apresentar como nativas capacidades que dependem de rede, fonte oficial, assinatura de dados ou hardware dedicado.
@@ -90,7 +92,7 @@ Executar testes unitários, build web, build Android, abertura no Xcode, teste o
 
 ## 6. Gates de lançamento
 
-A 1.0 não será liberada se houver perda de rota ao recarregar offline, alerta sem fonte/data, transmissão sem confirmação, pedido automático de permissão sensível, cobrança real sem configuração explícita, armazenamento de cartão, build nativo não reproduzível, conteúdo de sobrevivência sem revisão ou linguagem que atribua ao telefone uma capacidade militar inexistente.
+A 1.0 não será liberada se houver perda de rota ao recarregar offline, alerta sem fonte/data, transmissão sem confirmação, pedido automático de permissão sensível, cobrança real sem configuração explícita, armazenamento de cartão, build nativo não reproduzível, conteúdo de sobrevivência sem revisão ou linguagem que atribua ao telefone uma capacidade militar inexistente. No estado atual, os gates automatizados estão verdes; ainda bloqueiam o fechamento final os testes em aparelhos Android/Xiaomi e iPhone reais, a confirmação de operação offline com rede desligada e a assinatura de distribuição.
 
 ## 7. Roadmap pós-1.0
 
