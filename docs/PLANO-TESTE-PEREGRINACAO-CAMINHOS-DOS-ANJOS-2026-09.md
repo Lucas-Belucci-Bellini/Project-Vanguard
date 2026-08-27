@@ -35,11 +35,11 @@ Levar bateria reserva e um meio independente de comunicação. Confirmar com a o
 Usar **Trilha / Expedição** para registrar o caminho. Iniciar a rota somente quando começar o trecho que deve ser registrado, marcar pontos úteis como saída, encontro, pausa e retorno, e pausar a rota durante longas paradas.
 
 **Plano de Bateria:**
-- A alta precisão (intervalo de 3 segundos, GPS contínuo) só é solicitada durante a **gravação ativa** da rota.
-- Ao pausar a rota ou mudar para o modo Cidade, o app retorna ao perfil econômico (intervalo de 15 segundos, precisão normal).
+- A alta precisão, com `maximumAge` de 3 segundos e frequência efetiva definida pelo sistema operacional, só é solicitada durante a **gravação ativa** da rota. Isso não é garantia de um intervalo fixo entre leituras.
+- Ao pausar a rota ou mudar para o modo Cidade, o app retorna ao perfil econômico, com `maximumAge` de 15 segundos e distância mínima configurada; o aparelho ainda pode variar a frequência real.
 - A renderização do mapa é suspensa automaticamente quando o celular é bloqueado ou a tela é trocada.
 - O botão **Manter tela ativa** é voluntário e só fica habilitado com rota ativa. Usá-lo consumirá bateria rapidamente devido ao brilho da tela; prefira bloquear o celular e deixar o GPS gravar em segundo plano (se o sistema operacional permitir).
-- Leve bateria externa (powerbank) suficiente para 4 dias, pois a busca por sinal de celular em áreas rurais gasta mais energia que o próprio GPS.
+- Leve bateria externa dimensionada para os 4 dias, teste o powerbank antes da saída e não trate nenhuma estimativa como garantia: autonomia varia com aparelho, temperatura, brilho, sinal e uso do mapa.
 
 Observar o HUD antes de tomar qualquer decisão: conferir o MGRS, a latitude/longitude, a precisão e a **idade do fixo**. Se a idade indicar um dado antigo, se a precisão estiver indisponível ou se a posição parecer incompatível com o local, parar e confirmar a situação usando a organização, a sinalização, o grupo e outras referências. Uma tela com mapa não confirma sozinha a posição física da pessoa.
 
