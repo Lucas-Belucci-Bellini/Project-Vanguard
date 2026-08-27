@@ -42,3 +42,11 @@ A auditoria encontrou uma lacuna entre o fluxo de texto do Socorro e os download
 O Socorro usa o adaptador para coordenadas e mantém a regra de que compartilhar não confirma entrega. O Mapa usa o mesmo adaptador para JSON e GPX, tentando compartilhamento de arquivos quando `canShare` aceita e usando download local como fallback. Nenhuma permissão nova, transmissão automática ou confirmação de resgate foi adicionada.
 
 A cobertura em `test/compartilhamento.test.js` passou junto com a suíte completa, build web, sintaxe do Service Worker, auditoria de produção, sync Android/iOS e APK debug. O commit funcional `2bb3e74 feat(v2): compartilhar registros no mobile` foi publicado e o CI `33120523569` concluiu com sucesso. O Share Sheet, Files, clipboard e diretório de download ainda precisam de validação em Android comum, Xiaomi/MIUI/HyperOS e iPhone.
+
+## Marco de permissões GPS — 2026-08-27
+
+A auditoria encontrou que o Diagnóstico consultava somente a Permissions API Web, embora o app tenha um bridge nativo Capacitor. `src/platform/permissoes.js` agora lê `checkPermissions()` no Capacitor e `navigator.permissions.query()` na Web, sem executar `requestPermissions()` e sem abrir prompt durante o diagnóstico.
+
+Os estados `CONCEDIDA`, `NEGADA`, `NÃO SOLICITADA`, `INDISPONÍVEL` e `BROWSER DEPENDENT` são preservados. Um erro do bridge ou estado desconhecido não é tratado como permissão concedida. A integração não adiciona background GPS, não altera o Manifest/Info.plist e não substitui a verificação nativa de prompts, Configurações, GPS desligado ou tela bloqueada.
+
+`test/permissoes.test.js` cobre plugin concedido/negado, ausência de request, Permissions API Web, ausência de APIs e falha do bridge. A suíte local chegou a 150 testes aprovados; build web, sintaxe do Service Worker, auditoria de produção, sync Android/iOS e APK debug também passaram.

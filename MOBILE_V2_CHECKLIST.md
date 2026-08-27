@@ -22,6 +22,7 @@
 | MV2-016 | Distribuição | Release assinada | BLOCKED | scripts/documentação, sem credenciais | debug aprovado | keystore, Apple signing e publicação pendentes | `MOBILE_V2_RELEASE.md`, `V2_BLOCKERS.md` |
 | MV2-017 | Compartilhada | Camada de capacidades observáveis | TESTED | `src/core/capacidades.js` + grupo `CAPACIDADES` no Diagnóstico | testes determinísticos de estados e APIs ausentes | Node/CI; hardware, sensor e quota pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0014 |
 | MV2-018 | Android/iOS/PWA | Compartilhamento de texto e JSON/GPX | TESTED | `src/platform/compartilhamento.js`; Socorro e Mapa integrados | Web Share, cancelamento, clipboard, download e APIs ausentes | Node/CI; Share Sheet/Files/download físico pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0015 |
+| MV2-019 | Android/iOS/PWA | Leitura de permissão GPS | TESTED | `src/platform/permissoes.js`; Capacitor `checkPermissions()` e Permissions API Web sem prompt automático | plugin concedido/negado, Web granted/denied/prompt, bridge/API ausentes | Node/CI; prompts nativos e mudanças em Configurações pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0016 |
 
 ## Regra de encerramento
 

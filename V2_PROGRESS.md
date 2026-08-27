@@ -115,3 +115,9 @@ IN PROGRESS
 A nova unidade centraliza em `src/platform/compartilhamento.js` o compartilhamento de texto/coordenadas e de arquivos JSON/GPX. O Socorro usa Web Share ou clipboard; o Mapa tenta Web Share para arquivos e usa download local como fallback. Cancelamento, indisponibilidade e aceitação pelo sistema são estados distintos, e nenhum deles confirma entrega, resgate ou comunicação automática.
 
 A unidade está coberta por `test/compartilhamento.test.js`. A validação local alcançou 145 testes, build web, sintaxe do Service Worker, diff, auditoria de produção, sync Android/iOS e APK debug. O próximo gate é validar Share Sheet, Files, clipboard e diretório de download em aparelhos reais. ADR-0015 registra a decisão.
+
+## Marco Mobile V2 — leitura de permissão GPS — 2026-08-27
+
+`src/platform/permissoes.js` passou a consultar `checkPermissions()` no plugin Capacitor em plataforma nativa e `navigator.permissions.query()` na Web. O Diagnóstico somente lê e exibe o estado; não dispara `requestPermissions()` nem abre prompt automaticamente. A implementação distingue concedida, negada, não solicitada, indisponível e dependência do navegador, sem inferir sinal, precisão ou background GPS.
+
+`test/permissoes.test.js` cobre os estados do plugin, Permissions API Web, ausência de APIs, ausência de request e falha do bridge. A unidade alcançou 150 testes locais, build web, sintaxe do Service Worker, diff, audit de produção, sync Android/iOS e APK debug. ADR-0016 registra a decisão; a validação física dos prompts e das configurações do aparelho permanece pendente.

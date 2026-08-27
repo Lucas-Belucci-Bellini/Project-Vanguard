@@ -36,6 +36,10 @@ A camada `src/core/capacidades.js` classifica somente o que o ambiente expõe, u
 
 `src/platform/compartilhamento.js` centraliza texto e arquivos. O caminho preferencial é Web Share; clipboard é fallback para texto e download local é fallback para JSON/GPX. O resultado `COMPARTILHADO` significa apenas aceitação pelo sistema operacional, enquanto `COPIADO`, `BAIXADO`, `CANCELADO`, `INDISPONÍVEL` e `FALHA` permanecem distinguíveis. Nenhum caminho confirma entrega, contato, resgate ou envio automático.
 
+## D-010 — Diagnóstico lê permissões sem abrir prompt
+
+`src/platform/permissoes.js` consulta `checkPermissions()` no plugin Capacitor em plataforma nativa e `navigator.permissions.query()` na Web. O Diagnóstico apenas observa a permissão atual; a solicitação continua restrita aos fluxos explícitos de uso do GPS, como centralizar, buscar posição, registrar trilha ou preparar Socorro. Ausência de API, estado desconhecido ou erro não são convertidos em permissão concedida.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)
