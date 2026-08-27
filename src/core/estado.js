@@ -59,6 +59,7 @@ export const CHAVES = {
   CONTEXTO: 'contexto',
   ZONAS: 'zonas',
   ALERTA: 'alerta',
+  MAPAS_OFFLINE: 'mapasOffline',
   CONTATOS: 'contatos',
   /* Chaves legadas: mantidas para não quebrar os módulos de cálculo existentes. */
   PECA: 'peca',

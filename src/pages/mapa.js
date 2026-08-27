@@ -420,7 +420,13 @@ export function mapaPage() {
     async function atualizarCacheOffline() {
       try {
         const status = await mensagemOffline('CACHE_STATUS');
-        if (Number(status?.tiles) > 0) offlineStatus.textContent = `${status.tiles} tiles preparados neste aparelho. Prepare novamente ao mudar de área ou base.`;
+        const meta = estado.get(CHAVES.MAPAS_OFFLINE, null);
+        if (Number(status?.tiles) > 0) {
+          const ultima = meta?.preparadoEm ? ` Última preparação: ${new Date(meta.preparadoEm).toLocaleString()}.` : '';
+          offlineStatus.textContent = `${status.tiles} tiles preparados neste aparelho.${ultima} Prepare novamente ao mudar de área ou base.`;
+        } else if (meta?.preparadoEm) {
+          offlineStatus.textContent = `O último registro de preparo é de ${new Date(meta.preparadoEm).toLocaleString()}, mas o cache está vazio; ele pode ter sido limpo pelo sistema. Prepare novamente.`;
+        }
       } catch { /* o preparo continuará disponível quando o worker responder */ }
     }
 
@@ -445,6 +451,22 @@ export function mapaPage() {
       try {
         const resposta = await mensagemOffline('CACHE_TILES', { urls });
         const salvos = Number(resposta?.salvos ?? 0);
+        estado.set(CHAVES.MAPAS_OFFLINE, {
+          schema: 'vanguard-mapas-offline',
+          version: 1,
+          base: baseAtual.id,
+          baseNome: baseAtual.nome,
+          bounds: {
+            west: mapa.getBounds().getWest(),
+            east: mapa.getBounds().getEast(),
+            south: mapa.getBounds().getSouth(),
+            north: mapa.getBounds().getNorth(),
+          },
+          zoom: { atual: mapa.getZoom(), minimo: Math.max(5, Math.floor(mapa.getZoom()) - 1), maximo: Math.min(Number(baseAtual.maxzoom ?? 16), Math.floor(mapa.getZoom()) + 1, 16) },
+          preparadoEm: new Date().toISOString(),
+          urlsSolicitadas: urls.length,
+          tilesSalvos: salvos,
+        });
         offlineStatus.textContent = plano.limitado
           ? `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}; a área foi reduzida ao limite local. Aproxime o mapa e prepare novamente.`
           : `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}. Mova o mapa e prepare outra área se necessário.`;
@@ -458,9 +480,11 @@ export function mapaPage() {
     };
 
     offlineClearButton.onclick = async () => {
+      if (!window.confirm('Limpar todos os mapas offline guardados neste aparelho?')) return;
       offlineClearButton.disabled = true;
       try {
         await mensagemOffline('CLEAR_TILES');
+        estado.remover(CHAVES.MAPAS_OFFLINE);
         offlineStatus.textContent = 'Cache de mapas removido. Prepare novamente antes de sair sem internet.';
       } catch {
         offlineStatus.textContent = 'Não foi possível limpar o cache de mapas agora.';
