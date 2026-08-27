@@ -70,13 +70,17 @@ export const CONTEXTOS = [
 ];
 
 const POR_ID = new Map(CONTEXTOS.map((contexto) => [contexto.id, contexto]));
+export const SCHEMA_ZONAS = 'vanguard-zonas';
+export const VERSAO_ZONAS = 1;
 
 export function contextoPorId(id) {
   return POR_ID.get(id) ?? POR_ID.get('cidade');
 }
 
 export function normalizarZona(zona) {
-  if (!zona || !Number.isFinite(Number(zona.lat)) || !Number.isFinite(Number(zona.lon))) return null;
+  const lat = Number(zona?.lat);
+  const lon = Number(zona?.lon);
+  if (!zona || !Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
   const contexto = POR_ID.has(zona.contexto) ? zona.contexto : 'cidade';
   const raioBruto = Number(zona.raioM);
   if (!Number.isFinite(raioBruto) || raioBruto <= 0) return null;
@@ -85,11 +89,12 @@ export function normalizarZona(zona) {
     id: String(zona.id || `zona-${Date.now()}`),
     nome: String(zona.nome || contextoPorId(contexto).nome).slice(0, 120),
     contexto,
-    lat: Number(zona.lat),
-    lon: Number(zona.lon),
+    lat,
+    lon,
     raioM,
     fonte: String(zona.fonte || 'não informado').slice(0, 160),
     atualizadoEm: zona.atualizadoEm || new Date().toISOString(),
+    validadeEm: zona.validadeEm || null,
     ativo: zona.ativo !== false,
   };
 }
@@ -104,13 +109,53 @@ function distanciaM(a, b) {
   return 2 * raioTerra * Math.atan2(Math.sqrt(seno), Math.sqrt(1 - seno));
 }
 
+export function exportarZonas(zonas = []) {
+  const normalizadas = zonas.map(normalizarZona).filter(Boolean);
+  return JSON.stringify({
+    schema: SCHEMA_ZONAS,
+    version: VERSAO_ZONAS,
+    exportadoEm: new Date().toISOString(),
+    zonas: normalizadas,
+  }, null, 2);
+}
+
+export function importarZonas(texto) {
+  let pacote;
+  try {
+    pacote = JSON.parse(texto);
+  } catch {
+    throw new Error('JSON inválido');
+  }
+  if (!pacote || pacote.schema !== SCHEMA_ZONAS || pacote.version !== VERSAO_ZONAS || !Array.isArray(pacote.zonas)) {
+    throw new Error('arquivo incompatível com o Vanguard Field');
+  }
+  const unicas = new Map();
+  for (const item of pacote.zonas) {
+    const zona = normalizarZona(item);
+    if (zona) unicas.set(zona.id, zona);
+  }
+  return [...unicas.values()];
+}
+
 export function zonasAtivas(zonas = []) {
-  return zonas.map(normalizarZona).filter(Boolean).filter((zona) => zona.ativo && zona.raioM > 0);
+  const agora = Date.now();
+  return zonas.map(normalizarZona).filter(Boolean).filter((zona) => {
+    if (!zona.ativo || zona.raioM <= 0) return false;
+    if (!zona.validadeEm) return true;
+    const validade = Date.parse(zona.validadeEm);
+    return Number.isFinite(validade) && validade >= agora;
+  });
+}
+
+function posicaoValida(posicao) {
+  const lat = Number(posicao?.lat);
+  const lon = Number(posicao?.lon);
+  return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 }
 
 export function detectarContexto(posicao, zonas = [], padrao = 'cidade') {
   const base = contextoPorId(padrao);
-  if (!posicao) return { contexto: base, zona: null, distanciaM: null, confianca: 'sem posição' };
+  if (!posicaoValida(posicao)) return { contexto: base, zona: null, distanciaM: null, confianca: 'sem posição válida' };
   const candidatas = zonasAtivas(zonas)
     .map((zona) => ({ zona, distanciaM: distanciaM(posicao, zona) }))
     .filter(({ zona, distanciaM: distancia }) => distancia <= zona.raioM)

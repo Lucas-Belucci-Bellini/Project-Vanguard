@@ -10,7 +10,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   root: '.',
   publicDir: 'public',
-  server: { port: 5174, host: true, open: false, strictPort: false },
+  server: { port: 5174, host: true, open: false, strictPort: false, allowedHosts: ['localhost', '.manus.computer'] },
   build: {
     outDir: 'dist',
     target: 'es2022',

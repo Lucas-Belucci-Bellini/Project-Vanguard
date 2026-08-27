@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { contextoPorId, detectarContexto, normalizarZona, zonasAtivas } from '../src/core/contexto.js';
+import { contextoPorId, detectarContexto, exportarZonas, importarZonas, normalizarZona, zonasAtivas } from '../src/core/contexto.js';
 
 test('normalizarZona exige coordenadas, limita o raio e preserva a fonte', () => {
   const zona = normalizarZona({
@@ -17,6 +17,13 @@ test('normalizarZona exige coordenadas, limita o raio e preserva a fonte', () =>
   assert.equal(zona.raioM, 100000);
   assert.equal(zona.fonte, 'fonte oficial · 2026-08-26');
   assert.equal(normalizarZona({ lat: 'não', lon: 1 }), null);
+});
+
+test('normalizarZona recusa coordenadas fora do planeta e zonas expiradas não ficam ativas', () => {
+  assert.equal(normalizarZona({ lat: 91, lon: 0, raioM: 100, fonte: 'fonte' }), null);
+  assert.equal(normalizarZona({ lat: 0, lon: 181, raioM: 100, fonte: 'fonte' }), null);
+  const vencida = normalizarZona({ id: 'vencida', lat: 0, lon: 0, raioM: 100, fonte: 'fonte', validadeEm: '2020-01-01T00:00:00.000Z' });
+  assert.deepEqual(zonasAtivas([vencida]), []);
 });
 
 test('detectarContexto ativa uma zona crítica somente quando a posição está dentro do raio', () => {
@@ -37,4 +44,19 @@ test('zonasAtivas descarta zonas desativadas e raios inválidos', () => {
   ]);
   assert.deepEqual(ativas.map((zona) => zona.id), ['ok']);
   assert.equal(contextoPorId('inexistente').id, 'cidade');
+});
+
+test('detectarContexto mantém o padrão quando a posição não é válida', () => {
+  const resultado = detectarContexto({ lat: 'sem GPS', lon: 0 }, [], 'expedicao');
+  assert.equal(resultado.contexto.id, 'expedicao');
+  assert.equal(resultado.confianca, 'sem posição válida');
+});
+
+test('exportarZonas e importarZonas usam schema versionado e deduplicam por id', () => {
+  const pacote = exportarZonas([{ id: 'z1', lat: 1, lon: 2, raioM: 100, contexto: 'mar', fonte: 'CHM' }]);
+  const importadas = importarZonas(pacote);
+  assert.equal(importadas.length, 1);
+  assert.equal(importadas[0].id, 'z1');
+  assert.throws(() => importarZonas('{"schema":"outro","version":1,"zonas":[]}'), /incompatível/);
+  assert.throws(() => importarZonas('não json'), /JSON inválido/);
 });

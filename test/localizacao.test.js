@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizarPosicao, precisaoLabel, velocidadeLabel } from '../src/core/localizacao.js';
+import { normalizarPosicao, precisaoLabel, velocidadeLabel, opcoesLocalizacao, distanciaLocalM } from '../src/core/localizacao.js';
 
 test('normalizarPosicao converte a leitura nativa para o contrato do app', () => {
   const atual = normalizarPosicao({
@@ -39,4 +39,19 @@ test('formatadores não inventam precisão ou velocidade quando faltam dados', (
   assert.equal(precisaoLabel(null), 'precisão indisponível');
   assert.equal(velocidadeLabel(null), '—');
   assert.equal(velocidadeLabel(2), '7.2 km/h');
+});
+
+test('política de localização reserva alta precisão para trilha e emergência', () => {
+  assert.equal(opcoesLocalizacao('cidade').enableHighAccuracy, false);
+  assert.equal(opcoesLocalizacao('cidade').minDistanceM, 12);
+  assert.equal(opcoesLocalizacao('bussola').enableHighAccuracy, false);
+  assert.equal(opcoesLocalizacao('trilha').enableHighAccuracy, true);
+  assert.equal(opcoesLocalizacao('emergencia').maximumAge, 0);
+  assert.equal(opcoesLocalizacao('desconhecido').enableHighAccuracy, false);
+});
+
+test('distanciaLocalM mede deslocamento e rejeita posições inválidas', () => {
+  const distancia = distanciaLocalM({ lat: 0, lon: 0 }, { lat: 0, lon: 0.001 });
+  assert.ok(distancia > 100 && distancia < 120);
+  assert.equal(distanciaLocalM(null, { lat: 0, lon: 0 }), Infinity);
 });

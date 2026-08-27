@@ -8,7 +8,7 @@
 import { h } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { solicitarPosicao, precisaoLabel } from '../core/localizacao.js';
-import { CONTEXTOS, contextoPorId, detectarContexto, normalizarZona, zonasAtivas } from '../core/contexto.js';
+import { CONTEXTOS, contextoPorId, detectarContexto, exportarZonas, importarZonas, normalizarZona, zonasAtivas } from '../core/contexto.js';
 import { EQUIPAMENTOS_EXTERNOS } from '../core/equipamentos.js';
 import '../styles/contexto.css';
 
@@ -47,6 +47,8 @@ export function contextoPage() {
     : 'Sem fixo GPS local. O contexto escolhido continua salvo no aparelho.');
   const itens = h('div', { className: 'contexto__lista' });
   const zonaLista = h('div', { className: 'contexto__zonas-lista' });
+  const zonaArquivo = h('input', { className: 'contexto__file', type: 'file', accept: 'application/json,.json', 'aria-label': 'Importar zonas JSON' });
+  const zonaDadosFeedback = h('p', { className: 'contexto__form-feedback', role: 'status' });
 
   function renderContexto() {
     contextoAtual = contextoPorId(estado.get(CHAVES.CONTEXTO, PADRAO));
@@ -82,6 +84,36 @@ export function contextoPage() {
       } }, '×'))));
   }
 
+  const exportarButton = h('button', { className: 'contexto__secondary', type: 'button' }, 'EXPORTAR ZONAS JSON');
+  exportarButton.onclick = () => {
+    const blob = new Blob([exportarZonas(zonas)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `vanguard-zonas-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    zonaDadosFeedback.textContent = `${zonas.length} zona(s) exportada(s). Guarde o arquivo em local seguro.`;
+  };
+
+  zonaArquivo.onchange = async () => {
+    const arquivo = zonaArquivo.files?.[0];
+    if (!arquivo) return;
+    try {
+      const importadas = importarZonas(await arquivo.text());
+      const porId = new Map(zonas.map((zona) => [zona.id, zona]));
+      importadas.forEach((zona) => porId.set(zona.id, zona));
+      zonas = [...porId.values()];
+      estado.set(CHAVES.ZONAS, zonas);
+      renderZonas();
+      zonaDadosFeedback.textContent = `${importadas.length} zona(s) importada(s) ou atualizada(s). O arquivo foi apenas validado e salvo localmente.`;
+    } catch (erro) {
+      zonaDadosFeedback.textContent = `Importação recusada: ${erro.message}.`;
+    } finally {
+      zonaArquivo.value = '';
+    }
+  };
+
   const gpsButton = h('button', { className: 'contexto__primary', type: 'button' }, 'ATUALIZAR GPS E DETECTAR');
   gpsButton.onclick = () => {
     gpsButton.disabled = true;
@@ -108,12 +140,13 @@ export function contextoPage() {
     });
   };
 
-  const zonaNome = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Nome da zona', ariaLabel: 'Nome da zona' });
-  const zonaLat = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Latitude', ariaLabel: 'Latitude da zona' });
-  const zonaLon = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Longitude', ariaLabel: 'Longitude da zona' });
-  const zonaRaio = h('input', { className: 'contexto__input', type: 'number', min: '50', max: '100000', step: '50', placeholder: 'Raio em metros', ariaLabel: 'Raio em metros' });
-  const zonaFonte = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Fonte/data do aviso', ariaLabel: 'Fonte e data do aviso' });
-  const zonaTipo = h('select', { className: 'contexto__input', ariaLabel: 'Tipo de contexto da zona' },
+  const zonaNome = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Nome da zona', 'aria-label': 'Nome da zona' });
+  const zonaLat = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Latitude', 'aria-label': 'Latitude da zona' });
+  const zonaLon = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Longitude', 'aria-label': 'Longitude da zona' });
+  const zonaRaio = h('input', { className: 'contexto__input', type: 'number', min: '50', max: '100000', step: '50', placeholder: 'Raio em metros', 'aria-label': 'Raio em metros' });
+  const zonaFonte = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Fonte/data do aviso', 'aria-label': 'Fonte e data do aviso' });
+  const zonaValidade = h('input', { className: 'contexto__input', type: 'date', 'aria-label': 'Validade da zona, opcional' });
+  const zonaTipo = h('select', { className: 'contexto__input', 'aria-label': 'Tipo de contexto da zona' },
     ...CONTEXTOS.map((item) => h('option', { value: item.id }, item.nome)));
   const zonaFeedback = h('p', { className: 'contexto__form-feedback', role: 'status' });
   const salvarZona = h('button', { className: 'contexto__secondary', type: 'button' }, 'SALVAR ZONA LOCAL');
@@ -126,6 +159,7 @@ export function contextoPage() {
       lon: zonaLon.value,
       raioM: zonaRaio.value,
       fonte: zonaFonte.value.trim(),
+      validadeEm: zonaValidade.value ? new Date(`${zonaValidade.value}T23:59:59`).toISOString() : null,
       atualizadoEm: new Date().toISOString(),
     });
     if (!zona || !zona.nome || zona.raioM <= 0 || !zona.fonte) {
@@ -139,7 +173,8 @@ export function contextoPage() {
     zonaLon.value = '';
     zonaRaio.value = '';
     zonaFonte.value = '';
-    zonaFeedback.textContent = 'Zona salva no aparelho. Ela só ativará o modo quando o GPS entrar no raio informado.';
+    zonaValidade.value = '';
+    zonaFeedback.textContent = 'Zona salva no aparelho. Ela só ativará o modo quando o GPS entrar no raio informado e até a validade definida.';
     renderZonas();
   };
 
@@ -158,7 +193,9 @@ export function contextoPage() {
     h('p', null, 'Cadastre apenas áreas verificadas por uma fonte responsável. O app usa o ponto e o raio como aviso, não como detecção de ameaça.'),
     h('div', { className: 'contexto__form' }, zonaNome, zonaTipo,
       h('div', { className: 'contexto__form-grid' }, zonaLat, zonaLon, zonaRaio),
-      zonaFonte, salvarZona, zonaFeedback),
+      zonaFonte, zonaValidade, salvarZona, zonaFeedback),
+    h('div', { className: 'contexto__data-actions' }, exportarButton, zonaArquivo),
+    zonaDadosFeedback,
     zonaLista);
 
   const raizConteudo = h('div', { className: 'contexto__wrap' },

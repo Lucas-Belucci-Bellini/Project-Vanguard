@@ -3,6 +3,7 @@ import { h, empty, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { solicitarPosicao, precisaoLabel } from '../core/localizacao.js';
 import { latLonParaMGRS } from '../engine/mgrs.js';
+import { prepararMensagemExterna } from '../core/equipamentos.js';
 
 function coordenadasDa(posicao) {
   if (!posicao) return null;
@@ -62,8 +63,11 @@ export function socorroPage() {
           h('strong', null, 'ALERTA PREPARADO NO APARELHO'),
           h('span', { className: 'socorro__alert-time' }, new Date(alerta.createdAt).toLocaleTimeString())
         ),
-        h('p', null, 'Isto ainda não avisou uma equipe. Escolha um canal de comunicação e confirme o destinatário antes de enviar.'),
+        h('p', null, alerta.message?.estado === 'compartilhada'
+          ? 'O sistema operacional abriu o compartilhamento. Isso não confirma entrega nem acionamento de equipe.'
+          : 'Isto ainda não avisou uma equipe. Escolha um canal de comunicação e confirme o destinatário antes de enviar.'),
         h('div', { className: 'socorro__alert-actions' },
+          h('span', { className: 'socorro__message-state' }, alerta.message?.estado === 'compartilhada' ? 'PACOTE COMPARTILHADO PELO SISTEMA' : 'PACOTE PREPARADO LOCALMENTE'),
           h('button', { className: 'socorro__share-button', type: 'button', onclick: compartilhar }, 'COMPARTILHAR COORDENADAS'),
           h('button', { className: 'socorro__cancel-button', type: 'button', onclick: () => { alerta = null; estado.remover(CHAVES.ALERTA); renderAlerta(); feedback.textContent = 'Registro local cancelado. Nenhuma mensagem foi enviada.'; } }, 'CANCELAR')
         )
@@ -76,7 +80,12 @@ export function socorroPage() {
       feedback.textContent = 'Obtenha uma posição primeiro. Sem coordenadas, não prepare um alerta de localização.';
       return;
     }
-    alerta = { createdAt: Date.now(), status: 'preparado', position: posicao };
+    const pacote = prepararMensagemExterna({ posicao, tipo: 'sos', texto: textoCoordenadas(posicao) });
+    if (!pacote) {
+      feedback.textContent = 'Não foi possível validar a posição para preparar o pacote local.';
+      return;
+    }
+    alerta = { createdAt: Date.now(), status: 'preparado', position: posicao, message: pacote };
     estado.set(CHAVES.ALERTA, alerta);
     feedback.textContent = 'Registro criado localmente. Nenhuma equipe foi contatada.';
     renderAlerta();
@@ -88,10 +97,16 @@ export function socorroPage() {
     try {
       if (navigator.share) {
         await navigator.share({ title: 'Coordenadas Vanguard Field', text: texto });
-        feedback.textContent = 'Compartilhamento aberto. Confirme o contato ou canal no aparelho.';
+        alerta = { ...alerta, status: 'compartilhado', message: { ...alerta.message, estado: 'compartilhada', confirmadoPor: 'sistema operacional' } };
+        estado.set(CHAVES.ALERTA, alerta);
+        feedback.textContent = 'Compartilhamento aberto. Confirme o contato ou canal no aparelho; a entrega não foi confirmada pelo Vanguard.';
+        renderAlerta();
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(texto);
-        feedback.textContent = 'Coordenadas copiadas. Cole em uma mensagem, rádio digital ou comunicador compatível.';
+        alerta = { ...alerta, status: 'compartilhado', message: { ...alerta.message, estado: 'compartilhada', confirmadoPor: 'área de transferência' } };
+        estado.set(CHAVES.ALERTA, alerta);
+        feedback.textContent = 'Coordenadas copiadas. Cole em uma mensagem, rádio digital ou comunicador compatível; a entrega não foi confirmada pelo Vanguard.';
+        renderAlerta();
       } else {
         feedback.textContent = texto;
       }

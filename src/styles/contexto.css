@@ -36,6 +36,9 @@
 .contexto__input::placeholder { color: var(--color-text-muted); }
 .contexto__form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .contexto__form-feedback { min-height: 18px; margin: 0; color: var(--color-ambar) !important; font-size: 10px; }
+.contexto__data-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.contexto__file { width: 100%; min-height: 36px; padding: 8px; color: var(--color-text-muted); background: var(--color-surface); border: var(--border-base); font: inherit; font-size: 9px; }
+.contexto__file::file-selector-button { min-height: 24px; margin-right: 8px; padding: 4px 6px; color: var(--color-text-secondary); background: var(--color-panel); border: var(--border-base); font: inherit; font-size: 8px; }
 .contexto__zonas-lista { display: grid; gap: 8px; margin-top: 18px; }
 .contexto__zona { display: flex; align-items: center; gap: 9px; padding: 9px; background: var(--color-surface); border: var(--border-base); }
 .contexto__zona-dot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; }
@@ -67,4 +70,5 @@
   .contexto__lista { grid-template-columns: 1fr; }
   .contexto__equip-list { grid-template-columns: 1fr; }
   .contexto__form-grid { grid-template-columns: 1fr; }
+  .contexto__data-actions { grid-template-columns: 1fr; }
 }
