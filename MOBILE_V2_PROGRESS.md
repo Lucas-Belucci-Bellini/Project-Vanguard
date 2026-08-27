@@ -100,3 +100,9 @@ O Mapa foi integrado ao classificador, e `test/registro-arquivo.test.js` adicion
 Foi esclarecido que, quando os mapas/terrenos do Arma 3 ainda não estavam disponíveis, o fluxo de construção do Claude Code colocou provisoriamente uma API de imagens de satélite do mundo real na camada cartográfica. Isso foi uma contingência técnica do processo de construção, não uma solicitação do usuário e não representava mapa ou terreno do jogo. O mapa real pertence ao contexto civil do Vanguard Field; os terrenos do Arma 3 pertencem à base virtual própria da wiki/ambiente de testes.
 
 A política agora deixa explícito que os módulos balísticos foram criados somente para simulação e testes no videogame Arma 3, nunca para ambientes reais. A separação foi registrada em `SECURITY.md`, `README.md`, `CLAUDE.md`, `V2_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_DECISIONS.md`, `V2_ARCHITECTURE_MAP.md`, `docs/BALISTICA.md`, `docs/INTEGRACAO-BALUARTE.md` e no novo ADR-0023.
+
+## Marco de configuração pública compartilhada — 2026-08-27
+
+A auditoria identificou que identidade, versão e URLs oficiais de atualização estavam duplicadas entre o módulo de atualização e o diagnóstico. Foi criado `src/core/configuracao.js`, sem segredos e com objetos imutáveis para nome, application ID, versão, repositório e URLs oficiais. `src/core/atualizacao.js` mantém suas exportações públicas por compatibilidade, mas passa a consumir o contrato central; o diagnóstico também usa o mesmo nome e versão.
+
+`test/configuracao.test.js` cobre conteúdo, imutabilidade, ausência de campos de segredo e compatibilidade das URLs. A suíte local passou a 168 testes. O ADR-0024 documenta que package version, configuração nativa, signing e release continuam gates separados.

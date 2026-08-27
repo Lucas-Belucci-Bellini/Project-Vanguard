@@ -4,16 +4,19 @@
  * release e deixa o instalador do sistema pedir confirmação ao usuário.
  */
 
-export const VERSAO_ATUAL = '1.0.0';
-export const URL_RELEASES = 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases';
-export const URL_RELEASE_MAIS_RECENTE = 'https://api.github.com/repos/Lucas-Belucci-Bellini/Project-Vanguard/releases/latest';
-const CAMINHO_REPOSITORIO_OFICIAL = '/Lucas-Belucci-Bellini/Project-Vanguard/';
+import { CONFIGURACAO_APLICATIVO, CONFIGURACAO_ATUALIZACAO } from './configuracao.js';
+
+export const VERSAO_ATUAL = CONFIGURACAO_APLICATIVO.versao;
+export const URL_RELEASES = CONFIGURACAO_ATUALIZACAO.urlReleases;
+export const URL_RELEASE_MAIS_RECENTE = CONFIGURACAO_ATUALIZACAO.urlReleaseMaisRecente;
+const ORIGEM_GITHUB = new URL(CONFIGURACAO_APLICATIVO.urlRepositorio);
+const CAMINHO_REPOSITORIO_OFICIAL = `${ORIGEM_GITHUB.pathname}/`;
 
 function urlOficial(url) {
   if (typeof url !== 'string') return null;
   try {
     const candidata = new URL(url);
-    if (candidata.protocol !== 'https:' || candidata.origin !== 'https://github.com' || !candidata.pathname.startsWith(CAMINHO_REPOSITORIO_OFICIAL)) return null;
+    if (candidata.protocol !== 'https:' || candidata.origin !== ORIGEM_GITHUB.origin || !candidata.pathname.startsWith(CAMINHO_REPOSITORIO_OFICIAL)) return null;
     return candidata.toString();
   } catch {
     return null;

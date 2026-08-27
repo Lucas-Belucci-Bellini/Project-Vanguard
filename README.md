@@ -79,6 +79,7 @@ src/
     contexto.js        detecção por zonas, validade e JSON versionado
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
     registro-offline.js backup JSON e exportação GPX local
+    configuracao.js    identidade pública e URLs oficiais sem segredos
     atualizacao.js     comparação de versões e URL oficial de atualização
     diagnostico.js     estado local de versão, rede, GPS, cache e bateria
     trilha.js          resumo de distância, tempo e velocidade local

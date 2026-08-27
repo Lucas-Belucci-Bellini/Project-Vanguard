@@ -1,7 +1,7 @@
 import '../styles/diagnostico.css';
 import { h } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
-import { VERSAO_ATUAL } from '../core/atualizacao.js';
+import { CONFIGURACAO_APLICATIVO } from '../core/configuracao.js';
 import { desempenhoResumo, diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
 import { fonteLocalizacao } from '../core/localizacao.js';
 import { detectarCapacidades } from '../core/capacidades.js';
@@ -85,7 +85,7 @@ export function diagnosticoPage() {
       const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration().catch(() => null) : null;
       bateria = await bateriaAtual();
       const dados = diagnosticoResumo({
-        versao: `Vanguard Field ${VERSAO_ATUAL}`,
+        versao: `${CONFIGURACAO_APLICATIVO.nome} ${CONFIGURACAO_APLICATIVO.versao}`,
         plataforma: plataformaLabel(),
         rede: navigator.onLine !== false,
         posicao,

@@ -80,3 +80,10 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Push:** `origin/main` atualizado com sucesso; a entrada complementar deste log será publicada após a confirmação do CI.
 - **Arquivos centrais:** `SECURITY.md`, `README.md`, `CLAUDE.md`, `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`, `docs/adr/ADR-0023-separacao-mapas-real-e-arma3.md` e memórias V2/Omega.
 - **Limite:** nenhuma camada de mapa, provedor ou módulo balístico foi alterada; esta rodada apenas corrigiu a descrição e a separação de contexto.
+
+## 2026-08-27 — unidade nova: configuração pública compartilhada
+
+- **Escopo:** `src/core/configuracao.js`, `src/core/atualizacao.js`, `src/pages/diagnostico.js`, `test/configuracao.test.js` e ADR-0024.
+- **Comportamento:** identidade pública, versão e URLs oficiais ficam em contrato imutável sem segredos; atualização preserva suas exportações e allowlist HTTPS; diagnóstico usa o mesmo nome/versão.
+- **`npm test`:** 168 aprovados, 0 falhas.
+- **Limite:** `package.json`, `capacitor.config.json`, versionCode/versionName, signing, providers de mapa e release permanecem gates separados; nenhuma instalação ou distribuição foi declarada.
