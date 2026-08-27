@@ -10,6 +10,7 @@ import { resumoTrilha } from '../core/trilha.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
+import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const CENTRO_FALLBACK = [-43.21, -22.95];
@@ -349,31 +350,41 @@ export function mapaPage() {
     atualizarMarcadores();
   }
 
-  function exportarRegistro() {
+  function textoResultadoCompartilhamento(resultado, tipo) {
+    const prefixo = tipo === 'JSON'
+      ? `${trilha.length} pontos de trilha, ${waypoints.length} waypoints e ${destino ? '1 destino' : 'nenhum destino'}`
+      : `${trilha.length} pontos de trilha e ${waypoints.length + (destino ? 1 : 0)} waypoints`;
+    if (resultado.estado === ESTADOS_COMPARTILHAMENTO.COMPARTILHADO) return `${prefixo} compartilhados pelo sistema. Confirme o destino no aparelho.`;
+    if (resultado.estado === ESTADOS_COMPARTILHAMENTO.BAIXADO) return `${prefixo} disponibilizados para download local. Confirme onde o aparelho salvou o arquivo.`;
+    if (resultado.estado === ESTADOS_COMPARTILHAMENTO.CANCELADO) return 'Compartilhamento cancelado. Nenhum arquivo foi confirmado como enviado.';
+    return `${resultado.detalhe} O registro continua somente no aparelho.`;
+  }
+
+  async function exportarRegistro() {
     try {
       const conteudo = exportarRegistroLocal({ trilha, waypoints, destino });
-      const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/json;charset=utf-8' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `vanguard-registro-${new Date().toISOString().slice(0, 10)}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
-      registroStatus.textContent = `${trilha.length} pontos de trilha, ${waypoints.length} waypoints e ${destino ? '1 destino' : 'nenhum destino'} exportados para este aparelho.`;
+      const resultado = await compartilharArquivo({
+        blob: new Blob([conteudo], { type: 'application/json;charset=utf-8' }),
+        fileName: `vanguard-registro-${new Date().toISOString().slice(0, 10)}.json`,
+        title: 'Registro local Vanguard Field',
+        texto: 'Backup local de navegação Vanguard Field.',
+      });
+      registroStatus.textContent = textoResultadoCompartilhamento(resultado, 'JSON');
     } catch (erro) {
       registroStatus.textContent = erro?.message ?? 'Não foi possível exportar o registro local.';
     }
   }
 
-  async   function exportarRegistroGpxLocal() {
+  async function exportarRegistroGpxLocal() {
     try {
       const conteudo = exportarRegistroGpx({ trilha, waypoints, destino });
-      const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/gpx+xml;charset=utf-8' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `vanguard-trilha-${new Date().toISOString().slice(0, 10)}.gpx`;
-      link.click();
-      URL.revokeObjectURL(url);
-      registroStatus.textContent = `${trilha.length} pontos de trilha e ${waypoints.length + (destino ? 1 : 0)} waypoints exportados em GPX para este aparelho.`;
+      const resultado = await compartilharArquivo({
+        blob: new Blob([conteudo], { type: 'application/gpx+xml;charset=utf-8' }),
+        fileName: `vanguard-trilha-${new Date().toISOString().slice(0, 10)}.gpx`,
+        title: 'Trilha Vanguard Field',
+        texto: 'Backup GPX local de navegação Vanguard Field.',
+      });
+      registroStatus.textContent = textoResultadoCompartilhamento(resultado, 'GPX');
     } catch (erro) {
       registroStatus.textContent = erro?.message ?? 'Não foi possível exportar o GPX local.';
     }

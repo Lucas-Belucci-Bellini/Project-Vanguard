@@ -4,6 +4,7 @@ import { estado, CHAVES } from '../core/estado.js';
 import { solicitarPosicao, precisaoLabel } from '../core/localizacao.js';
 import { latLonParaMGRS } from '../engine/mgrs.js';
 import { prepararMensagemExterna } from '../core/equipamentos.js';
+import { compartilharTexto, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 
 function coordenadasDa(posicao) {
   if (!posicao) return null;
@@ -94,25 +95,23 @@ export function socorroPage() {
   async function compartilhar() {
     if (!alerta?.position) return;
     const texto = textoCoordenadas(alerta.position);
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Coordenadas Vanguard Field', text: texto });
-        alerta = { ...alerta, status: 'compartilhado', message: { ...alerta.message, estado: 'compartilhada', confirmadoPor: 'sistema operacional' } };
-        estado.set(CHAVES.ALERTA, alerta);
-        feedback.textContent = 'Compartilhamento aberto. Confirme o contato ou canal no aparelho; a entrega não foi confirmada pelo Vanguard.';
-        renderAlerta();
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(texto);
-        alerta = { ...alerta, status: 'compartilhado', message: { ...alerta.message, estado: 'compartilhada', confirmadoPor: 'área de transferência' } };
-        estado.set(CHAVES.ALERTA, alerta);
-        feedback.textContent = 'Coordenadas copiadas. Cole em uma mensagem, rádio digital ou comunicador compatível; a entrega não foi confirmada pelo Vanguard.';
-        renderAlerta();
-      } else {
-        feedback.textContent = texto;
-      }
-    } catch (erro) {
-      if (erro?.name !== 'AbortError') feedback.textContent = 'O compartilhamento foi bloqueado. Use as coordenadas exibidas e outro canal.';
+    const resultado = await compartilharTexto({
+      title: 'Coordenadas Vanguard Field',
+      texto,
+      navigatorApi: navigator,
+    });
+    if (resultado.estado === ESTADOS_COMPARTILHAMENTO.COMPARTILHADO || resultado.estado === ESTADOS_COMPARTILHAMENTO.COPIADO) {
+      alerta = { ...alerta, status: 'compartilhado', message: { ...alerta.message, estado: 'compartilhada', confirmadoPor: resultado.canal } };
+      estado.set(CHAVES.ALERTA, alerta);
+      feedback.textContent = resultado.estado === ESTADOS_COMPARTILHAMENTO.COMPARTILHADO
+        ? 'Compartilhamento aberto. Confirme o contato ou canal no aparelho; a entrega não foi confirmada pelo Vanguard.'
+        : 'Coordenadas copiadas. Cole em uma mensagem, rádio digital ou comunicador compatível; a entrega não foi confirmada pelo Vanguard.';
+      renderAlerta();
+      return;
     }
+    feedback.textContent = resultado.estado === ESTADOS_COMPARTILHAMENTO.CANCELADO
+      ? 'Compartilhamento cancelado. Nenhuma mensagem foi enviada pelo Vanguard.'
+      : `${resultado.detalhe} Coordenadas: ${texto}`;
   }
 
   localAction.onclick = () => {
