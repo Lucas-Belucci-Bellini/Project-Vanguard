@@ -4,7 +4,7 @@
 
 A avaliação local da Home agora classifica como `atencao` uma posição geograficamente válida sem `createdAt`/`timestamp`, com timestamp zero, futuro ou referência temporal inválida. Somente um fixo positivo, não futuro e com no máximo 24 horas contribui para liberar a base local. A comunicação de emergência continua em atenção: GPS não transmite SOS sozinho.
 
-Evidência local: `npm test` com 130 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS, APK debug e preview `#/inicio` com cartão `ANTES DE SAIR` em `2/5` itens conferidos. Decisão em `ADR-0010-prontidao-offline-frescor.md`; validação em `VALIDACAO-PRONTIDAO-OFFLINE-PREVIEW-2026-08.md`.
+Evidência local: `npm test` com 130 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS, APK debug e preview `#/inicio` com cartão `ANTES DE SAIR` em `2/5` itens conferidos. Decisão em `ADR-0010-prontidao-offline-frescor.md`; validação em `VALIDACAO-PRONTIDAO-OFFLINE-PREVIEW-2026-08.md`. Publicado em `main` como `cc076bb fix(v2): exigir frescor na prontidao offline`; CI `33116563282` concluído com sucesso.
 
 ## 2026-08-27 — Deduplicação do render do Mapa
 

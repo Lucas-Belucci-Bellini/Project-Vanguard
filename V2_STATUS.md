@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009/0010, referências WCAG/performance e validações do Diagnóstico/Mapa/Home versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | Nova unidade de prontidão offline validada localmente; commit/CI desta continuação serão registrados após o push |
+| **Main** | `cc076bb fix(v2): exigir frescor na prontidao offline`; CI `33116563282` concluído com sucesso |
 
 ## Regra de conclusão
 
