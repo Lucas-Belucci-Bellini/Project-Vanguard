@@ -89,3 +89,12 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Comportamento:** identidade pública, versão e URLs oficiais ficam em contrato imutável sem segredos; atualização preserva suas exportações e allowlist HTTPS; diagnóstico usa o mesmo nome/versão.
 - **`npm test`:** 168 aprovados, 0 falhas.
 - **Limite:** `package.json`, `capacitor.config.json`, versionCode/versionName, signing, providers de mapa e release permanecem gates separados; nenhuma instalação ou distribuição foi declarada.
+
+## 2026-08-27 — unidade nova: correção cartográfica e rota de referência
+
+- **Motivo:** capturas mostraram `API KEY REQUIRED` na base CARTO e ausência de nomes/cidades nas bases de imagem. A auditoria confirmou que o mapa inicial não adicionava o overlay de rótulos e que não havia GPX/KML oficial do Caminhos dos Anjos no repositório.
+- **Fontes verificadas:** a associação publica cidades e leis de reconhecimento; a Lei Estadual nº 22.530/2025 descreve a rota geral, mas cidades de referência não fornecem uma geometria navegável. O resultado foi registrado em `docs/ROTAS-CAMINHOS-DOS-ANJOS.md`.
+- **Implementação:** base escura trocada para OSM com tratamento visual local; overlay `labels` trocado para ArcGIS World Boundaries and Places; overlay adicionado ao estilo; preparação offline inclui base e rótulos; cache passou para `v3`; allowlist OSM adicionada e CARTO removido.
+- **Testes:** `npm test` chegou a 170 aprovados, 0 falhas; `test/camadas-mapa.test.js` cobre as quatro bases, ausência de CARTO/API key e composição de rótulos.
+- **Revisão visual:** prévia Vite na rota `#/mapa`; Topográfico, Tático escuro e Satélite carregaram sem watermark CARTO; nomes/limites permaneceram visíveis após o carregamento assíncrono da imagem. Evidência detalhada em `docs/visual-check-map-2026-08-27.md`.
+- **Limite:** esta unidade não cria rota oficial, não transforma cidades em linha aproximada e não corrige a precisão física dentro de prédios; GPS interno permanece uma unidade posterior dependente de aparelho, céu, ambiente e permissões.

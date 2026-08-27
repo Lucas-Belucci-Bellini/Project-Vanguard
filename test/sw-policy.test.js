@@ -18,11 +18,12 @@ function carregarPolitica() {
 
 test('Service Worker aceita somente HTTPS nos hosts permitidos e remove URLs repetidas', () => {
   const { allowedTileUrls } = carregarPolitica();
-  const permitido = 'https://a.tile.opentopomap.org/12/10/20.png';
+  const permitido = 'https://tile.openstreetmap.org/12/10/20.png';
   const resultado = allowedTileUrls([
     permitido,
     permitido,
-    'http://a.tile.opentopomap.org/12/10/20.png',
+    'http://tile.openstreetmap.org/12/10/20.png',
+    'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/12/10/20.png',
     'https://example.invalid/12/10/20.png',
     'não é URL',
   ]);

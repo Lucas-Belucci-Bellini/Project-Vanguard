@@ -62,12 +62,15 @@ export const CAMADAS_BASE = [
     desc: 'Base escura de baixo contraste — sobreposição tática legível à noite.',
     tileSize: 256,
     maxzoom: 19,
-    tiles: [
-      'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
-      'https://cartodb-basemaps-b.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
-      'https://cartodb-basemaps-c.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
-    ],
-    creditos: '© CARTO · © OpenStreetMap',
+    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+    paint: {
+      'raster-saturation': -1,
+      'raster-brightness-min': 0.05,
+      'raster-brightness-max': 0.28,
+      'raster-contrast': 0.15,
+      'raster-opacity': 0.96,
+    },
+    creditos: '© OpenStreetMap contributors',
   },
   {
     id: 'imagery',
@@ -88,17 +91,15 @@ export const CAMADAS_OVERLAY = [
   {
     id: 'labels',
     nome: 'Nomes e rótulos',
-    desc: 'Só os topônimos, para pôr por cima do satélite.',
+    desc: 'Nomes de lugares e limites para manter cidades legíveis sobre imagens e relevo.',
     tipo: 'raster',
     padrao: true,
     tileSize: 256,
-    maxzoom: 20,
+    maxzoom: 23,
     tiles: [
-      'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_only_labels/{z}/{x}/{y}.png',
-      'https://cartodb-basemaps-b.global.ssl.fastly.net/dark_only_labels/{z}/{x}/{y}.png',
-      'https://cartodb-basemaps-c.global.ssl.fastly.net/dark_only_labels/{z}/{x}/{y}.png',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
     ],
-    creditos: '© CARTO · © OpenStreetMap',
+    creditos: '© Esri · HERE · Garmin · © OpenStreetMap contributors',
   },
   {
     id: 'gibs',

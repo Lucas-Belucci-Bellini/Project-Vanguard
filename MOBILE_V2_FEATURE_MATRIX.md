@@ -7,7 +7,7 @@
 | Navegação | GPS/GNSS local, MGRS, rumo, distância | Implementado | testes do motor, localização e diagnóstico | sinal, precisão e aparelho real |
 | Tracking | Start, Pause, Resume, Stop, Save, Restore, Export | Implementado | máquina `trilha-sessao`, registro JSON/GPX/KML | lifecycle, tela bloqueada e bateria |
 | Pontos | Waypoints e destino | Implementado | validação, estado e serialização | uso touch em dispositivo |
-| Mapas | MapLibre, centralização, grade e tiles preparados | Implementado | build, planner e política do SW | provedor, cobertura, quota e modo avião |
+| Mapas | MapLibre, quatro bases, nomes/limites, centralização, grade e tiles preparados | Implementado | contratos das camadas, build, planner e política do SW; OSM/ArcGIS sem CARTO/API key | provedor, cobertura, quota e modo avião; cidades de referência não são uma rota oficial |
 | Offline | shell, estado local, manual de sobrevivência e contexto | Implementado | build/testes locais | persistência física e reabertura sem rede |
 | Import/export | JSON, GPX 1.1 e subconjunto KML 2.2 | Implementado | parsers, limites/XML seguro e classificador de extensão/MIME | MIME pode ser omitido; conteúdo ainda requer parser e Files/Share Sheet físico |
 | Compartilhamento | texto, coordenadas, JSON, GPX e KML | Implementado | Web Share, clipboard e download fallback | Share Sheet/Files físico |

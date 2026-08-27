@@ -4,7 +4,7 @@ import { estado, CHAVES } from '../core/estado.js';
 import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel, idadePosicaoLabel, frescorPosicao } from '../core/localizacao.js';
 import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
-import { CAMADAS_BASE } from '../data/camadas-mapa.js';
+import { CAMADAS_BASE, CAMADAS_OVERLAY } from '../data/camadas-mapa.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha } from '../core/trilha.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
@@ -15,6 +15,7 @@ import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arq
 import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
+const ROTULOS = CAMADAS_OVERLAY.find((camada) => camada.id === 'labels') ?? null;
 const CENTRO_FALLBACK = [-43.21, -22.95];
 
 function intervaloGrade(zoom) {
@@ -598,9 +599,17 @@ export function mapaPage() {
       return;
     }
     const base = BASES[selectBase.value];
+    const fontesIniciais = {
+      base: { type: 'raster', tiles: base.tiles, tileSize: base.tileSize ?? 256, maxzoom: base.maxzoom, attribution: base.creditos },
+    };
+    const camadasIniciais = [{ id: 'base', type: 'raster', source: 'base', paint: base.paint ?? {} }];
+    if (ROTULOS) {
+      fontesIniciais.rotulos = { type: 'raster', tiles: ROTULOS.tiles, tileSize: ROTULOS.tileSize ?? 256, maxzoom: ROTULOS.maxzoom, attribution: ROTULOS.creditos };
+      camadasIniciais.push({ id: 'rotulos', type: 'raster', source: 'rotulos', paint: { 'raster-opacity': 0.9 } });
+    }
     mapa = new maplibregl.Map({
       container: canvas,
-      style: { version: 8, sources: { base: { type: 'raster', tiles: base.tiles, tileSize: base.tileSize ?? 256, maxzoom: base.maxzoom, attribution: base.creditos } }, layers: [{ id: 'base', type: 'raster', source: 'base' }] },
+      style: { version: 8, sources: fontesIniciais, layers: camadasIniciais },
       center: posicao ? [posicao.lon, posicao.lat] : CENTRO_FALLBACK,
       zoom: posicao ? 15 : 12,
       attributionControl: { compact: true }
@@ -658,7 +667,10 @@ export function mapaPage() {
         return;
       }
       const baseAtual = BASES[selectBase.value];
-      const plano = planejarTilesDoViewport(mapa.getBounds(), { ...baseAtual, zoomAtual: mapa.getZoom() });
+      const tilesOffline = ROTULOS
+        ? [...(baseAtual.tiles ?? []), ...(ROTULOS.tiles ?? [])]
+        : baseAtual.tiles;
+      const plano = planejarTilesDoViewport(mapa.getBounds(), { ...baseAtual, tiles: tilesOffline, zoomAtual: mapa.getZoom() });
       const urls = plano.urls;
       if (!urls.length) {
         offlineStatus.textContent = 'Não foi possível calcular tiles para esta área.';
@@ -678,6 +690,7 @@ export function mapaPage() {
           version: 1,
           base: baseAtual.id,
           baseNome: baseAtual.nome,
+          camadas: ROTULOS ? [baseAtual.id, ROTULOS.id] : [baseAtual.id],
           bounds: {
             west: mapa.getBounds().getWest(),
             east: mapa.getBounds().getEast(),
@@ -690,8 +703,8 @@ export function mapaPage() {
           tilesSalvos: salvos,
         });
         offlineStatus.textContent = plano.limitado
-          ? `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}; a área foi reduzida ao limite local. Aproxime o mapa e prepare novamente.`
-          : `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}. Mova o mapa e prepare outra área se necessário.`;
+          ? `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome} e nomes/limites; a área foi reduzida ao limite local. Aproxime o mapa e prepare novamente.`
+          : `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome} e nomes/limites. Mova o mapa e prepare outra área se necessário.`;
       } catch {
         offlineStatus.textContent = 'Não foi possível preparar a área agora. Abra o app uma vez online e tente novamente.';
       } finally {
@@ -788,7 +801,7 @@ export function mapaPage() {
       mapa.removeLayer('base');
       mapa.removeSource('base');
       mapa.addSource('base', { type: 'raster', tiles: novaBase.tiles, tileSize: novaBase.tileSize ?? 256, maxzoom: novaBase.maxzoom, attribution: novaBase.creditos });
-      mapa.addLayer({ id: 'base', type: 'raster', source: 'base' }, 'vanguard-grade');
+      mapa.addLayer({ id: 'base', type: 'raster', source: 'base', paint: novaBase.paint ?? {} }, 'vanguard-grade');
     };
   })();
 

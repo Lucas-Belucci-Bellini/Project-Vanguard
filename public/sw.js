@@ -1,12 +1,10 @@
 const CACHE = 'vanguard-field-shell-v9';
-const TILE_CACHE = 'vanguard-field-tiles-v2';
+const TILE_CACHE = 'vanguard-field-tiles-v3';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/vanguard.svg'];
 const TILE_HOSTS = new Set([
   'mt0.google.com', 'mt1.google.com', 'mt2.google.com', 'mt3.google.com',
   'a.tile.opentopomap.org',
-  'cartodb-basemaps-a.global.ssl.fastly.net',
-  'cartodb-basemaps-b.global.ssl.fastly.net',
-  'cartodb-basemaps-c.global.ssl.fastly.net',
+  'tile.openstreetmap.org',
   'server.arcgisonline.com',
   'gibs.earthdata.nasa.gov',
   'wms.gebco.net',

@@ -106,3 +106,11 @@ A política agora deixa explícito que os módulos balísticos foram criados som
 A auditoria identificou que identidade, versão e URLs oficiais de atualização estavam duplicadas entre o módulo de atualização e o diagnóstico. Foi criado `src/core/configuracao.js`, sem segredos e com objetos imutáveis para nome, application ID, versão, repositório e URLs oficiais. `src/core/atualizacao.js` mantém suas exportações públicas por compatibilidade, mas passa a consumir o contrato central; o diagnóstico também usa o mesmo nome e versão.
 
 `test/configuracao.test.js` cobre conteúdo, imutabilidade, ausência de campos de segredo e compatibilidade das URLs. A suíte local passou a 168 testes. O ADR-0024 documenta que package version, configuração nativa, signing e release continuam gates separados.
+
+## Marco de correção cartográfica e rota de referência — 2026-08-27
+
+As capturas de tela mostraram que a base escura estava recebendo o watermark `API KEY REQUIRED` do CARTO. A auditoria também confirmou que o `mapaPage` iniciava apenas a base escolhida, sem adicionar o overlay de nomes/limites, e que o repositório não continha uma geometria oficial do Caminhos dos Anjos: a trilha desenhada é a trilha local gravada no aparelho.
+
+A base escura agora usa tiles públicos do OpenStreetMap com tratamento visual local; o overlay usa `World_Boundaries_and_Places` do ArcGIS, com atribuição. O Service Worker permitiu `tile.openstreetmap.org`, removeu hosts CARTO sem uso e passou o cache de tiles para `v3` para descartar tiles antigos com watermark. O preparo offline inclui a base selecionada e o overlay de nomes/limites dentro do limite local de 256 URLs.
+
+A pesquisa documentada em `docs/ROTAS-CAMINHOS-DOS-ANJOS.md` confirma a lista publicada pela associação e a Lei Estadual nº 22.530/2025, mas mantém cidades como referência, não como uma linha aproximada. Um GPX/KML oficial ou autorizado ainda é necessário para inserir o traçado navegável. A precisão do GPS dentro de prédios continua sendo um gargalo físico separado, sem promessa de correção por software.
