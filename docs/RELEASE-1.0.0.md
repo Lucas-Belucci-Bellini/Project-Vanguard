@@ -13,7 +13,7 @@
 
 ## Estado do snapshot e do código atual
 
-A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com a melhoria de exportação/importação JSON offline no commit `d390d55`, a documentação de build versus release no commit `15942f8`, o workflow móvel separado no commit `47aefaa` e a persistência versionada no commit `d5802a7`. Esses commits foram publicados em `main` e validados como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuir essas mudanças como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
+A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com a melhoria de exportação/importação JSON offline no commit `d390d55`, a documentação de build versus release no commit `15942f8`, o workflow móvel separado no commit `47aefaa` e a persistência versionada no commit `d5802a7`, a exportação GPX no commit `0517728`, a documentação correspondente no commit `2bf7993`, a importação GPX no commit `cb7508d` e a atualização do tutorial no commit `4c260cc`. Esses commits foram publicados em `main` e validados como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuir essas mudanças como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
 
 ## O que está entregue
 
@@ -23,13 +23,13 @@ O mapa oferece bases com atribuição, cache local de tiles visualizados/prepara
 
 As zonas de proteção civil podem guardar fonte, atualização, validade opcional, centro, raio e contexto. O motor ignora zonas expiradas, recusa coordenadas fora dos limites geográficos e suporta exportação/importação JSON com schema e versão. O manual de sobrevivência é um catálogo local versionado, com fontes, data de revisão, tags, busca e filtros.
 
-O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, precisão e horário. Compartilhar pelo sistema operacional ou copiar para a área de transferência não é tratado como entrega, confirmação de provedor ou acionamento de resgate. A fila offline permanece bloqueada para pagamentos, SOS, emergência, rádio e mensageiro satelital.
+O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, precisão e horário. Compartilhar pelo sistema operacional ou copiar para a área de transferência não é tratado como entrega, confirmação de provedor ou acionamento de resgate. A fila offline permanece bloqueada para pagamentos, SOS, emergência, rádio e mensageiro satelital. O mapa também exporta e importa trilhas GPX localmente; a importação valida pontos e deixa a rota pausada.
 
 ## Validação reproduzida
 
 | Verificação | Resultado |
 |---|---|
-| `npm test` | 96 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
+| `npm test` | 100 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
 | `npm run build` | Aprovado; bundle de produção gerado. |
 | `node --check public/sw.js` | Aprovado. |
 | `npm run mobile:android:debug` | Aprovado; `BUILD SUCCESSFUL`. |
