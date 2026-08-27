@@ -20,8 +20,12 @@ export function opcoesLocalizacao(modo = 'cidade') {
   return { ...(POLITICA_LOCALIZACAO[modo] ?? POLITICA_LOCALIZACAO.cidade) };
 }
 
-function capacitorNativo() {
-  return globalThis.Capacitor?.isNativePlatform?.() === true;
+function capacitorNativo(capacitorApi = globalThis.Capacitor) {
+  try {
+    return capacitorApi?.isNativePlatform?.() === true;
+  } catch {
+    return false;
+  }
 }
 
 export function fonteLocalizacao() {
@@ -30,8 +34,15 @@ export function fonteLocalizacao() {
   return 'INDISPONÍVEL';
 }
 
-async function geolocationNativo() {
-  pluginNativoPromise ??= import('@capacitor/geolocation').then(({ Geolocation }) => Geolocation);
+async function geolocationNativo(override) {
+  if (override) return override;
+  pluginNativoPromise ??= import('@capacitor/geolocation').then(({ Geolocation }) => ({
+    checkPermissions: (...args) => Geolocation.checkPermissions(...args),
+    requestPermissions: (...args) => Geolocation.requestPermissions(...args),
+    getCurrentPosition: (...args) => Geolocation.getCurrentPosition(...args),
+    watchPosition: (...args) => Geolocation.watchPosition(...args),
+    clearWatch: (...args) => Geolocation.clearWatch(...args),
+  }));
   return pluginNativoPromise;
 }
 
@@ -116,11 +127,13 @@ export function distanciaLocalM(a, b) {
   return 6371008.8 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
-export function iniciarAcompanhamento({ mode = 'cidade', onPosition = () => {}, onError = () => {}, onState = () => {} } = {}) {
-  const possuiWeb = typeof navigator !== 'undefined' && 'geolocation' in navigator;
-  const podeTentarNativo = capacitorNativo();
+export function iniciarAcompanhamento({ mode = 'cidade', onPosition = () => {}, onError = () => {}, onState = () => {}, navigatorApi = globalThis.navigator, capacitorApi = globalThis.Capacitor, geolocationApi } = {}) {
+  const possuiWeb = Boolean(navigatorApi && 'geolocation' in navigatorApi);
+  const podeTentarNativo = capacitorNativo(capacitorApi);
   if (!possuiWeb && !podeTentarNativo) {
-    onError(erroSemGeolocalizacao());
+    const erro = erroSemGeolocalizacao();
+    onState({ status: 'UNAVAILABLE', modo: mode, erro });
+    onError(erro);
     return () => {};
   }
 
@@ -131,8 +144,22 @@ export function iniciarAcompanhamento({ mode = 'cidade', onPosition = () => {}, 
   let nativeApi = null;
   let encerrado = false;
   let ciclo = 0;
+  let pausado = false;
+
+  function emitir(status, extras = {}) {
+    if (encerrado) return;
+    onState({ status, modo: modoAtual, ...extras });
+  }
+
+  function sinalizarErro(erro, fonte = 'INDISPONÍVEL') {
+    if (encerrado || pausado) return;
+    emitir('ERROR', { erro, fonte });
+    onError(erro);
+  }
 
   function aceitarPosicao(leitura, opcoes) {
+    if (pausado || encerrado) return;
+
     const posicao = normalizarPosicao(leitura);
     if (!Number.isFinite(posicao.lat) || !Number.isFinite(posicao.lon)) return;
     if (ultimaAceita && opcoes.minDistanceM > 0 && distanciaLocalM(ultimaAceita, posicao) < opcoes.minDistanceM) return;
@@ -141,75 +168,96 @@ export function iniciarAcompanhamento({ mode = 'cidade', onPosition = () => {}, 
     onPosition(posicao);
   }
 
+  function limparWatchers() {
+    if (webId !== null && possuiWeb) navigatorApi.geolocation.clearWatch(webId);
+    webId = null;
+    if (nativeApi && nativeId !== null) nativeApi.clearWatch({ id: nativeId }).catch(() => {});
+    nativeId = null;
+  }
+
   async function iniciarWatch() {
-    if (encerrado) return;
+    if (encerrado || pausado) return;
     const token = ++ciclo;
     const opcoes = opcoesLocalizacao(modoAtual);
     if (podeTentarNativo) {
       try {
-        const geolocation = await geolocationNativo();
+        const geolocation = await geolocationNativo(geolocationApi);
         await garantirPermissaoNativa(geolocation);
         if (encerrado || token !== ciclo) return;
         nativeApi = geolocation;
-        onState({ modo: modoAtual, opcoes, fonte: 'CAPACITOR_GEOLOCATION' });
+        emitir('STARTING', { opcoes, fonte: 'CAPACITOR_GEOLOCATION' });
         nativeId = await geolocation.watchPosition({
           enableHighAccuracy: opcoes.enableHighAccuracy,
           maximumAge: opcoes.maximumAge,
           timeout: opcoes.timeout,
         }, (leitura, erro) => {
-          if (erro) onError(erro);
+          if (erro) sinalizarErro(erro, 'CAPACITOR_GEOLOCATION');
           if (leitura) aceitarPosicao(leitura, opcoes);
         });
-        if (encerrado || token !== ciclo) {
+        if (encerrado || token !== ciclo || pausado) {
           await geolocation.clearWatch({ id: nativeId }).catch(() => {});
           nativeId = null;
+          return;
         }
+        emitir('ACTIVE', { opcoes, fonte: 'CAPACITOR_GEOLOCATION' });
         return;
       } catch (erro) {
         if (encerrado || token !== ciclo) return;
         if (erro?.code === 1 || !possuiWeb) {
-          onError(erro);
+          sinalizarErro(erro, 'CAPACITOR_GEOLOCATION');
           return;
         }
         /* Se o bridge nativo não responder, o WebView tenta seu fallback. */
       }
     }
     if (!possuiWeb || encerrado || token !== ciclo) {
-      if (!podeTentarNativo) onError(erroSemGeolocalizacao());
+      if (!podeTentarNativo) sinalizarErro(erroSemGeolocalizacao(), 'WEB_GEOLOCATION');
       return;
     }
-    onState({ modo: modoAtual, opcoes, fonte: 'WEB_GEOLOCATION' });
-    webId = navigator.geolocation.watchPosition(
+    emitir('STARTING', { opcoes, fonte: 'WEB_GEOLOCATION' });
+    webId = navigatorApi.geolocation.watchPosition(
       (leitura) => aceitarPosicao(leitura, opcoes),
-      (erro) => onError(erro),
+      (erro) => sinalizarErro(erro, 'WEB_GEOLOCATION'),
       {
         enableHighAccuracy: opcoes.enableHighAccuracy,
         maximumAge: opcoes.maximumAge,
         timeout: opcoes.timeout,
       },
     );
+    emitir('ACTIVE', { opcoes, fonte: 'WEB_GEOLOCATION' });
   }
 
   iniciarWatch();
 
   const parar = () => {
+    if (encerrado) return;
     encerrado = true;
     ciclo += 1;
-    if (webId !== null && possuiWeb) navigator.geolocation.clearWatch(webId);
-    webId = null;
-    if (nativeApi && nativeId !== null) nativeApi.clearWatch({ id: nativeId }).catch(() => {});
-    nativeId = null;
+    limparWatchers();
+    onState({ status: 'STOPPED', modo: modoAtual });
+  };
+
+  parar.setPaused = (novoEstado = true) => {
+    if (encerrado || Boolean(novoEstado) === pausado) return;
+    pausado = Boolean(novoEstado);
+    ciclo += 1;
+    limparWatchers();
+    if (pausado) {
+      onState({ status: 'PAUSED', modo: modoAtual, fonte: 'FOREGROUND_ONLY' });
+      return;
+    }
+    ultimaAceita = null;
+    emitir('STARTING', { fonte: 'FOREGROUND_ONLY' });
+    iniciarWatch();
   };
 
   parar.setMode = (novoModo = 'cidade') => {
     if (encerrado || novoModo === modoAtual) return;
-    if (webId !== null && possuiWeb) navigator.geolocation.clearWatch(webId);
-    if (nativeApi && nativeId !== null) nativeApi.clearWatch({ id: nativeId }).catch(() => {});
-    webId = null;
-    nativeId = null;
+    ciclo += 1;
+    limparWatchers();
     modoAtual = novoModo;
     ultimaAceita = null;
-    iniciarWatch();
+    if (!pausado) iniciarWatch();
   };
 
   return parar;

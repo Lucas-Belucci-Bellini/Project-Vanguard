@@ -82,3 +82,63 @@ test('fonteLocalizacao identifica Capacitor como foreground', () => {
     else globalThis.Capacitor = anterior;
   }
 });
+
+test('iniciarAcompanhamento expõe ACTIVE, PAUSED e STOPPED no fallback Web', async () => {
+  const estados = [];
+  const watches = [];
+  const navigatorApi = {
+    geolocation: {
+      watchPosition: (_sucesso, _erro, opcoes) => {
+        watches.push(opcoes);
+        return watches.length;
+      },
+      clearWatch: (id) => watches.push(`clear:${id}`),
+    },
+  };
+  const { iniciarAcompanhamento } = await import('../src/core/localizacao.js?watch-test=web');
+  const parar = iniciarAcompanhamento({ navigatorApi, onState: (estado) => estados.push(estado) });
+  assert.equal(estados.at(-1).status, 'ACTIVE');
+  assert.equal(watches.length, 1);
+  parar.setPaused(true);
+  assert.equal(estados.at(-1).status, 'PAUSED');
+  assert.equal(watches.at(-1), 'clear:1');
+  parar.setPaused(false);
+  assert.equal(estados.at(-1).status, 'ACTIVE');
+  assert.equal(watches.at(-1).enableHighAccuracy, false);
+  parar();
+  assert.equal(estados.at(-1).status, 'STOPPED');
+});
+
+test('iniciarAcompanhamento mantém pausa nativa foreground-only e limpa o watcher', async () => {
+  const estados = [];
+  const limpezas = [];
+  const geolocationApi = {
+    checkPermissions: async () => ({ location: 'granted' }),
+    watchPosition: async () => 77,
+    clearWatch: async ({ id }) => limpezas.push(id),
+  };
+  const { iniciarAcompanhamento } = await import('../src/core/localizacao.js?watch-test=native');
+  const parar = iniciarAcompanhamento({
+    capacitorApi: { isNativePlatform: () => true },
+    geolocationApi,
+    navigatorApi: {},
+    onState: (estado) => estados.push(estado),
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(estados.some((estado) => estado.status === 'ACTIVE' && estado.fonte === 'CAPACITOR_GEOLOCATION'), true);
+  parar.setPaused(true);
+  assert.equal(estados.at(-1).status, 'PAUSED');
+  parar();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(limpezas, [77]);
+  assert.equal(estados.at(-1).status, 'STOPPED');
+});
+
+test('iniciarAcompanhamento informa UNAVAILABLE quando não existe API de localização', async () => {
+  const estados = [];
+  const erros = [];
+  const { iniciarAcompanhamento } = await import('../src/core/localizacao.js?watch-test=none');
+  iniciarAcompanhamento({ navigatorApi: {}, onState: (estado) => estados.push(estado), onError: (erro) => erros.push(erro.message) });
+  assert.equal(estados[0].status, 'UNAVAILABLE');
+  assert.equal(erros.length, 1);
+});

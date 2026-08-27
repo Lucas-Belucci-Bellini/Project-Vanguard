@@ -85,6 +85,22 @@ export function mapaPage() {
   const topoLocal = h('span', { className: 'mapa__hud-coord' }, 'AGUARDANDO GPS');
   const topoMeta = h('span', { className: 'mapa__hud-meta' }, 'POSIÇÃO NÃO CONFIRMADA');
   const estadoGps = h('span', { className: 'mapa__gps-label' }, 'GPS DESLIGADO');
+  function exibirEstadoGps({ status, fonte } = {}) {
+    const prefixo = fonte === 'FOREGROUND_ONLY' ? ' · FOREGROUND' : '';
+    estadoGps.textContent = status === 'ACTIVE'
+      ? `GPS ATIVO${prefixo}`
+      : status === 'PAUSED'
+        ? 'GPS PAUSADO · APP OCULTO'
+        : status === 'STARTING'
+          ? 'GPS BUSCANDO'
+          : status === 'STOPPED'
+            ? 'GPS ENCERRADO'
+            : status === 'UNAVAILABLE'
+              ? 'GPS INDISPONÍVEL'
+              : status === 'ERROR'
+                ? 'GPS COM ERRO'
+                : estadoGps.textContent;
+  }
   const modoBotao = h('button', { className: 'mapa__mode-button', type: 'button' }, 'MARCAR PONTO');
   const sheetStatus = h('p', { className: 'mapa__sheet-status', role: 'status' }, 'Ative uma rota para registrar o caminho no aparelho.');
   const routeButton = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR ROTA');
@@ -491,7 +507,8 @@ export function mapaPage() {
     onError: (erro) => {
       estadoGps.textContent = erro?.code === 1 ? 'PERMISSÃO NEGADA' : 'GPS INDISPONÍVEL';
       sheetStatus.textContent = erro?.code === 1 ? 'Ative a permissão de localização para usar o mapa ao vivo.' : 'Não foi possível obter um fixo agora.';
-    }
+    },
+    onState: exibirEstadoGps,
   });
 
   if (rotaAtiva) pararGps.setMode('trilha');
@@ -499,9 +516,11 @@ export function mapaPage() {
   const aoMudarVisibilidade = () => {
     if (document.hidden) {
       mapa?.stop();
+      pararGps.setPaused?.(true);
       return;
     }
     mapa?.resize();
+    pararGps.setPaused?.(false);
     atualizarHud();
     atualizarSheet();
     atualizarMarcadores();
