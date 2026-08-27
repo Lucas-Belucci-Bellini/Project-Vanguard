@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Android e iPhone com energia como requisito</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding: 48px 72px 0; min-height: 720px; display: flex; flex-direction: column; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; padding-bottom: 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    h1 { font-family: Georgia, serif; font-size: 48px; line-height: 1.03; margin: 42px 0 8px; }
+    .lead { color: #38536B; font-size: 19px; line-height: 1.4; max-width: 1000px; margin: 0 0 6px; }
+    
+    .content { display: grid; grid-template-columns: 1fr 0.9fr; gap: 32px; margin-top: 18px; flex-grow: 1; }
+    
+    .col-title { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; border-bottom: 2px solid #0A2342; padding-bottom: 8px; margin-bottom: 12px; }
+    
+    .policy-table { width: 100%; border-collapse: collapse; }
+    .policy-table th { text-align: left; font-family: monospace; font-size: 11px; letter-spacing: 1.5px; color: #6B8297; text-transform: uppercase; padding: 0 0 8px 0; border-bottom: 1px dashed #B7C9D7; }
+    .policy-table td { padding: 8px 0; border-bottom: 1px dashed #B7C9D7; font-size: 15px; color: #38536B; line-height: 1.4; vertical-align: top; }
+    .policy-table tr:last-child td { border-bottom: none; }
+    .state-name { font-family: Georgia, serif; font-size: 18px; color: #0A2342; font-weight: bold; }
+    
+    .info-box { background: #F0F4F8; padding: 12px; border-left: 4px solid #008B8B; margin-bottom: 12px; }
+    .info-box h3 { font-family: Georgia, serif; font-size: 20px; margin: 0 0 8px; color: #0A2342; }
+    .info-box p { margin: 0 0 8px; font-size: 15px; line-height: 1.5; color: #38536B; }
+    .info-box p:last-child { margin-bottom: 0; }
+    
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 12px; padding-top: 8px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">09 / MOBILE E BATERIA</span></div>
+      <h1>Android e iPhone com energia como requisito.</h1>
+      <p class="lead">O caminho técnico é empacotar a base web com Capacitor, compartilhar a lógica entre Android e iOS e pedir permissões somente quando estritamente necessárias.</p>
+      
+      <div class="content">
+        <div class="left-col">
+          <div class="col-title">Política Adaptativa de Localização</div>
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Estado</th>
+                <th style="width: 40%;">Localização</th>
+                <th style="width: 35%;">Mapa e Sensores</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="state-name">Consulta Pontual</span></td>
+                <td>Uma leitura e encerra.</td>
+                <td>Interface normal.</td>
+              </tr>
+              <tr>
+                <td><span class="state-name">Cidade</span></td>
+                <td>Precisão equilibrada e atualizações espaçadas.</td>
+                <td>Sem renderização contínua quando parado.</td>
+              </tr>
+              <tr>
+                <td><span class="state-name">Trilha Ativa</span></td>
+                <td>Precisão alta somente com rota iniciada.</td>
+                <td>Mapa ativo; registra apenas deslocamentos relevantes.</td>
+              </tr>
+              <tr>
+                <td><span class="state-name">Rota Pausada</span></td>
+                <td>Interrompida ou reduzida.</td>
+                <td>Mapa pode ser pausado.</td>
+              </tr>
+              <tr>
+                <td><span class="state-name">Emergência</span></td>
+                <td>Preserva última posição local.</td>
+                <td>Mostra pacote preparado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="right-col">
+          <div class="col-title">Otimização de Energia</div>
+          <div class="info-box">
+            <h3>O mito do consumo</h3>
+            <p>iPhone não é automaticamente "ruim de bateria". Qualquer aparelho gasta mais com GPS contínuo, tela brilhante, mapa WebGL e localização em segundo plano.</p>
+            <p>Por isso, o Vanguard evita deixar tudo ligado o tempo todo, adaptando o consumo ao contexto real de uso.</p>
+          </div>
+          <div class="info-box">
+            <h3>Recomendações Oficiais</h3>
+            <p>A <strong>Apple</strong> recomenda usar o serviço de localização mais eficiente que atenda ao caso, desligando-o quando não houver necessidade de novas leituras [1].</p>
+            <p>O <strong>Android</strong> alerta que a localização em segundo plano pode impactar significativamente a bateria, aplicando limites no sistema [2].</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <span>[1] Apple Developer — Core Location | [2] Android Developers — Background Location</span>
+        <span>Capacitor · iOS · Android</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

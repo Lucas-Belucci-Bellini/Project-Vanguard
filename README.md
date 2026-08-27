@@ -53,7 +53,7 @@ npm run build     # gera dist/
 
 Node.js 22 ou superior é recomendado.
 
-Para testar no Android ou em um Xiaomi, abra a versão publicada em um navegador compatível e use **Adicionar à tela inicial**. A permissão de localização deve ser concedida ao navegador ou ao atalho instalado. Uma futura etapa pode empacotar a mesma base em APK com Capacitor; o código atual já foi organizado para esse caminho, mas o diretório nativo ainda não faz parte deste protótipo.
+Para testar no Android ou em um Xiaomi, abra a versão publicada em um navegador compatível e use **Adicionar à tela inicial**. A permissão de localização deve ser concedida ao navegador ou ao atalho instalado. O projeto também já possui os diretórios nativos `android/` e `ios/` gerados pelo Capacitor; veja [`docs/BUILD-MOBILE.md`](docs/BUILD-MOBILE.md) para os comandos e as limitações de assinatura. Para o roteiro de teste sem internet, consulte [`docs/REVISAO-INTERFACE-OFFLINE.md`](docs/REVISAO-INTERFACE-OFFLINE.md).
 
 ## Estrutura principal
 
@@ -86,6 +86,9 @@ docs/
   ASAAS-INTEGRACAO.md  contrato, auditoria, webhook e ativação futura
   CONTEXTOS-E-SEGURANCA.md fontes e limites de proteção civil
   MAPA-DE-FUNCIONALIDADES.md inventário completo da visão e do estado do produto
+  BUILD-MOBILE.md       builds Android/iOS, Capacitor e política de bateria
+  MOBILE-E-BATERIA.md   referências de energia da Apple e Android
+  REVISAO-INTERFACE-OFFLINE.md roteiro de teste offline e revisão visual
 
 test/                  testes determinísticos do motor
 ```

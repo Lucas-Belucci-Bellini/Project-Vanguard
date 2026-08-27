@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>GPS não é comunicação, radar ou Geiger</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding: 48px 72px 0; min-height: 720px; position: relative; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; padding-bottom: 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    
+    .content { display: grid; grid-template-columns: 1fr 2fr; gap: 64px; margin-top: 48px; }
+    
+    h1 { font-family: Georgia, serif; font-size: 46px; line-height: 1.05; margin: 0 0 24px; }
+    .lead { color: #38536B; font-size: 18px; line-height: 1.45; margin: 0 0 32px; }
+    
+    .principle { border-top: 3px solid #008B8B; padding-top: 16px; }
+    .principle-title { font-family: monospace; font-size: 12px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; margin-bottom: 12px; }
+    .principle-text { font-family: Georgia, serif; font-size: 20px; line-height: 1.3; color: #0A2342; }
+    
+    .equip-list { border-top: 2px solid #0A2342; }
+    .equip-item { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 20px 0; border-bottom: 1px dashed #B7C9D7; align-items: start; }
+    .equip-item:last-child { border-bottom: none; }
+    
+    .equip-name { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: #0A2342; }
+    .equip-desc { color: #38536B; font-size: 16px; line-height: 1.4; }
+    .equip-status { display: inline-block; font-family: monospace; font-size: 11px; letter-spacing: 1px; padding: 4px 8px; background: #F0F4F8; color: #6B8297; margin-top: 8px; border: 1px solid #B7C9D7; }
+    
+    .footer { position: absolute; bottom: 24px; left: 72px; right: 72px; display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; padding-top: 10px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">06 / EQUIPAMENTOS EXTERNOS</span></div>
+      
+      <div class="content">
+        <div class="left-col">
+          <h1>GPS não é comunicação, radar ou Geiger.</h1>
+          <p class="lead">O Vanguard possui contratos e estados preparados para integrações externas, mas exibe claramente <strong>"não conectado"</strong> até que exista um equipamento ou fonte real vinculada.</p>
+          
+          <div class="principle">
+            <div class="principle-title">Limites do Hardware</div>
+            <div class="principle-text">O aplicativo não simula capacidades que o celular não possui. Um ponto no mapa não substitui um sensor especializado.</div>
+          </div>
+        </div>
+        
+        <div class="right-col">
+          <div class="equip-list">
+            <div class="equip-item">
+              <div class="equip-name">GPS / GNSS</div>
+              <div>
+                <div class="equip-desc">Calcula a posição local do aparelho. Não transmite dados para equipes de resgate por conta própria.</div>
+                <div class="equip-status">NATIVO DO APARELHO</div>
+              </div>
+            </div>
+            <div class="equip-item">
+              <div class="equip-name">Mensageiro Satelital</div>
+              <div>
+                <div class="equip-desc">Transmite SOS e coordenadas fora da cobertura de rede móvel. Requer dispositivo e plano compatíveis.</div>
+                <div class="equip-status">REQUER HARDWARE EXTERNO</div>
+              </div>
+            </div>
+            <div class="equip-item">
+              <div class="equip-name">Contador Geiger</div>
+              <div>
+                <div class="equip-desc">Mede radiação no ambiente. O celular não possui sensores radiológicos; requer dosímetro calibrado via Bluetooth/cabo.</div>
+                <div class="equip-status">REQUER HARDWARE EXTERNO</div>
+              </div>
+            </div>
+            <div class="equip-item">
+              <div class="equip-name">Sonar / Eco-sonda</div>
+              <div>
+                <div class="equip-desc">Mede a profundidade observada da água. Satélites não substituem cartas náuticas ou sensores de embarcação.</div>
+                <div class="equip-status">REQUER HARDWARE EXTERNO</div>
+              </div>
+            </div>
+            <div class="equip-item">
+              <div class="equip-name">Rádio de Dados</div>
+              <div>
+                <div class="equip-desc">Comunicação local com rede autorizada. Requer rádio, frequência e autorização aplicáveis.</div>
+                <div class="equip-status">REQUER HARDWARE EXTERNO</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <span>Transparência técnica</span>
+        <span>Integrações modulares</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

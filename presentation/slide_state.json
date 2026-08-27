@@ -1,0 +1,144 @@
+{
+  "project_info": {
+    "title": "VANGUARD FIELD",
+    "created": 1787790298.324,
+    "last_updated": 1787790826.277,
+    "total_slides": 12
+  },
+  "slides": [
+    {
+      "id": "capa",
+      "state": "edited",
+      "pageNum": 1
+    },
+    {
+      "id": "problema",
+      "state": "edited",
+      "pageNum": 2
+    },
+    {
+      "id": "contextos",
+      "state": "edited",
+      "pageNum": 3
+    },
+    {
+      "id": "offline",
+      "state": "edited",
+      "pageNum": 4
+    },
+    {
+      "id": "sobrevivencia",
+      "state": "edited",
+      "pageNum": 5
+    },
+    {
+      "id": "protecao_civil",
+      "state": "edited",
+      "pageNum": 6
+    },
+    {
+      "id": "equipamentos",
+      "state": "edited",
+      "pageNum": 7
+    },
+    {
+      "id": "seguranca",
+      "state": "edited",
+      "pageNum": 8
+    },
+    {
+      "id": "doacoes",
+      "state": "edited",
+      "pageNum": 9
+    },
+    {
+      "id": "mobile_bateria",
+      "state": "edited",
+      "pageNum": 10
+    },
+    {
+      "id": "estado_proximos",
+      "state": "edited",
+      "pageNum": 11
+    },
+    {
+      "id": "encerramento",
+      "state": "edited",
+      "pageNum": 12
+    }
+  ],
+  "outline": [
+    {
+      "id": "capa",
+      "title": "VANGUARD FIELD",
+      "summary": "Navegação offline, sobrevivência e proteção civil para cidade, caminhada, expedição, mar e situações sem rede.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "problema",
+      "title": "Quando o sinal some",
+      "summary": "O problema de perder referência, plano de retorno e capacidade de explicar a própria localização em áreas remotas ou de crise.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "contextos",
+      "title": "Um produto, vários contextos",
+      "summary": "Cidade, Expedição, Mar, Zona de Desastre, Área Contaminada e Área de Conflito conectados a um único núcleo de navegação.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "offline",
+      "title": "Offline-first, não offline de fachada",
+      "summary": "GPS/GNSS, bússola, trilha, waypoints, MGRS, zonas e manual local, com preparação prévia de tiles para o mapa.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "sobrevivencia",
+      "title": "Conhecimento quando a rede some",
+      "summary": "Interface da aba Sobrevivência com primeiros passos, primeiros socorros básicos, abrigo, água, sinalização e segurança contra explosivos.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "protecao_civil",
+      "title": "Contexto muda a interface; não inventa fatos",
+      "summary": "Zonas locais, fontes, datas, níveis de risco e uso responsável de alertas civis.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "equipamentos",
+      "title": "GPS não é comunicação, radar ou Geiger",
+      "summary": "O que funciona no celular e o que depende de mensageiro satelital, beacon, dosímetro, rádio, sonar ou fonte externa.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "seguranca",
+      "title": "Transparência é uma função",
+      "summary": "Privacidade, SOS com confirmação explícita e limites contra falsas promessas de detecção ou transmissão.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "doacoes",
+      "title": "Apoiar o projeto sem caixa-preta",
+      "summary": "Doações PIX/cartão via Asaas em modo preparado, com auditoria, histórico, recibos e sem CPF/CNPJ do doador por padrão.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "mobile_bateria",
+      "title": "Android e iPhone com energia como requisito",
+      "summary": "Caminho para empacotamento nativo com Capacitor e política adaptativa para reduzir consumo de localização.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "estado_proximos",
+      "title": "Estado atual e próximos passos",
+      "summary": "O que já existe no projeto e o que ainda requer testes de campo, fontes oficiais, hardware e integração nativa.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "encerramento",
+      "title": "Preparar antes. Orientar durante. Explicar os limites.",
+      "summary": "Encerramento: um instrumento civil de navegação e preparação, sem substituir rede, treinamento, autoridade ou equipamento especializado.",
+      "image_plan": "Use a suitable image if needed"
+    }
+  ]
+}

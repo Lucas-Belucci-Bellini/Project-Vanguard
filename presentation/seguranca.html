@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Transparência é uma função</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding: 48px 72px 0; min-height: 720px; display: flex; flex-direction: column; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; padding-bottom: 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    h1 { font-family: Georgia, serif; font-size: 48px; line-height: 1.03; margin: 42px 0 8px; }
+    .lead { color: #38536B; font-size: 19px; line-height: 1.4; max-width: 900px; margin: 0; }
+    
+    /* Reduced vertical spacing to avoid overflow */
+    .content { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; margin-top: 8px; flex-grow: 1; }
+    
+    .col-title { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; border-bottom: 2px solid #0A2342; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .col-title::after { content: "+"; font-size: 16px; }
+    .col-title.alert { color: #B87935; border-bottom-color: #B87935; }
+    
+    .item { margin-bottom: 24px; position: relative; padding-left: 24px; border-left: 1px dashed #B7C9D7; }
+    .item::before { content: ""; position: absolute; left: -4px; top: 8px; width: 7px; height: 7px; background: #008B8B; }
+    .item.alert-item::before { background: #B87935; }
+    
+    .item h2 { font-family: Georgia, serif; font-size: 22px; margin: 0 0 8px; color: #0A2342; }
+    .item p { margin: 0; color: #38536B; font-size: 15px; line-height: 1.45; }
+    
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 24px; padding-top: 10px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">07 / SEGURANÇA</span></div>
+      <h1>Transparência é uma função.</h1>
+      <p class="lead">A segurança do usuário depende de saber exatamente o que o aplicativo está fazendo. O Vanguard não oculta processos nem faz promessas que o hardware não pode cumprir.</p>
+      
+      <div class="content">
+        <div class="left-col">
+          <div class="col-title">Privacidade e Controle</div>
+          
+          <div class="item">
+            <h2>Dados Locais por Padrão</h2>
+            <p>A localização, trilhas e pontos de referência ficam armazenados exclusivamente no aparelho. O compartilhamento exige uma ação explícita do usuário.</p>
+          </div>
+          
+          <div class="item">
+            <h2>Modo Socorro Explícito</h2>
+            <p>O aplicativo distingue claramente os estados de emergência: mensagem preparada, enfileirada, enviada e confirmada pelo provedor. Não há envio "invisível".</p>
+          </div>
+          
+          <div class="item">
+            <h2>Auditoria de Ações</h2>
+            <p>Todas as integrações externas e transmissões de dados possuem indicadores visuais claros de status, conectividade e última atualização.</p>
+          </div>
+        </div>
+        
+        <div class="right-col">
+          <div class="col-title alert">Limites Inegociáveis</div>
+          
+          <div class="item alert-item">
+            <h2>Sem Falsas Detecções</h2>
+            <p>O aplicativo não confirma a presença de drones, tropas, explosões, minas ou radiação por conta própria. Um ponto no mapa é um aviso contextual, não um radar.</p>
+          </div>
+          
+          <div class="item alert-item">
+            <h2>Não Substitui o Básico</h2>
+            <p>A tecnologia não substitui autoridades competentes, treinamento adequado, cartas náuticas oficiais, atendimento médico ou um plano de viagem bem estruturado.</p>
+          </div>
+          
+          <div class="item alert-item">
+            <h2>Dependência de Hardware</h2>
+            <p>Transmissões fora da rede celular exigem hardware dedicado (mensageiro satelital, beacon, rádio). O celular sozinho não "cria" sinal onde não existe.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <span>Privacidade by design</span>
+        <span>Limites técnicos claros</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

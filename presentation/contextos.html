@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Um produto, vários contextos</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding: 48px 72px 0; min-height: 720px; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; padding-bottom: 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    h1 { font-family: Georgia, serif; font-size: 48px; line-height: 1.03; margin: 42px 0 8px; }
+    .lead { color: #38536B; font-size: 19px; line-height: 1.4; max-width: 820px; margin: 0; }
+    .content { display: grid; grid-template-columns: 2fr 1fr; gap: 36px; margin-top: 8px; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; border-top: 2px solid #0A2342; }
+    .mode { min-height: 86px; padding: 12px 0 10px; border-bottom: 1px dashed #B7C9D7; }
+    .mode:nth-child(2), .mode:nth-child(4), .mode:nth-child(6) { border-left: 1px dashed #B7C9D7; padding-left: 16px; }
+    .tag { color: #008B8B; font-family: monospace; font-size: 12px; letter-spacing: 1.8px; text-transform: uppercase; }
+    h2 { font-family: Georgia, serif; font-size: 24px; margin: 8px 0 6px; }
+    .mode p { margin: 0; color: #38536B; font-size: 14px; line-height: 1.35; }
+    .logic { border-top: 2px solid #008B8B; padding-top: 12px; }
+    .logic-title { font-family: monospace; font-size: 12px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; }
+    .step { display: grid; grid-template-columns: 36px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #B7C9D7; align-items: start; }
+    .step:last-child { border-bottom: 0; }
+    .step-n { width: 28px; height: 28px; border: 2px solid #008B8B; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 12px; }
+    .step strong { display: block; font-family: Georgia, serif; font-size: 19px; margin-bottom: 4px; }
+    .step span { display: block; color: #38536B; font-size: 14px; line-height: 1.35; }
+    .principle { margin-top: 12px; padding-top: 12px; border-top: 3px solid #B87935; font-family: Georgia, serif; font-size: 20px; line-height: 1.2; }
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 24px; padding-top: 10px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">02 / CONTEXTOS</span></div>
+      <h1>Um produto, vários contextos.</h1>
+      <p class="lead">O mapa é o mesmo. A leitura muda conforme o ambiente, a fonte disponível e o risco civil conhecido.</p>
+      <div class="content">
+        <div class="modes">
+          <div class="mode"><div class="tag">01 / urbano</div><h2>Cidade / Dia a dia</h2><p>Deslocamento, caminhada urbana e pontos de encontro.</p></div>
+          <div class="mode"><div class="tag">02 / campo</div><h2>Trilha / Expedição</h2><p>Orientação offline, retorno pelo caminho e referências.</p></div>
+          <div class="mode"><div class="tag">03 / costa</div><h2>Mar / Navegação</h2><p>Carta, profundidade publicada, maré e perigos conhecidos.</p></div>
+          <div class="mode"><div class="tag">04 / desastre</div><h2>Zona de desastre</h2><p>Afastamento, abrigo e informações da Defesa Civil.</p></div>
+          <div class="mode"><div class="tag">05 / contaminação</div><h2>Área contaminada</h2><p>Risco químico ou radiológico publicado por fonte responsável.</p></div>
+          <div class="mode"><div class="tag">06 / proteção</div><h2>Área de conflito</h2><p>Risco civil, restos explosivos e rotas humanitárias conhecidas.</p></div>
+        </div>
+        <div class="logic">
+          <div class="logic-title">MODO AUTOMÁTICO / MANUAL</div>
+          <div class="step"><div class="step-n">01</div><div><strong>Escolha manual</strong><span>A pessoa decide o contexto quando não há dados confiáveis.</span></div></div>
+          <div class="step"><div class="step-n">02</div><div><strong>Zona salva</strong><span>Coordenada, raio, fonte e data ficam no aparelho.</span></div></div>
+          <div class="step"><div class="step-n">03</div><div><strong>Interface adaptada</strong><span>O modo muda a prioridade dos avisos, não cria uma detecção.</span></div></div>
+          <div class="principle">Uma zona no mapa é um aviso contextual — não é um radar.</div>
+        </div>
+      </div>
+      <div class="footer"><span>Seis contextos · um núcleo local</span><span>Fonte + data + validade</span></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Quando o sinal some</title>
+  <style>
+    * { box-sizing: border-box; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding: 52px 72px 0; min-height: 720px; }
+    .top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #B7C9D7; padding-bottom: 16px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    /* layout refreshed: index removed from flow so it doesn't inflate column height */
+    .layout { display: grid; grid-template-columns: 180px 1fr; gap: 56px; padding-top: 40px; position: relative; }
+    .index { font-family: Georgia, serif; font-size: 142px; line-height: .85; color: #D8E7EA; position: absolute; left: 0; top: 12px; }
+    .index::after { content: ""; display: block; width: 100px; height: 4px; background: #008B8B; margin-top: 24px; }
+    h1 { font-family: Georgia, serif; font-size: 54px; line-height: 1.02; margin: 0 0 20px; max-width: 770px; }
+    .lead { font-size: 22px; line-height: 1.4; max-width: 760px; color: #38536B; margin: 0; }
+    .rows { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 18px; }
+    .row { min-height: 120px; border-top: 3px solid #0A2342; padding-top: 10px; }
+    .row:nth-child(2) { border-top-color: #008B8B; }
+    .row:nth-child(3) { border-top-color: #B87935; }
+    .row-num { font-family: monospace; color: #6B8297; font-size: 13px; letter-spacing: 2px; }
+    h2 { font-family: Georgia, serif; font-size: 25px; line-height: 1.1; margin: 14px 0 12px; }
+    .row p { font-size: 15px; line-height: 1.45; color: #38536B; margin: 0; }
+    .signal { display: grid; grid-template-columns: 1fr 72px 1fr; align-items: center; gap: 18px; margin-top: 12px; border-top: 1px dashed #B7C9D7; padding-top: 12px; color: #0A2342; }
+    .signal-label { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .crosshair { width: 26px; height: 26px; border: 2px solid #008B8B; transform: rotate(45deg); position: relative; margin: auto; }
+    .crosshair::before, .crosshair::after { content: ""; position: absolute; background: #008B8B; }
+    .crosshair::before { width: 38px; height: 1px; left: -8px; top: 11px; }
+    .crosshair::after { width: 1px; height: 38px; left: 11px; top: -8px; }
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 20px; padding-top: 14px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #6B8297; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">01 / O PROBLEMA</span></div>
+      <div class="layout">
+        <div class="index">01</div>
+        <div>
+          <h1>Quando o sinal some, a orientação precisa continuar.</h1>
+          <p class="lead">Em uma cidade, caminhada ou área remota, perder a rede significa perder mais do que o mapa: significa perder referência, plano de retorno e clareza sobre como pedir ajuda.</p>
+          <div class="rows">
+            <div class="row"><div class="row-num">01 / POSIÇÃO</div><h2>Onde estou?</h2><p>Uma leitura local de GNSS pode preservar a posição mesmo quando o aparelho não consegue acessar a internet.</p></div>
+            <div class="row"><div class="row-num">02 / ORIENTAÇÃO</div><h2>Para onde vou?</h2><p>Bússola, rumo, destino, MGRS e rota registrada ajudam a transformar coordenadas em decisão.</p></div>
+            <div class="row"><div class="row-num">03 / RETORNO</div><h2>Como explico?</h2><p>Última posição, horário e contexto preparado formam uma mensagem mais útil quando um canal reaparece.</p></div>
+          </div>
+          <div class="signal"><span class="signal-label">Resposta do produto</span><span class="crosshair"></span><strong>preparar antes · orientar durante · compartilhar com confirmação</strong></div>
+        </div>
+      </div>
+      <div class="footer"><span>Uso cotidiano + campo</span><span>Proteção civil, não promessa militar</span></div>
+    </div>
+  </div>
+</body>
+</html>

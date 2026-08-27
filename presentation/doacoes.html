@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Apoiar o projeto sem caixa-preta</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding-top: 48px; padding-left: 72px; padding-right: 72px; min-height: 720px; display: flex; flex-direction: column; }
+    
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; height: 28px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    
+    h1 { font-family: Georgia, serif; font-size: 48px; line-height: 1.03; margin-top: 42px; margin-bottom: 0; }
+    .lead { color: #38536B; font-size: 19px; line-height: 1.4; max-width: 900px; margin-top: 12px; margin-bottom: 0; }
+    
+    /* Reduced vertical spacing to fit under 720px without touching title padding */
+    .ledger-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 32px; margin-top: 24px; border-top: 3px solid #0A2342; padding-top: 24px; }
+    .ledger-col { border-right: 1px dashed #B7C9D7; padding-right: 32px; }
+    .ledger-col:last-child { border-right: none; padding-right: 0; }
+    
+    .col-title { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; border-bottom: 2px solid #B7C9D7; height: 32px; margin-top: 0; margin-bottom: 0; }
+    
+    .data-point { margin-top: 24px; }
+    .data-point strong { display: block; font-family: Georgia, serif; font-size: 20px; color: #0A2342; margin-bottom: 6px; }
+    .data-point span { display: block; font-size: 15px; color: #38536B; line-height: 1.45; }
+    
+    .status-banner { margin-top: 24px; background: #F0F4F8; border-left: 4px solid #B87935; padding-top: 20px; padding-left: 24px; padding-right: 24px; height: 84px; display: flex; align-items: flex-start; gap: 24px; }
+    .badge { background: #B87935; color: #FFFFFF; font-family: monospace; padding-top: 6px; padding-left: 10px; padding-right: 10px; height: 26px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .status-text { margin-top: 0; margin-bottom: 0; font-size: 16px; color: #0A2342; line-height: 1.4; max-width: 800px; }
+    
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 12px; padding-top: 12px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top">
+        <span class="brand">VANGUARD FIELD</span>
+        <span class="muted">08 / DOAÇÕES E AUDITORIA</span>
+      </div>
+      
+      <h1>Apoiar o projeto sem caixa-preta.</h1>
+      <p class="lead">O sistema de apoio financeiro foi desenhado para garantir transparência total e rastreabilidade, protegendo tanto o projeto quanto os doadores através de registros claros.</p>
+      
+      <div class="ledger-grid">
+        <div class="ledger-col">
+          <div class="col-title">Integração</div>
+          <div class="data-point">
+            <strong>Checkout Asaas</strong>
+            <span>Processamento via PIX e Cartão de Crédito utilizando infraestrutura hospedada segura.</span>
+          </div>
+          <div class="data-point">
+            <strong>Zero Armazenamento</strong>
+            <span>O Vanguard não processa, não intercepta e não armazena dados de cartão de crédito.</span>
+          </div>
+        </div>
+        
+        <div class="ledger-col">
+          <div class="col-title">Privacidade</div>
+          <div class="data-point">
+            <strong>Sem CPF Obrigatório</strong>
+            <span>O sistema não exige CPF ou CNPJ do doador por padrão, coletando apenas o necessário.</span>
+          </div>
+          <div class="data-point">
+            <strong>Foco na Origem</strong>
+            <span>O rastreamento identifica a origem interna da doação (campanha, botão) para fins de métrica.</span>
+          </div>
+        </div>
+        
+        <div class="ledger-col">
+          <div class="col-title">Trilha de Auditoria</div>
+          <div class="data-point">
+            <strong>Registro Financeiro</strong>
+            <span>Armazenamento de ID interno, ID do Asaas, valor bruto, tarifas aplicadas e valor líquido.</span>
+          </div>
+          <div class="data-point">
+            <strong>Ciclo de Vida</strong>
+            <span>Histórico completo de status: criado, confirmado, recebido, estornado ou chargeback.</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="status-banner">
+        <div class="badge">Modo Preparado</div>
+        <p class="status-text">A interface, os contratos de dados e a documentação estão prontos no código. Os pagamentos permanecem bloqueados até a configuração de credenciais reais e domínio público.</p>
+      </div>
+      
+      <div class="footer">
+        <span>Transparência financeira</span>
+        <span>Preparação para produção</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

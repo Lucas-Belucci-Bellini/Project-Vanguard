@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>Contexto muda a interface; não inventa fatos</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; background: #FFFFFF; color: #0A2342; font-family: Arial, sans-serif; }
+    .frame { padding: 48px 72px 0; min-height: 720px; }
+    .top { display: flex; justify-content: space-between; border-bottom: 1px solid #B7C9D7; padding-bottom: 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    .brand { font-weight: 700; letter-spacing: 3px; }
+    .muted { color: #6B8297; }
+    h1 { font-family: Georgia, serif; font-size: 48px; line-height: 1.03; margin: 42px 0 12px; }
+    .lead { color: #38536B; font-size: 19px; line-height: 1.4; max-width: 900px; margin: 0; }
+    
+    .split-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; margin-top: 42px; }
+    
+    .anatomy { border-top: 3px solid #0A2342; padding-top: 16px; }
+    .anatomy-title { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: #008B8B; text-transform: uppercase; margin-bottom: 24px; }
+    
+    .data-block { margin-bottom: 20px; }
+    .data-label { font-family: monospace; font-size: 11px; letter-spacing: 1.5px; color: #6B8297; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .data-value { font-family: Georgia, serif; font-size: 22px; color: #0A2342; border-bottom: 1px dashed #B7C9D7; padding-bottom: 8px; }
+    
+    .principle-box { margin-top: 32px; padding: 16px; background: #0A2342; color: #FFFFFF; border-left: 4px solid #008B8B; }
+    .principle-box strong { display: block; font-family: monospace; font-size: 12px; letter-spacing: 2px; color: #6ED7D2; margin-bottom: 8px; text-transform: uppercase; }
+    .principle-box p { margin: 0; font-size: 15px; line-height: 1.4; color: #B8D2E5; }
+    
+    .examples { border-top: 3px solid #008B8B; padding-top: 16px; }
+    .example-item { display: grid; grid-template-columns: 140px 1fr; gap: 24px; padding: 16px 0; border-bottom: 1px dashed #B7C9D7; }
+    .example-item:last-child { border-bottom: none; }
+    .example-type { font-family: monospace; font-size: 12px; letter-spacing: 1px; color: #0A2342; font-weight: bold; text-transform: uppercase; }
+    .example-desc { margin: 0; font-size: 15px; line-height: 1.4; color: #38536B; }
+    .example-desc strong { color: #0A2342; font-family: Georgia, serif; font-size: 18px; display: block; margin-bottom: 4px; }
+    
+    .danger-type { color: #B87935; }
+    
+    .footer { display: flex; justify-content: space-between; border-top: 1px solid #B7C9D7; margin-top: 12px; padding-top: 12px; color: #6B8297; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="frame">
+      <div class="top"><span class="brand">VANGUARD FIELD</span><span class="muted">05 / PROTEÇÃO CIVIL</span></div>
+      <h1>Contexto muda a interface; não inventa fatos.</h1>
+      <p class="lead">Zonas locais guardam nome, tipo, coordenada, raio, fonte e data. O app mostra por que o contexto mudou e conserva o modo manual quando não existem dados confiáveis.</p>
+      
+      <div class="split-layout">
+        <div class="anatomy">
+          <div class="anatomy-title">Anatomia de um Alerta</div>
+          
+          <div class="data-block">
+            <span class="data-label">Localização e Abrangência</span>
+            <div class="data-value">Coordenada Central + Raio (m)</div>
+          </div>
+          
+          <div class="data-block">
+            <span class="data-label">Verificação de Origem</span>
+            <div class="data-value">Fonte Oficial Registrada</div>
+          </div>
+          
+          <div class="data-block">
+            <span class="data-label">Temporalidade</span>
+            <div class="data-value">Data de Emissão / Validade</div>
+          </div>
+          
+          <div class="principle-box">
+            <strong>Princípio Operacional</strong>
+            <p>Um alerta precisa de fonte e validade. Um ponto no mapa é um aviso contextual, não um radar ativo detectando ameaças em tempo real.</p>
+          </div>
+        </div>
+        
+        <div class="examples">
+          <div class="anatomy-title">Exemplos de Ativação</div>
+          
+          <div class="example-item">
+            <div class="example-type">ZONA DE DESASTRE</div>
+            <div class="example-desc">
+              <strong>Área de Evacuação</strong>
+              Polígono ou raio definido pela Defesa Civil para afastamento imediato.
+            </div>
+          </div>
+          
+          <div class="example-item">
+            <div class="example-type danger-type">ÁREA CONTAMINADA</div>
+            <div class="example-desc">
+              <strong>Risco Químico / Radiológico</strong>
+              Zona de exclusão publicada por autoridade responsável (ex: perímetro de acidente).
+            </div>
+          </div>
+          
+          <div class="example-item">
+            <div class="example-type">MAR / NAVEGAÇÃO</div>
+            <div class="example-desc">
+              <strong>Perigo Marítimo</strong>
+              Aviso aos navegantes sobre obstáculo submerso ou área de exercício militar.
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+      <div class="footer">
+        <span>Uso responsável de alertas civis</span>
+        <span>Dados locais verificáveis</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
