@@ -31,6 +31,8 @@
 .mapa__offline-card { margin-top: 9px; padding: 10px; background: var(--color-cyan-soft); border: 1px solid var(--color-cyan-edge); }
 .mapa__offline-button { width: 100%; min-height: 34px; padding: 7px; color: var(--color-cyan); background: transparent; border-color: var(--color-cyan-edge); font-size: 9px; font-weight: var(--font-weight-bold); }
 .mapa__offline-status { min-height: 15px; margin: 6px 0 0; color: var(--color-text-muted); font-size: 9px; line-height: 1.45; }
+.mapa__offline-clear { width: 100%; min-height: 28px; margin-top: 6px; padding: 6px; background: transparent; border-color: var(--color-cyan-edge); color: var(--color-text-muted); font-size: 8px; letter-spacing: .04em; }
+.mapa__offline-clear:disabled, .mapa__offline-button:disabled { opacity: .55; cursor: wait; }
 .mapa__quick-button { min-height: 36px; padding: 7px; color: var(--color-text-secondary); background: var(--color-surface); font-size: 9px; }
 .mapa__quick-button--quiet { color: var(--color-text-muted); }
 .mapa__route-card { margin-top: 10px; padding: 12px; background: var(--color-surface); border: var(--border-base); }
