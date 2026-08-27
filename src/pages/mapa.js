@@ -292,6 +292,8 @@ export function mapaPage() {
     estado.set(CHAVES.TRILHA, trilha);
     estado.set(CHAVES.WAYPOINTS, waypoints);
     estado.set(CHAVES.ROTA_ATIVA, false);
+    configurarWakeLock(false);
+    pararGps?.setMode('cidade');
     sheetStatus.textContent = 'Trilha e pontos removidos deste aparelho.';
     atualizarSheet();
     atualizarMarcadores();
