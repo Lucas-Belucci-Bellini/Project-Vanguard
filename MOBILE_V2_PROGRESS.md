@@ -64,3 +64,11 @@ Este teste confirma o caminho remoto de artifacts e a separação build/artifact
 A auditoria encontrou que o watcher GPS tinha callbacks de posição e erro, mas não expunha estados operacionais para a UI. `src/core/localizacao.js` agora emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILABLE` e `STOPPED`, aceita APIs injetáveis para testes e expõe `setPaused(true/false)`.
 
 O Mapa usa esses estados no HUD e pausa o watcher quando a página fica oculta, retomando-o ao voltar ao foreground. Essa é uma política foreground-only e não uma implementação de tracking em background. `test/localizacao.test.js` cobre Web, Capacitor injetado, pausa, retomada, cleanup e ausência de API. A suíte local chegou a 154 testes, e build, sync Android/iOS e APK debug passaram.
+
+## Marco de tracking local Start/Pause/Resume/Stop — 2026-08-27
+
+A auditoria do prompt Mobile V2 confirmou que o Mapa tinha somente alternância iniciar/parar. Foi adicionada a máquina pura `src/core/trilha-sessao.js`, com os estados `STOPPED`, `ACTIVE` e `PAUSED`, e a chave local `rotaPausada` foi criada sem remover `rotaAtiva`.
+
+O Mapa agora oferece `INICIAR ROTA`, `PAUSAR ROTA`, `RETOMAR ROTA` e `PARAR E GUARDAR`; a Home distingue `GRAVAÇÃO ATIVA`, `ROTA PAUSADA` e `REGISTRO PRONTO`. Pausar impede novos pontos, preservando o registro local; parar não apaga, exporta nem compartilha. A pausa manual permanece separada da pausa de lifecycle foreground-only.
+
+`test/trilha-sessao.test.js` cobre transições válidas e eventos inválidos; os testes de localização cobrem o watcher. A suíte chegou a 156 testes, com build, sync Capacitor, auditoria e APK debug aprovados. Sessão real, tela bloqueada, suspensão, retomada e consumo de bateria continuam pendentes em dispositivos.

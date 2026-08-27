@@ -1,17 +1,17 @@
 # Vanguard Field — MOBILE V2 STATUS
 
-> Registro persistente da execução Mobile V2. Atualizado em **2026-08-27**, após a unidade de estados GPS foreground-only. Este arquivo não declara a V2 completa sem validação física.
+> Registro persistente da execução Mobile V2. Atualizado em **2026-08-27**, após a unidade de controle manual da trilha. Este arquivo não declara a V2 completa sem validação física.
 
 | Campo | Estado atual |
 |---|---|
 | **Version** | `2.x` em construção; pacote compartilhado atual `1.0.0` |
 | **Phase** | Mobile foundation com diagnóstico local, PWA e Capacitor; `IN PROGRESS` |
-| **Milestone** | Capacidades observáveis, compartilhamento explícito, permissões GPS, persistência observável e estados foreground-only |
+| **Milestone** | Capacidades observáveis, compartilhamento explícito, permissões GPS, persistência observável, estados foreground-only e controle de trilha |
 | **Android** | Projeto Capacitor presente; `com.projectvanguard.field`; permissões somente coarse/fine; APK debug compilado; aparelho real ainda não validado |
 | **iOS** | Projeto Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync validado no Linux; build, assinatura e aparelho real pendentes em macOS/Xcode |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache local; instalação e modo avião ainda exigem teste físico |
 | **Build** | `npm run build`, sync Android/iOS e `assembleDebug` aprovados nesta execução; APK permanece artifact de teste |
-| **Tests** | `npm test`: **154 aprovados**; `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados |
+| **Tests** | `npm test`: **156 aprovados**; `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados |
 | **Permissions** | Android foreground coarse/fine; iOS descrição foreground; não há background location, foreground service ou `UIBackgroundModes` |
 | **GPS** | Driver Capacitor foreground com fallback Web/PWA; watcher emite `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; posição normalizada usa `lat/lon` |
 | **Compass** | Sensor físico ainda `BROWSER DEPENDENT`/`DEVICE DEPENDENT`; fallback de rumo GPS não prova sensor magnético |
@@ -22,8 +22,8 @@
 | **Security** | Civil, local-first, sem telemetria automática, sem SOS/resgate confirmado, sem integração militar e sem expansão do legado balístico |
 | **Accessibility** | Shell com skip link, landmarks, foco, ARIA e status; leitor de tela/touch precisam de validação em dispositivos |
 | **Release** | `BLOCKED`; a única release continua `v1.0.0-rc.2`; `v1.0.0` final não foi criada |
-| **Current Task** | Validar estados GPS, pausa ao ocultar o app, permissões nativas, persistência/quota, capabilities e Share Sheet/Files/clipboard/download nos fluxos Mobile V2 em Android comum, Xiaomi/MIUI/HyperOS e iPhone quando os aparelhos estiverem disponíveis |
-| **Next Task** | Executar lifecycle real, tela bloqueada, retomada do watcher, falha/quota de storage, modo avião, importação/exportação, Share Sheet/Files, bússola, update posterior e bateria; não assumir background contínuo |
+| **Current Task** | Validar Start/Pause/Resume/Stop da trilha, lifecycle GPS, permissões nativas, persistência/quota, capabilities e Share Sheet/Files/clipboard/download nos fluxos Mobile V2 em Android comum, Xiaomi/MIUI/HyperOS e iPhone quando os aparelhos estiverem disponíveis |
+| **Next Task** | Executar em aparelho real Start/Pause/Resume/Stop, tela bloqueada, retomada do watcher, falha/quota de storage, modo avião, importação/exportação, Share Sheet/Files, bússola, update posterior e bateria; não assumir background contínuo |
 
 ## Unidades entregues
 
@@ -37,7 +37,9 @@ Na rodada anterior, `src/platform/permissoes.js` passou a consultar `checkPermis
 
 Na rodada anterior, `src/core/estado.js` passou a registrar a última tentativa de escrita local, distinguindo `PERSISTIDO` de `FALHA` e preservando o valor retornado por `estado.set()`.
 
-Nesta rodada, `src/core/localizacao.js` passou a emitir estados operacionais do watcher e expor `setPaused(true/false)`. O Mapa pausa o watcher ao ocultar a página e o retoma ao voltar ao foreground; `test/localizacao.test.js` cobre Web, Capacitor injetado, cleanup e ausência de API. A suíte chegou a 154 testes aprovados.
+Na rodada anterior, `src/core/localizacao.js` passou a emitir estados operacionais do watcher e expor `setPaused(true/false)`. O Mapa pausa o watcher ao ocultar a página e o retoma ao voltar ao foreground.
+
+Nesta rodada, `src/core/trilha-sessao.js` adicionou a máquina de estados local `STOPPED`/`ACTIVE`/`PAUSED`, com `Start`, `Pause`, `Resume` e `Stop`. O Mapa e a Home distinguem rota ativa, pausada e parada; os pontos continuam locais e `Stop` não apaga nem exporta automaticamente. `test/trilha-sessao.test.js` e regressões de localização elevaram a suíte para 156 testes aprovados.
 
 ## Evidência e limites
 

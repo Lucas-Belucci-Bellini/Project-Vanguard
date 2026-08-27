@@ -27,6 +27,8 @@
 
 | MV2-021 | Android/iOS/PWA | Estados do acompanhamento GPS foreground-only | TESTED | `src/core/localizacao.js` emite `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; Mapa usa `setPaused()` ao ocultar/retomar | Web, Capacitor injetado, cleanup e ausência de API cobertos em `test/localizacao.test.js` | Node/CI; tela bloqueada, suspensão e retorno físico pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0019 |
 
+| MV2-022 | Android/iOS/PWA | Tracking local Start/Pause/Resume/Stop | TESTED | `src/core/trilha-sessao.js`, `CHAVES.ROTA_PAUSADA`, controles do Mapa e resumo da Home | máquina pura em `test/trilha-sessao.test.js`; suíte total 156 | Node/CI; sessão real, tela bloqueada, suspensão e bateria pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0020 |
+
 ## Regra de encerramento
 
 Nenhum item bloqueado por hardware, assinatura, quota, ciclo de vida ou integração pode ser promovido automaticamente para `VERIFIED` ou `COMPLETE`. A tag `v1.0.0` permanece fora deste ciclo até que os gates do checklist de campo sejam executados e registrados.

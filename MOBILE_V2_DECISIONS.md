@@ -52,6 +52,10 @@ O workflow Mobile Release aceita um dispatch com versão e `publish_tag` vazio p
 
 O watcher compartilhado emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILABLE` e `STOPPED`. O Mapa chama `setPaused(true)` quando fica oculto e `setPaused(false)` ao retornar. Essa decisão evita afirmar que o GPS segue executando em background; não adiciona localização em segundo plano, foreground service ou modos especiais de execução. A continuidade, o retorno após suspensão e o comportamento em tela bloqueada ainda precisam de validação física.
 
+## D-014 — Sessão de trilha separa pausa manual de lifecycle
+
+A sessão local usa `STOPPED`, `ACTIVE` e `PAUSED` em `src/core/trilha-sessao.js`. O Mapa oferece `INICIAR ROTA`, `PAUSAR ROTA`, `RETOMAR ROTA` e `PARAR E GUARDAR`; a chave `rotaPausada` é persistida sem remover a chave legada `rotaAtiva`. Pausar a sessão impede a inclusão de novos pontos, mas não simula nem habilita tracking em background. Ocultar a página continua sendo tratado pelo watcher `FOREGROUND_ONLY`, e `STOP` não exporta, compartilha ou apaga o registro.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)
