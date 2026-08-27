@@ -2,6 +2,7 @@ import '../styles/inicio.css';
 import { h, empty } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { solicitarPosicao, precisaoLabel } from '../core/localizacao.js';
+import { avaliarProntidaoOffline } from '../core/prontidao-offline.js';
 
 function caminho(hash, titulo, descricao, icone, classe = '') {
   return h('button', {
@@ -71,6 +72,39 @@ export function inicioPage() {
       ? `${trilha.length} leituras salvas no aparelho`
       : 'Nenhuma rota em andamento');
 
+  const prontidaoCard = h('section', { className: 'inicio__prontidao', 'aria-labelledby': 'prontidao-titulo' });
+  const prontidaoTitulo = h('h2', { id: 'prontidao-titulo' });
+  const prontidaoResumo = h('p', { className: 'inicio__prontidao-resumo', role: 'status' });
+  const prontidaoLista = h('ul', { className: 'inicio__prontidao-lista' });
+  prontidaoCard.append(
+    h('div', { className: 'inicio__prontidao-head' },
+      h('div', null, h('span', { className: 'inicio__kicker' }, 'ANTES DE SAIR'), prontidaoTitulo),
+      h('span', { className: 'inicio__prontidao-badge' }, 'LOCAL')
+    ),
+    prontidaoResumo,
+    prontidaoLista
+  );
+
+  function atualizarProntidao() {
+    const resultado = avaliarProntidaoOffline({
+      posicao,
+      mapasOffline: estado.get(CHAVES.MAPAS_OFFLINE, null),
+      armazenamento: typeof localStorage !== 'undefined',
+      serviceWorker: typeof navigator !== 'undefined' && 'serviceWorker' in navigator ? Boolean(navigator.serviceWorker.controller) : false,
+      trilha: estado.get(CHAVES.TRILHA, []),
+      waypoints: estado.get(CHAVES.WAYPOINTS, []),
+    });
+    prontidaoCard.classList.toggle('is-ready', resultado.pronto);
+    prontidaoTitulo.textContent = resultado.pronto ? 'BASE OFFLINE CONFERIDA' : 'PREPARE ANTES DE SAIR';
+    prontidaoResumo.textContent = `${resultado.conferidos}/${resultado.total} itens conferidos. ${resultado.recomendacao}`;
+    prontidaoLista.replaceChildren(...resultado.itens.map((item) => h('li', { className: `is-${item.estado}` },
+      h('span', { className: 'inicio__prontidao-mark', ariaHidden: 'true' }, item.estado === 'ok' ? '✓' : item.estado === 'atencao' ? '!' : '○'),
+      h('span', null, h('strong', null, item.nome), h('small', null, item.detalhe))
+    )));
+  }
+
+  atualizarProntidao();
+
   raiz.append(
     h('section', { className: 'inicio__scroll' },
       h('div', { className: 'inicio__hero' },
@@ -81,6 +115,7 @@ export function inicioPage() {
         gpsButton,
         gpsFeedback
       ),
+      h('section', { className: 'inicio__section inicio__section--readiness' }, prontidaoCard),
       h('section', { className: 'inicio__section', 'aria-labelledby': 'atalhos-titulo' },
         h('div', { className: 'inicio__section-head' },
           h('span', { className: 'inicio__kicker' }, 'PAINEL DE CAMPO'),
@@ -123,12 +158,24 @@ export function inicioPage() {
     )
   );
 
-  const removeListener = estado.on(CHAVES.LOCAL, (novaPosicao) => {
+  const removeLocalListener = estado.on(CHAVES.LOCAL, (novaPosicao) => {
     posicao = novaPosicao;
     statusDot.classList.add('is-ready');
     statusTitle.textContent = 'LOCALIZAÇÃO DISPONÍVEL';
     statusDetail.textContent = `Último fixo salvo no aparelho · ${precisaoLabel(novaPosicao.accuracy)}`;
+    atualizarProntidao();
   });
+  const removeTrilhaListener = estado.on(CHAVES.TRILHA, atualizarProntidao);
+  const removeWaypointsListener = estado.on(CHAVES.WAYPOINTS, atualizarProntidao);
+  const removeMapasListener = estado.on(CHAVES.MAPAS_OFFLINE, atualizarProntidao);
 
-  return { elemento: raiz, desmontar: removeListener };
+  return {
+    elemento: raiz,
+    desmontar: () => {
+      removeLocalListener();
+      removeTrilhaListener();
+      removeWaypointsListener();
+      removeMapasListener();
+    },
+  };
 }

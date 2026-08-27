@@ -18,6 +18,22 @@
 .inicio__primary:hover { background: var(--color-text-primary); border-color: var(--color-text-primary); }
 .inicio__feedback { min-height: 18px; margin: 8px 0 0; color: var(--color-text-muted); font-size: 10px; }
 .inicio__section { padding: 24px 0 0; }
+.inicio__section--readiness { padding-top: 12px; }
+.inicio__prontidao { padding: 14px; background: var(--color-surface); border: var(--border-base); }
+.inicio__prontidao.is-ready { border-color: var(--color-cyan-edge); }
+.inicio__prontidao-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.inicio__prontidao-head h2 { margin-top: 6px; color: var(--color-text-primary); font-size: 15px; }
+.inicio__prontidao-badge { padding: 4px 6px; color: var(--color-cyan); border: 1px solid var(--color-cyan-edge); font-size: 8px; letter-spacing: var(--tracking-wide); }
+.inicio__prontidao-resumo { min-height: 18px; margin: 9px 0 0; color: var(--color-text-secondary); font-size: 10px; line-height: 1.5; }
+.inicio__prontidao-lista { display: grid; gap: 5px; margin: 10px 0 0; padding: 0; list-style: none; }
+.inicio__prontidao-lista li { display: grid; grid-template-columns: 20px 1fr; gap: 7px; align-items: start; padding: 6px 0; border-top: 1px solid rgba(139,255,63,.1); }
+.inicio__prontidao-mark { color: var(--color-text-muted); font-weight: var(--font-weight-bold); text-align: center; }
+.inicio__prontidao-lista li.is-ok .inicio__prontidao-mark { color: var(--color-cyan); }
+.inicio__prontidao-lista li.is-atencao .inicio__prontidao-mark { color: var(--color-amber); }
+.inicio__prontidao-lista li.is-pendente .inicio__prontidao-mark { color: var(--color-magenta); }
+.inicio__prontidao-lista strong, .inicio__prontidao-lista small { display: block; }
+.inicio__prontidao-lista strong { color: var(--color-text-primary); font-size: 9px; }
+.inicio__prontidao-lista small { margin-top: 2px; color: var(--color-text-muted); font-size: 8px; line-height: 1.4; }
 .inicio__section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .inicio__section-head h2 { color: var(--color-text-primary); }
 .inicio__atalhos { display: grid; grid-template-columns: 1fr; gap: 8px; }
