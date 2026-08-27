@@ -1,116 +1,74 @@
-/**
- * `#/sobre` — o que a ferramenta é, o que ela não é, e de onde vêm os números.
+/*
+ * #/sobre — contrato público do Vanguard Field.
  *
- * Esta tela existe por um motivo específico: o app cospe números com quatro
- * dígitos e aparência de autoridade. Quem usa precisa saber exatamente qual é
- * a procedência de cada um e onde o modelo para de valer. Esconder isso numa
- * nota de rodapé seria a decisão errada.
+ * A página explica o que o produto faz hoje, o que fica preparado para depois
+ * e quais capacidades exigem fontes oficiais, hardware ou comunicação externa.
  */
 
 import { h } from '../ui/helpers.js';
-import { listarSistemas } from '../engine/charges.js';
-import { VERSAO_MOTOR, SCHEMA_PEDIDO, SCHEMA_RESPOSTA } from '../engine/fire-mission.js';
-import { A3TER, A3TER_META } from '../data/arma3-terrenos.js';
+import '../styles/sobre.css';
 
-/* Contado da base, não escrito à mão: um mundo novo com northing pra cima
- * mudaria a frase da tela, e uma ressalva desatualizada é pior que nenhuma. */
-const COM_GRADE = A3TER.filter((t) => t.grade);
-const NORTE_PARA_SUL = COM_GRADE.filter((t) => t.grade.passoY < 0).length;
+function painel(titulo, ...corpo) {
+  return h('section', { className: 'vg-painel sobre__painel' },
+    h('div', { className: 'vg-painel__titulo' }, titulo),
+    h('div', { className: 'vg-painel__corpo' }, ...corpo));
+}
+
+function linha(status, titulo, descricao) {
+  return h('div', { className: 'sobre__linha' },
+    h('span', { className: `sobre__status sobre__status--${status}` }, status === 'feito' ? 'FEITO' : status === 'preparado' ? 'PREPARADO' : 'EXTERNO'),
+    h('div', { className: 'sobre__linha-copy' }, h('strong', null, titulo), h('p', null, descricao)));
+}
 
 export function sobrePage() {
-  const raiz = h('div', { className: 'vg-pagina', style: { overflowY: 'auto', padding: '24px', display: 'block' } });
-  const wrap = h('div', { style: { maxWidth: '860px', margin: '0 auto' } });
+  const raiz = h('div', { className: 'vg-pagina sobre' });
+  const wrap = h('div', { className: 'sobre__wrap' });
   raiz.append(wrap);
 
-  const painel = (titulo, ...corpo) =>
-    h('div', { className: 'vg-painel', style: { marginBottom: '16px' } },
-      h('div', { className: 'vg-painel__titulo' }, titulo),
-      h('div', { className: 'vg-painel__corpo' }, ...corpo));
-
   wrap.append(
-    h('h1', { style: { color: 'var(--color-cyan)', marginBottom: '8px', letterSpacing: '0.2em' } },
-      'PROJECT VANGUARD'),
-    h('p', { className: 'u-mudo', style: { marginTop: '0', marginBottom: '24px' } },
-      `Motor v${VERSAO_MOTOR} · GPS topográfico tático e computador de tiro · ecossistema Projeto Baluarte`),
+    h('header', { className: 'sobre__header' },
+      h('div', null,
+        h('div', { className: 'sobre__eyebrow' }, 'VANGUARD FIELD / CONTRATO PÚBLICO'),
+        h('h1', null, 'Navegação que explica seus limites'),
+        h('p', null, 'O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, mar e proteção civil. Ele prioriza dados locais e avisa quando uma função depende de rede, fonte oficial ou equipamento externo.')),
+      h('div', { className: 'sobre__version' }, 'PROTÓTIPO', h('small', null, 'OFFLINE-FIRST'))),
 
-    h('div', { className: 'vg-aviso' },
-      h('strong', null, 'Ferramenta de treino e simulação. '),
-      'Os dados de armamento são valores de referência de modelo, compilados de fontes ' +
-      'públicas — não são tabela de tiro oficial e não substituem uma. Não use para ' +
-      'emprego real de armamento.'),
+    painel('◤ O QUE O PRODUTO FAZ',
+      linha('feito', 'Cidade e dia a dia', 'Define destinos por coordenadas ou toque no mapa, mostra distância e rumo e guarda pontos localmente.'),
+      linha('feito', 'Trilha e expedição', 'Registra a rota no aparelho, permite pausar/retomar, marca referências e exibe MGRS para orientação.'),
+      linha('feito', 'Bússola e GPS/GNSS', 'Usa o sensor de orientação e o rumo do GPS quando disponíveis. O aparelho calcula a posição; isso não é comunicação.'),
+      linha('feito', 'Modo Socorro', 'Prepara a última posição, precisão, horário e coordenadas para compartilhamento manual, sem afirmar que uma equipe recebeu o alerta.'),
+      linha('feito', 'Sobrevivência', 'Disponibiliza conteúdo local de primeiros passos, abrigo, água, sinalização, alimentação e conduta diante de explosivos.'),
+      linha('feito', 'Mapas para uso sem rede', 'Permite preparar a área visível enquanto conectado; a shell, os dados locais e os tiles já guardados podem ser reabertos offline.')),
 
-    painel('◤ O QUE O MOTOR FAZ',
+    painel('◤ MODOS AUTOMÁTICOS DE CONTEXTO',
+      h('p', null, 'O modo pode ser escolhido manualmente ou ativado por uma zona local cadastrada com coordenada, raio, fonte e data. A prioridade só sobe quando há uma zona conhecida; sem fonte, o app mantém o modo escolhido.'),
+      h('div', { className: 'sobre__contextos' },
+        ...['Cidade', 'Expedição', 'Mar', 'Zona de desastre', 'Área contaminada', 'Área de conflito'].map((nome) => h('span', null, nome))),
+      h('p', { className: 'sobre__muted' }, 'Uma zona é um aviso geográfico, não um radar. Dados antigos ou sem fonte não devem ser tratados como alerta atual.')),
+
+    painel('◤ O QUE DEPENDE DE FORA',
+      linha('preparado', 'Cartas náuticas e profundidade', 'O modo Mar está preparado para cartas, perigos, marés e avisos oficiais. Imagem de satélite não substitui carta náutica atualizada, sonar ou habilitação.'),
+      linha('preparado', 'Área contaminada e radiação', 'O app pode exibir uma área de exclusão publicada. Medição de radiação exige contador Geiger ou dosímetro externo identificado e calibrado.'),
+      linha('preparado', 'SOS sem rede', 'É necessário mensageiro via satélite, beacon, rádio de dados ou outro canal compatível. GPS, câmera, microfone e bússola não enviam mensagem sozinhos.'),
+      linha('externo', 'Drones, tropas e explosões', 'O Vanguard não é radar militar e não confirma a presença de drones, tropas ou explosões. Alertas devem vir de fonte verificada ou equipamento especializado.'),
+      linha('externo', 'Minas e restos explosivos', 'O app pode mostrar zonas publicadas e instruções de afastamento. Não identifica, remove, investiga ou libera a passagem por uma área suspeita.'),
+      linha('preparado', 'Doações e pagamentos', 'O fluxo Asaas está documentado, mas permanece bloqueado até conta, credenciais, domínio, Webhook e serviço de e-mail reais serem configurados.')),
+
+    painel('◤ PRIVACIDADE E OFFLINE',
       h('ul', null,
-        h('li', null, h('strong', null, 'Coordenadas: '),
-          'lat/lon ⇄ UTM ⇄ MGRS em WGS84, com as exceções de fuso da Noruega e de ' +
-          'Svalbard. Precisão de ida-e-volta abaixo de 5 cm no mundo todo.'),
-        h('li', null, h('strong', null, 'Grade local: '),
-          'grid de 4 a 10 dígitos no estilo Arma 3, com quadro opcionalmente amarrado ao mundo real.'),
-        h('li', null, h('strong', null, 'Terrenos do Arma 3: '),
-          `${A3TER_META.comGrade} mundos com a grade lida do config de cada um `
-          + `(${A3TER_META.oficiais} oficiais, ${A3TER_META.mods} de mod). `
-          + 'A grade da carta do jogo é convertida em metros do mundo pelo offset e pelo '
-          + 'SINAL do passo daquele mundo — ver a ressalva abaixo.'),
-        h('li', null, h('strong', null, 'Geodésia: '),
-          'Vincenty direto e inverso (precisão milimétrica) para navegação; plano da ' +
-          'grade UTM para tiro — que é o que a doutrina de artilharia usa.'),
-        h('li', null, h('strong', null, 'Balística: '),
-          'solução exata em vácuo (forma fechada) e solução com arrasto quadrático e ' +
-          'vento 3D por integração numérica.'))),
+        h('li', null, 'A posição fica no aparelho por padrão; compartilhamento exige ação explícita.'),
+        h('li', null, 'Sem internet, rotas, pontos, destinos, bússola e manual local continuam disponíveis depois do primeiro carregamento.'),
+        h('li', null, 'O aplicativo não tenta enviar pagamento, e-mail ou SOS por uma rede inexistente. Eventos sincronizáveis podem aguardar uma conexão autorizada.'),
+        h('li', null, 'O manual de sobrevivência é apoio educacional e não substitui treinamento, atendimento médico, Defesa Civil, autoridade marítima ou especialistas.'))),
 
-    painel('◤ DE ONDE VÊM OS NÚMEROS',
-      h('p', null,
-        'O coeficiente de arrasto de cada carga não é chutado: ele é ',
-        h('strong', { className: 'u-acento' }, 'derivado'),
-        ' do par (velocidade inicial, alcance máximo publicado), que é dado verificável. ' +
-        'Trocar a fonte por uma tabela de tiro real recalibra a tabela inteira sozinha.'),
-      h('table', { className: 'vg-tabela' },
-        h('thead', null, h('tr', null,
-          h('th', null, 'Sistema'), h('th', null, 'Calibre'), h('th', null, 'Origem'),
-          h('th', null, 'Cargas'), h('th', null, 'Alcance máx.'))),
-        h('tbody', null, ...listarSistemas().map((s) =>
-          h('tr', null,
-            h('td', null, s.nome, s.jogo && h('span', { className: 'vg-badge u-ambar', style: { marginLeft: '6px' } }, 'JOGO')),
-            h('td', null, `${s.calibre} mm`),
-            h('td', null, s.origem),
-            h('td', null, String(s.cargas)),
-            h('td', null, `${(s.alcanceMaxM / 1000).toFixed(1)} km`)))))),
+    painel('◤ MÓDULO LEGADO ISOLADO',
+      h('p', null, 'O repositório preserva um motor e uma tela antigos de cálculo balístico para compatibilidade histórica e testes do projeto original. Eles não fazem parte do produto civil recomendado, não aparecem no fluxo principal e não devem ser usados para emprego real de armamento.'),
+      h('button', { className: 'sobre__legacy-button', type: 'button', onclick: () => { location.hash = '#/tiro'; } }, 'ABRIR SOMENTE O MÓDULO LEGADO →')),
 
-    painel('◤ ONDE O MODELO PARA DE VALER',
-      h('ul', null,
-        h('li', null, 'Atmosfera é uniforme: sem gradiente de densidade, temperatura ou vento com a altitude. ' +
-          'Num apogeu de 3 km isso é uma simplificação real.'),
-        h('li', null, 'Sem efeito Coriolis nem deriva por rotação do projétil (spin drift). ' +
-          'Relevante acima de ~10 km; irrelevante em morteiro.'),
-        h('li', null, 'Gravidade constante e Terra plana dentro do alcance — válido para os ' +
-          'alcances envolvidos (< 10 km).'),
-        h('li', null, 'A dispersão é um modelo de ordem de grandeza, não tabela de tiro.'),
-        h('li', null, 'A altitude vem de modelo digital de terreno (Open-Meteo), com erro ' +
-          'típico de alguns metros. Em terreno acidentado, confira.'),
-        h('li', null, h('strong', null, 'Terreno do Arma 3: '),
-          'a grade vem do config de cada mundo, mas a ',
-          h('strong', null, 'altitude não'),
-          ' — o dump não traz o mapa de elevação. Digite a cota lida no jogo; deixá-la '
-          + 'em zero calcula como se peça e alvo estivessem no mesmo nível.'),
-        h('li', null, h('strong', null, 'Northing invertido: '),
-          `em ${NORTE_PARA_SUL} dos ${COM_GRADE.length} mundos o rótulo de northing `
-          + 'cresce para o SUL, ao contrário de toda carta MGRS. O motor respeita o sinal do '
-          + 'passo de cada mundo, mas isso só vale se o terreno certo estiver selecionado: '
-          + 'terreno errado espelha o eixo N-S e o azimute sai 180° fora.'))),
-
-    painel('◤ CONTRATO DE INTEGRAÇÃO',
-      h('p', null, 'O computador de tiro é chamável de fora — mesma função no navegador, em Web Worker, em Node ou atrás de HTTP:'),
-      h('pre', { style: { overflowX: 'auto', fontSize: '11px', color: 'var(--color-text-secondary)' } },
-        `POST /api/fire-mission\n{\n  "schema": "${SCHEMA_PEDIDO}",\n  "peca": { "pos": { "tipo": "mgrs", "valor": "23K PQ 83477 60685", "alt": 30 },\n            "sistema": "m252_81mm" },\n  "alvo": { "pos": { "tipo": "mgrs", "valor": "23K PQ 86000 63000", "alt": 120 } },\n  "ambiente": { "ventoVelocidadeMs": 8, "ventoDirecaoDeg": 270 }\n}\n\n→ ${SCHEMA_RESPOSTA}`)),
-
-    painel('◤ ECOSSISTEMA',
-      h('p', null,
-        'O Vanguard usa a MESMA formulação de arrasto do ',
-        h('code', { className: 'u-acento' }, 'arma3-balistica.js'),
-        ' do Projeto Baluarte, e os mesmos nomes de token de design — ' +
-        'então componente e coeficiente calibrado atravessam os dois projetos sem tradução.'),
-      h('p', { className: 'u-mudo' }, 'Ver docs/INTEGRACAO-BALUARTE.md no repositório.'))
-  );
+    h('footer', { className: 'sobre__footer' },
+      h('strong', null, 'Documentação completa'),
+      h('p', null, 'Consulte README.md, docs/CONTEXTOS-E-SEGURANCA.md e docs/ASAAS-INTEGRACAO.md no repositório para fontes, preparação offline, auditoria financeira e dependências externas.')));
 
   return { elemento: raiz, desmontar: null };
 }
