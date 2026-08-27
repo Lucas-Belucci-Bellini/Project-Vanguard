@@ -80,3 +80,11 @@ A auditoria da FASE 14 do prompt identificou que o Vanguard oferecia JSON e GPX,
 O Mapa oferece `EXPORTAR KML`, integra o mesmo adaptador de compartilhamento explícito e aceita `.kml` na importação. O parser trata o conteúdo como dados, escapa/decodifica nomes e ignora elementos não suportados; não executa scripts, links nem dados externos. `test/registro-offline.test.js` cobre exportação, importação, XML escapado, altitude, raiz ausente, arquivo vazio e coordenadas inválidas. A suíte chegou a 159 testes aprovados.
 
 Interoperabilidade completa de KML, Files/Share Sheet em aparelho e comportamento físico continuam pendentes; o recurso não é uma promessa de sincronização ou mapa oficial.
+
+## Marco Omega — memória persistente consolidada — 2026-08-27
+
+A nova ordem Omega exige uma memória mais ampla que os arquivos Mobile V2 anteriores. A auditoria de `main` confirmou que seis arquivos ainda não existiam: `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_FEATURE_MATRIX.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_DEVICE_MATRIX.md` e `MOBILE_V2_EXECUTION_LOG.md`.
+
+Esses arquivos foram criados com a separação entre implementação, teste, CI, artifact, assinatura, instalação, validação física e release. A implementação existente foi preservada: JS ES2022/Vite/MapLibre/Capacitor/PWA, GPS foreground-only, tracking local, JSON/GPX/KML, compartilhamento explícito e diagnóstico. A auditoria de marcadores encontrou somente placeholders legítimos de interface/comentários no escopo avaliado; não foram convertidos em features fictícias.
+
+A memória Omega mantém `IN PROGRESS` e `BLOCKED` onde faltam aparelhos, macOS/Xcode, signing, quota, modo avião, sensores, bateria ou distribuição. A release pública segue somente `v1.0.0-rc.2`.

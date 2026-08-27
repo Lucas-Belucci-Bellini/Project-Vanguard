@@ -1,0 +1,26 @@
+# Vanguard Field — Mobile V2 Feature Matrix
+
+> Inventário funcional da execução Omega, atualizado em 2026-08-27. A coluna de evidência não transforma implementação em capacidade física verificada.
+
+| Área | Feature | Estado do código | Cobertura atual | Limite/evidência pendente |
+|---|---|---|---|---|
+| Navegação | GPS/GNSS local, MGRS, rumo, distância | Implementado | testes do motor, localização e diagnóstico | sinal, precisão e aparelho real |
+| Tracking | Start, Pause, Resume, Stop, Save, Restore, Export | Implementado | máquina `trilha-sessao`, registro JSON/GPX/KML | lifecycle, tela bloqueada e bateria |
+| Pontos | Waypoints e destino | Implementado | validação, estado e serialização | uso touch em dispositivo |
+| Mapas | MapLibre, centralização, grade e tiles preparados | Implementado | build, planner e política do SW | provedor, cobertura, quota e modo avião |
+| Offline | shell, estado local, manual de sobrevivência e contexto | Implementado | build/testes locais | persistência física e reabertura sem rede |
+| Import/export | JSON, GPX 1.1 e subconjunto KML 2.2 | Implementado | testes de validação, limites e XML seguro | interoperabilidade em Files/Share Sheet |
+| Compartilhamento | texto, coordenadas, JSON, GPX e KML | Implementado | Web Share, clipboard e download fallback | Share Sheet/Files físico |
+| Socorro | preparação manual de posição/pacote | Implementado | contrato local | não envia SOS nem confirma entrega/resgate |
+| Bússola | UI e fallback de rumo GPS | Parcial | APIs observáveis | sensor magnético/calibração reais |
+| Diagnóstico | GPS, permissão, lifecycle, capacidades, storage e performance local | Implementado | testes determinísticos | leituras físicas e profiling |
+| PWA | manifest, service worker, waiting update | Implementado | build e testes do SW | instalação, update e modo avião reais |
+| Android | Capacitor, permissões foreground, debug APK | Implementado | sync, Gradle e CI | aparelho Android, Xiaomi e assinatura |
+| iOS | Capacitor, bundle, descrição foreground, sync | Implementado | sync no Linux | macOS/Xcode, assinatura, iPhone/iPad |
+| Release | workflow artifact-only | Implementado | run `33121937373` | signing, instalação, tag e distribuição |
+| Pagamentos | Asaas/Supabase/e-mail fiscal | Não configurado | nenhuma integração | credenciais, autorização e escopo fiscal |
+| Capacidades militares | radar, detecção ofensiva, rádio, satélite, Geiger/sonar | Não implementado | não aplicável | não inventar hardware ou integração |
+
+## Política
+
+A aplicação é civil, local-first e sem telemetria automática. Recursos externos, sensores e distribuição somente podem ser declarados disponíveis após integração real e validação correspondente.

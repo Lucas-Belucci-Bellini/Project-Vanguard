@@ -1,51 +1,56 @@
 # Vanguard Field — MOBILE V2 STATUS
 
-> Registro persistente da execução Mobile V2. Atualizado em **2026-08-27**, após a unidade de importação/exportação KML. Este arquivo não declara a V2 completa sem validação física.
+> Registro persistente da execução Mobile V2 Omega. Atualizado em **2026-08-27** a partir do estado real de `main`. Este arquivo não declara a V2 completa sem evidência física.
 
 | Campo | Estado atual |
 |---|---|
 | **Version** | `2.x` em construção; pacote compartilhado atual `1.0.0` |
-| **Phase** | Mobile foundation com diagnóstico local, PWA e Capacitor; `IN PROGRESS` |
-| **Milestone** | Capacidades observáveis, compartilhamento explícito, permissões GPS, persistência observável, estados foreground-only, controle de trilha e KML local |
-| **Android** | Projeto Capacitor presente; `com.projectvanguard.field`; permissões somente coarse/fine; APK debug compilado; aparelho real ainda não validado |
-| **iOS** | Projeto Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync validado no Linux; build, assinatura e aparelho real pendentes em macOS/Xcode |
-| **PWA** | Build e service worker presentes; shell/estado/tile cache local; instalação e modo avião ainda exigem teste físico |
-| **Build** | `npm run build`, sync Android/iOS e `assembleDebug` aprovados nesta execução; APK permanece artifact de teste |
-| **Tests** | `npm test`: **159 aprovados**; `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados |
-| **Permissions** | Android foreground coarse/fine; iOS descrição foreground; não há background location, foreground service ou `UIBackgroundModes` |
-| **GPS** | Driver Capacitor foreground com fallback Web/PWA; watcher emite `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; posição normalizada usa `lat/lon` |
-| **Compass** | Sensor físico ainda `BROWSER DEPENDENT`/`DEVICE DEPENDENT`; fallback de rumo GPS não prova sensor magnético |
-| **Storage** | `localStorage` para dados do produto e Cache Storage para shell/tiles; última escrita agora expõe `PERSISTIDO`/`FALHA`; quota e persistência física ainda pendentes |
-| **Offline** | Planner/SW defensivos e limite local de 256 URLs; cobertura real e modo avião pendentes |
-| **Maps** | MapLibre, tiles preparados e deduplicação; provedores/cobertura/quota não são garantidos |
-| **Battery** | Política econômica documentada; consumo de quatro dias e suspensão em background exigem aparelho real |
-| **Security** | Civil, local-first, sem telemetria automática, sem SOS/resgate confirmado, sem integração militar e sem expansão do legado balístico |
-| **Accessibility** | Shell com skip link, landmarks, foco, ARIA e status; leitor de tela/touch precisam de validação em dispositivos |
-| **Release** | `BLOCKED`; a única release continua `v1.0.0-rc.2`; `v1.0.0` final não foi criada |
-| **Main** | `431449e feat(v2): adicionar suporte kml local`; CI `33124173644` concluído com sucesso; documentação KML desta unidade aguarda commit separado |
-| **Current Task** | Validar KML, Start/Pause/Resume/Stop da trilha, lifecycle GPS, permissões nativas, persistência/quota, capabilities e Share Sheet/Files/clipboard/download nos fluxos Mobile V2 em Android comum, Xiaomi/MIUI/HyperOS e iPhone quando os aparelhos estiverem disponíveis |
-| **Next Task** | Executar em aparelho real KML/JSON/GPX, Start/Pause/Resume/Stop, tela bloqueada, retomada do watcher, falha/quota de storage, modo avião, Share Sheet/Files, bússola, update posterior e bateria; não assumir background contínuo |
+| **Phase** | Mobile foundation + GPS/tracking/offline hardening; `IN PROGRESS` |
+| **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
+| **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
+| **Current Task** | Manter a memória Omega completa e preparar os gates de dispositivo, lifecycle, offline, assinatura e distribuição |
+| **Last Completed** | Suporte KML 2.2 local seguro, publicado em `431449e`, com documentação no `d3175a0` |
+| **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
+| **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
+| **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
+| **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
+| **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
+| **GPS** | Capacitor foreground + fallback Web/PWA; estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; posição normalizada `lat/lon`; background não implementado |
+| **Compass** | UI/fallback GPS existentes; sensor físico e calibração `BROWSER DEPENDENT`/`DEVICE DEPENDENT` |
+| **Maps** | MapLibre, MGRS, grade, centralização, waypoints, destino e planner de tiles preparados; cobertura/provedor/quota não garantidos |
+| **Offline** | shell, estado local, manual, contexto e tiles preparados; modo avião, quota e reabertura física pendentes |
+| **Storage** | `localStorage` com envelope versionado; Cache Storage para shell/tiles; última persistência distingue `PERSISTIDO`/`FALHA`; quota física pendente |
+| **Tracking** | `STOPPED`/`ACTIVE`/`PAUSED`, Start/Pause/Resume/Stop local; pontos preservados e Stop não exporta/apaga automaticamente |
+| **Waypoints** | Criar, persistir, visualizar e exportar localmente; uso touch físico pendente |
+| **Routes** | Trilha local, destino, JSON/GPX/KML e resumo de distância/tempo/pontos; interoperabilidade física pendente |
+| **Sharing** | Texto, coordenadas, JSON, GPX e KML via ação explícita, com Web Share/clipboard/download fallback; Share Sheet/Files físico pendente |
+| **Emergency Preparation** | Socorro prepara coordenadas/pacote e compartilha manualmente; não envia SOS, não confirma entrega/resgate e não transmite via satélite |
+| **Security** | Civil/local-first; sem telemetria automática, hardware falso, integração militar ou expansão do legado balístico |
+| **Privacy** | Dados locais por padrão; sem sincronização automática; pagamentos/Asaas/Supabase/e-mail fiscal `NOT_CONFIGURED` |
+| **Accessibility** | Shell com skip link, landmarks, foco e ARIA; leitor de tela, touch e safe areas precisam de validação física |
+| **Performance** | Métricas locais de navegação/memória opcional; profiling físico e bateria de quatro dias pendentes |
+| **Debug Build** | `npm run mobile:android:debug` aprovado; APK debug de teste, não distribuição |
+| **Release Build** | Geração remota artifact-only exercitada; AAB não assinado, sem publicação |
+| **Signed Build** | `BLOCKED`; nenhuma keystore/certificado real configurado |
+| **AAB** | Artifact não assinado gerado no run `33121937373`; não apto para loja |
+| **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
+| **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
+| **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
+| **Main** | `d3175a0 docs(v2): registrar suporte kml`; CI `33124273565` concluído com sucesso; worktree limpa e alinhada |
+| **Next Task** | Executar os gates de `MOBILE_V2_DEVICE_MATRIX.md` e, depois, revisar assinatura/distribuição sem publicar automaticamente |
 
-## Unidades entregues
+## Unidades recentes
 
-A unidade anterior corrigiu o diagnóstico para reconhecer `lat/lon` e manteve compatibilidade com `latitude/longitude`, no commit `f9da500`.
+1. Diagnóstico compatível com `lat/lon` — `f9da500`.
+2. Capacidades observáveis — `4f8e20a`.
+3. Compartilhamento explícito — `2bb3e74`.
+4. Leitura de permissão GPS sem prompt automático — `15f9bac`.
+5. Persistência observável — `cd47a0c`.
+6. Estados GPS foreground-only — `478e2cf`.
+7. Tracking local Start/Pause/Resume/Stop — `3d859f6`.
+8. Importação/exportação KML 2.2 local — `431449e`.
+9. Memória Omega consolidada — arquivos `MOBILE_V2_*` criados nesta execução.
 
-Na rodada anterior, `src/core/capacidades.js` passou a detectar capacidades observáveis do ambiente — GPS, orientação, storage, rede, bateria e compartilhamento — usando os estados `AVAILABLE`, `UNAVAILABLE`, `DENIED` e `NOT_SUPPORTED`.
+## Regra de evidência
 
-Na rodada anterior, `src/platform/compartilhamento.js` centralizou compartilhamento de texto e arquivos. O Socorro usa Web Share/clipboard; o Mapa usa Web Share para arquivos e download local como fallback.
-
-Na rodada anterior, `src/platform/permissoes.js` passou a consultar `checkPermissions()` no Capacitor nativo e `navigator.permissions.query()` na Web, sem solicitar permissão automaticamente.
-
-Na rodada anterior, `src/core/estado.js` passou a registrar a última tentativa de escrita local, distinguindo `PERSISTIDO` de `FALHA` e preservando o valor retornado por `estado.set()`.
-
-Na rodada anterior, `src/core/localizacao.js` passou a emitir estados operacionais do watcher e expor `setPaused(true/false)`. O Mapa pausa o watcher ao ocultar a página e o retoma ao voltar ao foreground.
-
-Na rodada anterior, `src/core/trilha-sessao.js` adicionou a máquina de estados local `STOPPED`/`ACTIVE`/`PAUSED`, com `Start`, `Pause`, `Resume` e `Stop`. O Mapa e a Home distinguem rota ativa, pausada e parada; os pontos continuam locais e `Stop` não apaga nem exporta automaticamente.
-
-Nesta rodada, `src/core/registro-offline.js` passou a exportar e importar o subconjunto seguro KML 2.2, com `Point` para waypoints/destino e `LineString` para trilhas. O Mapa integra botão, compartilhamento e seleção de arquivo `.kml`; `test/registro-offline.test.js` cobre XML escapado, coordenada 3D, normalização e rejeições. A suíte chegou a 159 testes aprovados.
-
-## Evidência e limites
-
-O build do Android produz um **APK debug de teste**, não um artefato de distribuição. A sincronização iOS confirma apenas a geração dos recursos nativos no ambiente Linux; ela não substitui Xcode, assinatura Apple, instalação ou execução em iPhone. Nenhum estado `VERIFIED` deve ser atribuído a hardware, bateria, background, sensores, quota ou release sem evidência física correspondente.
-
-Referências do projeto: [`docs/BUILD-MOBILE.md`](docs/BUILD-MOBILE.md), [`docs/CHECKLIST-MOBILE-V1.0.0.md`](docs/CHECKLIST-MOBILE-V1.0.0.md), [`MOBILE_V2_TEST_MATRIX.md`](MOBILE_V2_TEST_MATRIX.md) e [`V2_BLOCKERS.md`](V2_BLOCKERS.md).
+`VERIFIED` e `COMPLETE` exigem evidência real. Código, build, teste Node, sync e CI provam somente seus respectivos escopos. Nenhum deles prova sensor, bateria, tela bloqueada, modo avião, quota, assinatura, instalação ou distribuição.
