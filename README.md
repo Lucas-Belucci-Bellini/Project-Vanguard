@@ -12,7 +12,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 |---|---|
 | **Início** | Painel de campo, ativação explícita do GPS, atalhos e tutorial de primeiro uso. |
 | **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição** e **Cidade / Dia a dia**, com destino por coordenadas ou toque no mapa. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. |
-| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado, sem sincronização automática. |
+| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado, sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
 | **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
 | **Socorro** | Captura da posição, criação de pacote externo validado, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência, com estados explícitos e sem confirmação de entrega. |
 | **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
@@ -47,7 +47,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 91 testes do motor geográfico e contratos civis
+npm test          # 96 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 
@@ -60,7 +60,7 @@ Para testar no Android ou em um Xiaomi, abra a versão publicada em um navegador
 ```text
 src/
   core/
-    estado.js          persistência local e chaves compartilhadas
+    estado.js          persistência local versionada e chaves compartilhadas
     localizacao.js     normalização do GPS e ciclo de acompanhamento
     contexto.js        detecção por zonas, validade e JSON versionado
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
@@ -94,6 +94,7 @@ docs/
   MOBILE-E-BATERIA.md   referências de energia da Apple e Android
   REVISAO-INTERFACE-OFFLINE.md roteiro de teste offline e revisão visual
   BUILD-VS-RELEASE.md  separação entre compilação, artefato e release
+  RELEASE-1.0.0.md     checklist da release candidate e gates finais
 
 test/                  testes determinísticos do motor
 ```

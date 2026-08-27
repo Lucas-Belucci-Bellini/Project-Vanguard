@@ -13,7 +13,7 @@
 
 ## Estado do snapshot e do código atual
 
-A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com a melhoria de exportação/importação JSON offline no commit `d390d55` e com a documentação de build versus release no commit `15942f8`. Esses commits foram publicados em `main` e validados como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuir essas mudanças como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
+A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com a melhoria de exportação/importação JSON offline no commit `d390d55`, a documentação de build versus release no commit `15942f8`, o workflow móvel separado no commit `47aefaa` e a persistência versionada no commit `d5802a7`. Esses commits foram publicados em `main` e validados como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuir essas mudanças como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
 
 ## O que está entregue
 
@@ -29,14 +29,14 @@ O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, preci
 
 | Verificação | Resultado |
 |---|---|
-| `npm test` | 91 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
+| `npm test` | 96 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
 | `npm run build` | Aprovado; bundle de produção gerado. |
 | `node --check public/sw.js` | Aprovado. |
 | `npm run mobile:android:debug` | Aprovado; `BUILD SUCCESSFUL`. |
 | APK | `android/app/build/outputs/apk/debug/app-debug.apk`, aproximadamente 4,4 MB. |
 | Preview HTTPS | `#/inicio` e `#/mapa` carregaram; MapLibre renderizou base topográfica; nenhum GPS fictício foi criado. |
 | Service worker | Registro ativo; `CACHE_STATUS` respondeu com cache `vanguard-field-tiles-v2` e 25 tiles observados no preview. |
-| `CI / PR` | Checks automáticos aprovados antes do merge da base; o commit posterior de exportação foi validado localmente e publicado em `main`. |
+| `CI / PR` | Checks automáticos aprovados nos commits publicados em `main`, incluindo a persistência versionada. |
 
 ## Checklist antes da tag final
 
