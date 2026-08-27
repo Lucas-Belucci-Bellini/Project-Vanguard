@@ -12,7 +12,7 @@
 | V2-006 | Map | MapLibre, camadas, destino e waypoints | `src/pages/mapa.js` | Preview; aparelhos e rede real pendentes | README, docs mapa | IN_PROGRESS | Preview + CI |
 | V2-007 | Tracking | Início, pausa, retomada e resumo | Trilha local | Teste Android/iOS e quatro dias pendentes | plano de campo | IN_PROGRESS | Código + testes |
 | V2-008 | Offline | Shell, dados e manual reabrem sem rede | PWA/service worker/localStorage + prontidão offline exige frescor do fixo | Modo avião em aparelhos pendente; timestamp ausente/futuro coberto | docs offline, ADR-0010 | IN_PROGRESS | 130 testes; CI não substitui campo |
-| V2-009 | Offline maps | Preparar/consultar/limpar tiles | Cache HTTPS limitado a 256 URLs/preparação | Cobertura real e quota pendentes | README, plano de campo | IN_PROGRESS | Status local; não é cobertura completa |
+| V2-009 | Offline maps | Preparar/consultar/limpar tiles | Cache HTTPS limitado a 256 URLs/preparação; planner remove templates duplicados | Cobertura real, quota, resposta dos provedores e modo avião pendentes | README, plano de campo, ADR-0011 | IN_PROGRESS | 131 testes; limite/antimeridiano/deduplicação locais; não é cobertura completa |
 | V2-010 | Storage | Versionamento, migração e fallback | Envelopes locais versionados | Corrupção/recuperação cobertas parcialmente | `estado.js`, README | TESTED | Testes de estado |
 | V2-011 | Import/export | JSON e GPX validados | `registro-offline.js` | Testes determinísticos | plano de campo | TESTED | Suíte Node |
 | V2-012 | Context | Contextos civis e validade | `contexto.js`, zonas locais | Testes de validade/prioridade | README | TESTED | Suíte Node |

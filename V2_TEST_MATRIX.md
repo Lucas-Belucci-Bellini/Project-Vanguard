@@ -8,7 +8,7 @@
 | T-004 | Tracking | Browser/PWA | Iniciar, pausar, retomar, limpar e importar rota | Dados locais consistentes; rota importada pausada | Testes locais; campo pendente | IN_PROGRESS |
 | T-005 | Map | HTTPS | MapLibre, bases, destino, waypoint, câmera e render repetido | Tela utilizável; nenhum GPS fictício; rótulos não redesenham sem mudança visual | Preview `#/mapa` sem console error; campo pendente | IN_PROGRESS |
 | T-006 | Offline shell | Chrome/PWA | Primeiro carregamento, reload sem rede, cache hit/miss e prontidão sem frescor | Shell e dados locais carregam; cache miss e posição sem idade são indicados | 130 testes; CI/sintaxe; aparelho pendente | IN_PROGRESS |
-| T-007 | Offline map | Android/iOS | Preparar área, limite, cache parcial, limpeza e troca de base | Status honesto; tiles não preparados não são fingidos | Status local; aparelho pendente | IN_PROGRESS |
+| T-007 | Offline map | Node/Android/iOS | Preparar área, limite, templates duplicados, cache parcial, limpeza e troca de base | Planner não infla estimativa nem ultrapassa 256 URLs; status honesto; tiles não preparados não são fingidos | 131 testes cobrem limite/antimeridiano/deduplicação; quota, resposta e modo avião pendentes | IN_PROGRESS |
 | T-008 | Storage | Node/browser | Migração, versão futura, corrupção e limpeza | Fallback seguro sem apagar namespace indevido | Testes de estado | TESTED |
 | T-009 | Import/export | Browser/PWA | JSON/GPX válido, inválido, altitude, timestamp e XML escapado | Valida, confirma substituição e deixa rota pausada | Suíte Node | TESTED |
 | T-010 | Context/survival | Browser/offline | Busca, filtros, validade e zonas expiradas | Conteúdo local e estado de validade corretos | Suíte/dados | TESTED |

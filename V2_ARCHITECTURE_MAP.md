@@ -25,7 +25,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | GPS → HUD | `@capacitor/geolocation` foreground nativo ou `navigator.geolocation` → `src/core/localizacao.js` → normalização → `engine/mgrs.js` → mapa/HUD | Posição local; fonte, precisão e idade devem ser visíveis |
 | GPS → trilha | posição normalizada → filtro de distância/tempo → `estado.js` → resumo `trilha.js` | Alta precisão somente em rota ativa; sistema operacional define frequência |
 | Mapa → destino | toque/coordenadas → validação → distância/azimute `engine/geo.js` → HUD | Não é roteamento viário completo |
-| Mapa → tiles | MapLibre → HTTPS permitido → `public/sw.js`/Cache Storage | Pré-cache limitado; cache parcial não prova cobertura |
+| Mapa → tiles | MapLibre → `planejarTilesDoViewport()` → templates únicos → HTTPS permitido → `public/sw.js`/Cache Storage | Pré-cache limitado a 256 URLs; cache parcial não prova cobertura; resposta do provedor/quota dependem do ambiente |
 | Rota → backup | `estado.js` → `registro-offline.js` → JSON/GPX → download local | Importação confirma, valida e pausa a rota |
 | Contexto → mapa | zonas JSON → `core/contexto.js` → validade/prioridade → cartão local | Não é alerta oficial automático |
 | Manual → sobrevivência | catálogo local → filtros/busca → tela | Disponível offline; fontes e revisão visíveis |

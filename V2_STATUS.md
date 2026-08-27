@@ -7,19 +7,19 @@
 | **Version** | `2.x` em construção; pacote atual `1.0.0` |
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: estado, observabilidade, offline-first e validação mobile |
-| **Current Task** | Validar em aparelhos GPS foreground, lifecycle, acessibilidade e atualização; executar profiling físico e modo avião antes de novas otimizações ou background GPS |
-| **Last Completed Task** | Endurecimento da prontidão offline: posição válida só conta quando o frescor tem timestamp confiável, não futuro e com até 24 horas |
+| **Current Task** | Validar modo avião, persistência, posição/frescor e mapas preparados em Android/Xiaomi/MIUI/HyperOS/iPhone; medir quota/resposta de tiles, performance, bateria e suspensão antes de novas otimizações ou background GPS |
+| **Last Completed Task** | Planner de tiles offline deduplica templates e respeita a cota de 256 URLs sem inflar a estimativa |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
-| **Next Task** | Validar modo avião, persistência, posição/frescor e mapas preparados em Android/Xiaomi/MIUI/HyperOS/iPhone; medir performance, bateria e suspensão e só então decidir novas otimizações ou background GPS |
+| **Next Task** | Validar modo avião, persistência, posição/frescor, resposta dos provedores e quota de mapas preparados em Android/Xiaomi/MIUI/HyperOS/iPhone; medir performance, bateria e suspensão antes de decidir novas otimizações ou background GPS |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 130 testes aprovados; `node --check public/sw.js`: aprovado; preview da Home/prontidão offline validado |
+| **Tests** | `npm test`: 131 testes aprovados; `node --check public/sw.js`: aprovado; preview da Home/prontidão offline e planner de tiles validados |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009/0010, referências WCAG/performance e validações do Diagnóstico/Mapa/Home versionados |
+| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009/0010/0011, referências WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `cc076bb fix(v2): exigir frescor na prontidao offline`; CI `33116563282` concluído com sucesso |
+| **Main** | Nova unidade de planner offline validada localmente; commit/CI desta continuação serão registrados após o push |
 
 ## Regra de conclusão
 

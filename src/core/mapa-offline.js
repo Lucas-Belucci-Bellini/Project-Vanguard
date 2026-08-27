@@ -50,23 +50,23 @@ export function planejarTilesDoViewport(bounds, base = {}) {
   const zoomAtual = Math.max(0, Math.floor(Number(base.zoomAtual ?? 12)));
   const minimo = Math.max(5, zoomAtual - 1);
   const maximo = Math.min(Number(base.maxzoom ?? 16), zoomAtual + 1, 16);
-  const templates = (base.tiles ?? []).map(String);
+  const templates = [...new Set((Array.isArray(base.tiles) ? base.tiles : [base.tiles]).filter(Boolean).map(String))];
   const urls = new Set();
   let totalEstimado = 0;
   for (let z = minimo; z <= maximo; z++) {
     const xs = xsDoIntervalo(bounds.getWest(), bounds.getEast(), z);
     const [y0, y1] = ysDoIntervalo(bounds.getNorth(), bounds.getSouth(), z);
     totalEstimado += xs.length * Math.max(0, y1 - y0 + 1) * templates.length;
-    if (urls.size > LIMITE_TILES_OFFLINE) continue;
+    if (urls.size >= LIMITE_TILES_OFFLINE) continue;
     for (const x of xs) {
       for (let y = y0; y <= y1; y++) {
         for (const template of templates) {
           urls.add(urlDoTile(template, x, y, z));
-          if (urls.size > LIMITE_TILES_OFFLINE) break;
+          if (urls.size >= LIMITE_TILES_OFFLINE) break;
         }
-        if (urls.size > LIMITE_TILES_OFFLINE) break;
+        if (urls.size >= LIMITE_TILES_OFFLINE) break;
       }
-      if (urls.size > LIMITE_TILES_OFFLINE) break;
+      if (urls.size >= LIMITE_TILES_OFFLINE) break;
     }
   }
   const todos = [...urls];

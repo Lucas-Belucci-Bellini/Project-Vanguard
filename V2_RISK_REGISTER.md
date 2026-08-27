@@ -4,7 +4,7 @@
 |---|---|---:|---:|---|---|
 | R-001 | Usuário interpreta GPS como canal de socorro | Média | Crítico | Textos explícitos, Socorro manual e sem confirmação falsa | Mitigado/documentado |
 | R-002 | Fixo antigo tratado como posição atual | Média | Alto | Idade do fixo no HUD, estado `STALE` e conferência antes de agir | Implementado; hardware pendente |
-| R-003 | Mapa parcialmente preparado parece completo | Alta | Alto | Limite, status solicitado/salvo, data e aviso de que não prova cobertura | Implementado; campo pendente |
+| R-003 | Mapa parcialmente preparado parece completo ou cota é inflada por URLs repetidas | Alta | Alto | Limite de 256 URLs, status solicitado/salvo, data, aviso de cobertura não garantida e deduplicação de templates | Mitigado no planner; resposta do provedor, quota e campo pendentes |
 | R-004 | Sistema operacional encerra rastreamento em background | Alta | Alto | Perfis econômicos, pausa, documentação e checklist Android/iOS | Não resolvido; PHYSICAL VALIDATION REQUIRED |
 | R-005 | Bateria insuficiente durante quatro dias | Alta | Alto | Medição no aparelho real, powerbank testado e plano de recarga | Não resolvido; campo pendente |
 | R-006 | Atualização quebra app ou interrompe navegação | Média | Alto | Service worker em `waiting`, confirmação, recarga após `controllerchange`, fallback APK oficial | Implementado; teste posterior pendente |

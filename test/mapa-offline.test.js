@@ -30,6 +30,13 @@ test('planejarTilesDoViewport respeita o limite local e informa a estimativa', (
   assert.ok(plano.totalEstimado > LIMITE_TILES_OFFLINE);
 });
 
+test('planejarTilesDoViewport deduplica templates de tiles sem inflar a estimativa', () => {
+  const template = 'https://tiles.example/{z}/{x}/{y}.png';
+  const único = planejarTilesDoViewport(bounds(-1, 1, -1, 1), { zoomAtual: 5, maxzoom: 5, tiles: [template] });
+  const duplicado = planejarTilesDoViewport(bounds(-1, 1, -1, 1), { zoomAtual: 5, maxzoom: 5, tiles: [template, template] });
+  assert.deepEqual(duplicado, único);
+});
+
 test('planejarTilesDoViewport inclui ambos os lados do antimeridiano', () => {
   const plano = planejarTilesDoViewport(bounds(179, -179, -1, 1), { zoomAtual: 5, maxzoom: 5, tiles: ['https://tiles.example/{z}/{x}/{y}.png'] });
   const xs = new Set(plano.urls.map((url) => Number(url.split('/').at(-2))));
