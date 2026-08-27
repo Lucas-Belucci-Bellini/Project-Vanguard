@@ -101,9 +101,14 @@ export function mapaPage() {
   selectBase.value = 'terreno' in BASES ? 'terreno' : Object.keys(BASES)[0];
   const selectUso = h('select', { className: 'mapa__select', 'aria-label': 'Modo de uso' },
     h('option', { value: 'trilha' }, 'TRILHA / EXPEDIÇÃO'),
-    h('option', { value: 'cidade' }, 'CIDADE / DIA A DIA')
+    h('option', { value: 'cidade' }, 'CIDADE / DIA A DIA'),
+    h('option', { value: 'mar' }, 'MAR / REFERÊNCIA')
   );
   selectUso.value = estado.get(CHAVES.MODO_USO, 'trilha');
+  const modoMarInfo = h('aside', { className: 'mapa__mar-info', role: 'note', 'aria-label': 'Limites do modo Mar' },
+    h('strong', null, 'MODO MAR · REFERÊNCIA'),
+    h('p', null, 'Satélite e topografia ajudam a orientar, mas não mostram profundidade segura nem substituem carta náutica oficial atualizada, avisos aos navegantes, marés, sonar ou julgamento local.')
+  );
   const destinoInput = h('input', { className: 'mapa__destino-input', type: 'text', inputMode: 'decimal', placeholder: 'LAT, LON  ·  ex.: -23.55, -46.63', 'aria-label': 'Coordenadas do destino' });
   const destinoButton = h('button', { className: 'mapa__destino-button', type: 'button' }, 'DEFINIR DESTINO');
   const destinoMapButton = h('button', { className: 'mapa__destino-map-button', type: 'button' }, 'TOCAR NO MAPA');
@@ -116,11 +121,12 @@ export function mapaPage() {
       h('label', { className: 'mapa__base-label' }, h('span', null, 'BASE'), selectBase)
     ),
     h('label', { className: 'mapa__uso-label' }, h('span', null, 'MODO DE USO'), selectUso),
+    modoMarInfo,
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
     h('div', { className: 'mapa__registro-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DADOS LOCAIS'), h('span', { className: 'mapa__privacy' }, '⌖ JSON')),
-      h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroImportarButton),
+      h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroGpxButton, registroImportarButton),
       registroArquivo,
       registroStatus
     ),
@@ -205,6 +211,7 @@ export function mapaPage() {
   }
 
   function atualizarSheet() {
+    modoMarInfo.classList.toggle('is-visible', selectUso.value === 'mar');
     sheet.querySelector('.mapa__route-distance').textContent = dist(distanciaTrilha());
     routeButton.textContent = rotaAtiva ? 'PAUSAR ROTA' : 'INICIAR ROTA';
     routeButton.classList.toggle('is-active', rotaAtiva);
@@ -412,7 +419,9 @@ export function mapaPage() {
     pararGps?.setMode(rotaAtiva ? 'trilha' : 'cidade');
     sheetStatus.textContent = selectUso.value === 'cidade'
       ? 'Modo cidade: defina um destino para ver rumo e distância.'
-      : 'Modo trilha: registre sua rota e pontos de referência localmente.';
+      : selectUso.value === 'mar'
+        ? 'Modo Mar: use a posição como referência; confirme a navegação em carta e avisos oficiais.'
+        : 'Modo trilha: registre sua rota e pontos de referência localmente.';
   };
   modoBotao.onclick = () => {
     marcando = !marcando;
