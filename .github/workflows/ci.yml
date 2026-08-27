@@ -1,7 +1,7 @@
 # CI do Project Vanguard.
 #
 # O CLAUDE.md deste repo manda "merge com CI verde" desde o começo, mas não
-# havia CI: os 65 testes do motor rodavam só na máquina de quem lembrasse de
+# havia CI: os testes do motor rodavam só na máquina de quem lembrasse de
 # rodar. Um motor de balística e de coordenadas é exatamente o tipo de código
 # em que a regressão não aparece na tela — ela aparece num azimute plausível e
 # errado. Então o teste tem de rodar em toda proposta de mudança.
@@ -29,9 +29,12 @@ jobs:
 
       - run: npm ci
 
-      # O motor primeiro: se a física quebrou, o build passar não consola.
-      - name: Testes do motor
+      # Os contratos geográficos e civis primeiro: se quebraram, o build passar não consola.
+      - name: Testes do motor e contratos civis
         run: npm test
+
+      - name: Sintaxe do service worker offline
+        run: node --check public/sw.js
 
       - name: Build
         run: npm run build
