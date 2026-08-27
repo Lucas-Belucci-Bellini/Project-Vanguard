@@ -28,6 +28,7 @@ Fixed:
 
 Tests:
 - `npm test`: 119 passados.
+- `npm audit --omit=dev`: 0 vulnerabilidades de produção.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
 
@@ -69,6 +70,7 @@ Blockers:
 
 Next Task:
 - Validar Geolocation foreground e permissões em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo.
+- Commit publicado: `bb240e7`; CI `33108661603` passou.
 
 V2 Completion:
 IN PROGRESS
