@@ -18,6 +18,7 @@
 | R-014 | Lifecycle observável é confundido com GPS ou processo contínuo em background | Média | Alto | Rótulos `CAPACITOR APP`/`VISIBILITY API`, texto explícito no Diagnóstico, ADR-0005 e nenhum serviço/permissão de background | Mitigado no código; validação física pendente |
 | R-015 | Semântica de foco/ARIA no preview é confundida com acessibilidade completa em leitores de tela | Média | Alto | Link de salto, foco visível, landmark e atributos ARIA explícitos; teste DOM; manter TalkBack/VoiceOver/contraste como bloqueios físicos | Mitigado parcialmente; validação de assistência e contraste pendente |
 | R-016 | Payload de release direciona para asset ou página fora da origem oficial | Baixa | Crítico | Allowlist de HTTPS + host/caminho do repositório, fallback fixo e confirmação explícita; ADR-0007 | Mitigado no núcleo; release posterior e instalação continuam pendentes |
+| R-017 | Prontidão offline otimista com posição de frescor não verificável | Média | Alto | Exigir timestamp positivo, não futuro e com até 24 horas; estado `atencao` para idade ausente/inválida; ADR-0010 | Mitigado no núcleo; validação de campo e relógio do aparelho pendentes |
 
 ## Critério
 

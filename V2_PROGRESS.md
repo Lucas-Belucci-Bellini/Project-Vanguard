@@ -5,7 +5,7 @@ EXECUTION REPORT
 
 Current Version: 2.x em construção; pacote atual 1.0.0
 Current Phase: Fase 2 — Engine/GPS mobile foundation + lifecycle observability
-Current Milestone: Foundation Hardening + renderização eficiente do Mapa
+Current Milestone: Foundation Hardening + prontidão offline baseada em frescor
 
 Completed:
 - O prompt V2 foi lido e decomposto sem reiniciar o trabalho existente.
@@ -25,6 +25,7 @@ Implemented:
 - Fluxo de atualização endurecido: downloads aceitos apenas no caminho HTTPS oficial do repositório, fallback fixo para releases e teste PWA de waiting/negação/confirmação/reload/limpeza.
 - Diagnóstico local passou a expor Navigation Timing, carga completa e memória JS opcional; APIs ausentes ou que lançam erro permanecem `INDISPONÍVEL`.
 - O canvas de rótulos do Mapa agora deduplica eventos `render` idênticos usando chave pura de câmera, viewport, DPR e versão da grade; nenhuma frequência de GPS foi alterada.
+- A prontidão offline não libera a posição quando `createdAt`/`timestamp` está ausente, zero, no futuro ou quando o relógio de referência é inválido; o item fica em `atencao`.
 
 Fixed:
 - Idade do último fixo visível no HUD.
@@ -32,7 +33,7 @@ Fixed:
 - Versão Android alinhada a `versionCode 100` e `versionName 1.0.0`.
 
 Tests:
-- `npm test`: 129 passados.
+- `npm test`: 130 passados.
 - `npm audit --omit=dev`: 0 vulnerabilidades de produção.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
@@ -70,6 +71,7 @@ Files Modified:
 - `src/core/atualizacao.js` com allowlist HTTPS do repositório e `test/atualizacao-ui.test.js` cobrindo o fluxo PWA waiting.
 - `src/core/diagnostico.js` com `desempenhoResumo()`, `test/diagnostico.test.js` cobrindo APIs válidas/ausentes/array-like/com erro, e grupo `DESEMPENHO` na tela.
 - `src/core/chave-renderizacao.js` com `test/chave-renderizacao.test.js`; `src/pages/mapa.js` usa a chave para evitar pintura idêntica do canvas.
+- `src/core/prontidao-offline.js` exige frescor verificável do fixo e `test/prontidao-offline.test.js` cobre ausência, zero, futuro, relógio inválido e posição antiga.
 - Android/iOS sincronizados com `@capacitor/geolocation@8.2.2` e `@capacitor/app@8.1.1`; permissões Android foreground e descrições iOS atualizadas.
 - A rota `#/diagnostico` e o atalho correspondente foram adicionados ao app.
 
@@ -79,14 +81,15 @@ Blockers:
 - Assinatura Android/iOS e distribuição.
 
 Next Task:
-- Medir antes/depois do Mapa, startup, memória, bateria e suspensão em Android/Xiaomi/iOS; validar GPS foreground, lifecycle, acessibilidade e update com release posterior controlada. Só então decidir novas otimizações ou background GPS nativo.
+- Validar modo avião, persistência, posição/frescor e mapas preparados em Android/Xiaomi/iOS; medir antes/depois do Mapa, startup, memória, bateria e suspensão. Só então decidir novas otimizações ou background GPS nativo.
 - Commit anterior publicado: `bb240e7`; CI `33108661603` passou.
 - Unidade publicada: `2bfd797 feat(v2): observar ciclo de vida mobile`; CI `33110246185` concluído com sucesso.
 - Preview limpo confirmou `FOREGROUND · VISIBILITY API`; a primeira tentativa presa em loading levou à correção não bloqueante de `getRegistration()`. Isso não substitui validação nativa.
 - Unidade anterior publicada como `b5a83c9 feat(v2): fortalecer acessibilidade da shell`; CI `33111683598` concluído com sucesso.
 - Unidade anterior publicada como `e0e632b security(v2): restringir destinos de atualizacao`; CI `33112962807` concluído com sucesso.
 - Unidade anterior publicada como `3d171e8 perf(v2): expor diagnostico de performance`; CI `33114175983` concluído com sucesso.
-- Unidade publicada como `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso. Validação local: 129 testes, build web, preview do Mapa sem erro de console, audit de produção, sync Android/iOS e APK debug.
+- Unidade anterior publicada como `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso.
+- Unidade atual validada localmente com 130 testes, build web, preview `#/inicio` com cartão `ANTES DE SAIR`, audit de produção, sync Android/iOS e APK debug; commit/CI serão registrados após o push.
 
 V2 Completion:
 IN PROGRESS

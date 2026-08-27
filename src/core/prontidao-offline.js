@@ -16,8 +16,12 @@ function posicaoValida(posicao) {
 
 function statusPosicao(posicao, agora) {
   if (!posicaoValida(posicao)) return { estado: 'pendente', detalhe: 'Ative o GPS e aguarde um fixo local.' };
+  const referencia = Number(agora);
   const criadoEm = Number(posicao.createdAt ?? posicao.timestamp);
-  if (Number.isFinite(criadoEm) && agora - criadoEm > LIMITE_IDADE_POSICAO_MS) {
+  if (!Number.isFinite(referencia) || referencia <= 0 || !Number.isFinite(criadoEm) || criadoEm <= 0 || criadoEm > referencia) {
+    return { estado: 'atencao', detalhe: 'A posição é válida, mas a idade do fixo não pode ser confirmada.' };
+  }
+  if (referencia - criadoEm > LIMITE_IDADE_POSICAO_MS) {
     return { estado: 'atencao', detalhe: 'Há uma posição salva, mas ela tem mais de 24 horas.' };
   }
   return { estado: 'ok', detalhe: 'Último fixo válido guardado no aparelho.' };

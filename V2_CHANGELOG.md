@@ -1,5 +1,11 @@
 # Project Vanguard V2 — changelog de construção
 
+## 2026-08-27 — Prontidão offline exige frescor verificável
+
+A avaliação local da Home agora classifica como `atencao` uma posição geograficamente válida sem `createdAt`/`timestamp`, com timestamp zero, futuro ou referência temporal inválida. Somente um fixo positivo, não futuro e com no máximo 24 horas contribui para liberar a base local. A comunicação de emergência continua em atenção: GPS não transmite SOS sozinho.
+
+Evidência local: `npm test` com 130 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS, APK debug e preview `#/inicio` com cartão `ANTES DE SAIR` em `2/5` itens conferidos. Decisão em `ADR-0010-prontidao-offline-frescor.md`; validação em `VALIDACAO-PRONTIDAO-OFFLINE-PREVIEW-2026-08.md`.
+
 ## 2026-08-27 — Deduplicação do render do Mapa
 
 O canvas sobreposto dos rótulos da grade agora evita redesenhar quando eventos `render` repetidos mantêm a mesma câmera, viewport, DPR e versão da grade. Mudanças visuais invalidam a chave; a função é pura e testada. GPS, MapLibre, cache, wake lock e frequência de localização não foram alterados.

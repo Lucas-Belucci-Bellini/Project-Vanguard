@@ -38,6 +38,8 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | Diagnóstico → performance | `performance.getEntriesByType('navigation')` e `performance.memory` opcional → `desempenhoResumo()` → grupo `DESEMPENHO` | Medição local de DOM/carga/heap disponível; não mede FPS, bateria ou memória total |
 | Shell → acessibilidade | `src/main.js` cria skip link, `<main>` focável e estados ARIA → `src/ui/helpers.js` serializa atributos → `src/styles/base.css` mantém foco visível | Melhora navegação sem declarar conformidade WCAG; TalkBack/VoiceOver e contraste ainda exigem campo |
 
+| Home → prontidão offline | `estado.js` posição/mapas/trilha/waypoints → `prontidao-offline.js` → cartão `ANTES DE SAIR` em `inicio.js` | Posição válida sem timestamp, futura ou com relógio inválido fica em `atencao`; GPS não é comunicação |
+
 ## Armazenamento
 
 `localStorage` mantém envelopes versionados sob namespace Vanguard. Cache de shell e cache de tiles são separados no Cache Storage. Nenhum dado de posição é transmitido automaticamente. Integrações externas e hardware devem declarar `NOT CONFIGURED`, `NOT CONNECTED` ou `UNAVAILABLE` quando aplicável.

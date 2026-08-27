@@ -2,7 +2,7 @@
 
 | ID | Funcionalidade | Status | Evidência | Limite/Próximo passo |
 |---|---|---|---|---|
-| HOME | Início, tutorial e prontidão offline | TESTED | `src/pages/inicio.js` | Validar em aparelhos reais |
+| HOME | Início, tutorial e prontidão offline | TESTED | `src/pages/inicio.js`, `prontidao-offline.js`, regra de idade do fixo e testes | Validar em aparelhos reais; posição sem idade confiável não libera a prontidão |
 | MAP | Mapa MapLibre e camadas | IN_PROGRESS | `src/pages/mapa.js`, build/preview | Testar rede, tiles e lifecycle |
 | GPS | GPS/GNSS local | IN_PROGRESS | `src/core/localizacao.js`, Web fallback, `@capacitor/geolocation@8.2.2` foreground e testes | Teste físico de permissões, perda de fixo e lifecycle |
 | GNSS | Uso dos sinais do receptor do aparelho | DEVICE DEPENDENT | API de localização | Não transmite dados |
@@ -12,7 +12,7 @@
 | WAYPOINTS | Pontos locais e notas | TESTED | Página de mapa e registros | Teste de campo |
 | ROUTES | Destino, distância e rumo | TESTED | engine + mapa | Não é roteamento viário completo |
 | OFFLINE_MAP | Pré-cache de tiles | IN_PROGRESS | `mapa-offline.js`, `sw.js` | Limite de 256 URLs; cobertura/quota pendentes |
-| OFFLINE_DATA | Estado, manual e registros locais | TESTED | `estado.js`, catálogo e testes | Não sincroniza silenciosamente |
+| OFFLINE_DATA | Estado, manual e registros locais | TESTED | `estado.js`, catálogo, prontidão offline e testes | Não sincroniza silenciosamente; fixo sem frescor confirmado exige atenção |
 | SURVIVAL | Manual offline conservador | TESTED | `src/data/sobrevivencia.js` | Revisão de fontes contínua |
 | CONTEXT | Contextos e zonas civis | TESTED | `contexto.js` e testes | Fonte oficial externa não sincronizada |
 | EMERGENCY_PREP | Pacote local de Socorro | TESTED | `socorro.js`, simulação | Não envia nem confirma resgate |
