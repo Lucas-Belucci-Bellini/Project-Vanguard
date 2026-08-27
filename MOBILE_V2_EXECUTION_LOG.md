@@ -58,3 +58,11 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **`npm run mobile:sync:ios`:** concluído dentro do gate composto; nenhum arquivo nativo versionado mudou.
 - **`npm run mobile:android:debug`:** `BUILD SUCCESSFUL`; artifact de teste, não release.
 - **Limitação:** MIME/extensão não autenticam conteúdo; validação física em Android/Xiaomi/iPhone, Files/Share Sheet, modo avião, bateria, signing e loja continuam pendentes.
+
+## 2026-08-27 — fechamento da rodada
+
+- **Commit documental:** `ea8fbf0 docs(v2): fechar registro da unidade`.
+- **CI:** run `33124967071` concluído com sucesso.
+- **Git:** `main` e `origin/main` alinhadas; worktree limpa após o push.
+- **Release:** nenhuma tag `v1.0.0` criada e nenhuma release publicada nesta rodada. `v1.0.0-rc.2` permanece a única release pública registrada.
+- **Conclusão:** a rodada fechou exatamente uma unidade nova de software, com testes, documentação, build e CI; os gates físicos e de distribuição permanecem bloqueados conforme a matriz Omega.
