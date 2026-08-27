@@ -4,6 +4,7 @@ import { estado, CHAVES } from '../core/estado.js';
 import { VERSAO_ATUAL } from '../core/atualizacao.js';
 import { diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
 import { fonteLocalizacao } from '../core/localizacao.js';
+import { estadoCicloVidaAtual, observarCicloVida } from '../core/ciclo-vida.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -88,7 +89,7 @@ export function diagnosticoPage() {
     status.textContent = 'LENDO ESTADOS LOCAIS…';
     try {
       const posicao = estado.get(CHAVES.LOCAL, null);
-      const reg = navigator.serviceWorker ? await navigator.serviceWorker.ready.catch(() => null) : null;
+      const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration().catch(() => null) : null;
       bateria = await bateriaAtual();
       const dados = diagnosticoResumo({
         versao: `Vanguard Field ${VERSAO_ATUAL}`,
@@ -107,7 +108,9 @@ export function diagnosticoPage() {
       const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'atencao' : 'ok' };
       const localizacaoItem = { grupo: 'LOCALIZAÇÃO', nome: 'Fonte GPS', valor: fonteLocalizacao(), estado: fonteLocalizacao() === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
       const backgroundItem = { grupo: 'MOBILE', nome: 'GPS em background', valor: 'DEVICE DEPENDENT · sem garantia contínua', estado: 'atencao' };
-      render([...dados, localizacaoItem, backgroundItem, cacheItem]);
+      const ciclo = estadoCicloVidaAtual();
+      const cicloItem = { grupo: 'MOBILE', nome: 'Ciclo do app', valor: ciclo.rotulo, estado: ciclo.estado === 'UNAVAILABLE' ? 'atencao' : 'ok' };
+      render([...dados, localizacaoItem, backgroundItem, cicloItem, cacheItem]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {
@@ -120,6 +123,7 @@ export function diagnosticoPage() {
 
   recarregar.onclick = atualizar;
   const removeLocal = estado.on(CHAVES.LOCAL, atualizar);
+  const removeCiclo = observarCicloVida({ onState: () => atualizar() });
   const aoConectar = () => atualizar();
   addEventListener('online', aoConectar);
   addEventListener('offline', aoConectar);
@@ -144,6 +148,7 @@ export function diagnosticoPage() {
     desmontar() {
       removido = true;
       removeLocal();
+      removeCiclo();
       removeEventListener('online', aoConectar);
       removeEventListener('offline', aoConectar);
       if (bateria) {

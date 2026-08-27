@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-A base web do Vanguard foi empacotada com Capacitor e os projetos nativos foram gerados em `android/` e `ios/`. O pacote `@capacitor/geolocation@8.2.2` está sincronizado para o driver nativo de localização foreground; isso não constitui suporte contínuo em background.
+A base web do Vanguard foi empacotada com Capacitor e os projetos nativos foram gerados em `android/` e `ios/`. O pacote `@capacitor/geolocation@8.2.2` está sincronizado para o driver nativo de localização foreground e `@capacitor/app@8.1.1` para observação do lifecycle; isso não constitui suporte contínuo em background.
 
 | Artefato | Estado |
 |---|---|
@@ -49,7 +49,7 @@ No Xcode, selecionar uma equipe Apple, revisar o Bundle Identifier `com.projectv
 
 O app usa perfis adaptativos: consulta pontual, cidade econômica, trilha ativa, bússola econômica e emergência. Alta precisão só é solicitada quando a pessoa inicia uma trilha ou pede uma posição de emergência. Na plataforma nativa, o driver `@capacitor/geolocation` usa a mesma política e o mesmo contrato local do fallback Web. Ao pausar a rota ou sair da função, o acompanhamento deve ser reduzido ou encerrado.
 
-No iOS nativo, a integração de background ainda é futura: deve usar o serviço mais econômico que atenda ao caso, `distanceFilter`, precisão mínima suficiente, pausas automáticas e localização em segundo plano somente quando explicitamente necessária e validada no ciclo de vida real. No Android, o acompanhamento em segundo plano também deve ser opt-in e limitado ao período real da trilha. Em aparelhos Xiaomi, a documentação de configuração de bateria e execução em segundo plano precisa ser apresentada ao usuário sem recomendar desativar proteções do sistema de forma indiscriminada.
+O diagnóstico também exibe o ciclo do app como `FOREGROUND`/`BACKGROUND` por `@capacitor/app` no nativo e por `visibilitychange` na Web. Essa linha serve para evidência local de troca de estado e não mantém processo, GPS ou gravação ativos após suspensão. No iOS nativo, a integração de background ainda é futura: deve usar o serviço mais econômico que atenda ao caso, `distanceFilter`, precisão mínima suficiente, pausas automáticas e localização em segundo plano somente quando explicitamente necessária e validada no ciclo de vida real. No Android, o acompanhamento em segundo plano também deve ser opt-in e limitado ao período real da trilha. Em aparelhos Xiaomi, a documentação de configuração de bateria e execução em segundo plano precisa ser apresentada ao usuário sem recomendar desativar proteções do sistema de forma indiscriminada.
 
 No mapa web atual, a tela inicia no perfil econômico de cidade; o perfil de alta precisão só entra quando a pessoa inicia a gravação da rota. Pausar ou limpar a rota retorna ao modo econômico. A vigília de tela é opcional, só aparece durante uma rota ativa e é liberada ao sair dela; ocultar a tela interrompe a atualização visual do mapa. A duração da bateria não pode ser garantida: depende do aparelho, temperatura, recepção GNSS, brilho, tela, mapas, rede e sensores. O iPhone não é automaticamente pior; GPS contínuo, mapa renderizado e localização em segundo plano consomem energia em qualquer plataforma.
 
@@ -69,3 +69,4 @@ Antes de ficar sem conexão, abrir o mapa, selecionar a base e tocar em **Prepar
 [4]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)
 [5]: [Android Developers — Access location in the background](https://developer.android.com/develop/sensors-and-location/location/background)
 [6]: [Apple Developer — Handling location updates in the background](https://developer.apple.com/documentation/corelocation/handling-location-updates-in-the-background)
+[7]: [Capacitor — App Plugin API](https://capacitorjs.com/docs/apis/app)

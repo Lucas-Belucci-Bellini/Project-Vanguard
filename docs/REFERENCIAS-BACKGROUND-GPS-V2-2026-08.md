@@ -22,6 +22,12 @@ Fonte: [Handling location updates in the background — Apple Developer](https:/
 
 Fonte: [CLLocationManager — allowsBackgroundLocationUpdates](https://developer.apple.com/documentation/corelocation/cllocationmanager/allowsbackgroundlocationupdates).
 
+## Capacitor App e ciclo de vida
+
+A API oficial `@capacitor/app` expõe eventos de estado do aplicativo, incluindo `appStateChange`, `pause` e `resume`. A documentação descreve que esses eventos refletem o ciclo nativo no iOS/Android e `visibilitychange` na Web. O Vanguard usa apenas essa observação para tornar o estado local diagnosticável; ela não mantém o app executando e não transforma a localização foreground em rastreamento contínuo.
+
+Fonte: [Capacitor App Plugin API](https://capacitorjs.com/docs/apis/app).
+
 ## Decisão de implementação
 
-O app agora possui um driver opcional de foreground com `@capacitor/geolocation@8.2.2`, permissões Android coarse/fine e descrições de uso no `Info.plist` iOS. O rastreamento contínuo em background continua não garantido: o plugin oficial não oferece background geolocation diretamente, e a próxima etapa exige validação de lifecycle nativa antes de alterar permissões de background. Nenhuma interface pode exibir `TRACKING` ou `BACKGROUND SUPPORTED` sem teste real correspondente.
+O app agora possui um driver opcional de foreground com `@capacitor/geolocation@8.2.2`, um observador de lifecycle com `@capacitor/app@8.1.1`, permissões Android coarse/fine e descrições de uso no `Info.plist` iOS. O rastreamento contínuo em background continua não garantido: o plugin oficial não oferece background geolocation diretamente, e a próxima etapa exige validação de lifecycle nativa antes de alterar permissões de background. Nenhuma interface pode exibir `TRACKING` ou `BACKGROUND SUPPORTED` sem teste real correspondente.

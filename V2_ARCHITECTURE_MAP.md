@@ -32,7 +32,8 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | Socorro → compartilhamento | posição → pacote local → Share/clipboard do sistema | Compartilhamento não confirma entrega |
 | SW → atualização PWA | registro → SW `waiting` → botão → confirmação → `SKIP_WAITING` → `controllerchange` | Sem atualização silenciosa |
 | Release → APK | GitHub release HTTPS → botão → instalador do sistema | APK não se auto-instala; nova versão deve ser maior |
-| Diagnóstico → observabilidade | APIs locais → `src/core/diagnostico.js` → `src/pages/diagnostico.js` → estado local | Sem telemetria oculta; bateria e sensores podem estar indisponíveis |
+| Lifecycle → diagnóstico | `@capacitor/app` `appStateChange` ou `visibilitychange` → `ciclo-vida.js` → diagnóstico | Mede foreground/background; não garante execução nem GPS contínuo |
+| Diagnóstico → observabilidade | APIs locais → `src/core/diagnostico.js`/`src/core/ciclo-vida.js` → `src/pages/diagnostico.js` → estado local | Sem telemetria oculta; bateria, sensores e lifecycle podem estar indisponíveis |
 
 ## Armazenamento
 
@@ -40,7 +41,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 
 ## Mobile
 
-O Capacitor encapsula a base web. `@capacitor/geolocation@8.2.2` é o driver opcional de foreground; Android declara coarse/fine e iOS declara descrições de uso. Android e iOS recebem a mesma UI, mas permissões, suspensão, bateria, sensores, instalação e atualização precisam de validação específica. Background GPS prolongado não deve ser afirmado a partir de um teste de navegador ou do driver foreground.
+O Capacitor encapsula a base web. `@capacitor/geolocation@8.2.2` é o driver opcional de foreground e `@capacitor/app@8.1.1` observa lifecycle; Android declara coarse/fine e iOS declara descrições de uso. Android e iOS recebem a mesma UI, mas permissões, suspensão, bateria, sensores, instalação e atualização precisam de validação específica. Background GPS prolongado não deve ser afirmado a partir de um teste de navegador ou do driver foreground.
 
 ## Legacy
 

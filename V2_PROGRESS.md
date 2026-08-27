@@ -20,6 +20,7 @@ Implemented:
 - Skill reutilizável em `.claude/skills/vanguard-field-release-ops/SKILL.md`.
 - Diagnóstico local em `#/diagnostico`, com versão, plataforma, rede, GPS, frescor, cache, armazenamento, bateria quando disponível, service worker e bússola.
 - Driver opcional `@capacitor/geolocation@8.2.2` para foreground nativo, com fallback Web/PWA e política de energia compartilhada.
+- Observador de lifecycle com `@capacitor/app@8.1.1`, usando `appStateChange` nativo ou `visibilitychange` na Web; o estado aparece no Diagnóstico sem prometer background GPS.
 
 Fixed:
 - Idade do último fixo visível no HUD.
@@ -27,7 +28,7 @@ Fixed:
 - Versão Android alinhada a `versionCode 100` e `versionName 1.0.0`.
 
 Tests:
-- `npm test`: 119 passados.
+- `npm test`: 122 passados.
 - `npm audit --omit=dev`: 0 vulnerabilidades de produção.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
@@ -60,17 +61,19 @@ Files Created:
 Files Modified:
 - `src/core/diagnostico.js`, `src/pages/diagnostico.js`, `src/styles/diagnostico.css` e `test/diagnostico.test.js`.
 - `src/core/localizacao.js` com driver nativo opcional e teste de fonte.
-- Android/iOS sincronizados com `@capacitor/geolocation@8.2.2`; permissões Android foreground e descrições iOS atualizadas.
+- `src/core/ciclo-vida.js` com testes de estado e limpeza de listeners.
+- Android/iOS sincronizados com `@capacitor/geolocation@8.2.2` e `@capacitor/app@8.1.1`; permissões Android foreground e descrições iOS atualizadas.
 - A rota `#/diagnostico` e o atalho correspondente foram adicionados ao app.
 
 Blockers:
-- Validação física do diagnóstico e do driver foreground em Android, Xiaomi/MIUI/HyperOS e iPhone.
-- Background GPS real, ciclo de vida, consumo e quota de cache.
+- Validação física do diagnóstico, driver foreground e lifecycle em Android, Xiaomi/MIUI/HyperOS e iPhone.
+- Background GPS real, consumo e quota de cache.
 - Assinatura Android/iOS e distribuição.
 
 Next Task:
-- Validar Geolocation foreground e permissões em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo.
-- Commit publicado: `bb240e7`; CI `33108661603` passou.
+- Validar Geolocation foreground, permissões e lifecycle em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo.
+- Commit anterior publicado: `bb240e7`; CI `33108661603` passou.
+- Esta continuação foi validada localmente com 122 testes e Android debug; o commit/CI desta continuação serão registrados após o push.
 
 V2 Completion:
 IN PROGRESS

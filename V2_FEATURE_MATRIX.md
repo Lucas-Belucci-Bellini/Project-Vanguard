@@ -23,11 +23,11 @@
 | JSON | Backup versionado | TESTED | Envelope e testes | Backup externo recomendado |
 | KML | Interoperabilidade KML | NOT_STARTED | Não presente no escopo atual | V3 backlog |
 | PWA | Manifest, shell e service worker | IN_PROGRESS | `public/sw.js`, `index.html` | Testar instalação e reload offline |
-| ANDROID | Capacitor + Geolocation foreground | IN_PROGRESS | APK debug, Gradle e permissões coarse/fine | Assinatura, permissões e hardware/lifecycle pendentes |
-| IOS | Capacitor iOS + Geolocation foreground | BLOCKED | Plugin sincronizado e descrições foreground | Mac/Xcode/Apple, permissões e lifecycle necessários |
+| ANDROID | Capacitor + Geolocation foreground + App lifecycle | IN_PROGRESS | APK debug, Gradle, `@capacitor/app@8.1.1` e permissões coarse/fine | Assinatura, permissões e hardware/lifecycle pendentes |
+| IOS | Capacitor iOS + Geolocation foreground + App lifecycle | BLOCKED | Plugins sincronizados, `Package.swift` e descrições foreground | Mac/Xcode/Apple, permissões e lifecycle necessários |
 | UPDATES | Update confirmado | IN_PROGRESS | `atualizacao.js`, UI e SW | Testar release posterior |
 | DONATIONS | Tela preparada | NOT_CONFIGURED | Sem checkout/credenciais | Não ativar sem integração real |
-| DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, 5 testes | Validar em navegador e aparelhos reais; sem telemetria oculta |
+| DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, 8 testes | Validar em navegador e aparelhos reais; sem telemetria oculta |
 | SETTINGS | Configuração/tema local | IMPLEMENTED | Shell e estado | Expandir somente com necessidade |
 | ACCESSIBILITY | Labels, contraste e foco | IN_PROGRESS | UI atual | TalkBack/VoiceOver pendentes |
 | EXTERNAL_HARDWARE | Satélite, beacon, rádio, Geiger, sonar | NOT_CONFIGURED | Contratos/documentação | Não simular hardware |
