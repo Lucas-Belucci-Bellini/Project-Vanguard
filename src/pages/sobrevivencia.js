@@ -33,8 +33,8 @@ export function sobrevivenciaPage() {
   const checklist = h('div', { className: 'sobrevivencia__checklist' },
     h('span', null, 'ANTES DE SAIR'),
     h('strong', null, 'GPS + mapa offline + água + luz + bateria + contato + plano de retorno'));
-  const busca = h('input', { className: 'sobrevivencia__search', type: 'search', placeholder: 'Buscar no manual offline', ariaLabel: 'Buscar no manual offline' });
-  const filtro = h('select', { className: 'sobrevivencia__filter', ariaLabel: 'Filtrar guias do manual' },
+  const busca = h('input', { className: 'sobrevivencia__search', type: 'search', placeholder: 'Buscar no manual offline', 'aria-label': 'Buscar no manual offline' });
+  const filtro = h('select', { className: 'sobrevivencia__filter', 'aria-label': 'Filtrar guias do manual' },
     ...TAGS.map((tag) => h('option', { value: tag }, tag === 'todos' ? 'TODOS OS TEMAS' : tag.toUpperCase())));
   const contador = h('p', { className: 'sobrevivencia__count', role: 'status' });
   const grade = h('section', { className: 'sobrevivencia__grid', 'aria-label': 'Guias offline de sobrevivência' });

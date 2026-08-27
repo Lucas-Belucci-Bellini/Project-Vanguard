@@ -47,7 +47,7 @@ export function contextoPage() {
     : 'Sem fixo GPS local. O contexto escolhido continua salvo no aparelho.');
   const itens = h('div', { className: 'contexto__lista' });
   const zonaLista = h('div', { className: 'contexto__zonas-lista' });
-  const zonaArquivo = h('input', { className: 'contexto__file', type: 'file', accept: 'application/json,.json', ariaLabel: 'Importar zonas JSON' });
+  const zonaArquivo = h('input', { className: 'contexto__file', type: 'file', accept: 'application/json,.json', 'aria-label': 'Importar zonas JSON' });
   const zonaDadosFeedback = h('p', { className: 'contexto__form-feedback', role: 'status' });
 
   function renderContexto() {
@@ -140,13 +140,13 @@ export function contextoPage() {
     });
   };
 
-  const zonaNome = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Nome da zona', ariaLabel: 'Nome da zona' });
-  const zonaLat = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Latitude', ariaLabel: 'Latitude da zona' });
-  const zonaLon = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Longitude', ariaLabel: 'Longitude da zona' });
-  const zonaRaio = h('input', { className: 'contexto__input', type: 'number', min: '50', max: '100000', step: '50', placeholder: 'Raio em metros', ariaLabel: 'Raio em metros' });
-  const zonaFonte = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Fonte/data do aviso', ariaLabel: 'Fonte e data do aviso' });
-  const zonaValidade = h('input', { className: 'contexto__input', type: 'date', ariaLabel: 'Validade da zona, opcional' });
-  const zonaTipo = h('select', { className: 'contexto__input', ariaLabel: 'Tipo de contexto da zona' },
+  const zonaNome = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Nome da zona', 'aria-label': 'Nome da zona' });
+  const zonaLat = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Latitude', 'aria-label': 'Latitude da zona' });
+  const zonaLon = h('input', { className: 'contexto__input', type: 'number', step: 'any', placeholder: 'Longitude', 'aria-label': 'Longitude da zona' });
+  const zonaRaio = h('input', { className: 'contexto__input', type: 'number', min: '50', max: '100000', step: '50', placeholder: 'Raio em metros', 'aria-label': 'Raio em metros' });
+  const zonaFonte = h('input', { className: 'contexto__input', type: 'text', placeholder: 'Fonte/data do aviso', 'aria-label': 'Fonte e data do aviso' });
+  const zonaValidade = h('input', { className: 'contexto__input', type: 'date', 'aria-label': 'Validade da zona, opcional' });
+  const zonaTipo = h('select', { className: 'contexto__input', 'aria-label': 'Tipo de contexto da zona' },
     ...CONTEXTOS.map((item) => h('option', { value: item.id }, item.nome)));
   const zonaFeedback = h('p', { className: 'contexto__form-feedback', role: 'status' });
   const salvarZona = h('button', { className: 'contexto__secondary', type: 'button' }, 'SALVAR ZONA LOCAL');

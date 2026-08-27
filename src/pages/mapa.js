@@ -83,7 +83,7 @@ export function mapaPage() {
   const modoBotao = h('button', { className: 'mapa__mode-button', type: 'button' }, 'MARCAR PONTO');
   const sheetStatus = h('p', { className: 'mapa__sheet-status', role: 'status' }, 'Ative uma rota para registrar o caminho no aparelho.');
   const routeButton = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR ROTA');
-  const wakeButton = h('button', { className: 'mapa__wake-button', type: 'button' }, 'MANTER TELA ATIVA: DESLIGADO');
+  const wakeButton = h('button', { className: 'mapa__wake-button', type: 'button', 'aria-pressed': 'false' }, 'MANTER TELA ATIVA: DESLIGADO');
   const centerButton = h('button', { className: 'mapa__quick-button', type: 'button' }, '⌾ CENTRAR');
   const clearButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'LIMPAR TRILHA');
   const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
@@ -205,6 +205,7 @@ export function mapaPage() {
     wakeButton.textContent = !('wakeLock' in navigator)
       ? 'TELA ATIVA INDISPONÍVEL NESTE APARELHO'
       : `MANTER TELA ATIVA: ${wakeAtivo ? 'LIGADO' : 'DESLIGADO'}`;
+    wakeButton.setAttribute('aria-pressed', String(wakeAtivo));
     modoBotao.textContent = marcando ? 'CANCELAR MARCAÇÃO' : 'MARCAR PONTO';
     modoBotao.classList.toggle('is-active', marcando);
     destinoMapButton.textContent = marcandoDestino ? 'CANCELAR TOQUE' : 'TOCAR NO MAPA';
