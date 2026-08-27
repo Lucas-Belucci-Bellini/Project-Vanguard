@@ -20,7 +20,7 @@
 | `f9da500` | diagnóstico compatível com `lat/lon` | testes e CI |
 | `4f8e20a` | capacidades observáveis | testes e CI |
 | `2bb3e74` | compartilhamento explícito | testes e CI |
-| `15f9bac` | leitura de permissão GPS | testes e CI |
+| `15f9bac` | leitura de permissão GPS sem prompt automático | testes e CI |
 | `cd47a0c` | persistência observável | testes e CI |
 | `3d859f6` | tracking local Start/Pause/Resume/Stop | 156 testes e CI |
 | `431449e` | importação/exportação KML 2.2 local | 159 testes e CI |
@@ -28,3 +28,16 @@
 ## Regra de continuidade
 
 Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultado, CI e limitações. Falhas devem ser registradas antes da correção; nenhum sucesso deve ser presumido por histórico anterior.
+
+## 2026-08-27 — publicação da memória Omega e gates locais
+
+- **Commit:** `ddd2e86 docs(v2): consolidar memoria omega`.
+- **Push:** `origin/main` atualizado com sucesso; `main` ficou alinhada.
+- **CI:** run de push `3312455...` listado como concluído com sucesso; confirmar ID completo no GitHub se necessário.
+- **`npm test`:** 159 aprovados, 0 falhas.
+- **`npm run build`:** aprovado; Vite produziu `dist/`.
+- **`node --check public/sw.js`:** aprovado.
+- **`git diff --check`:** aprovado.
+- **`npm audit --omit=dev --audit-level=high`:** 0 vulnerabilidades.
+- **Release:** não executada; `v1.0.0` não criada; `v1.0.0-rc.2` continua a única release pública.
+- **Limitação:** esta unidade foi documental; não prova instalação, sensor, bateria, modo avião, assinatura, loja ou iOS IPA.
