@@ -5,6 +5,7 @@ import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel
 import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
+import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const CENTRO_FALLBACK = [-43.21, -22.95];
@@ -60,32 +61,7 @@ function rotuloDaLinha(valor, passo) {
   return String(Math.floor((valor % 100000) / passo) % 100).padStart(2, '0');
 }
 
-function tileX(lon, zoom) { return Math.floor(((lon + 180) / 360) * (2 ** zoom)); }
-function tileY(lat, zoom) {
-  const rad = Math.max(-85.0511, Math.min(85.0511, lat)) * Math.PI / 180;
-  return Math.floor(((1 - Math.asinh(Math.tan(rad)) / Math.PI) / 2) * (2 ** zoom));
-}
-function urlDoTile(template, x, y, z) {
-  return template.replace('{x}', x).replace('{y}', y).replace('{z}', z);
-}
-function tilesDoViewport(bounds, base) {
-  const zoomAtual = Math.max(0, Math.floor(base?.zoomAtual ?? 12));
-  const minimo = Math.max(5, zoomAtual - 1);
-  const maximo = Math.min(Number(base?.maxzoom ?? 16), zoomAtual + 1, 16);
-  const urls = new Set();
-  for (let z = minimo; z <= maximo; z++) {
-    const x0 = tileX(bounds.getWest(), z);
-    const x1 = tileX(bounds.getEast(), z);
-    const y0 = tileY(bounds.getNorth(), z);
-    const y1 = tileY(bounds.getSouth(), z);
-    for (let x = x0; x <= x1; x++) {
-      for (let y = y0; y <= y1; y++) {
-        for (const template of base.tiles ?? []) urls.add(urlDoTile(template, x, y, z));
-      }
-    }
-  }
-  return [...urls].slice(0, 256);
-}
+
 
 async function carregarMapLibre() {
   try {
@@ -452,7 +428,8 @@ export function mapaPage() {
         return;
       }
       const baseAtual = BASES[selectBase.value];
-      const urls = tilesDoViewport(mapa.getBounds(), { ...baseAtual, zoomAtual: mapa.getZoom() });
+      const plano = planejarTilesDoViewport(mapa.getBounds(), { ...baseAtual, zoomAtual: mapa.getZoom() });
+      const urls = plano.urls;
       if (!urls.length) {
         offlineStatus.textContent = 'Não foi possível calcular tiles para esta área.';
         return;
@@ -460,11 +437,15 @@ export function mapaPage() {
       offlineButton.disabled = true;
       offlineClearButton.disabled = true;
       offlineButton.textContent = 'PREPARANDO…';
-      offlineStatus.textContent = `${urls.length} tiles serão guardados no aparelho. Não feche a tela.`;
+      offlineStatus.textContent = plano.limitado
+        ? `${urls.length} de ${plano.totalEstimado} tiles serão preparados (limite desta versão). Não feche a tela.`
+        : `${urls.length} tiles serão guardados no aparelho. Não feche a tela.`;
       try {
         const resposta = await mensagemOffline('CACHE_TILES', { urls });
         const salvos = Number(resposta?.salvos ?? 0);
-        offlineStatus.textContent = `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}. Mova o mapa e prepare outra área se necessário.`;
+        offlineStatus.textContent = plano.limitado
+          ? `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}; a área foi reduzida ao limite local. Aproxime o mapa e prepare novamente.`
+          : `${salvos}/${urls.length} tiles preparados para ${baseAtual.nome}. Mova o mapa e prepare outra área se necessário.`;
       } catch {
         offlineStatus.textContent = 'Não foi possível preparar a área agora. Abra o app uma vez online e tente novamente.';
       } finally {
