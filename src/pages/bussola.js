@@ -84,6 +84,7 @@ export function bussolaPage() {
     try {
       if (!assistindoGps) {
         pararGps = iniciarAcompanhamento({
+          mode: 'bussola',
           onPosition: (posicao) => {
             if (!sensorAtivo && Number.isFinite(posicao.heading)) atualizar(posicao.heading, 'RUMO DO GPS');
           },

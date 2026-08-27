@@ -323,6 +323,7 @@ export function mapaPage() {
   destinoInput.onkeydown = (event) => { if (event.key === 'Enter') definirDestino(); };
   selectUso.onchange = () => {
     estado.set(CHAVES.MODO_USO, selectUso.value);
+    pararGps?.setMode(selectUso.value === 'cidade' ? 'cidade' : 'trilha');
     sheetStatus.textContent = selectUso.value === 'cidade'
       ? 'Modo cidade: defina um destino para ver rumo e distância.'
       : 'Modo trilha: registre sua rota e pontos de referência localmente.';
@@ -336,6 +337,7 @@ export function mapaPage() {
   };
 
   const pararGps = iniciarAcompanhamento({
+    mode: estado.get(CHAVES.MODO_USO, 'trilha') === 'cidade' ? 'cidade' : 'trilha',
     onPosition: (nova) => {
       const anterior = posicao;
       posicao = nova;
