@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007, referências WCAG e contrato de update versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | Nova unidade de update validada localmente; commit/CI desta continuação serão registrados após o push |
+| **Main** | `e0e632b security(v2): restringir destinos de atualizacao`; CI `33112962807` concluído com sucesso |
 
 ## Regra de conclusão
 

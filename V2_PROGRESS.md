@@ -75,12 +75,12 @@ Blockers:
 - Assinatura Android/iOS e distribuição.
 
 Next Task:
-- Validar Geolocation foreground, permissões, lifecycle e acessibilidade em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo.
+- Validar Geolocation foreground, permissões, lifecycle, acessibilidade e update em Android/Xiaomi/iOS; testar uma release posterior controlada antes de considerar o fluxo de atualização verificado. Somente depois decidir sobre background GPS nativo.
 - Commit anterior publicado: `bb240e7`; CI `33108661603` passou.
 - Unidade publicada: `2bfd797 feat(v2): observar ciclo de vida mobile`; CI `33110246185` concluído com sucesso.
 - Preview limpo confirmou `FOREGROUND · VISIBILITY API`; a primeira tentativa presa em loading levou à correção não bloqueante de `getRegistration()`. Isso não substitui validação nativa.
 - Unidade anterior publicada como `b5a83c9 feat(v2): fortalecer acessibilidade da shell`; CI `33111683598` concluído com sucesso.
-- Unidade atual validada localmente com 124 testes, build web, audit de produção, sync Android/iOS e APK debug; commit/CI serão registrados após o push.
+- Unidade publicada como `e0e632b security(v2): restringir destinos de atualizacao`; CI `33112962807` concluído com sucesso. Validação local: 124 testes, build web, audit de produção, sync Android/iOS e APK debug.
 
 V2 Completion:
 IN PROGRESS
