@@ -32,6 +32,10 @@ O aplicativo pode obter a posição, montar coordenadas e abrir compartilhamento
 
 A camada `src/core/capacidades.js` classifica somente o que o ambiente expõe, usando `AVAILABLE`, `UNAVAILABLE`, `DENIED` e `NOT_SUPPORTED`. A detecção não afirma que o GPS tem sinal, que a bússola tem sensor/calibração, que o storage tem quota ou que o compartilhamento foi entregue. O Diagnóstico mostra o detalhe e mantém a validação física separada.
 
+## D-009 — Compartilhamento com fallback explícito
+
+`src/platform/compartilhamento.js` centraliza texto e arquivos. O caminho preferencial é Web Share; clipboard é fallback para texto e download local é fallback para JSON/GPX. O resultado `COMPARTILHADO` significa apenas aceitação pelo sistema operacional, enquanto `COPIADO`, `BAIXADO`, `CANCELADO`, `INDISPONÍVEL` e `FALHA` permanecem distinguíveis. Nenhum caminho confirma entrega, contato, resgate ou envio automático.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)

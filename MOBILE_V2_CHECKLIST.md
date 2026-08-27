@@ -21,6 +21,7 @@
 | MV2-015 | Android/iOS | Atualização confirmada | IN_PROGRESS | PWA waiting; APK apenas abre origem oficial após confirmação | testes de política/fluxo local | release posterior e instalador físico pendentes | `MOBILE_V2_RELEASE.md` |
 | MV2-016 | Distribuição | Release assinada | BLOCKED | scripts/documentação, sem credenciais | debug aprovado | keystore, Apple signing e publicação pendentes | `MOBILE_V2_RELEASE.md`, `V2_BLOCKERS.md` |
 | MV2-017 | Compartilhada | Camada de capacidades observáveis | TESTED | `src/core/capacidades.js` + grupo `CAPACIDADES` no Diagnóstico | testes determinísticos de estados e APIs ausentes | Node/CI; hardware, sensor e quota pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0014 |
+| MV2-018 | Android/iOS/PWA | Compartilhamento de texto e JSON/GPX | TESTED | `src/platform/compartilhamento.js`; Socorro e Mapa integrados | Web Share, cancelamento, clipboard, download e APIs ausentes | Node/CI; Share Sheet/Files/download físico pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0015 |
 
 ## Regra de encerramento
 

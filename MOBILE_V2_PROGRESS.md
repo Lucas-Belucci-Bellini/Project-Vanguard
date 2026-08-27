@@ -34,3 +34,11 @@ As unidades anteriores permanecem válidas e não foram repetidas: lifecycle obs
 ## Próximo passo
 
 Executar `MOBILE_V2_TEST_MATRIX.md` em Android comum, Xiaomi/MIUI/HyperOS e iPhone quando houver dispositivos. Priorizar permissões, troca de app/tela bloqueada, modo avião, persistência, quota/resposta de tiles, sensor de bússola, compartilhamento, update posterior e bateria. Sem hardware, não implementar background GPS, notificações, signing ou integrações fictícias.
+
+## Marco de compartilhamento — 2026-08-27
+
+A auditoria encontrou uma lacuna entre o fluxo de texto do Socorro e os downloads JSON/GPX do Mapa: cada tela tratava a plataforma de forma diferente. `src/platform/compartilhamento.js` agora centraliza Web Share, clipboard e download local, com estados explícitos para sucesso aceito pelo sistema, cópia, download, cancelamento, indisponibilidade e falha.
+
+O Socorro usa o adaptador para coordenadas e mantém a regra de que compartilhar não confirma entrega. O Mapa usa o mesmo adaptador para JSON e GPX, tentando compartilhamento de arquivos quando `canShare` aceita e usando download local como fallback. Nenhuma permissão nova, transmissão automática ou confirmação de resgate foi adicionada.
+
+A cobertura em `test/compartilhamento.test.js` passou junto com a suíte completa, build web, sintaxe do Service Worker, auditoria de produção, sync Android/iOS e APK debug. O commit funcional `2bb3e74 feat(v2): compartilhar registros no mobile` foi publicado e o CI `33120523569` concluiu com sucesso. O Share Sheet, Files, clipboard e diretório de download ainda precisam de validação em Android comum, Xiaomi/MIUI/HyperOS e iPhone.

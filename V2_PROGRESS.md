@@ -109,3 +109,9 @@ IN PROGRESS
 - Criados os registros `MOBILE_V2_STATUS.md`, `MOBILE_V2_CHECKLIST.md`, `MOBILE_V2_PROGRESS.md`, `MOBILE_V2_BLOCKERS.md`, `MOBILE_V2_TEST_MATRIX.md`, `MOBILE_V2_DECISIONS.md`, `MOBILE_V2_RISK_REGISTER.md`, `MOBILE_V2_RELEASE.md`, ADR-0013 e ADR-0014.
 - A unidade de capacidades locais passou em 138 testes, build web, sintaxe do Service Worker, audit de produção, sync Android/iOS e APK debug. O commit funcional `4f8e20a` ainda aguarda registro do CI.
 - Próxima unidade: executar a matriz Mobile V2 em dispositivos reais. Não promover hardware, bateria, sensores, quota, background, signing ou release a `VERIFIED` por inferência.
+
+## Marco Mobile V2 — compartilhamento explícito — 2026-08-27
+
+A nova unidade centraliza em `src/platform/compartilhamento.js` o compartilhamento de texto/coordenadas e de arquivos JSON/GPX. O Socorro usa Web Share ou clipboard; o Mapa tenta Web Share para arquivos e usa download local como fallback. Cancelamento, indisponibilidade e aceitação pelo sistema são estados distintos, e nenhum deles confirma entrega, resgate ou comunicação automática.
+
+A unidade está coberta por `test/compartilhamento.test.js`. A validação local alcançou 145 testes, build web, sintaxe do Service Worker, diff, auditoria de produção, sync Android/iOS e APK debug. O próximo gate é validar Share Sheet, Files, clipboard e diretório de download em aparelhos reais. ADR-0015 registra a decisão.
