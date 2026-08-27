@@ -107,6 +107,7 @@ export function mapaPage() {
   const modoBotao = h('button', { className: 'mapa__mode-button', type: 'button' }, 'MARCAR PONTO');
   const sheetStatus = h('p', { className: 'mapa__sheet-status', role: 'status' }, 'Ative uma rota para registrar o caminho no aparelho.');
   const routeButton = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR ROTA');
+  const wakeButton = h('button', { className: 'mapa__wake-button', type: 'button' }, 'MANTER TELA ATIVA: DESLIGADO');
   const centerButton = h('button', { className: 'mapa__quick-button', type: 'button' }, '⌾ CENTRAR');
   const clearButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'LIMPAR TRILHA');
   const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
@@ -149,6 +150,7 @@ export function mapaPage() {
       h('strong', { className: 'mapa__route-distance' }, '0 m'),
       h('span', { className: 'mapa__route-caption' }, 'distância registrada'),
       routeButton,
+      wakeButton,
       sheetStatus
     ),
     h('div', { className: 'mapa__map-actions' }, modoBotao, h('button', { className: 'mapa__socorro-button', type: 'button', onclick: () => { location.hash = '#/socorro'; } }, 'MODO SOCORRO →'))
@@ -177,6 +179,8 @@ export function mapaPage() {
   let primeiraPosicao = !posicao;
   let desmontado = false;
   let gradeAtual = { type: 'FeatureCollection', features: [], passo: 1000 };
+  let wakeLock = null;
+  let wakeAtivo = false;
 
   function distanciaTrilha() {
     let total = 0;
@@ -221,6 +225,10 @@ export function mapaPage() {
       : trilha.length
         ? `${trilha.length} pontos guardados localmente · pronto para continuar`
         : 'Ative uma rota para registrar o caminho no aparelho.';
+    wakeButton.disabled = !rotaAtiva || !('wakeLock' in navigator);
+    wakeButton.textContent = !('wakeLock' in navigator)
+      ? 'TELA ATIVA INDISPONÍVEL NESTE APARELHO'
+      : `MANTER TELA ATIVA: ${wakeAtivo ? 'LIGADO' : 'DESLIGADO'}`;
     modoBotao.textContent = marcando ? 'CANCELAR MARCAÇÃO' : 'MARCAR PONTO';
     modoBotao.classList.toggle('is-active', marcando);
     destinoMapButton.textContent = marcandoDestino ? 'CANCELAR TOQUE' : 'TOCAR NO MAPA';
@@ -259,6 +267,29 @@ export function mapaPage() {
     else if (mapa) solicitarPosicao({ onPosition: (pos) => { posicao = pos; atualizarHud(); mapa.flyTo({ center: [pos.lon, pos.lat], zoom: 15 }); }, onError: () => { sheetStatus.textContent = 'Permita o GPS nas configurações do aparelho para centralizar.'; } });
   }
 
+  async function configurarWakeLock(ativo) {
+    if (!ativo || !('wakeLock' in navigator)) {
+      if (wakeLock) await wakeLock.release().catch(() => {});
+      wakeLock = null;
+      wakeAtivo = false;
+      atualizarSheet();
+      return;
+    }
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeAtivo = true;
+      wakeLock.addEventListener?.('release', () => {
+        wakeLock = null;
+        wakeAtivo = false;
+        atualizarSheet();
+      });
+    } catch {
+      wakeLock = null;
+      wakeAtivo = false;
+    }
+    atualizarSheet();
+  }
+
   function alternarRota() {
     if (!posicao) {
       sheetStatus.textContent = 'Aguardando GPS. Toque em centralizar e permita a localização primeiro.';
@@ -267,6 +298,8 @@ export function mapaPage() {
     }
     rotaAtiva = !rotaAtiva;
     estado.set(CHAVES.ROTA_ATIVA, rotaAtiva);
+    pararGps?.setMode(rotaAtiva ? 'trilha' : 'cidade');
+    if (!rotaAtiva) configurarWakeLock(false);
     if (rotaAtiva && trilha.length === 0) {
       trilha = [posicao];
       estado.set(CHAVES.TRILHA, trilha);
@@ -311,6 +344,7 @@ export function mapaPage() {
   }
 
   routeButton.onclick = alternarRota;
+  wakeButton.onclick = () => configurarWakeLock(!wakeAtivo);
   centerButton.onclick = centralizar;
   clearButton.onclick = limparTrilha;
   destinoButton.onclick = definirDestino;
@@ -324,7 +358,7 @@ export function mapaPage() {
   destinoInput.onkeydown = (event) => { if (event.key === 'Enter') definirDestino(); };
   selectUso.onchange = () => {
     estado.set(CHAVES.MODO_USO, selectUso.value);
-    pararGps?.setMode(selectUso.value === 'cidade' ? 'cidade' : 'trilha');
+    pararGps?.setMode(rotaAtiva ? 'trilha' : 'cidade');
     sheetStatus.textContent = selectUso.value === 'cidade'
       ? 'Modo cidade: defina um destino para ver rumo e distância.'
       : 'Modo trilha: registre sua rota e pontos de referência localmente.';
@@ -338,7 +372,7 @@ export function mapaPage() {
   };
 
   const pararGps = iniciarAcompanhamento({
-    mode: estado.get(CHAVES.MODO_USO, 'trilha') === 'cidade' ? 'cidade' : 'trilha',
+    mode: 'cidade',
     onPosition: (nova) => {
       const anterior = posicao;
       posicao = nova;
@@ -346,16 +380,33 @@ export function mapaPage() {
         trilha = [...trilha, nova].slice(-4000);
         estado.set(CHAVES.TRILHA, trilha);
       }
-      atualizarHud();
-      atualizarSheet();
-      atualizarMarcadores();
-      if (mapa && primeiraPosicao) { primeiraPosicao = false; mapa.flyTo({ center: [nova.lon, nova.lat], zoom: 15, duration: 700 }); }
+      if (!document.hidden) {
+        atualizarHud();
+        atualizarSheet();
+        atualizarMarcadores();
+        if (mapa && primeiraPosicao) { primeiraPosicao = false; mapa.flyTo({ center: [nova.lon, nova.lat], zoom: 15, duration: 700 }); }
+      }
     },
     onError: (erro) => {
       estadoGps.textContent = erro?.code === 1 ? 'PERMISSÃO NEGADA' : 'GPS INDISPONÍVEL';
       sheetStatus.textContent = erro?.code === 1 ? 'Ative a permissão de localização para usar o mapa ao vivo.' : 'Não foi possível obter um fixo agora.';
     }
   });
+
+  if (rotaAtiva) pararGps.setMode('trilha');
+
+  const aoMudarVisibilidade = () => {
+    if (document.hidden) {
+      mapa?.stop();
+      return;
+    }
+    mapa?.resize();
+    atualizarHud();
+    atualizarSheet();
+    atualizarMarcadores();
+    if (rotaAtiva && wakeAtivo) configurarWakeLock(true);
+  };
+  document.addEventListener('visibilitychange', aoMudarVisibilidade);
 
   (async () => {
     const maplibregl = await carregarMapLibre();
@@ -500,5 +551,5 @@ export function mapaPage() {
   atualizarHud();
   atualizarDestino();
   atualizarSheet();
-  return { elemento: raiz, desmontar: () => { desmontado = true; pararGps(); if (mapa) mapa.remove(); } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
 }
