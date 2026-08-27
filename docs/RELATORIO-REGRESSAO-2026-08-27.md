@@ -21,3 +21,7 @@ O preview HTTPS carregou `#/inicio` com tutorial, atalhos e indicador de estado.
 ## Pendências que impedem chamar este estado de release final assinado
 
 Ainda faltam testes em aparelhos Android/Xiaomi e iPhone reais, confirmação de operação offline no Chrome DevTools com perda efetiva de rede, revisão de permissões nativas, assinatura Android/iOS e validação do conteúdo com profissionais. Doações Asaas, fontes oficiais sincronizadas, cartas náuticas, sensores externos e mensageiro via satélite permanecem preparados, não conectados.
+
+## Teste real do service worker no preview HTTPS
+
+O service worker foi registrado e ficou ativo no preview. A mensagem `CACHE_STATUS` respondeu com `cache: vanguard-field-tiles-v2`, `tiles: 25` e `type: CACHE_STATUS_DONE`. Isso confirma o protocolo de consulta do cache em navegador HTTPS; não substitui o teste de desligar a rede, preparar área e reabrir em aparelho real.
