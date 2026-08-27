@@ -8,6 +8,7 @@ import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha } from '../core/trilha.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
+import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
@@ -181,6 +182,8 @@ export function mapaPage() {
   let primeiraPosicao = !posicao;
   let desmontado = false;
   let gradeAtual = { type: 'FeatureCollection', features: [], passo: 1000 };
+  let versaoGrade = 0;
+  let ultimaChaveRotulos = null;
   let wakeLock = null;
   let wakeAtivo = false;
 
@@ -641,6 +644,7 @@ export function mapaPage() {
     function redesenharGrade() {
       if (!mapa?.getSource('vanguard-grade')) return;
       try { gradeAtual = gerarGrade(mapa.getBounds(), mapa.getZoom()); } catch { gradeAtual = { type: 'FeatureCollection', features: [] }; }
+      versaoGrade += 1;
       mapa.getSource('vanguard-grade').setData(gradeAtual);
     }
 
@@ -649,9 +653,23 @@ export function mapaPage() {
       const largura = canvas.clientWidth;
       const altura = canvas.clientHeight;
       const dpr = window.devicePixelRatio || 1;
+      const centro = mapa.getCenter?.() || {};
+      const chave = chaveDesenhoGrade({
+        center: centro,
+        zoom: mapa.getZoom?.(),
+        bearing: mapa.getBearing?.(),
+        pitch: mapa.getPitch?.(),
+        largura,
+        altura,
+        dpr,
+        versaoGrade,
+      });
+      if (chave === ultimaChaveRotulos) return;
       rotulos.width = largura * dpr;
       rotulos.height = altura * dpr;
       const ctx = rotulos.getContext('2d');
+      if (!ctx) return;
+      ultimaChaveRotulos = chave;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, largura, altura);
       ctx.font = '700 10px ui-monospace, monospace';

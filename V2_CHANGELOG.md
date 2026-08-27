@@ -1,5 +1,11 @@
 # Project Vanguard V2 — changelog de construção
 
+## 2026-08-27 — Deduplicação do render do Mapa
+
+O canvas sobreposto dos rótulos da grade agora evita redesenhar quando eventos `render` repetidos mantêm a mesma câmera, viewport, DPR e versão da grade. Mudanças visuais invalidam a chave; a função é pura e testada. GPS, MapLibre, cache, wake lock e frequência de localização não foram alterados.
+
+Evidência local: `npm test` com 129 testes aprovados, build web, preview `#/mapa` com base/controles/overlay carregados e console sem erro, audit de produção, sync Android/iOS e APK debug. A mudança não declara ganho percentual; FPS, bateria, memória total e suspensão nativa continuam dependentes de profiling físico. Decisão em `ADR-0009-deduplicacao-render-mapa.md`; validação em `VALIDACAO-MAPA-RENDER-PREVIEW-2026-08.md`.
+
 ## 2026-08-27 — Diagnóstico de performance local
 
 O Diagnóstico passou a mostrar `Startup DOM`, `Carga completa` e `Memória JS` quando as APIs locais fornecem dados. A implementação usa Navigation Timing sem polling e trata `performance.memory` como opcional; nenhuma métrica é persistida ou enviada. Foram adicionados testes para valores válidos, API ausente, lista array-like e exceção.

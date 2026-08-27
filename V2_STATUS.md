@@ -7,19 +7,19 @@
 | **Version** | `2.x` em construção; pacote atual `1.0.0` |
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: estado, observabilidade, offline-first e validação mobile |
-| **Current Task** | Validar em aparelhos GPS foreground, lifecycle, acessibilidade e atualização; executar profiling físico de performance antes de decidir otimizações ou background GPS |
-| **Last Completed Task** | Instrumentação local de performance no Diagnóstico: Navigation Timing, carga completa e memória JS opcional com fallback honesto |
+| **Current Task** | Validar em aparelhos GPS foreground, lifecycle, acessibilidade e atualização; executar profiling físico comparativo do Mapa antes de novas otimizações ou background GPS |
+| **Last Completed Task** | Deduplicação determinística do render de rótulos do Mapa por câmera, viewport, DPR e versão da grade |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
-| **Next Task** | Executar profiling físico de startup, mapa, memória, bateria e suspensão em Android, Xiaomi/MIUI/HyperOS e iPhone; validar GPS/lifecycle/acessibilidade/update e só então decidir otimizações ou background GPS |
+| **Next Task** | Medir antes/depois do Mapa, startup, memória, bateria e suspensão em Android, Xiaomi/MIUI/HyperOS e iPhone; validar GPS/lifecycle/acessibilidade/update e só então decidir novas otimizações ou background GPS |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 126 testes aprovados; `node --check public/sw.js`: aprovado; preview do Diagnóstico e fallback de APIs validados |
+| **Tests** | `npm test`: 129 testes aprovados; `node --check public/sw.js`: aprovado; previews do Diagnóstico e Mapa validados |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008, referências WCAG/performance e validação do Diagnóstico versionados |
+| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009, referências WCAG/performance e validações do Diagnóstico/Mapa versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `3d171e8 perf(v2): expor diagnostico de performance`; CI `33114175983` concluído com sucesso |
+| **Main** | Nova unidade de renderização validada localmente; commit/CI desta continuação serão registrados após o push |
 
 ## Regra de conclusão
 

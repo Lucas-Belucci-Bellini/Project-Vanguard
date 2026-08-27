@@ -6,7 +6,7 @@
 | T-002 | MGRS/geodésia | Node 22 | Conversão ida/volta, fusos, antimeridiano e limites | Erro dentro do contrato e sem resultado silencioso errado | Suíte Node | TESTED |
 | T-003 | GPS | Node/browser/Capacitor | Posição válida, negada, indisponível, baixa precisão e fixo antigo | Estados claros, idade/fonte visíveis e fallback seguro | 119 testes; driver Capacitor compilado; dispositivo pendente | IN_PROGRESS |
 | T-004 | Tracking | Browser/PWA | Iniciar, pausar, retomar, limpar e importar rota | Dados locais consistentes; rota importada pausada | Testes locais; campo pendente | IN_PROGRESS |
-| T-005 | Map | HTTPS | MapLibre, bases, destino, waypoint e câmera | Tela utilizável; nenhum GPS fictício | Preview anterior | IN_PROGRESS |
+| T-005 | Map | HTTPS | MapLibre, bases, destino, waypoint, câmera e render repetido | Tela utilizável; nenhum GPS fictício; rótulos não redesenham sem mudança visual | Preview `#/mapa` sem console error; campo pendente | IN_PROGRESS |
 | T-006 | Offline shell | Chrome/PWA | Primeiro carregamento, reload sem rede e cache hit/miss | Shell e dados locais carregam; cache miss é indicado | CI/sintaxe; aparelho pendente | IN_PROGRESS |
 | T-007 | Offline map | Android/iOS | Preparar área, limite, cache parcial, limpeza e troca de base | Status honesto; tiles não preparados não são fingidos | Status local; aparelho pendente | IN_PROGRESS |
 | T-008 | Storage | Node/browser | Migração, versão futura, corrupção e limpeza | Fallback seguro sem apagar namespace indevido | Testes de estado | TESTED |
@@ -21,7 +21,7 @@
 | T-017 | Diagnostics | Browser/PWA/mobile | Versão, rede, GPS, frescor, fonte, cache, bateria, lifecycle e service worker | Estado local honesto e sem telemetria escondida | Diagnóstico + 8 testes de diagnóstico/lifecycle + preview; aparelhos pendentes | IN_PROGRESS |
 | T-018 | Security | Node/browser | URL abusiva, payload malformado, segredo e XSS | Rejeição/escape e nenhum segredo no bundle | Revisão contínua | IN_PROGRESS |
 | T-019 | Release | GitHub/macOS/Android | Tag assinada, hashes, APK/AAB/IPA e notas | Artefatos assinados apontam ao commit aprovado | Candidate `rc.2` | BLOCKED |
-| T-020 | Performance | Node/browser | Valores válidos, APIs ausentes, lista array-like e API que lança erro | Startup/carga/memória local formatados; indisponibilidade explícita | 3 testes puros + Diagnóstico; FPS, bateria e profiling físico pendentes | IN_PROGRESS |
+| T-020 | Performance | Node/browser | Navigation Timing, memória opcional, chave estável e invalidação por câmera/viewport/DPR/grade | Métricas locais e deduplicação determinística; indisponibilidade explícita | 5 testes puros + previews `#/diagnostico`/`#/mapa`; FPS, bateria e profiling físico pendentes | IN_PROGRESS |
 
 ## Execução
 
