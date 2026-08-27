@@ -28,4 +28,6 @@ Fonte: [Android Developers — About background location and battery life](https
 | Rota pausada | Interrompida ou reduzida | Mapa pode ser pausado | Nenhuma |
 | Emergência | Preserva última posição local | Mostra pacote preparado | Tenta canal externo apenas com confirmação |
 
+No mapa atual, a tela inicia o acompanhamento no perfil `cidade`, mesmo que o contexto escolhido seja Trilha/Expedição. O perfil `trilha` só é ativado quando a pessoa toca em **INICIAR ROTA** e retorna ao perfil econômico ao pausar ou limpar a rota. A vigília de tela é opcional, fica disponível apenas durante rota ativa e é liberada ao terminar; quando o mapa fica oculto, as atualizações visuais são interrompidas e retomadas ao voltar para a tela.
+
 Esses estados são uma decisão de produto, não uma promessa de duração de bateria. A autonomia final varia conforme aparelho, temperatura, recepção GNSS, brilho, mapa, rede, sensores e otimizações do sistema.
