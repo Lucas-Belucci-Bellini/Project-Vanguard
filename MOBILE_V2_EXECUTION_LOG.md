@@ -83,6 +83,8 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 
 ## 2026-08-27 — unidade nova: configuração pública compartilhada
 
+- **Commit:** `54d6c72 feat(v2): centralizar configuracao publica`.
+- **CI:** run `33126077429` concluído com sucesso.
 - **Escopo:** `src/core/configuracao.js`, `src/core/atualizacao.js`, `src/pages/diagnostico.js`, `test/configuracao.test.js` e ADR-0024.
 - **Comportamento:** identidade pública, versão e URLs oficiais ficam em contrato imutável sem segredos; atualização preserva suas exportações e allowlist HTTPS; diagnóstico usa o mesmo nome/versão.
 - **`npm test`:** 168 aprovados, 0 falhas.
