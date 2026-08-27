@@ -28,6 +28,10 @@ O aplicativo pode obter a posição, montar coordenadas e abrir compartilhamento
 
 `npm run build` e `assembleDebug` são validações técnicas. O APK debug é artifact de teste. Release assinada, tag, publicação em loja e distribuição exigem revisão e autorização deliberadas; nenhuma tag `v1.0.0` é criada automaticamente.
 
+## D-008 — Capacidades observáveis sem inferência de hardware
+
+A camada `src/core/capacidades.js` classifica somente o que o ambiente expõe, usando `AVAILABLE`, `UNAVAILABLE`, `DENIED` e `NOT_SUPPORTED`. A detecção não afirma que o GPS tem sinal, que a bússola tem sensor/calibração, que o storage tem quota ou que o compartilhamento foi entregue. O Diagnóstico mostra o detalhe e mantém a validação física separada.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)

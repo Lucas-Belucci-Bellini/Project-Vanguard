@@ -31,6 +31,7 @@
 |---|---|
 | Contratos GPS, normalização, frescor e distância | Node: aprovado |
 | Diagnóstico, inclusive posição persistida `lat/lon` | Node: aprovado; regressão publicada em `f9da500` |
+| Capacidades observáveis | Node: aprovado; GPS/orientação/storage/rede/bateria/compartilhamento e estados `AVAILABLE`/`UNAVAILABLE`/`DENIED`/`NOT_SUPPORTED` cobertos em `test/capacidades.test.js` |
 | Planner e filtro do Service Worker | Node/VM: aprovado; limite defensivo de 256 URLs |
 | Build web e sintaxe do Service Worker | aprovado |
 | Sync Capacitor Android/iOS | aprovado no ambiente Linux |

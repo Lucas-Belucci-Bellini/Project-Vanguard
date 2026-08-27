@@ -2,6 +2,11 @@
 
 ## Registro da rodada — 2026-08-27
 
+A auditoria de continuidade confirmou `main` limpa em `478d87c`, CI anterior concluído e somente a pré-release `v1.0.0-rc.2`. O próximo gap do prompt Mobile V2 era a ausência de uma camada explícita para capacidades observáveis. A unidade implementada não presume hardware, sinal, quota ou sensor físico: ela classifica GPS, orientação, storage, rede, bateria e compartilhamento em `AVAILABLE`, `UNAVAILABLE`, `DENIED` ou `NOT_SUPPORTED`.
+
+`src/core/capacidades.js` foi integrado ao Diagnóstico local, e `test/capacidades.test.js` cobre disponibilidade, negação, APIs ausentes e bridge Capacitor com falha. A presença da API de orientação é reportada como capacidade de API; calibração e sensor físico continuam dependentes do dispositivo.
+
+
 A auditoria partiu de `main` limpa em `6ce06a6` e confirmou que a camada Capacitor já possuía Android/iOS, GPS foreground, lifecycle observável, PWA, MapLibre, importação/exportação local e preparação defensiva de tiles. O gargalo verificável encontrado foi no diagnóstico: `statusPosicao()` lia somente `latitude`/`longitude`, embora o contrato normalizado e persistido pelo GPS use `lat`/`lon`. Isso podia exibir `UNAVAILABLE` mesmo depois de um fixo local válido.
 
 A unidade implementada foi deliberadamente pequena. `src/core/diagnostico.js` agora aceita os dois shapes e permite injetar `agora` no `diagnosticoResumo()`; `test/diagnostico.test.js` cobre o shape normalizado e usa tempo determinístico. O commit foi publicado em `main` como `f9da500 fix(v2): reconhecer posição normalizada no diagnostico` e o CI `33119352814` concluiu com sucesso.
@@ -10,7 +15,7 @@ A unidade implementada foi deliberadamente pequena. `src/core/diagnostico.js` ag
 
 | Gate | Resultado |
 |---|---|
-| `npm test` | 134 aprovados |
+| `npm test` | 138 aprovados |
 | `npm run build` | aprovado |
 | `node --check public/sw.js` | aprovado |
 | `git diff --check` | aprovado |

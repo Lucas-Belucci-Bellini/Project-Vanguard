@@ -35,7 +35,7 @@ Fixed:
 - Versão Android alinhada a `versionCode 100` e `versionName 1.0.0`.
 
 Tests:
-- `npm test`: 134 passados.
+- `npm test`: 138 passados.
 - `npm audit --omit=dev`: 0 vulnerabilidades de produção.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
@@ -67,6 +67,7 @@ Files Created:
 
 Files Modified:
 - `src/core/diagnostico.js`, `src/pages/diagnostico.js`, `src/styles/diagnostico.css` e `test/diagnostico.test.js`; a compatibilidade `lat/lon` foi publicada em `f9da500`.
+- `src/core/capacidades.js`, `src/pages/diagnostico.js` e `test/capacidades.test.js`; estados observáveis publicados em `4f8e20a`.
 - `src/core/localizacao.js` com driver nativo opcional e teste de fonte.
 - `src/core/ciclo-vida.js` com testes de estado e limpeza de listeners.
 - `src/ui/helpers.js` com serialização ARIA explícita e `test/helpers.test.js` cobrindo os atributos.
@@ -105,5 +106,6 @@ IN PROGRESS
 - Auditoria confirmou Android/iOS/PWA em Capacitor, GPS foreground, lifecycle observável, MapLibre, offline local e ausência deliberada de background GPS.
 - O diagnóstico foi corrigido para reconhecer o shape persistido `{ lat, lon }` sem remover compatibilidade com `{ latitude, longitude }`; commit publicado: `f9da500 fix(v2): reconhecer posição normalizada no diagnostico`.
 - Validação local da unidade: 134 testes, build web, sintaxe do Service Worker, diff, audit de produção, sync Android/iOS e APK debug de 8.284.304 bytes. O APK continua sendo artifact de teste.
-- Criados os registros `MOBILE_V2_STATUS.md`, `MOBILE_V2_CHECKLIST.md`, `MOBILE_V2_PROGRESS.md`, `MOBILE_V2_BLOCKERS.md`, `MOBILE_V2_TEST_MATRIX.md`, `MOBILE_V2_DECISIONS.md`, `MOBILE_V2_RISK_REGISTER.md`, `MOBILE_V2_RELEASE.md` e ADR-0013.
+- Criados os registros `MOBILE_V2_STATUS.md`, `MOBILE_V2_CHECKLIST.md`, `MOBILE_V2_PROGRESS.md`, `MOBILE_V2_BLOCKERS.md`, `MOBILE_V2_TEST_MATRIX.md`, `MOBILE_V2_DECISIONS.md`, `MOBILE_V2_RISK_REGISTER.md`, `MOBILE_V2_RELEASE.md`, ADR-0013 e ADR-0014.
+- A unidade de capacidades locais passou em 138 testes, build web, sintaxe do Service Worker, audit de produção, sync Android/iOS e APK debug. O commit funcional `4f8e20a` ainda aguarda registro do CI.
 - Próxima unidade: executar a matriz Mobile V2 em dispositivos reais. Não promover hardware, bateria, sensores, quota, background, signing ou release a `VERIFIED` por inferência.

@@ -20,6 +20,7 @@
 | MV2-014 | Android/iOS | Bateria por quatro dias | BLOCKED | perfis econômicos documentados | sem profiling físico | aparelhos, temperatura e operação reais pendentes | `docs/OPERACAO-BATERIA-GPS-4-DIAS.md` |
 | MV2-015 | Android/iOS | Atualização confirmada | IN_PROGRESS | PWA waiting; APK apenas abre origem oficial após confirmação | testes de política/fluxo local | release posterior e instalador físico pendentes | `MOBILE_V2_RELEASE.md` |
 | MV2-016 | Distribuição | Release assinada | BLOCKED | scripts/documentação, sem credenciais | debug aprovado | keystore, Apple signing e publicação pendentes | `MOBILE_V2_RELEASE.md`, `V2_BLOCKERS.md` |
+| MV2-017 | Compartilhada | Camada de capacidades observáveis | TESTED | `src/core/capacidades.js` + grupo `CAPACIDADES` no Diagnóstico | testes determinísticos de estados e APIs ausentes | Node/CI; hardware, sensor e quota pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0014 |
 
 ## Regra de encerramento
 
