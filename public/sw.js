@@ -19,12 +19,17 @@ function isTileRequest(url) {
 }
 
 function allowedTileUrls(urls) {
+  const vistos = new Set();
   return urls
     .filter((value) => typeof value === 'string')
     .map((value) => {
       try { return new URL(value); } catch { return null; }
     })
-    .filter((url) => url && isTileRequest(url))
+    .filter((url) => {
+      if (!url || !isTileRequest(url) || vistos.has(url.href)) return false;
+      vistos.add(url.href);
+      return true;
+    })
     .slice(0, 256);
 }
 

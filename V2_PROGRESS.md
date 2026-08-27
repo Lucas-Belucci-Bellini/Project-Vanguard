@@ -5,7 +5,7 @@ EXECUTION REPORT
 
 Current Version: 2.x em construção; pacote atual 1.0.0
 Current Phase: Fase 2 — Engine/GPS mobile foundation + lifecycle observability
-Current Milestone: Foundation Hardening + planner offline robusto
+Current Milestone: Foundation Hardening + fronteira defensiva de tiles offline
 
 Completed:
 - O prompt V2 foi lido e decomposto sem reiniciar o trabalho existente.
@@ -27,6 +27,7 @@ Implemented:
 - O canvas de rótulos do Mapa agora deduplica eventos `render` idênticos usando chave pura de câmera, viewport, DPR e versão da grade; nenhuma frequência de GPS foi alterada.
 - A prontidão offline não libera a posição quando `createdAt`/`timestamp` está ausente, zero, no futuro ou quando o relógio de referência é inválido; o item fica em `atencao`.
 - O planner de tiles offline deduplica templates, ignora entradas vazias e interrompe a geração ao alcançar exatamente a cota local de 256 URLs.
+- O Service Worker agora filtra `CACHE_TILES` por HTTPS/hosts permitidos, remove URLs duplicadas e limita a entrada a 256 itens antes de buscar ou gravar no cache.
 
 Fixed:
 - Idade do último fixo visível no HUD.
@@ -34,7 +35,7 @@ Fixed:
 - Versão Android alinhada a `versionCode 100` e `versionName 1.0.0`.
 
 Tests:
-- `npm test`: 131 passados.
+- `npm test`: 133 passados.
 - `npm audit --omit=dev`: 0 vulnerabilidades de produção.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
@@ -74,6 +75,7 @@ Files Modified:
 - `src/core/chave-renderizacao.js` com `test/chave-renderizacao.test.js`; `src/pages/mapa.js` usa a chave para evitar pintura idêntica do canvas.
 - `src/core/prontidao-offline.js` exige frescor verificável do fixo e `test/prontidao-offline.test.js` cobre ausência, zero, futuro, relógio inválido e posição antiga.
 - `src/core/mapa-offline.js` deduplica templates antes da estimativa/cota e `test/mapa-offline.test.js` compara template único e duplicado.
+- `public/sw.js` aplica allowlist HTTPS/host e deduplicação defensiva; `test/sw-policy.test.js` executa o script real em contexto controlado com entradas inválidas, repetidas e acima da cota.
 - Android/iOS sincronizados com `@capacitor/geolocation@8.2.2` e `@capacitor/app@8.1.1`; permissões Android foreground e descrições iOS atualizadas.
 - A rota `#/diagnostico` e o atalho correspondente foram adicionados ao app.
 
@@ -92,7 +94,8 @@ Next Task:
 - Unidade anterior publicada como `3d171e8 perf(v2): expor diagnostico de performance`; CI `33114175983` concluído com sucesso.
 - Unidade anterior publicada como `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso.
 - Unidade anterior publicada como `cc076bb fix(v2): exigir frescor na prontidao offline`; CI `33116563282` concluído com sucesso.
-- Unidade publicada como `1b1fb50 perf(v2): deduplicar planner de tiles offline`; CI `33117511617` concluído com sucesso. Validação local: 131 testes, build web, planner de tiles, audit de produção, sync Android/iOS e APK debug.
+- Unidade anterior publicada como `1b1fb50 perf(v2): deduplicar planner de tiles offline`; CI `33117511617` concluído com sucesso.
+- Unidade atual validada localmente com 133 testes, build web, filtro do Service Worker, audit de produção, sync Android/iOS e APK debug; commit/CI serão registrados após o push.
 
 V2 Completion:
 IN PROGRESS

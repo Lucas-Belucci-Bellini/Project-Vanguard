@@ -1,5 +1,11 @@
 # Project Vanguard V2 — changelog de construção
 
+## 2026-08-27 — Service Worker filtra tiles antes do cache
+
+A fronteira `CACHE_TILES` do Service Worker agora aceita somente URLs HTTPS nos hosts permitidos, remove URLs duplicadas e limita a lista a 256 entradas antes de buscar ou gravar no Cache Storage. A política complementa a deduplicação do planner e não amplia cobertura nem confirma resposta de provedor.
+
+Evidência local: `npm test` com 133 testes aprovados, `node --check public/sw.js`, build web, audit de produção sem vulnerabilidades, sync Android/iOS e APK debug. O teste executa o script real do Service Worker em contexto controlado com URLs permitidas, HTTP, host externo, entradas repetidas e 300 URLs. Modo avião, quota real e cobertura continuam pendentes. Decisão em `ADR-0012-filtro-tiles-service-worker.md`; validação em `VALIDACAO-FILTRO-TILES-SW-NODE-2026-08.md`.
+
 ## 2026-08-27 — Planner de tiles offline sem duplicação
 
 O planner de mapas offline agora normaliza `base.tiles`, remove templates vazios e deduplica templates repetidos antes de calcular `totalEstimado` e gerar URLs. O loop para ao alcançar a cota de 256 URLs. Antimeridiano, limite Web Mercator e níveis de zoom existentes foram preservados.

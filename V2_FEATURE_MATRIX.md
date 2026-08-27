@@ -11,7 +11,7 @@
 | TRACK | Registro local, pausa e retomada | IN_PROGRESS | `src/pages/mapa.js`, `trilha.js` | Teste de quatro dias |
 | WAYPOINTS | Pontos locais e notas | TESTED | Página de mapa e registros | Teste de campo |
 | ROUTES | Destino, distância e rumo | TESTED | engine + mapa | Não é roteamento viário completo |
-| OFFLINE_MAP | Pré-cache de tiles | IN_PROGRESS | `mapa-offline.js`, `sw.js` | Limite de 256 URLs; cobertura/quota pendentes |
+| OFFLINE_MAP | Pré-cache de tiles | IN_PROGRESS | `mapa-offline.js`, `sw.js`; planner e filtro do worker deduplicam e exigem HTTPS/hosts permitidos | Limite de 256 URLs; resposta, cobertura, quota e modo avião pendentes |
 | OFFLINE_DATA | Estado, manual e registros locais | TESTED | `estado.js`, catálogo, prontidão offline e testes | Não sincroniza silenciosamente; fixo sem frescor confirmado exige atenção |
 | SURVIVAL | Manual offline conservador | TESTED | `src/data/sobrevivencia.js` | Revisão de fontes contínua |
 | CONTEXT | Contextos e zonas civis | TESTED | `contexto.js` e testes | Fonte oficial externa não sincronizada |
