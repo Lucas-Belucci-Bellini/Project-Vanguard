@@ -66,8 +66,11 @@ export function inicioPage() {
 
   const trilha = estado.get(CHAVES.TRILHA, []);
   const rotaAtiva = estado.get(CHAVES.ROTA_ATIVA, false);
+  const rotaPausada = Boolean(estado.get(CHAVES.ROTA_PAUSADA, false)) && rotaAtiva;
   const trilhaStatus = h('span', null, rotaAtiva
-    ? `${trilha.length} leituras registradas nesta rota`
+    ? rotaPausada
+      ? `${trilha.length} leituras guardadas; rota pausada`
+      : `${trilha.length} leituras registradas nesta rota`
     : trilha.length
       ? `${trilha.length} leituras salvas no aparelho`
       : 'Nenhuma rota em andamento');
@@ -132,9 +135,9 @@ export function inicioPage() {
         )
       ),
       h('section', { className: 'inicio__section inicio__section--split' },
-        h('div', { className: 'inicio__mini-card' },
-          h('span', { className: 'inicio__kicker' }, 'ROTA LOCAL'),
-          h('strong', null, rotaAtiva ? 'GRAVAÇÃO ATIVA' : 'REGISTRO PRONTO'),
+          h('div', { className: 'inicio__mini-card' },
+           h('span', { className: 'inicio__kicker' }, 'ROTA LOCAL'),
+           h('strong', null, rotaAtiva ? (rotaPausada ? 'ROTA PAUSADA' : 'GRAVAÇÃO ATIVA') : 'REGISTRO PRONTO'),
           trilhaStatus,
           h('button', { className: 'inicio__text-button', type: 'button', onclick: () => { location.hash = '#/mapa'; } }, 'GERENCIAR ROTA →')
         ),

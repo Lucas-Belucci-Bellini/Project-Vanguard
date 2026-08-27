@@ -7,6 +7,7 @@ import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha } from '../core/trilha.js';
+import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
@@ -104,6 +105,7 @@ export function mapaPage() {
   const modoBotao = h('button', { className: 'mapa__mode-button', type: 'button' }, 'MARCAR PONTO');
   const sheetStatus = h('p', { className: 'mapa__sheet-status', role: 'status' }, 'Ative uma rota para registrar o caminho no aparelho.');
   const routeButton = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR ROTA');
+  const stopRouteButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'PARAR E GUARDAR');
   const wakeButton = h('button', { className: 'mapa__wake-button', type: 'button', 'aria-pressed': 'false' }, 'MANTER TELA ATIVA: DESLIGADO');
   const centerButton = h('button', { className: 'mapa__quick-button', type: 'button' }, '⌾ CENTRAR');
   const clearButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'LIMPAR TRILHA');
@@ -169,9 +171,10 @@ export function mapaPage() {
       h('strong', { className: 'mapa__route-distance' }, '0 m'),
       h('span', { className: 'mapa__route-caption' }, 'distância registrada'),
       h('span', { className: 'mapa__route-stats', role: 'status' }, '0 pontos · tempo indisponível · velocidade média indisponível'),
-      routeButton,
-      wakeButton,
-      sheetStatus
+        routeButton,
+        stopRouteButton,
+        wakeButton,
+        sheetStatus
     ),
     h('div', { className: 'mapa__map-actions' }, modoBotao, h('button', { className: 'mapa__socorro-button', type: 'button', onclick: () => { location.hash = '#/socorro'; } }, 'MODO SOCORRO →'))
   );
@@ -194,6 +197,7 @@ export function mapaPage() {
   let waypoints = estado.get(CHAVES.WAYPOINTS, []);
   let destino = estado.get(CHAVES.DESTINO, null);
   let rotaAtiva = Boolean(estado.get(CHAVES.ROTA_ATIVA, false));
+  let rotaPausada = Boolean(estado.get(CHAVES.ROTA_PAUSADA, false)) && rotaAtiva;
   let marcando = false;
   let marcandoDestino = false;
   let primeiraPosicao = !posicao;
@@ -260,14 +264,22 @@ export function mapaPage() {
     const resumo = resumoTrilha(trilha);
     sheet.querySelector('.mapa__route-distance').textContent = dist(resumo.distanciaM);
     sheet.querySelector('.mapa__route-stats').textContent = `${resumo.pontos} pontos · ${resumo.duracaoLabel} · ${resumo.velocidadeMediaLabel}`;
-    routeButton.textContent = rotaAtiva ? 'PAUSAR ROTA' : 'INICIAR ROTA';
-    routeButton.classList.toggle('is-active', rotaAtiva);
-    sheetStatus.textContent = rotaAtiva
+    const estadoAtualRota = estadoTrilha({ ativa: rotaAtiva, pausada: rotaPausada });
+    routeButton.textContent = estadoAtualRota === ESTADOS_TRILHA.GRAVANDO
+      ? 'PAUSAR ROTA'
+      : estadoAtualRota === ESTADOS_TRILHA.PAUSADA
+        ? 'RETOMAR ROTA'
+        : 'INICIAR ROTA';
+    routeButton.classList.toggle('is-active', estadoAtualRota === ESTADOS_TRILHA.GRAVANDO);
+    stopRouteButton.disabled = estadoAtualRota === ESTADOS_TRILHA.PARADA;
+    sheetStatus.textContent = estadoAtualRota === ESTADOS_TRILHA.GRAVANDO
       ? `Gravando no aparelho · ${trilha.length} pontos · ${velocidadeLabel(posicao?.speed)}`
-      : trilha.length
-        ? `${trilha.length} pontos guardados localmente · pronto para continuar`
-        : 'Ative uma rota para registrar o caminho no aparelho.';
-    wakeButton.disabled = !rotaAtiva || !('wakeLock' in navigator);
+      : estadoAtualRota === ESTADOS_TRILHA.PAUSADA
+        ? `${trilha.length} pontos guardados localmente · rota pausada`
+        : trilha.length
+          ? `${trilha.length} pontos guardados localmente · pronto para continuar`
+          : 'Ative uma rota para registrar o caminho no aparelho.';
+    wakeButton.disabled = estadoAtualRota !== ESTADOS_TRILHA.GRAVANDO || !('wakeLock' in navigator);
     wakeButton.textContent = !('wakeLock' in navigator)
       ? 'TELA ATIVA INDISPONÍVEL NESTE APARELHO'
       : `MANTER TELA ATIVA: ${wakeAtivo ? 'LIGADO' : 'DESLIGADO'}`;
@@ -339,16 +351,36 @@ export function mapaPage() {
       centralizar();
       return;
     }
-    rotaAtiva = !rotaAtiva;
+    const atual = estadoTrilha({ ativa: rotaAtiva, pausada: rotaPausada });
+    const proximoEvento = atual === ESTADOS_TRILHA.PARADA ? 'START' : atual === ESTADOS_TRILHA.GRAVANDO ? 'PAUSE' : 'RESUME';
+    const proximo = transicionarTrilha(atual, proximoEvento);
+    rotaAtiva = proximo.ativa;
+    rotaPausada = proximo.pausada;
     estado.set(CHAVES.ROTA_ATIVA, rotaAtiva);
+    estado.set(CHAVES.ROTA_PAUSADA, rotaPausada);
     pararGps?.setMode(rotaAtiva ? 'trilha' : 'cidade');
-    if (!rotaAtiva) configurarWakeLock(false);
     if (rotaAtiva && trilha.length === 0) {
       trilha = [posicao];
       estado.set(CHAVES.TRILHA, trilha);
     }
+    if (!rotaAtiva || rotaPausada) configurarWakeLock(false);
+    if (rotaAtiva && !rotaPausada) sheetStatus.textContent = 'Rota iniciada: gravação local ativa.';
+    if (rotaAtiva && rotaPausada) sheetStatus.textContent = 'Rota pausada. Os pontos já registrados permanecem no aparelho.';
     atualizarSheet();
     atualizarMarcadores();
+  }
+
+  function pararRota() {
+    if (!rotaAtiva) return;
+    const proximo = transicionarTrilha(estadoTrilha({ ativa: rotaAtiva, pausada: rotaPausada }), 'STOP');
+    rotaAtiva = proximo.ativa;
+    rotaPausada = proximo.pausada;
+    estado.set(CHAVES.ROTA_ATIVA, rotaAtiva);
+    estado.set(CHAVES.ROTA_PAUSADA, rotaPausada);
+    pararGps?.setMode('cidade');
+    configurarWakeLock(false);
+    sheetStatus.textContent = `${trilha.length} pontos guardados localmente. Rota parada sem apagar o registro.`;
+    atualizarSheet();
   }
 
   function limparTrilha() {
@@ -356,9 +388,11 @@ export function mapaPage() {
     trilha = [];
     waypoints = [];
     rotaAtiva = false;
+    rotaPausada = false;
     estado.set(CHAVES.TRILHA, trilha);
     estado.set(CHAVES.WAYPOINTS, waypoints);
     estado.set(CHAVES.ROTA_ATIVA, false);
+    estado.set(CHAVES.ROTA_PAUSADA, false);
     configurarWakeLock(false);
     pararGps?.setMode('cidade');
     sheetStatus.textContent = 'Trilha e pontos removidos deste aparelho.';
@@ -416,10 +450,12 @@ export function mapaPage() {
       waypoints = registro.waypoints;
       destino = registro.destino;
       rotaAtiva = false;
+      rotaPausada = false;
       estado.set(CHAVES.TRILHA, trilha);
       estado.set(CHAVES.WAYPOINTS, waypoints);
       estado.set(CHAVES.DESTINO, destino);
       estado.set(CHAVES.ROTA_ATIVA, false);
+      estado.set(CHAVES.ROTA_PAUSADA, false);
       pararGps?.setMode('cidade');
       await configurarWakeLock(false);
       registroStatus.textContent = `${trilha.length} pontos de trilha e ${waypoints.length} waypoints importados localmente. A rota foi deixada pausada por segurança.`;
@@ -455,6 +491,7 @@ export function mapaPage() {
   }
 
   routeButton.onclick = alternarRota;
+  stopRouteButton.onclick = pararRota;
   wakeButton.onclick = () => configurarWakeLock(!wakeAtivo);
   centerButton.onclick = centralizar;
   clearButton.onclick = limparTrilha;
@@ -493,7 +530,7 @@ export function mapaPage() {
     onPosition: (nova) => {
       const anterior = posicao;
       posicao = nova;
-      if (rotaAtiva && (!anterior || haversine(anterior, nova) >= 5)) {
+      if (rotaAtiva && !rotaPausada && (!anterior || haversine(anterior, nova) >= 5)) {
         trilha = [...trilha, nova].slice(-4000);
         estado.set(CHAVES.TRILHA, trilha);
       }
