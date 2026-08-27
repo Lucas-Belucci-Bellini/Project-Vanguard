@@ -40,6 +40,10 @@ A camada `src/core/capacidades.js` classifica somente o que o ambiente expõe, u
 
 `src/platform/permissoes.js` consulta `checkPermissions()` no plugin Capacitor em plataforma nativa e `navigator.permissions.query()` na Web. O Diagnóstico apenas observa a permissão atual; a solicitação continua restrita aos fluxos explícitos de uso do GPS, como centralizar, buscar posição, registrar trilha ou preparar Socorro. Ausência de API, estado desconhecido ou erro não são convertidos em permissão concedida.
 
+## D-011 — Persistência falha de forma observável
+
+`estado.set()` mantém o valor retornado e o comportamento dos listeners, mas `src/core/estado.js` registra o resultado da última escrita em `statusPersistencia()`. O Diagnóstico exibe `PERSISTIDO`, `FALHA` ou `NÃO TESTADO`; erros como `QuotaExceededError` não são silenciosamente apresentados como backup confirmado. A leitura continua com fallback seguro e a implementação não migra para IndexedDB sem medição e necessidade comprovada.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)

@@ -121,3 +121,9 @@ A unidade está coberta por `test/compartilhamento.test.js`. A validação local
 `src/platform/permissoes.js` passou a consultar `checkPermissions()` no plugin Capacitor em plataforma nativa e `navigator.permissions.query()` na Web. O Diagnóstico somente lê e exibe o estado; não dispara `requestPermissions()` nem abre prompt automaticamente. A implementação distingue concedida, negada, não solicitada, indisponível e dependência do navegador, sem inferir sinal, precisão ou background GPS.
 
 `test/permissoes.test.js` cobre os estados do plugin, Permissions API Web, ausência de APIs, ausência de request e falha do bridge. A unidade alcançou 150 testes locais, build web, sintaxe do Service Worker, diff, audit de produção, sync Android/iOS e APK debug. ADR-0016 registra a decisão; a validação física dos prompts e das configurações do aparelho permanece pendente.
+
+## Marco Mobile V2 — persistência observável — 2026-08-27
+
+A auditoria confirmou que `estado.set()` ignorava silenciosamente falhas de `localStorage.setItem()`, o que poderia aparentar que trilhas, waypoints ou alertas foram salvos quando a quota ou o WebView rejeitava a escrita. `src/core/estado.js` agora mantém o contrato de retorno e listeners, mas registra `statusPersistencia()` com `PERSISTIDO`, `FALHA` ou `NAO_TESTADO`; o Diagnóstico mostra a última tentativa no grupo `ARMAZENAMENTO`.
+
+`test/estado.test.js` cobre `QuotaExceededError` e confirma que a falha não é convertida em persistência confirmada. A unidade foi publicada como `cd47a0c fix(v2): sinalizar falha de persistencia`, com CI `33121288900` aprovado. O ADR-0017 registra os limites: quota real, reinstalação, limpeza do sistema e durabilidade física continuam pendentes.

@@ -1,29 +1,29 @@
 # Vanguard Field — MOBILE V2 STATUS
 
-> Registro persistente da execução Mobile V2. Atualizado em **2026-08-27**, após a unidade de diagnóstico de permissões GPS. Este arquivo não declara a V2 completa sem validação física.
+> Registro persistente da execução Mobile V2. Atualizado em **2026-08-27**, após a unidade de observabilidade de persistência local. Este arquivo não declara a V2 completa sem validação física.
 
 | Campo | Estado atual |
 |---|---|
 | **Version** | `2.x` em construção; pacote compartilhado atual `1.0.0` |
 | **Phase** | Mobile foundation com diagnóstico local, PWA e Capacitor; `IN PROGRESS` |
-| **Milestone** | Capacidades observáveis, compartilhamento explícito e leitura de permissões GPS no diagnóstico |
+| **Milestone** | Capacidades observáveis, compartilhamento explícito, permissões GPS e persistência local observável |
 | **Android** | Projeto Capacitor presente; `com.projectvanguard.field`; permissões somente coarse/fine; APK debug compilado; aparelho real ainda não validado |
 | **iOS** | Projeto Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync validado no Linux; build, assinatura e aparelho real pendentes em macOS/Xcode |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache local; instalação e modo avião ainda exigem teste físico |
 | **Build** | `npm run build`, sync Android/iOS e `assembleDebug` aprovados nesta execução; APK permanece artifact de teste |
-| **Tests** | `npm test`: **150 aprovados**; `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados |
+| **Tests** | `npm test`: **151 aprovados**; `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados |
 | **Permissions** | Android foreground coarse/fine; iOS descrição foreground; não há background location, foreground service ou `UIBackgroundModes` |
 | **GPS** | Driver Capacitor foreground com fallback Web/PWA; posição normalizada usa `lat/lon`; diagnóstico agora reconhece também esse formato |
 | **Compass** | Sensor físico ainda `BROWSER DEPENDENT`/`DEVICE DEPENDENT`; fallback de rumo GPS não prova sensor magnético |
-| **Storage** | `localStorage` para dados do produto e Cache Storage para shell/tiles; quota e persistência física ainda pendentes |
+| **Storage** | `localStorage` para dados do produto e Cache Storage para shell/tiles; última escrita agora expõe `PERSISTIDO`/`FALHA`; quota e persistência física ainda pendentes |
 | **Offline** | Planner/SW defensivos e limite local de 256 URLs; cobertura real e modo avião pendentes |
 | **Maps** | MapLibre, tiles preparados e deduplicação; provedores/cobertura/quota não são garantidos |
 | **Battery** | Política econômica documentada; consumo de quatro dias e suspensão em background exigem aparelho real |
 | **Security** | Civil, local-first, sem telemetria automática, sem SOS/resgate confirmado, sem integração militar e sem expansão do legado balístico |
 | **Accessibility** | Shell com skip link, landmarks, foco, ARIA e status; leitor de tela/touch precisam de validação em dispositivos |
 | **Release** | `BLOCKED`; a única release continua `v1.0.0-rc.2`; `v1.0.0` final não foi criada |
-| **Current Task** | Validar permissões nativas, capabilities e Share Sheet/Files/clipboard/download nos fluxos Mobile V2 em Android comum, Xiaomi/MIUI/HyperOS e iPhone quando os aparelhos estiverem disponíveis |
-| **Next Task** | Executar permissões no aparelho, lifecycle, modo avião, persistência, importação/exportação, Share Sheet/Files, bússola, update posterior e bateria; não assumir background contínuo |
+| **Current Task** | Validar permissões nativas, persistência/quota, capabilities e Share Sheet/Files/clipboard/download nos fluxos Mobile V2 em Android comum, Xiaomi/MIUI/HyperOS e iPhone quando os aparelhos estiverem disponíveis |
+| **Next Task** | Executar permissões no aparelho, falha/quota de storage, lifecycle, modo avião, importação/exportação, Share Sheet/Files, bússola, update posterior e bateria; não assumir background contínuo |
 
 ## Unidades entregues
 
@@ -33,7 +33,9 @@ Na rodada anterior, `src/core/capacidades.js` passou a detectar capacidades obse
 
 Na rodada anterior, `src/platform/compartilhamento.js` centralizou compartilhamento de texto e arquivos. O Socorro usa Web Share/clipboard; o Mapa usa Web Share para arquivos e download local como fallback.
 
-Nesta rodada, `src/platform/permissoes.js` passou a consultar `checkPermissions()` no Capacitor nativo e `navigator.permissions.query()` na Web, sem solicitar permissão automaticamente. Estados desconhecidos, bridge ausente ou erro retornam `INDISPONÍVEL`/`BROWSER DEPENDENT`; o Diagnóstico usa o resultado para distinguir permissão concedida, negada ou ainda não solicitada. `test/permissoes.test.js` cobre os caminhos e a suíte chegou a 150 testes aprovados.
+Na rodada anterior, `src/platform/permissoes.js` passou a consultar `checkPermissions()` no Capacitor nativo e `navigator.permissions.query()` na Web, sem solicitar permissão automaticamente.
+
+Nesta rodada, `src/core/estado.js` passou a registrar a última tentativa de escrita local, distinguindo `PERSISTIDO` de `FALHA` e preservando o valor retornado por `estado.set()`. A tela de Diagnóstico exibe essa evidência sem afirmar quota total ou persistência durável. `test/estado.test.js` cobre `QuotaExceededError`; a suíte chegou a 151 testes aprovados.
 
 ## Evidência e limites
 

@@ -23,6 +23,7 @@
 | MV2-017 | Compartilhada | Camada de capacidades observáveis | TESTED | `src/core/capacidades.js` + grupo `CAPACIDADES` no Diagnóstico | testes determinísticos de estados e APIs ausentes | Node/CI; hardware, sensor e quota pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0014 |
 | MV2-018 | Android/iOS/PWA | Compartilhamento de texto e JSON/GPX | TESTED | `src/platform/compartilhamento.js`; Socorro e Mapa integrados | Web Share, cancelamento, clipboard, download e APIs ausentes | Node/CI; Share Sheet/Files/download físico pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0015 |
 | MV2-019 | Android/iOS/PWA | Leitura de permissão GPS | TESTED | `src/platform/permissoes.js`; Capacitor `checkPermissions()` e Permissions API Web sem prompt automático | plugin concedido/negado, Web granted/denied/prompt, bridge/API ausentes | Node/CI; prompts nativos e mudanças em Configurações pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0016 |
+| MV2-020 | Android/iOS/PWA | Falha de persistência e quota | TESTED | `estado.statusPersistencia()` e grupo `ARMAZENAMENTO` no Diagnóstico; `estado.set()` mantém o contrato | escrita normal e `QuotaExceededError` cobertos em `test/estado.test.js` | Node/CI; quota, reinstalação, limpeza do SO e persistência física pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0017 |
 
 ## Regra de encerramento
 
