@@ -5,19 +5,11 @@ import { VERSAO_ATUAL } from '../core/atualizacao.js';
 import { desempenhoResumo, diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
 import { fonteLocalizacao } from '../core/localizacao.js';
 import { detectarCapacidades } from '../core/capacidades.js';
+import { lerPermissaoGps } from '../platform/permissoes.js';
 import { estadoCicloVidaAtual, observarCicloVida } from '../core/ciclo-vida.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
-}
-
-async function permissaoGps() {
-  try {
-    const resultado = await navigator.permissions?.query({ name: 'geolocation' });
-    return resultado?.state === 'granted' ? 'CONCEDIDA' : resultado?.state === 'denied' ? 'NEGADA' : 'NÃO SOLICITADA';
-  } catch {
-    return 'BROWSER DEPENDENT';
-  }
 }
 
 async function armazenamentoLabel() {
@@ -102,7 +94,7 @@ export function diagnosticoPage() {
         bateria,
         bussola: 'BROWSER DEPENDENT',
       });
-      const gps = await permissaoGps();
+      const gps = await lerPermissaoGps();
       const capacidades = detectarCapacidades({ gpsPermission: gps });
       const capacidadeItens = capacidades.map((capacidade) => ({
         grupo: 'CAPACIDADES',
