@@ -10,7 +10,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 
 | Área | Comportamento |
 |---|---|
-| **Início** | Painel de campo, ativação explícita do GPS, atalhos e tutorial de primeiro uso. |
+| **Início** | Painel de campo, ativação explícita do GPS, atalhos, tutorial de primeiro uso e cartão local de prontidão offline. |
 | **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição**, **Cidade / Dia a dia** e **Mar / Referência**, com destino por coordenadas ou toque no mapa. O mapa mostra o contexto civil e a zona local ativa, quando houver, com fonte e validade. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. |
 | **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado e a trilha pode ser exportada em GPX 1.1, sempre sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
 | **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
@@ -24,7 +24,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 
 ## Modo offline-first
 
-Depois do primeiro carregamento, a shell do Vanguard, as telas, a posição, a bússola, as rotas, os pontos, os destinos, as zonas importadas e o manual de sobrevivência podem continuar funcionando sem internet. No mapa, mova-se até a área desejada, escolha a base cartográfica e toque em **Preparar área offline** enquanto ainda estiver conectado. O aplicativo guarda até 256 URLs por preparação da área visível e de níveis próximos, informa quando a estimativa excede esse limite, mostra o status do cache e permite limpar os mapas com confirmação; prepare novamente depois de mover o mapa ou trocar de base.
+Depois do primeiro carregamento, a shell do Vanguard, as telas, a posição, a bússola, as rotas, os pontos, os destinos, as zonas importadas e o manual de sobrevivência podem continuar funcionando sem internet. Na tela inicial, o cartão **Prontidão offline** resume posição, mapa preparado, dados locais, manual e comunicação independente; ele é uma conferência local, não um teste de cobertura nem uma confirmação de SOS. No mapa, mova-se até a área desejada, escolha a base cartográfica e toque em **Preparar área offline** enquanto ainda estiver conectado. O aplicativo guarda até 256 URLs por preparação da área visível e de níveis próximos, informa quando a estimativa excede esse limite, mostra o status do cache e permite limpar os mapas com confirmação; prepare novamente depois de mover o mapa ou trocar de base.
 
 A internet continua sendo necessária para obter tiles que ainda não foram baixados, receber avisos novos, enviar e-mail, sincronizar eventos, abrir o futuro checkout Asaas e transmitir um SOS por serviço externo. O modo Mar não transforma imagem de satélite em carta náutica nem estima profundidade; use produtos oficiais e informações atualizadas das autoridades. O backup JSON de rota, waypoints e destino é criado e lido localmente, sem conta ou rede. Arquivos GPX também podem ser importados localmente; pontos de trilha e waypoints são validados e a rota importada fica pausada. O GPS/GNSS e a bússola podem fornecer dados locais sem rede, mas nenhum dos dois transmite um pedido de socorro sozinho.
 
@@ -34,7 +34,7 @@ Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative
 
 Na tela **Bússola**, toque em **Ativar sensor do aparelho**. A mesma ferramenta pode orientar uma caminhada no bairro, uma corrida ou uma travessia em área remota. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
 
-Antes de entrar em uma região sem sinal, abra **Modo socorro**, atualize a posição e prepare o alerta local. Isso cria um pacote de coordenadas no aparelho, mas **não contata uma equipe**. Quando houver rede móvel, Wi-Fi, rádio com dados ou um mensageiro via satélite compatível, toque em **Compartilhar coordenadas** e confirme o destinatário.
+Antes de entrar em uma região sem sinal, confira na tela inicial a **Prontidão offline**, ative o GPS, prepare a área do mapa, abra **Sobrevivência** e avise alguém do itinerário. Depois, abra **Modo socorro**, atualize a posição e prepare o alerta local. Isso cria um pacote de coordenadas no aparelho, mas **não contata uma equipe**. Quando houver rede móvel, Wi-Fi, rádio com dados ou um mensageiro via satélite compatível, toque em **Compartilhar coordenadas** e confirme o destinatário.
 
 ## GPS, satélite e resgate: o que o celular consegue fazer
 
@@ -71,7 +71,7 @@ src/
     mgrs.js            conversões UTM/MGRS
     ...                motor geográfico e módulos legados
   pages/
-    inicio.js          painel inicial e tutorial
+    inicio.js          painel inicial, tutorial e prontidão offline
     mapa.js            mapa, trilha e pontos de referência
     bussola.js         sensor de orientação e fallback de rumo
     socorro.js         coordenadas e compartilhamento manual
