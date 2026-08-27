@@ -4,7 +4,7 @@ EXECUTION REPORT
 ==============================
 
 Current Version: 2.x em construção; pacote atual 1.0.0
-Current Phase: Fase 2 — Engine/GPS mobile foundation
+Current Phase: Fase 2 — Engine/GPS mobile foundation + lifecycle observability
 Current Milestone: Foundation Hardening
 
 Completed:
@@ -73,7 +73,8 @@ Blockers:
 Next Task:
 - Validar Geolocation foreground, permissões e lifecycle em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo.
 - Commit anterior publicado: `bb240e7`; CI `33108661603` passou.
-- Esta continuação foi validada localmente com 122 testes e Android debug; o commit/CI desta continuação serão registrados após o push.
+- Unidade publicada: `2bfd797 feat(v2): observar ciclo de vida mobile`; CI `33110246185` concluído com sucesso.
+- Preview limpo confirmou `FOREGROUND · VISIBILITY API`; a primeira tentativa presa em loading levou à correção não bloqueante de `getRegistration()`. Isso não substitui validação nativa.
 
 V2 Completion:
 IN PROGRESS

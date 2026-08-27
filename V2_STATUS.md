@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, simulação, limitações, segurança, memória V2 e skill versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | Lifecycle implementado e validado localmente; commit/CI serão registrados após o push |
+| **Main** | `2bfd797 feat(v2): observar ciclo de vida mobile`; CI `33110246185` concluído com sucesso |
 
 ## Regra de conclusão
 
