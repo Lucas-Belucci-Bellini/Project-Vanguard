@@ -15,7 +15,7 @@ O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, m
 | GPS para uso urbano no dia a dia | **Implementado** | Destino por coordenadas ou toque no mapa, distância, rumo, pontos e rota local. | O GPS calcula posição; o mapa online depende de tiles disponíveis ou pré-baixados. |
 | GPS para caminhadas e montanhas | **Implementado** | Trilha, pausa, retomada, pontos de referência, bússola e grade MGRS. | Deve haver plano de retorno, bateria e conferência de mapa. |
 | Operação sem sinal de internet | **Implementado** | Shell PWA, armazenamento local, GPS/GNSS, bússola, trilhas, destinos e manual de sobrevivência. | Internet continua necessária para dados novos, tiles não baixados, e-mail, pagamentos e sincronização. |
-| Mapa offline | **Implementado em versão inicial** | Botão **Preparar área offline** guarda tiles da área visível e níveis próximos no cache local. | A pessoa precisa preparar cada área e base antes de sair; a versão atual não substitui um pacote cartográfico oficial completo. |
+| Mapa offline | **Implementado em versão inicial** | Botão **Preparar área offline** guarda tiles da área visível e níveis próximos no cache local; a tela consulta a quantidade já guardada e permite limpar deliberadamente o cache. | A pessoa precisa preparar cada área e base antes de sair; a versão atual não substitui um pacote cartográfico oficial completo nem confirma quota/armazenamento do sistema. |
 | Localização por satélites | **Implementado** | O aparelho usa a API de geolocalização e converte a posição para latitude/longitude, UTM e MGRS. | O celular recebe sinais e calcula uma posição; isso não é triangulação de resgate nem envio de mensagem. |
 | Equipe de resgate receber coordenadas | **Preparado** | O Modo Socorro prepara mensagem com posição, precisão, horário e referência MGRS para compartilhamento manual. | Para entrega sem rede móvel é necessário mensageiro via satélite, beacon, rádio de dados ou canal equivalente. |
 | SOS após queda ou acidente | **Preparado** | A última posição pode permanecer salva e uma mensagem pode ser preparada. | Detecção automática de queda e transmissão automática exigem app nativo, permissões, sensores, regras de cancelamento e canal externo; não devem ser fingidas no PWA. |
@@ -24,7 +24,7 @@ O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, m
 | Modo Expedição | **Implementado** | Trilha, bússola, MGRS, waypoints e preparação de socorro. | A orientação do app não substitui carta, treinamento e equipamento reserva. |
 | Modo Mar | **Preparado** | Contexto específico para carta, profundidade publicada, marés, perigos e avisos. | Deve usar cartas náuticas e avisos oficiais; imagem de satélite não substitui carta náutica atualizada [1]. |
 | Profundidade e topografia no mar | **Preparado** | O contrato aceita carta, profundidade publicada e sonar externo. | Batimetria de satélite não é uma autorização de navegação; profundidade medida requer sonar/eco-sounder e validação. |
-| Zona de desastre | **Implementado como contexto local** | Zona com fonte, data, centro, raio e prioridade pode mudar o modo e mostrar orientação civil. | Alertas precisam ser importados de Defesa Civil, bombeiros ou autoridade competente; o app não inventa rota segura. |
+| Zona de desastre | **Implementado como contexto local** | Zona com fonte, data, validade opcional, centro, raio e prioridade pode mudar o modo e mostrar orientação civil; zonas podem ser exportadas/importadas em JSON versionado offline. | Alertas precisam ser importados de Defesa Civil, bombeiros ou autoridade competente; o app não inventa rota segura. Zonas expiradas são ignoradas automaticamente. |
 | Chernobyl e áreas contaminadas | **Implementado como contexto; medição externa preparada** | O modo Área Contaminada pode ser ativado por zona publicada e exibir data, fonte e instrução de afastamento. | O celular não é contador Geiger. Medição requer dosímetro/Geiger externo identificado, unidade e calibração. |
 | Radar de drones | **Não deve ser simulado** | O produto pode mostrar um alerta oficial ou relato manual identificado como não confirmado. | GPS, câmera, microfone e magnetômetro não viram radar confiável. Detecção exige sensor e processamento dedicados. |
 | Detecção de tropas | **Não deve ser simulada** | O modo Área de Conflito pode mostrar zonas oficiais, rotas humanitárias e avisos civis. | Não realizar identificação, rastreamento ou recomendação operacional de tropas. |
@@ -48,7 +48,7 @@ O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, m
 | Destino por coordenadas | Sim | Distância e rumo podem ser calculados localmente. |
 | Coordenadas MGRS | Sim | A conversão é feita pelo motor local. |
 | Manual de sobrevivência | Sim | Conteúdo fica no bundle do aplicativo. |
-| Zonas cadastradas localmente | Sim | Funcionam com a última versão salva, mostrando fonte e data. |
+| Zonas cadastradas localmente | Sim | Funcionam com a última versão salva; zonas expiradas ou com pacote incompatível são ignoradas/recusadas. O JSON versionado pode ser transportado manualmente. |
 | Tiles preparados | Sim | Apenas áreas e níveis já guardados no cache. |
 | Alertas novos de autoridades | Não | Precisam de conexão ou pacote atualizado previamente. |
 | Pedido de resgate | Não por si só | Requer rede móvel, internet, mensageiro satelital, beacon ou rádio externo. |
@@ -57,7 +57,7 @@ O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, m
 
 ## Modelo de dados para zonas de alerta
 
-Cada zona deve guardar, no mínimo, `id`, `nome`, `contexto`, `geometria` ou centro/raio, `fonte`, `publicadoEm`, `expiraEm`, `nivel`, `instrução`, `versão` e `importadoEm`. Uma zona sem fonte ou data pode ser exibida como informação local, mas não deve ser apresentada como alerta oficial.
+Cada zona deve guardar, no mínimo, `id`, `nome`, `contexto`, `geometria` ou centro/raio, `fonte`, `publicadoEm`, `expiraEm`, `nivel`, `instrução`, `versão` e `importadoEm`. No contrato atual do Vanguard Field, `id`, `nome`, contexto, centro/raio, `fonte`, `atualizadoEm`, `validadeEm` e `ativo` são normalizados; `publicadoEm`, nível detalhado, instrução e geometria poligonal permanecem extensão futura. Uma zona sem fonte ou data pode ser exibida como informação local, mas não deve ser apresentada como alerta oficial.
 
 O contexto automático deve respeitar esta ordem: primeiro verificar validade temporal e fonte; depois verificar se a posição está na geometria; então escolher a zona de maior prioridade; por fim mostrar o motivo da mudança. A pessoa deve poder retornar ao modo manual e ver qual zona causou a alteração.
 
@@ -71,7 +71,7 @@ A experiência civil e de proteção deve ser o caminho principal. O código bal
 
 ## Próximas etapas recomendadas
 
-A sequência recomendada é validar o conteúdo com profissionais de primeiros socorros, ação contra minas, navegação marítima e proteção radiológica; substituir zonas manuais por fontes oficiais versionadas; criar pacotes cartográficos offline completos; empacotar o PWA com permissões nativas apenas quando houver política clara para queda e SOS; e testar todos os fluxos sem rede em aparelhos Android e Xiaomi reais.
+A sequência recomendada é validar o conteúdo com profissionais de primeiros socorros, ação contra minas, navegação marítima e proteção radiológica; conectar apenas fontes oficiais versionadas; transformar o cache de tiles em pacotes cartográficos selecionáveis; empacotar o PWA com permissões nativas apenas quando houver política clara para queda e SOS; e testar todos os fluxos sem rede em aparelhos Android e Xiaomi reais.
 
 ## Referências
 
