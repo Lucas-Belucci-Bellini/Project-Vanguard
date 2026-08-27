@@ -12,7 +12,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 |---|---|
 | **Início** | Painel de campo, ativação explícita do GPS, atalhos, tutorial de primeiro uso e cartão local de prontidão offline. |
 | **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição**, **Cidade / Dia a dia** e **Mar / Referência**, com destino por coordenadas ou toque no mapa. O mapa mostra o contexto civil e a zona local ativa, quando houver, com fonte e validade. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. |
-| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado e a trilha pode ser exportada em GPX 1.1, sempre sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
+| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada, limpeza manual e resumo de pontos, tempo registrado e velocidade média quando os horários existem. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado e a trilha pode ser exportada em GPX 1.1, sempre sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
 | **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
 | **Socorro** | Captura da posição, criação de pacote externo validado, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência, com estados explícitos e sem confirmação de entrega. |
 | **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
@@ -30,7 +30,7 @@ A internet continua sendo necessária para obter tiles que ainda não foram baix
 
 ## Como usar em uma expedição
 
-Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O cartão **Contexto civil** informa o contexto padrão e, quando aplicável, a zona local ativa, sua fonte e validade; isso é uma referência local e não um alerta oficial automático. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho. No modo **Mar / Referência**, confirme sempre a carta náutica oficial e os avisos aplicáveis antes de navegar. Em **Dados locais**, use **Exportar JSON** para backup completo, **Exportar GPX** para abrir a trilha em outro aplicativo compatível, ou **Importar JSON/GPX** para restaurar um backup ou trazer uma trilha compatível; a importação substitui os dados atuais somente após confirmação e deixa a rota pausada. A alta precisão só é solicitada durante a gravação ativa; ao pausar, o mapa retorna ao perfil econômico. A opção **Manter tela ativa** é voluntária e só fica disponível durante uma rota ativa.
+Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O cartão **Contexto civil** informa o contexto padrão e, quando aplicável, a zona local ativa, sua fonte e validade; isso é uma referência local e não um alerta oficial automático. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho. O cartão da rota mostra a distância e, quando os horários dos pontos permitem, o tempo registrado e a velocidade média; quando não permitem, informa que o dado está indisponível em vez de estimá-lo. No modo **Mar / Referência**, confirme sempre a carta náutica oficial e os avisos aplicáveis antes de navegar. Em **Dados locais**, use **Exportar JSON** para backup completo, **Exportar GPX** para abrir a trilha em outro aplicativo compatível, ou **Importar JSON/GPX** para restaurar um backup ou trazer uma trilha compatível; a importação substitui os dados atuais somente após confirmação e deixa a rota pausada. A alta precisão só é solicitada durante a gravação ativa; ao pausar, o mapa retorna ao perfil econômico. A opção **Manter tela ativa** é voluntária e só fica disponível durante uma rota ativa.
 
 Na tela **Bússola**, toque em **Ativar sensor do aparelho**. A mesma ferramenta pode orientar uma caminhada no bairro, uma corrida ou uma travessia em área remota. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
 
@@ -47,7 +47,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 100 testes do motor geográfico e contratos civis
+npm test          # 106 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 
@@ -65,6 +65,7 @@ src/
     contexto.js        detecção por zonas, validade e JSON versionado
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
     registro-offline.js backup JSON e exportação GPX local
+    trilha.js          resumo de distância, tempo e velocidade local
     fila-offline.js    fila local para sincronização posterior
   engine/
     geo.js             distância e azimute geodésicos
