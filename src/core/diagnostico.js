@@ -58,7 +58,9 @@ export function statusServiceWorker({ controller = false, waiting = false } = {}
 }
 
 export function statusPosicao(posicao, agora = Date.now()) {
-  if (!posicao || !Number.isFinite(Number(posicao.latitude)) || !Number.isFinite(Number(posicao.longitude))) {
+  const latitude = posicao?.lat ?? posicao?.latitude;
+  const longitude = posicao?.lon ?? posicao?.longitude;
+  if (!Number.isFinite(Number(latitude)) || !Number.isFinite(Number(longitude))) {
     return { estado: 'UNAVAILABLE', detalhe: 'Nenhum fixo válido salvo no aparelho.' };
   }
   const timestamp = Number(posicao.timestamp);
@@ -79,8 +81,9 @@ export function diagnosticoResumo({
   armazenamento,
   bateria,
   bussola,
+  agora = Date.now(),
 }) {
-  const estadoPosicao = statusPosicao(posicao);
+  const estadoPosicao = statusPosicao(posicao, agora);
   return [
     { grupo: 'APLICAÇÃO', nome: 'Versão', valor: versao || UNAVAILABLE, estado: versao ? 'ok' : 'atencao' },
     { grupo: 'APLICAÇÃO', nome: 'Plataforma', valor: plataforma || UNAVAILABLE, estado: plataforma ? 'ok' : 'atencao' },

@@ -59,6 +59,14 @@ test('statusPosicao diferencia indisponível, idade desconhecida, recente e anti
   assert.equal(statusPosicao({ latitude: -23, longitude: -51, timestamp: agora - 5 * 60_000 }, agora).estado, 'STALE');
 });
 
+test('statusPosicao reconhece a posição normalizada em lat/lon', () => {
+  const agora = 1_700_000_000_000;
+  assert.deepEqual(statusPosicao({ lat: -23, lon: -51, timestamp: agora - 2_000 }, agora), {
+    estado: 'AVAILABLE',
+    detalhe: 'Fixo recebido agora.',
+  });
+});
+
 test('statusRede e statusServiceWorker mantêm estados explícitos', () => {
   assert.equal(statusRede(true), 'ONLINE');
   assert.equal(statusRede(false), 'OFFLINE');
@@ -68,17 +76,20 @@ test('statusRede e statusServiceWorker mantêm estados explícitos', () => {
 });
 
 test('diagnosticoResumo expõe grupos locais sem telemetria', () => {
+  const agora = 1_700_000_000_000;
   const itens = diagnosticoResumo({
     versao: '1.0.0',
     plataforma: 'Android',
     rede: false,
-    posicao: { latitude: -23, longitude: -51, timestamp: 1_699_999_999_000 },
+    posicao: { lat: -23, lon: -51, timestamp: agora - 1_000 },
     serviceWorker: { controller: false, waiting: false },
     armazenamento: 'localStorage disponível',
     bateria: null,
     bussola: 'INDISPONÍVEL',
+    agora,
   });
   assert.equal(itens.length, 9);
   assert.equal(itens.find((item) => item.nome === 'Rede').valor, 'OFFLINE');
   assert.equal(itens.find((item) => item.nome === 'Bateria').valor, 'INDISPONÍVEL');
+  assert.equal(itens.find((item) => item.nome === 'GPS/GNSS').valor, 'AVAILABLE');
 });
