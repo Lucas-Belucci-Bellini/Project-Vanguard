@@ -95,7 +95,7 @@ Next Task:
 - Unidade anterior publicada como `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso.
 - Unidade anterior publicada como `cc076bb fix(v2): exigir frescor na prontidao offline`; CI `33116563282` concluído com sucesso.
 - Unidade anterior publicada como `1b1fb50 perf(v2): deduplicar planner de tiles offline`; CI `33117511617` concluído com sucesso.
-- Unidade atual validada localmente com 133 testes, build web, filtro do Service Worker, audit de produção, sync Android/iOS e APK debug; commit/CI serão registrados após o push.
+- Unidade publicada como `bddc6b6 security(v2): filtrar tiles no service worker`; CI `33118348438` concluído com sucesso. Validação local: 133 testes, build web, filtro do Service Worker, audit de produção, sync Android/iOS e APK debug.
 
 V2 Completion:
 IN PROGRESS
