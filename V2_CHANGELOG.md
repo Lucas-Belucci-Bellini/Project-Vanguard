@@ -4,7 +4,7 @@
 
 O planner de mapas offline agora normaliza `base.tiles`, remove templates vazios e deduplica templates repetidos antes de calcular `totalEstimado` e gerar URLs. O loop para ao alcançar a cota de 256 URLs. Antimeridiano, limite Web Mercator e níveis de zoom existentes foram preservados.
 
-Evidência local: `npm test` com 131 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS e APK debug. O teste compara template único e duplicado, além de manter os cenários de limite e antimeridiano. A função não testa resposta do provedor, quota real, cobertura ou modo avião. Decisão em `ADR-0011-planejador-tiles-deduplicado.md`; validação em `VALIDACAO-TILES-OFFLINE-NODE-2026-08.md`.
+Evidência local: `npm test` com 131 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS e APK debug. O teste compara template único e duplicado, além de manter os cenários de limite e antimeridiano. A função não testa resposta do provedor, quota real, cobertura ou modo avião. Decisão em `ADR-0011-planejador-tiles-deduplicado.md`; validação em `VALIDACAO-TILES-OFFLINE-NODE-2026-08.md`. Publicado em `main` como `1b1fb50 perf(v2): deduplicar planner de tiles offline`; CI `33117511617` concluído com sucesso.
 
 ## 2026-08-27 — Prontidão offline exige frescor verificável
 

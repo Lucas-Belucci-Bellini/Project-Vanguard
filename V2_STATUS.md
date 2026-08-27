@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009/0010/0011, referências WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | Nova unidade de planner offline validada localmente; commit/CI desta continuação serão registrados após o push |
+| **Main** | `1b1fb50 perf(v2): deduplicar planner de tiles offline`; CI `33117511617` concluído com sucesso |
 
 ## Regra de conclusão
 
