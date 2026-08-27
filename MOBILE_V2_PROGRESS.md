@@ -4,7 +4,7 @@
 
 A auditoria partiu de `main` limpa em `6ce06a6` e confirmou que a camada Capacitor já possuía Android/iOS, GPS foreground, lifecycle observável, PWA, MapLibre, importação/exportação local e preparação defensiva de tiles. O gargalo verificável encontrado foi no diagnóstico: `statusPosicao()` lia somente `latitude`/`longitude`, embora o contrato normalizado e persistido pelo GPS use `lat`/`lon`. Isso podia exibir `UNAVAILABLE` mesmo depois de um fixo local válido.
 
-A unidade implementada foi deliberadamente pequena. `src/core/diagnostico.js` agora aceita os dois shapes e permite injetar `agora` no `diagnosticoResumo()`; `test/diagnostico.test.js` cobre o shape normalizado e usa tempo determinístico. O commit foi publicado em `main` como `f9da500 fix(v2): reconhecer posição normalizada no diagnostico`.
+A unidade implementada foi deliberadamente pequena. `src/core/diagnostico.js` agora aceita os dois shapes e permite injetar `agora` no `diagnosticoResumo()`; `test/diagnostico.test.js` cobre o shape normalizado e usa tempo determinístico. O commit foi publicado em `main` como `f9da500 fix(v2): reconhecer posição normalizada no diagnostico` e o CI `33119352814` concluiu com sucesso.
 
 ## Evidências
 
@@ -19,6 +19,8 @@ A unidade implementada foi deliberadamente pequena. `src/core/diagnostico.js` ag
 | `npm run mobile:sync:ios` | aprovado; plugins App e Geolocation sincronizados |
 | `npm run mobile:android:debug` | `BUILD SUCCESSFUL` |
 | APK | `android/app/build/outputs/apk/debug/app-debug.apk`, 8.284.304 bytes; somente artifact de teste |
+
+O commit documental `cbc7e19 docs(v2): registrar memoria mobile` também foi publicado em `main`; o CI `33119634669` concluiu com sucesso.
 
 ## Histórico preservado
 

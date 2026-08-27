@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013, referências WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `f9da500 fix(v2): reconhecer posição normalizada no diagnostico`; CI deste commit ainda será aguardado/registrado após o push documental |
+| **Main** | `cbc7e19 docs(v2): registrar memoria mobile`; CI `33119634669` concluído com sucesso; correção de código `f9da500` com CI `33119352814` também aprovado |
 
 ## Regra de conclusão
 
