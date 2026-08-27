@@ -21,6 +21,7 @@
 | T-017 | Diagnostics | Browser/PWA/mobile | Versão, rede, GPS, frescor, fonte, cache, bateria, lifecycle e service worker | Estado local honesto e sem telemetria escondida | Diagnóstico + 8 testes de diagnóstico/lifecycle + preview; aparelhos pendentes | IN_PROGRESS |
 | T-018 | Security | Node/browser | URL abusiva, payload malformado, segredo e XSS | Rejeição/escape e nenhum segredo no bundle | Revisão contínua | IN_PROGRESS |
 | T-019 | Release | GitHub/macOS/Android | Tag assinada, hashes, APK/AAB/IPA e notas | Artefatos assinados apontam ao commit aprovado | Candidate `rc.2` | BLOCKED |
+| T-020 | Performance | Node/browser | Valores válidos, APIs ausentes, lista array-like e API que lança erro | Startup/carga/memória local formatados; indisponibilidade explícita | 3 testes puros + Diagnóstico; FPS, bateria e profiling físico pendentes | IN_PROGRESS |
 
 ## Execução
 

@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  desempenhoResumo,
   diagnosticoResumo,
   formatarBateria,
+  formatarMilissegundos,
   formatarBytes,
   statusPosicao,
   statusRede,
@@ -14,6 +16,33 @@ test('formatarBytes cobre valores pequenos, KiB, MiB e inválidos', () => {
   assert.equal(formatarBytes(2048), '2.0 KiB');
   assert.equal(formatarBytes(2 * 1024 ** 2), '2.0 MiB');
   assert.equal(formatarBytes(Number.NaN), 'INDISPONÍVEL');
+});
+
+test('formatarMilissegundos rejeita valores ausentes ou negativos', () => {
+  assert.equal(formatarMilissegundos(1234.6), '1235 ms');
+  assert.equal(formatarMilissegundos(0), '0 ms');
+  assert.equal(formatarMilissegundos(-1), 'INDISPONÍVEL');
+  assert.equal(formatarMilissegundos(Number.NaN), 'INDISPONÍVEL');
+});
+
+test('desempenhoResumo expõe Navigation Timing e memória somente quando disponíveis', () => {
+  const resumo = desempenhoResumo({
+    getEntriesByType: () => ({ 0: { domContentLoadedEventEnd: 1234.6, loadEventEnd: 2345.4 }, length: 1 }),
+    memory: { usedJSHeapSize: 2 * 1024 ** 2, jsHeapSizeLimit: 64 * 1024 ** 2 },
+  });
+  assert.deepEqual(resumo, {
+    navegacao: '1235 ms',
+    carga: '2345 ms',
+    memoria: '2.0 MiB usados · 64.0 MiB limite reportado',
+    fonte: 'NAVIGATION TIMING',
+  });
+  assert.deepEqual(desempenhoResumo({ getEntriesByType: () => [] }), {
+    navegacao: 'INDISPONÍVEL',
+    carga: 'INDISPONÍVEL',
+    memoria: 'INDISPONÍVEL',
+    fonte: 'INDISPONÍVEL',
+  });
+  assert.equal(desempenhoResumo({ getEntriesByType: () => { throw new Error('indisponível'); } }).fonte, 'INDISPONÍVEL');
 });
 
 test('formatarBateria não inventa nível quando a API não existe', () => {

@@ -27,7 +27,7 @@
 | IOS | Capacitor iOS + Geolocation foreground + App lifecycle | BLOCKED | Plugins sincronizados, `Package.swift` e descrições foreground | Mac/Xcode/Apple, permissões e lifecycle necessários |
 | UPDATES | Update confirmado | IN_PROGRESS | `atualizacao.js`, `atualizacao-ui.js`, SW, allowlist HTTPS oficial e teste waiting/confirmado | Testar release posterior real e instalador do sistema |
 | DONATIONS | Tela preparada | NOT_CONFIGURED | Sem checkout/credenciais | Não ativar sem integração real |
-| DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, 8 testes | Validar em navegador e aparelhos reais; sem telemetria oculta |
+| DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, performance opcional, 11 testes de diagnóstico/lifecycle/performance | Validar em navegador e aparelhos reais; sem telemetria oculta |
 | SETTINGS | Configuração/tema local | IMPLEMENTED | Shell e estado | Expandir somente com necessidade |
 | ACCESSIBILITY | Labels, salto de conteúdo, foco e contraste | IN_PROGRESS | Shell com link de salto, `<main>` focável, ARIA explícito, foco pós-rota e preview DOM | TalkBack/VoiceOver, contraste e aparelhos reais pendentes |
 | EXTERNAL_HARDWARE | Satélite, beacon, rádio, Geiger, sonar | NOT_CONFIGURED | Contratos/documentação | Não simular hardware |

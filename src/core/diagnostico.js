@@ -19,6 +19,34 @@ export function formatarBateria(bateria) {
   return `${percentual} · ${estado}`;
 }
 
+export function formatarMilissegundos(valor) {
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero >= 0 ? `${Math.round(numero)} ms` : UNAVAILABLE;
+}
+
+export function desempenhoResumo(performanceApi = globalThis.performance) {
+  let entradas = [];
+  try {
+    entradas = typeof performanceApi?.getEntriesByType === 'function'
+      ? performanceApi.getEntriesByType('navigation')
+      : [];
+  } catch {
+    entradas = [];
+  }
+  const navegacao = Array.from(entradas || []).find((entrada) => entrada && typeof entrada === 'object');
+  const memoria = performanceApi?.memory;
+  const usados = Number(memoria?.usedJSHeapSize);
+  const limite = Number(memoria?.jsHeapSizeLimit);
+  return {
+    navegacao: formatarMilissegundos(navegacao?.domContentLoadedEventEnd),
+    carga: formatarMilissegundos(navegacao?.loadEventEnd),
+    memoria: Number.isFinite(usados) && usados >= 0
+      ? `${formatarBytes(usados)} usados${Number.isFinite(limite) && limite >= 0 ? ` · ${formatarBytes(limite)} limite reportado` : ''}`
+      : UNAVAILABLE,
+    fonte: navegacao ? 'NAVIGATION TIMING' : 'INDISPONÍVEL',
+  };
+}
+
 export function statusRede(online) {
   return online === true ? 'ONLINE' : online === false ? 'OFFLINE' : UNAVAILABLE;
 }

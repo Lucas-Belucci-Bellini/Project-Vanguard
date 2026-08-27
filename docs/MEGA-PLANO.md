@@ -347,13 +347,13 @@ grandeza. Tudo listado na tela `#/sobre` — não escondido em rodapé.
 ```bash
 npm install
 npm run dev      # http://localhost:5174
-npm test         # 74 testes do motor e dos contratos civis
+npm test         # suíte completa; a execução atual registra 126 testes
 npm run build    # dist/
 ```
 
 ## 7. Direção futura de performance e linguagens leves
 
-A preferência do projeto para a evolução pós-`v1.0.0` é priorizar baixo consumo, inicialização rápida e uso eficiente de memória. A decisão não autoriza uma reescrita prematura: o Vanguard Field deve primeiro ser medido em aparelhos reais e manter a base JS/Capacitor estável até que um gargalo verificável justifique uma camada nativa.
+A preferência do projeto para a evolução pós-`v1.0.0` é priorizar baixo consumo, inicialização rápida e uso eficiente de memória. A decisão não autoriza uma reescrita prematura: o Vanguard Field deve primeiro ser medido em aparelhos reais e manter a base JS/Capacitor estável até que um gargalo verificável justifique uma camada nativa. O Diagnóstico já mostra Navigation Timing e, quando o navegador oferece, uma estimativa opcional de heap JS; esses valores são observacionais e não encerram o profiling de aparelho.
 
 | Área | Direção preferida | Regra de adoção |
 |---|---|---|

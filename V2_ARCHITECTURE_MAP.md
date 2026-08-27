@@ -35,6 +35,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | Release → destino seguro | payload GitHub → `core/atualizacao.js` → allowlist HTTPS do repositório → UI de confirmação | Asset externo ou URL insegura volta à página fixa de releases |
 | Lifecycle → diagnóstico | `@capacitor/app` `appStateChange` ou `visibilitychange` → `ciclo-vida.js` → diagnóstico | Mede foreground/background; não garante execução nem GPS contínuo |
 | Diagnóstico → observabilidade | APIs locais → `src/core/diagnostico.js`/`src/core/ciclo-vida.js` → `src/pages/diagnostico.js` → estado local | Sem telemetria oculta; bateria, sensores e lifecycle podem estar indisponíveis |
+| Diagnóstico → performance | `performance.getEntriesByType('navigation')` e `performance.memory` opcional → `desempenhoResumo()` → grupo `DESEMPENHO` | Medição local de DOM/carga/heap disponível; não mede FPS, bateria ou memória total |
 | Shell → acessibilidade | `src/main.js` cria skip link, `<main>` focável e estados ARIA → `src/ui/helpers.js` serializa atributos → `src/styles/base.css` mantém foco visível | Melhora navegação sem declarar conformidade WCAG; TalkBack/VoiceOver e contraste ainda exigem campo |
 
 ## Armazenamento

@@ -2,7 +2,7 @@ import '../styles/diagnostico.css';
 import { h } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { VERSAO_ATUAL } from '../core/atualizacao.js';
-import { diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
+import { desempenhoResumo, diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
 import { fonteLocalizacao } from '../core/localizacao.js';
 import { estadoCicloVidaAtual, observarCicloVida } from '../core/ciclo-vida.js';
 
@@ -103,6 +103,7 @@ export function diagnosticoPage() {
       });
       const gps = await permissaoGps();
       const cache = await cacheStatus();
+      const desempenho = desempenhoResumo();
       const gpsItem = dados.find((item) => item.nome === 'GPS/GNSS');
       if (gpsItem) gpsItem.valor = `${gps} · ${statusPosicao(posicao).estado}`;
       const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'atencao' : 'ok' };
@@ -110,7 +111,10 @@ export function diagnosticoPage() {
       const backgroundItem = { grupo: 'MOBILE', nome: 'GPS em background', valor: 'DEVICE DEPENDENT · sem garantia contínua', estado: 'atencao' };
       const ciclo = estadoCicloVidaAtual();
       const cicloItem = { grupo: 'MOBILE', nome: 'Ciclo do app', valor: ciclo.rotulo, estado: ciclo.estado === 'UNAVAILABLE' ? 'atencao' : 'ok' };
-      render([...dados, localizacaoItem, backgroundItem, cicloItem, cacheItem]);
+      const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      render([...dados, localizacaoItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {
@@ -133,7 +137,7 @@ export function diagnosticoPage() {
       h('div', null,
         h('div', { className: 'diagnostico__eyebrow' }, 'VANGUARD FIELD / DIAGNÓSTICO LOCAL'),
         h('h1', null, 'Estado observável'),
-        h('p', { className: 'diagnostico__intro' }, 'Conferência local de versão, rede, GPS, frescor, cache, armazenamento, bateria quando disponível e sensores. Este painel não envia telemetria e não prova cobertura, comunicação ou resgate.')
+        h('p', { className: 'diagnostico__intro' }, 'Conferência local de versão, rede, GPS, frescor, cache, armazenamento, bateria, lifecycle, performance e sensores. Este painel não envia telemetria e não prova cobertura, comunicação ou resgate.')
       ),
       recarregar
     ),
