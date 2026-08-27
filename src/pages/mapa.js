@@ -6,6 +6,7 @@ import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
+import { resumoTrilha } from '../core/trilha.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
 
@@ -149,6 +150,7 @@ export function mapaPage() {
       ),
       h('strong', { className: 'mapa__route-distance' }, '0 m'),
       h('span', { className: 'mapa__route-caption' }, 'distância registrada'),
+      h('span', { className: 'mapa__route-stats', role: 'status' }, '0 pontos · tempo indisponível · velocidade média indisponível'),
       routeButton,
       wakeButton,
       sheetStatus
@@ -232,7 +234,9 @@ export function mapaPage() {
   function atualizarSheet() {
     modoMarInfo.classList.toggle('is-visible', selectUso.value === 'mar');
     atualizarContextoMapa();
-    sheet.querySelector('.mapa__route-distance').textContent = dist(distanciaTrilha());
+    const resumo = resumoTrilha(trilha);
+    sheet.querySelector('.mapa__route-distance').textContent = dist(resumo.distanciaM);
+    sheet.querySelector('.mapa__route-stats').textContent = `${resumo.pontos} pontos · ${resumo.duracaoLabel} · ${resumo.velocidadeMediaLabel}`;
     routeButton.textContent = rotaAtiva ? 'PAUSAR ROTA' : 'INICIAR ROTA';
     routeButton.classList.toggle('is-active', rotaAtiva);
     sheetStatus.textContent = rotaAtiva

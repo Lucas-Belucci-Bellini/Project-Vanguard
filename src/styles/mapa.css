@@ -51,7 +51,9 @@
 .mapa__route-card-head { display: flex; align-items: center; justify-content: space-between; }
 .mapa__privacy { color: var(--color-cyan); font-size: 9px; letter-spacing: .08em; }
 .mapa__route-distance { display: block; margin-top: 10px; color: var(--color-cyan); font-size: 29px; line-height: 1; text-shadow: var(--shadow-glow-cyan); }
-.mapa__route-caption { display: block; margin: 4px 0 10px; color: var(--color-text-muted); font-size: 9px; text-transform: uppercase; }
+.mapa__route-caption { display: block; margin-top: 4px; color: var(--color-text-muted); font-size: 9px; }
+.mapa__route-stats { display: block; min-height: 16px; margin-top: 7px; color: var(--color-text-secondary); font-size: 8px; line-height: 1.4; }
+.mapa__route-buttons { display: grid; gap: 6px; text-transform: uppercase; }
 .mapa__route-button { width: 100%; background: var(--color-cyan-soft); border-color: var(--color-cyan-edge); color: var(--color-cyan); font-weight: var(--font-weight-bold); }
 .mapa__wake-button { width: 100%; min-height: 30px; margin-top: 6px; padding: 6px; color: var(--color-text-muted); background: transparent; border-color: var(--color-cyan-edge); font-size: 8px; letter-spacing: .04em; }
 .mapa__wake-button:disabled { opacity: .5; cursor: not-allowed; }
