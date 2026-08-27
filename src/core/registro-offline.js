@@ -32,9 +32,11 @@ function normalizarPonto(ponto, indice, { nomePadrao = 'Ponto' } = {}) {
   };
   const accuracy = clonarNumero(ponto.accuracy);
   const speed = clonarNumero(ponto.speed);
+  const altitude = clonarNumero(ponto.altitude);
   const createdAt = clonarNumero(ponto.createdAt);
   if (accuracy !== undefined && accuracy >= 0) normalizado.accuracy = accuracy;
   if (speed !== undefined && speed >= 0) normalizado.speed = speed;
+  if (altitude !== undefined && altitude >= -11000 && altitude <= 100000) normalizado.altitude = altitude;
   if (createdAt !== undefined && createdAt >= 0) normalizado.createdAt = createdAt;
   return normalizado;
 }
@@ -62,6 +64,40 @@ export function exportarRegistroLocal({ trilha = [], waypoints = [], destino = n
 /**
  * Valida e normaliza um arquivo importado. Nunca executa campos do JSON.
  */
+function escaparXml(valor) {
+  return String(valor ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;');
+}
+
+/**
+ * Gera GPX 1.1 local para trilha e waypoints. O formato não inclui destino
+ * como rota ativa: ele é exportado como waypoint para não sugerir navegação
+ * automática ou comunicação externa.
+ */
+export function exportarRegistroGpx({ trilha = [], waypoints = [], destino = null, nome = 'Vanguard Field' } = {}) {
+  const pontosTrilha = validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha');
+  const pontosWaypoint = validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint');
+  const todosWaypoints = destino == null
+    ? pontosWaypoint
+    : [...pontosWaypoint, normalizarPonto(destino, pontosWaypoint.length, { nomePadrao: 'Destino' })];
+  const trkpts = pontosTrilha.map((ponto) => {
+    const ele = Number.isFinite(Number(ponto.altitude)) ? `<ele>${Number(ponto.altitude)}</ele>` : '';
+    const time = Number.isFinite(Number(ponto.createdAt)) ? `<time>${new Date(Number(ponto.createdAt)).toISOString()}</time>` : '';
+    return `      <trkpt lat="${ponto.lat}" lon="${ponto.lon}">${ele}${time}</trkpt>`;
+  }).join('\n');
+  const wpts = todosWaypoints.map((ponto) => `  <wpt lat="${ponto.lat}" lon="${ponto.lon}"><name>${escaparXml(ponto.nome)}</name></wpt>`).join('\n');
+  const track = pontosTrilha.length ? `  <trk><name>${escaparXml(nome)}</name><trkseg>\n${trkpts}\n  </trkseg></trk>` : '';
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Vanguard Field" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+${wpts}${wpts && track ? '\n' : ''}${track}
+</gpx>
+`;
+}
+
 export function importarRegistroLocal(entrada) {
   let dados;
   try {

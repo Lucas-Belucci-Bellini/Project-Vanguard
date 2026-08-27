@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   exportarRegistroLocal,
+  exportarRegistroGpx,
   importarRegistroLocal,
   REGISTRO_SCHEMA,
   REGISTRO_VERSION,
@@ -48,6 +49,27 @@ test('importarRegistroLocal rejeita schema incompatível e geometria inválida',
 test('exportarRegistroLocal aplica limites de trilha e waypoints', () => {
   assert.throws(() => exportarRegistroLocal({ trilha: Array.from({ length: LIMITE_TRILHA + 1 }, (_, i) => ponto(i)) }), /acima do limite/);
   assert.throws(() => exportarRegistroLocal({ waypoints: Array.from({ length: LIMITE_WAYPOINTS + 1 }, (_, i) => ponto(i)) }), /acima do limite/);
+});
+
+test('exportarRegistroGpx cria trilha e waypoints com XML escapado', () => {
+  const gpx = exportarRegistroGpx({
+    trilha: [{ ...ponto(1), altitude: 742 }],
+    waypoints: [{ ...ponto(2), nome: 'Abrigo & retorno <A>' }],
+    destino: { ...ponto(3), nome: 'Destino' },
+    nome: 'Rota de teste',
+  });
+  assert.match(gpx, /<gpx version="1\.1"/);
+  assert.match(gpx, /<trkpt lat="-23\.549" lon="-46\.631"><ele>742<\/ele>/);
+  assert.match(gpx, /Abrigo &amp; retorno &lt;A&gt;/);
+  assert.match(gpx, /<wpt lat="-23\.547" lon="-46\.633"><name>Destino<\/name>/);
+  assert.doesNotMatch(gpx, /\\\\n/);
+});
+
+test('exportarRegistroGpx aceita dados vazios sem inventar uma trilha', () => {
+  const gpx = exportarRegistroGpx();
+  assert.match(gpx, /<gpx version="1\.1"/);
+  assert.doesNotMatch(gpx, /<trk>/);
+  assert.doesNotMatch(gpx, /<wpt>/);
 });
 
 test('importarRegistroLocal exige arrays de dados', () => {

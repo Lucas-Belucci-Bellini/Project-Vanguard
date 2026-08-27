@@ -6,7 +6,7 @@ import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
-import { exportarRegistroLocal, importarRegistroLocal } from '../core/registro-offline.js';
+import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const CENTRO_FALLBACK = [-43.21, -22.95];
@@ -90,8 +90,9 @@ export function mapaPage() {
   const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
   const offlineStatus = h('p', { className: 'mapa__offline-status', role: 'status' }, 'Baixe a área visível antes de sair sem internet.');
   const offlineClearButton = h('button', { className: 'mapa__offline-clear', type: 'button' }, 'LIMPAR ÁREA PREPARADA');
-  const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR REGISTRO');
-  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR REGISTRO');
+  const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR JSON');
+  const registroGpxButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR GPX');
+  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR JSON');
   const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json', 'aria-label': 'Importar registro local JSON' });
   const registroStatus = h('p', { className: 'mapa__registro-status', role: 'status' }, 'Backup local de rota, pontos e destino; sem sincronização.');
   const selectBase = h('select', { className: 'mapa__select', 'aria-label': 'Base cartográfica' },
@@ -326,6 +327,21 @@ export function mapaPage() {
     }
   }
 
+  async   function exportarRegistroGpxLocal() {
+    try {
+      const conteudo = exportarRegistroGpx({ trilha, waypoints, destino });
+      const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/gpx+xml;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `vanguard-trilha-${new Date().toISOString().slice(0, 10)}.gpx`;
+      link.click();
+      URL.revokeObjectURL(url);
+      registroStatus.textContent = `${trilha.length} pontos de trilha e ${waypoints.length + (destino ? 1 : 0)} waypoints exportados em GPX para este aparelho.`;
+    } catch (erro) {
+      registroStatus.textContent = erro?.message ?? 'Não foi possível exportar o GPX local.';
+    }
+  }
+
   async function importarRegistro(arquivo) {
     if (!arquivo) return;
     try {
@@ -378,6 +394,7 @@ export function mapaPage() {
   centerButton.onclick = centralizar;
   clearButton.onclick = limparTrilha;
   registroExportarButton.onclick = exportarRegistro;
+  registroGpxButton.onclick = exportarRegistroGpxLocal;
   registroImportarButton.onclick = () => registroArquivo.click();
   registroArquivo.onchange = () => importarRegistro(registroArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;

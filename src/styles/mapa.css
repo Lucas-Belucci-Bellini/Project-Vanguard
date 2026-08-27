@@ -34,8 +34,8 @@
 .mapa__offline-clear { width: 100%; min-height: 28px; margin-top: 6px; padding: 6px; background: transparent; border-color: var(--color-cyan-edge); color: var(--color-text-muted); font-size: 8px; letter-spacing: .04em; }
 .mapa__offline-clear:disabled, .mapa__offline-button:disabled { opacity: .55; cursor: wait; }
 .mapa__registro-card { margin-top: 9px; padding: 10px; background: var(--color-surface); border: var(--border-base); }
-.mapa__registro-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 8px; }
-.mapa__registro-actions .mapa__quick-button { min-height: 32px; font-size: 8px; }
+.mapa__registro-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-top: 8px; }
+.mapa__registro-actions .mapa__quick-button { min-height: 32px; padding-inline: 3px; font-size: 7px; letter-spacing: .01em; }
 .mapa__registro-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .mapa__registro-status { min-height: 15px; margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
 .mapa__quick-button { min-height: 36px; padding: 7px; color: var(--color-text-secondary); background: var(--color-surface); font-size: 9px; }
