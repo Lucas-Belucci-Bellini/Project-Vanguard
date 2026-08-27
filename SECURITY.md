@@ -2,7 +2,19 @@
 
 ## Escopo
 
-O produto atual é o Vanguard Field civil. O repositório preserva módulos balísticos antigos apenas para compatibilidade histórica e testes; eles são `LEGACY-RESTRICTED` e não devem receber novas capacidades operacionais.
+O produto atual é o Vanguard Field civil, offline-first e voltado a navegação, sobrevivência e proteção civil. O repositório também preserva, em contexto separado, módulos que nasceram como uma wiki de Arma 3 para testes de mecânicas e referência dentro do videogame. Esse material é `LEGACY-RESTRICTED`: não faz parte do produto civil, não deve receber novas capacidades e nunca foi criado para ambientes, equipamentos, treinamento ou operações reais.
+
+## Separação do legado de videogame
+
+A wiki de Arma 3 e seus módulos balísticos foram concebidos separadamente do Vanguard Field para experimentação em ambiente virtual e testes de software relacionados ao jogo. Seus nomes, fórmulas, dados e telas não constituem manual, tabela oficial, solução de tiro ou orientação para armas reais. Não devem ser adaptados, exportados ou interpretados para uso no mundo real.
+
+O Vanguard Field não usa esses módulos no fluxo civil de GPS, MGRS, mapas, trilhas, sobrevivência, diagnóstico ou Socorro. Qualquer solicitação de expansão balística, controle de tiro, armamento ou integração operacional permanece fora do escopo e deve ser recusada como `LEGACY-RESTRICTED`.
+
+## Registro histórico da contingência cartográfica
+
+Quando os mapas/terrenos do jogo ainda não estavam disponíveis, o fluxo de construção do Claude Code colocou provisoriamente uma API de imagens de satélite do mundo real na camada de mapa. Isso fez o simulador mostrar o mundo real como se fosse um mapa comum. Essa foi uma contingência técnica tomada pelo processo de construção, não uma solicitação do usuário e não uma decisão válida para a wiki de Arma 3.
+
+A camada de mapa real pode existir no Vanguard Field civil, quando configurada e atribuída, para navegação no mundo físico. Ela não é mapa, terreno ou cenário do Arma 3. Os terrenos virtuais do jogo devem permanecer no banco e no contexto próprios da wiki de Arma 3; nunca se deve apresentar uma API de satélite real como substituto silencioso desses terrenos. A distinção completa está em [`docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`](docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md).
 
 ## Princípios
 

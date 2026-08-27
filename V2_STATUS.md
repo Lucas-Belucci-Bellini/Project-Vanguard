@@ -16,10 +16,10 @@
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
-| **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021/0022, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
+| **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico. O legado pertence a uma wiki separada de Arma 3, somente virtual/teste e nunca destinado a uso real |
+| **Documentation** | README, `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021/0022/0023, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `3f6945c docs(v2): registrar gates omega`; CI do commit de memória passou; unidade de validação de arquivos está no worktree e aguarda commit separado |
+| **Main** | `d41d0b4 docs(v2): registrar fechamento omega`; CI `33125018133` concluído com sucesso; correção de escopo cartográfico está no worktree e aguarda commit separado |
 
 ## Regra de conclusão
 
@@ -32,5 +32,5 @@ A V2 permanece `IN PROGRESS` até que cada item obrigatório tenha implementaç�
 | **V2 civil** | Navegação, GPS/GNSS, MGRS, bússola, mapa, trilha, offline, armazenamento, diagnóstico, PWA, mobile e atualização |
 | **Preparado** | Integrações externas, fontes oficiais sincronizadas, hardware real, pagamentos e comunicação externa |
 | **PHYSICAL VALIDATION REQUIRED** | Android/Xiaomi/iOS, consumo, permissões, ciclo de vida, background e distribuição |
-| **LEGACY-RESTRICTED** | Computador de tiro, balística, controle de tiro e qualquer automação operacional de armas |
+| **LEGACY-RESTRICTED** | Wiki/ambiente separado de Arma 3 e seus módulos balísticos de videogame; nunca adaptar para ambientes reais, controle de tiro, armamento ou automação operacional |
 | **V3** | Itens não necessários para a definição de pronto da V2, registrados em `V3_BACKLOG.md` |

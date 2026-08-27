@@ -25,7 +25,7 @@
 | **Routes** | Trilha local, destino, JSON/GPX/KML e resumo de distância/tempo/pontos; interoperabilidade física pendente |
 | **Sharing** | Texto, coordenadas, JSON, GPX e KML via ação explícita, com Web Share/clipboard/download fallback; Share Sheet/Files físico pendente |
 | **Emergency Preparation** | Socorro prepara coordenadas/pacote e compartilha manualmente; não envia SOS, não confirma entrega/resgate e não transmite via satélite |
-| **Security** | Civil/local-first; sem telemetria automática, hardware falso, integração militar ou expansão do legado balístico |
+| **Security** | Civil/local-first; sem telemetria automática, hardware falso, integração militar ou expansão do legado balístico. O legado é uma wiki separada de Arma 3, criada apenas para testes/simulação no videogame e nunca para uso real. A API de satélite real foi contingência histórica do processo de construção, não pedido do usuário nem mapa do jogo |
 | **Privacy** | Dados locais por padrão; sem sincronização automática; pagamentos/Asaas/Supabase/e-mail fiscal `NOT_CONFIGURED` |
 | **Accessibility** | Shell com skip link, landmarks, foco e ARIA; leitor de tela, touch e safe areas precisam de validação física |
 | **Performance** | Métricas locais de navegação/memória opcional; profiling físico e bateria de quatro dias pendentes |

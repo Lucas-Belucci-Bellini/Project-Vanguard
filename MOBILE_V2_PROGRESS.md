@@ -94,3 +94,9 @@ A memória Omega mantém `IN PROGRESS` e `BLOCKED` onde faltam aparelhos, macOS/
 A auditoria do fluxo de importação identificou que o Mapa escolhia o parser somente pela extensão do nome. Para tratar diferenças entre navegador, Android e iOS sem expandir o escopo, foi criado `src/core/registro-arquivo.js`, um classificador puro que normaliza extensão/MIME, aceita JSON/GPX/KML por metadado disponível e rejeita conflito específico antes de ler o arquivo. O conteúdo continua sendo validado pelos parsers locais, com limites e schema existentes; não há rede, execução XML ou assinatura implícita.
 
 O Mapa foi integrado ao classificador, e `test/registro-arquivo.test.js` adicionou sete casos determinísticos. A suíte passou de 159 para 166 testes. O ADR-0022 registra a decisão e as limitações: MIME/extensão não autenticam conteúdo e Files/Share Sheet físicos ainda precisam de validação em aparelhos reais.
+
+## Marco de separação entre mapas reais e Arma 3 — 2026-08-27
+
+Foi esclarecido que, quando os mapas/terrenos do Arma 3 ainda não estavam disponíveis, o fluxo de construção do Claude Code colocou provisoriamente uma API de imagens de satélite do mundo real na camada cartográfica. Isso foi uma contingência técnica do processo de construção, não uma solicitação do usuário e não representava mapa ou terreno do jogo. O mapa real pertence ao contexto civil do Vanguard Field; os terrenos do Arma 3 pertencem à base virtual própria da wiki/ambiente de testes.
+
+A política agora deixa explícito que os módulos balísticos foram criados somente para simulação e testes no videogame Arma 3, nunca para ambientes reais. A separação foi registrada em `SECURITY.md`, `README.md`, `CLAUDE.md`, `V2_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_DECISIONS.md`, `V2_ARCHITECTURE_MAP.md`, `docs/BALISTICA.md`, `docs/INTEGRACAO-BALUARTE.md` e no novo ADR-0023.

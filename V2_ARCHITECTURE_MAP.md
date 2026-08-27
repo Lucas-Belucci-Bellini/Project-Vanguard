@@ -50,4 +50,6 @@ O Capacitor encapsula a base web. `@capacitor/geolocation@8.2.2` é o driver opc
 
 ## Legacy
 
-O módulo balístico legado permanece fora do fluxo civil. Qualquer pedido de nova capacidade operacional de armamento deve ser marcado `LEGACY-RESTRICTED` e não implementado.
+O módulo balístico legado pertence ao contexto separado da wiki/ambiente de testes de Arma 3. Foi criado somente para simulação e testes dentro do videogame, permanece fora do fluxo civil do Vanguard Field e nunca foi destinado a ambientes, equipamentos, treinamento ou operações reais. Qualquer pedido de adaptação, nova capacidade operacional de armamento ou integração desse material deve ser marcado `LEGACY-RESTRICTED` e não implementado.
+
+Quando os terrenos do jogo ainda não estavam disponíveis, o fluxo de construção do Claude Code colocou provisoriamente uma API de imagens de satélite do mundo real na camada cartográfica. Essa contingência não foi solicitada pelo usuário, mostrava o mundo real e não representava mapa/terreno do Arma 3; mapas reais pertencem ao contexto civil do Vanguard Field, enquanto a wiki deve usar sua base virtual própria.

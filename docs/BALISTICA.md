@@ -1,11 +1,16 @@
-# 🎯 Mega-Plano — Calculadora Balística (Morteiros e Artilharia)
+# Wiki Arma 3 — Calculadora Balística de Simulação (Morteiros e Artilharia)
 
-> Módulo de **Fire Control System**: dados de tiro (elevação em MRAD/Mils,
-> azimute e tempo de voo) a partir das posições de peça e alvo. Acoplado ao
-> GPS topográfico do Vanguard e ao Projeto Baluarte.
+> **LEGACY-RESTRICTED · AMBIENTE VIRTUAL DE VIDEOGAME**
 >
-> **Estado:** Fases 1 e 2 entregues (`src/engine/ballistics.js`,
-> `charges.js`, `fire-mission.js`, tela `#/tiro`, 65 testes).
+> Este documento pertence ao contexto separado da wiki/ambiente de testes de
+> **Arma 3**. O módulo de **Fire Control System** foi criado somente para
+> simulação, testes de software e referência dentro do videogame. Ele não é
+> manual, tabela oficial, solução de tiro ou orientação para armas reais e nunca
+> foi destinado a ambientes, equipamentos, treinamento ou operações reais.
+>
+> **Estado:** Fases 1 e 2 entregues no contexto de videogame (`src/engine/ballistics.js`,
+> `charges.js`, `fire-mission.js`, tela `#/tiro`, 65 testes). Esse material não
+> faz parte do fluxo civil atual do Vanguard Field.
 
 ---
 
@@ -72,10 +77,10 @@ $$\boxed{\;x_{max} = \frac{v}{g}\sqrt{v^{2} - 2gy}\;}$$
 
 Se $v^2 - 2gy \le 0$, o alvo está acima do apogeu vertical: **inalcançável**.
 
-> **Uso real:** este solucionador é exato para o modelo *sem ar* e custa
-> microssegundos. Serve para pré-filtrar cargas viáveis e alimentar a UI em
-> tempo real. **Não** é o número que vai para a peça — em morteiro de 82 mm a
-> 3 km ele superestima o alcance em 15–25 %.
+> **Uso na simulação do videogame:** este solucionador é uma aproximação para
+> o modelo virtual *sem ar* e serve apenas para testes e visualização dentro do
+> Arma 3. **Não** é um número para uma peça real e não deve ser usado para
+> calcular, orientar ou validar qualquer operação no mundo real.
 
 Implementação: `resolverVacuo()` em `src/engine/ballistics.js`.
 
@@ -397,4 +402,4 @@ app — não escondido em rodapé.
 
 ## Nota de escopo atual — Vanguard Field
 
-Este documento descreve exclusivamente o módulo balístico legado preservado no repositório original. Ele não representa o produto principal atual, não é usado pelo fluxo civil de navegação, sobrevivência ou proteção civil e não deve ser interpretado como manual operacional. O escopo atual está em `README.md`, `docs/MAPA-DE-FUNCIONALIDADES.md` e `docs/CONTEXTOS-E-SEGURANCA.md`.
+Este documento descreve exclusivamente o módulo balístico legado da wiki/ambiente de testes de Arma 3 preservado no repositório original. Ele foi criado somente para simulação e testes no videogame, não representa o produto principal atual, não é usado pelo fluxo civil de navegação, sobrevivência ou proteção civil e nunca foi destinado a ambientes, equipamentos, treinamento ou operações reais. Não deve ser interpretado como manual, tabela oficial ou orientação operacional. O escopo vigente do Vanguard Field está em `README.md`, `SECURITY.md`, `docs/MAPA-DE-FUNCIONALIDADES.md` e `docs/CONTEXTOS-E-SEGURANCA.md`.

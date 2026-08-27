@@ -153,9 +153,12 @@ Seguindo os 5 pontos do `CONTRIBUTING.md` do Baluarte:
 
 ### Passo 3 — Reconciliar os dois modelos balísticos
 
-O Baluarte tem `src/utils/arma3-balistica.js` (queda de bala em armas de tiro
-tenso, para a wiki de Arma 3). O Vanguard tem `ballistics.js` (solução de
-tiro para morteiro). **Eles não competem** — resolvem problemas inversos:
+O Baluarte tem `src/utils/arma3-balistica.js` (queda de projétil no contexto
+virtual da wiki de Arma 3). O Vanguard histórico tem `ballistics.js` (modelo de
+simulação de morteiro). Ambos pertencem ao contexto de videogame/testes e não
+foram criados para ambientes, equipamentos, treinamento ou operações reais.
+Eles permanecem separados do Vanguard Field civil e **não competem** — resolvem
+problemas inversos:
 
 | | `arma3-balistica.js` (Baluarte) | `ballistics.js` (Vanguard) |
 |---|---|---|
@@ -163,8 +166,10 @@ tiro para morteiro). **Eles não competem** — resolvem problemas inversos:
 | Domínio | Tiro tenso, arma de infantaria | Tiro curvo, morteiro |
 | Saída | Queda em cm e mils, deriva | Elevação, azimute, tempo de voo |
 
-**Ambos usam a mesma formulação `airFriction`** — decisão deliberada. Um
-coeficiente calibrado num vale no outro.
+**Ambos usam a mesma formulação `airFriction` no contexto virtual** — decisão
+deliberada para manter coerência entre testes de videogame. Um coeficiente
+calibrado num vale no outro; isso não valida dados, modelos ou resultados para
+armas e ambientes reais.
 
 **Recomendação:** manter os dois, e numa fase seguinte extrair o integrador
 comum para `vanguard/ballistics.js`, deixando o do Baluarte só com a camada de
@@ -252,6 +257,6 @@ integração.
 
 ## Nota de escopo atual — Vanguard Field
 
-Este documento preserva o contrato histórico de integração com o Projeto Baluarte. O produto principal atual é o Vanguard Field civil, offline-first e orientado a navegação, sobrevivência e proteção civil. Recursos de esquadrão, WebSocket e cálculo balístico descritos aqui não fazem parte do fluxo recomendado do aplicativo atual.
+Este documento preserva o contrato histórico de integração com o Projeto Baluarte. A parte de Arma 3/ballística aqui descrita pertence a uma wiki e ambiente de testes de videogame, nunca foi destinada a uso real e não deve ser interpretada como orientação operacional. O produto principal atual é o Vanguard Field civil, offline-first e orientado a navegação, sobrevivência e proteção civil. Recursos de esquadrão, WebSocket e cálculo balístico descritos aqui não fazem parte do fluxo recomendado do aplicativo atual.
 
 Para a visão vigente, consulte `README.md`, `docs/MAPA-DE-FUNCIONALIDADES.md` e `docs/CONTEXTOS-E-SEGURANCA.md`. A integração futura deve priorizar dados civis, fontes oficiais, privacidade, auditoria e confirmação explícita de qualquer transmissão.

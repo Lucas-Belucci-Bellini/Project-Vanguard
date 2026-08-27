@@ -1,13 +1,18 @@
 # Project Vanguard — contexto pro agente
 
-GPS topográfico tático + computador de tiro (estética Arma 3), em
-**JavaScript puro + Vite 5**. Sem TypeScript, sem framework. Parte do
-ecossistema **Projeto Baluarte** — repo irmão, mesmas regras.
+**Vanguard Field** é um aplicativo civil de navegação offline-first, em
+**JavaScript puro + Vite 5**, com GPS/GNSS, MGRS, mapas, trilhas e proteção civil.
+Sem TypeScript, sem framework. O repositório também preserva separadamente uma
+wiki/ambiente de testes de **Arma 3** (do ecossistema Projeto Baluarte), que contém
+módulos balísticos criados somente para simulação e testes dentro do videogame.
+Esses módulos nunca foram destinados a ambientes, equipamentos, treinamento ou
+operações reais e não fazem parte do fluxo do Vanguard Field.
 
 ## 🧭 Comece por aqui
 
 - 👉 [`README.md`](README.md) — o que é e como rodar
 - 👉 [`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md) — plano mestre: stack, arquitetura, roadmap em 4 fases (a Fase 1 está entregue)
+- 👉 [`docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`](docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md) — separação entre Vanguard Field, wiki Arma 3 e contingência cartográfica histórica
 - 👉 [`docs/BALISTICA.md`](docs/BALISTICA.md) — a matemática e o contrato JSON
 - 👉 [`docs/INTEGRACAO-BALUARTE.md`](docs/INTEGRACAO-BALUARTE.md) — como acopla no Baluarte
 - 👉 [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) — **contrato visual**; todo design novo sai daqui
@@ -42,9 +47,11 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - **Testes ancorados em algo verificável.** Nada de conferir contra número
   digitado de memória — só constante geodésica publicada, integração numérica
   independente, ou propriedade estrutural (ida-e-volta, simetria, monotonicidade).
-- **Dado de armamento nunca é inventado.** Guarda-se (v₀, alcance publicado) e
-  **deriva-se** o arrasto com `calibrarArrasto()`. Há teste rejeitando pares
-  fisicamente impossíveis.
+- **No legado da wiki de Arma 3, dado de jogo nunca é inventado.** Os valores
+  mantidos ali são referências de simulação para o videogame e não constituem
+  dados de armamento real, tabela de tiro ou orientação operacional. Não adaptar
+  esses módulos para o mundo real; qualquer expansão permanece
+  `LEGACY-RESTRICTED`.
 - **Nunca reimplementar a física em outra linguagem.** Se um cliente não-JS
   precisar calcular, expor o motor num host Node — uma implementação, dois hosts.
 
@@ -73,6 +80,8 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 
 ## Aviso que acompanha o produto
 
-Ferramenta de treino e simulação. Dados de armamento são referência de modelo,
-não tabela de tiro oficial. Os limites do modelo estão declarados na tela
-`#/sobre` — mantenha-os lá e atualizados.
+Os módulos balísticos legados são ferramentas de teste e simulação **do videogame
+Arma 3**. Seus dados são referências de modelo dentro desse ambiente virtual,
+não tabela de tiro oficial, manual ou orientação para ambientes reais. Eles estão
+fora do fluxo do Vanguard Field e não devem ser usados, adaptados ou interpretados
+para armas, equipamentos, treinamento ou operações reais.
