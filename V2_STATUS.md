@@ -7,19 +7,19 @@
 | **Version** | `2.x` em construção; pacote atual `1.0.0` |
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: estado, observabilidade, offline-first e validação mobile |
-| **Current Task** | Validar modo avião, persistência, posição/frescor e mapas preparados em Android/Xiaomi/MIUI/HyperOS/iPhone; medir quota/resposta de tiles, performance, bateria e suspensão antes de novas otimizações ou background GPS |
-| **Last Completed Task** | Service Worker filtra tiles por HTTPS/host permitido, deduplica URLs e limita a entrada de `CACHE_TILES` a 256 itens |
+| **Current Task** | Validar permissões, posição/frescor, modo avião, persistência, mapas preparados, lifecycle, sensores, performance e bateria em Android/Xiaomi/MIUI/HyperOS/iPhone; não assumir background GPS |
+| **Last Completed Task** | Diagnóstico passou a reconhecer o contrato normalizado `lat/lon` e mantém compatibilidade com `latitude/longitude`; testes determinísticos publicados em `f9da500` |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
-| **Next Task** | Validar modo avião, persistência, posição/frescor, resposta dos provedores e quota de mapas preparados em Android/Xiaomi/MIUI/HyperOS/iPhone; medir performance, bateria e suspensão antes de decidir novas otimizações ou background GPS |
+| **Next Task** | Executar `MOBILE_V2_TEST_MATRIX.md` em aparelhos reais; priorizar permissões, lifecycle, modo avião, import/export, bússola, update posterior e bateria |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 133 testes aprovados; `node --check public/sw.js`: aprovado; filtro do Service Worker, Home/prontidão offline e planner de tiles validados |
+| **Tests** | `npm test`: 134 testes aprovados; `node --check public/sw.js`, `git diff --check` e auditoria de produção aprovados; diagnóstico `lat/lon` coberto |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009/0010/0011/0012, referências WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW versionados |
+| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013, referências WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `bddc6b6 security(v2): filtrar tiles no service worker`; CI `33118348438` concluído com sucesso |
+| **Main** | `f9da500 fix(v2): reconhecer posição normalizada no diagnostico`; CI deste commit ainda será aguardado/registrado após o push documental |
 
 ## Regra de conclusão
 
