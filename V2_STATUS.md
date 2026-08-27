@@ -5,21 +5,21 @@
 | Campo | Estado atual |
 |---|---|
 | **Version** | `2.x` em construção; pacote atual `1.0.0` |
-| **Phase** | Fase 1 — Foundation Hardening e observabilidade local; V2 ainda `IN PROGRESS` |
+| **Phase** | Fase 2 — Engine/GPS mobile foundation; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: estado, observabilidade, offline-first e validação mobile |
-| **Current Task** | Validar em navegador e aparelhos a nova tela Diagnóstico, incluindo APIs disponíveis e estados offline |
-| **Last Completed Task** | Memória persistente V2 e primeira tela de Diagnóstico local para versão, rede, GPS, frescor, cache, armazenamento, bateria e sensores |
+| **Current Task** | Validar em aparelhos o driver Capacitor de Geolocation foreground e escolher a próxima lacuna de lifecycle/background |
+| **Last Completed Task** | Driver opcional `@capacitor/geolocation@8.2.2`, permissões foreground Android/iOS e fonte GPS observável no Diagnóstico |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
-| **Next Task** | Validar o diagnóstico em Android/Xiaomi/iOS e priorizar a próxima lacuna física: lifecycle/background, bateria ou cobertura real de mapas |
+| **Next Task** | Validar posição foreground, permissões e lifecycle em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 117 testes aprovados; `node --check public/sw.js`: aprovado |
+| **Tests** | `npm test`: 119 testes aprovados; `node --check public/sw.js`: aprovado |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
-| **Android** | Capacitor debug compilado; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
-| **iOS** | Projeto Capacitor gerado; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
+| **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
+| **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, simulação, limitações, segurança, memória V2 e skill versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | Diagnóstico validado localmente nesta execução; commit e CI serão registrados após o push |
+| **Main** | Driver foreground validado localmente; commit e CI serão registrados após o push |
 
 ## Regra de conclusão
 

@@ -4,7 +4,7 @@ EXECUTION REPORT
 ==============================
 
 Current Version: 2.x em construção; pacote atual 1.0.0
-Current Phase: Fase 1 — Foundation Hardening e observabilidade local
+Current Phase: Fase 2 — Engine/GPS mobile foundation
 Current Milestone: Foundation Hardening
 
 Completed:
@@ -19,6 +19,7 @@ Implemented:
 - Atualização confirmada para PWA/APK, sem auto-instalação silenciosa.
 - Skill reutilizável em `.claude/skills/vanguard-field-release-ops/SKILL.md`.
 - Diagnóstico local em `#/diagnostico`, com versão, plataforma, rede, GPS, frescor, cache, armazenamento, bateria quando disponível, service worker e bússola.
+- Driver opcional `@capacitor/geolocation@8.2.2` para foreground nativo, com fallback Web/PWA e política de energia compartilhada.
 
 Fixed:
 - Idade do último fixo visível no HUD.
@@ -26,7 +27,7 @@ Fixed:
 - Versão Android alinhada a `versionCode 100` e `versionName 1.0.0`.
 
 Tests:
-- `npm test`: 117 passados.
+- `npm test`: 119 passados.
 - `node --check public/sw.js`: aprovado.
 - Skill validada pelo `quick_validate.py`.
 
@@ -57,17 +58,17 @@ Files Created:
 
 Files Modified:
 - `src/core/diagnostico.js`, `src/pages/diagnostico.js`, `src/styles/diagnostico.css` e `test/diagnostico.test.js`.
+- `src/core/localizacao.js` com driver nativo opcional e teste de fonte.
+- Android/iOS sincronizados com `@capacitor/geolocation@8.2.2`; permissões Android foreground e descrições iOS atualizadas.
 - A rota `#/diagnostico` e o atalho correspondente foram adicionados ao app.
 
 Blockers:
-- Validação física Android, Xiaomi/MIUI/HyperOS e iPhone.
+- Validação física do diagnóstico e do driver foreground em Android, Xiaomi/MIUI/HyperOS e iPhone.
 - Background GPS real, ciclo de vida, consumo e quota de cache.
 - Assinatura Android/iOS e distribuição.
-- Validação do diagnóstico em navegador, Android/Xiaomi/MIUI/HyperOS e iPhone.
-- Background GPS real, ciclo de vida, consumo e quota de cache.
 
 Next Task:
-- Validar o diagnóstico em navegador, Android/Xiaomi/iOS e priorizar a próxima lacuna física: lifecycle/background, bateria ou cobertura real de mapas.
+- Validar Geolocation foreground e permissões em Android/Xiaomi/iOS; somente depois decidir sobre background GPS nativo.
 
 V2 Completion:
 IN PROGRESS

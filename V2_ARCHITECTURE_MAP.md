@@ -22,7 +22,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 
 | Caminho | Fluxo | Estado/limite |
 |---|---|---|
-| GPS → HUD | `navigator.geolocation` → `src/core/localizacao.js` → normalização → `engine/mgrs.js` → mapa/HUD | Posição local; precisão e idade devem ser visíveis |
+| GPS → HUD | `@capacitor/geolocation` foreground nativo ou `navigator.geolocation` → `src/core/localizacao.js` → normalização → `engine/mgrs.js` → mapa/HUD | Posição local; fonte, precisão e idade devem ser visíveis |
 | GPS → trilha | posição normalizada → filtro de distância/tempo → `estado.js` → resumo `trilha.js` | Alta precisão somente em rota ativa; sistema operacional define frequência |
 | Mapa → destino | toque/coordenadas → validação → distância/azimute `engine/geo.js` → HUD | Não é roteamento viário completo |
 | Mapa → tiles | MapLibre → HTTPS permitido → `public/sw.js`/Cache Storage | Pré-cache limitado; cache parcial não prova cobertura |
@@ -32,7 +32,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | Socorro → compartilhamento | posição → pacote local → Share/clipboard do sistema | Compartilhamento não confirma entrega |
 | SW → atualização PWA | registro → SW `waiting` → botão → confirmação → `SKIP_WAITING` → `controllerchange` | Sem atualização silenciosa |
 | Release → APK | GitHub release HTTPS → botão → instalador do sistema | APK não se auto-instala; nova versão deve ser maior |
-| Diagnóstico → observabilidade | APIs locais → estado de leitura → futura página diagnóstica | Sem telemetria oculta; bateria pode estar indisponível |
+| Diagnóstico → observabilidade | APIs locais → `src/core/diagnostico.js` → `src/pages/diagnostico.js` → estado local | Sem telemetria oculta; bateria e sensores podem estar indisponíveis |
 
 ## Armazenamento
 
@@ -40,7 +40,7 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 
 ## Mobile
 
-O Capacitor encapsula a base web. Android e iOS recebem a mesma UI, mas permissões, suspensão, bateria, sensores, instalação e atualização precisam de validação específica de cada plataforma. Background GPS prolongado não deve ser afirmado a partir de um teste de navegador.
+O Capacitor encapsula a base web. `@capacitor/geolocation@8.2.2` é o driver opcional de foreground; Android declara coarse/fine e iOS declara descrições de uso. Android e iOS recebem a mesma UI, mas permissões, suspensão, bateria, sensores, instalação e atualização precisam de validação específica. Background GPS prolongado não deve ser afirmado a partir de um teste de navegador ou do driver foreground.
 
 ## Legacy
 

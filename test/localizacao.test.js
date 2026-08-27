@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizarPosicao, precisaoLabel, velocidadeLabel, opcoesLocalizacao, distanciaLocalM, idadePosicaoMs, idadePosicaoLabel, frescorPosicao } from '../src/core/localizacao.js';
+import { normalizarPosicao, precisaoLabel, velocidadeLabel, opcoesLocalizacao, distanciaLocalM, idadePosicaoMs, idadePosicaoLabel, frescorPosicao, fonteLocalizacao } from '../src/core/localizacao.js';
 
 test('normalizarPosicao converte a leitura nativa para o contrato do app', () => {
   const atual = normalizarPosicao({
@@ -66,4 +66,19 @@ test('distanciaLocalM mede deslocamento e rejeita posições inválidas', () => 
   const distancia = distanciaLocalM({ lat: 0, lon: 0 }, { lat: 0, lon: 0.001 });
   assert.ok(distancia > 100 && distancia < 120);
   assert.equal(distanciaLocalM(null, { lat: 0, lon: 0 }), Infinity);
+});
+
+test('fonteLocalizacao não inventa driver nativo em Node', () => {
+  assert.equal(fonteLocalizacao(), 'INDISPONÍVEL');
+});
+
+test('fonteLocalizacao identifica Capacitor como foreground', () => {
+  const anterior = globalThis.Capacitor;
+  globalThis.Capacitor = { isNativePlatform: () => true };
+  try {
+    assert.equal(fonteLocalizacao(), 'CAPACITOR GEOLOCATION · FOREGROUND');
+  } finally {
+    if (anterior === undefined) delete globalThis.Capacitor;
+    else globalThis.Capacitor = anterior;
+  }
 });

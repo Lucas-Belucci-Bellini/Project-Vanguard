@@ -3,6 +3,7 @@ import { h } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { VERSAO_ATUAL } from '../core/atualizacao.js';
 import { diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
+import { fonteLocalizacao } from '../core/localizacao.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -104,7 +105,9 @@ export function diagnosticoPage() {
       const gpsItem = dados.find((item) => item.nome === 'GPS/GNSS');
       if (gpsItem) gpsItem.valor = `${gps} · ${statusPosicao(posicao).estado}`;
       const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'atencao' : 'ok' };
-      render([...dados, cacheItem]);
+      const localizacaoItem = { grupo: 'LOCALIZAÇÃO', nome: 'Fonte GPS', valor: fonteLocalizacao(), estado: fonteLocalizacao() === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const backgroundItem = { grupo: 'MOBILE', nome: 'GPS em background', valor: 'DEVICE DEPENDENT · sem garantia contínua', estado: 'atencao' };
+      render([...dados, localizacaoItem, backgroundItem, cacheItem]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {

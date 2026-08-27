@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | HOME | Início, tutorial e prontidão offline | TESTED | `src/pages/inicio.js` | Validar em aparelhos reais |
 | MAP | Mapa MapLibre e camadas | IN_PROGRESS | `src/pages/mapa.js`, build/preview | Testar rede, tiles e lifecycle |
-| GPS | GPS/GNSS local | IN_PROGRESS | `src/core/localizacao.js`, testes | Teste físico de permissões e perda de fixo |
+| GPS | GPS/GNSS local | IN_PROGRESS | `src/core/localizacao.js`, Web fallback, `@capacitor/geolocation@8.2.2` foreground e testes | Teste físico de permissões, perda de fixo e lifecycle |
 | GNSS | Uso dos sinais do receptor do aparelho | DEVICE DEPENDENT | API de localização | Não transmite dados |
 | MGRS | Conversão e exibição MGRS | TESTED | `src/engine/mgrs.js` e testes | Confirmar leitura de campo |
 | COMPASS | Sensor e fallback de rumo | IN_PROGRESS | `src/pages/bussola.js` | Validar sensor/precisão por aparelho |
@@ -23,8 +23,8 @@
 | JSON | Backup versionado | TESTED | Envelope e testes | Backup externo recomendado |
 | KML | Interoperabilidade KML | NOT_STARTED | Não presente no escopo atual | V3 backlog |
 | PWA | Manifest, shell e service worker | IN_PROGRESS | `public/sw.js`, `index.html` | Testar instalação e reload offline |
-| ANDROID | Capacitor debug | IN_PROGRESS | APK debug e Gradle | Assinatura e hardware pendentes |
-| IOS | Capacitor iOS | BLOCKED | Projeto gerado | Mac/Xcode/Apple/iPhone necessários |
+| ANDROID | Capacitor + Geolocation foreground | IN_PROGRESS | APK debug, Gradle e permissões coarse/fine | Assinatura, permissões e hardware/lifecycle pendentes |
+| IOS | Capacitor iOS + Geolocation foreground | BLOCKED | Plugin sincronizado e descrições foreground | Mac/Xcode/Apple, permissões e lifecycle necessários |
 | UPDATES | Update confirmado | IN_PROGRESS | `atualizacao.js`, UI e SW | Testar release posterior |
 | DONATIONS | Tela preparada | NOT_CONFIGURED | Sem checkout/credenciais | Não ativar sem integração real |
 | DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, 5 testes | Validar em navegador e aparelhos reais; sem telemetria oculta |

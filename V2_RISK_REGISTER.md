@@ -14,6 +14,7 @@
 | R-010 | Legacy balístico volta a receber capacidade operacional | Baixa | Crítico | Tag `LEGACY-RESTRICTED`, revisão de escopo e bloqueio de expansão | Controlado |
 | R-011 | Dependência externa fica indisponível | Média | Médio | Dados essenciais locais, status `UNAVAILABLE` e não simular integração | Mitigado parcialmente |
 | R-012 | Telemetria ou sincronização silenciosa expõe localização | Baixa | Crítico | Armazenamento local por padrão e ação explícita para compartilhar | Mitigado/documentado |
+| R-013 | Dependências de desenvolvimento reportam vulnerabilidades no audit completo | Média | Médio | `npm audit --omit=dev` sem vulnerabilidades de produção; revisar audit completo antes de release e não aplicar `--force` sem análise | Audit de produção: 0; audit completo requer acompanhamento |
 
 ## Critério
 
