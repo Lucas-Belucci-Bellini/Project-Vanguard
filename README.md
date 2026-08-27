@@ -22,6 +22,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Sobrevivência** | Manual offline versionado com fonte/data de revisão, busca, filtros por tema, abrigo, água, primeiros socorros, sinalização, alimentação e conduta em áreas com possíveis explosivos. |
 | **Mapa de funcionalidades** | Inventário completo da visão do produto, com status, dependências, limites e próximos passos em [`docs/MAPA-DE-FUNCIONALIDADES.md`](docs/MAPA-DE-FUNCIONALIDADES.md). |
 | **Notas de lançamento** | Resumo da futura `v1.0.0`, mudanças desde a `v1.0.0-rc.2`, validações reproduzidas e gates restantes em [`docs/NOTAS-DE-LANCAMENTO-V1.0.0.md`](docs/NOTAS-DE-LANCAMENTO-V1.0.0.md). |
+| **Teste de campo** | Procedimento de backup GPX/JSON, teste offline, bateria e preparação para a peregrinação em [`docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md`](docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md). |
 
 ## Modo offline-first
 

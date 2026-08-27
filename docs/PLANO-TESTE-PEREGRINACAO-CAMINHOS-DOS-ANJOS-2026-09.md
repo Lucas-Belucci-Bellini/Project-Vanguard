@@ -24,13 +24,22 @@ O objetivo é avaliar o Vanguard Field como ferramenta **civil de apoio à naveg
 | Offline | Ativar modo avião ou desligar dados após a preparação e reabrir as telas | Shell, dados locais, mapa preparado e manual continuam acessíveis; tiles não preparados podem falhar |
 | Registro | Iniciar uma rota curta de teste, marcar um waypoint e pausá-la | O ponto fica local; ao pausar, a política retorna ao perfil econômico |
 | Socorro | Preparar o pacote local e verificar o conteúdo sem simular envio | O pacote contém coordenadas, MGRS, precisão e hora; não há alegação de entrega ou resgate |
-| Backup | Exportar JSON e GPX de teste e confirmar que os arquivos podem ser lidos localmente | Arquivos são criados; a rota importada fica pausada |
+| Backup JSON | No mapa, abrir a gaveta lateral e tocar em **Exportar JSON**. Confirmar que o arquivo é salvo no aparelho. | Arquivo JSON gerado contém trilha, waypoints e destino |
+| Backup GPX | Na mesma gaveta, tocar em **Exportar GPX**. Confirmar que o arquivo `.gpx` é salvo. | Arquivo gerado pode ser lido em outros aplicativos |
+| Importação | Tocar em **Importar JSON/GPX** e selecionar um dos arquivos gerados. | O app pede confirmação, substitui os dados e deixa a rota pausada |
 
 Levar bateria reserva e um meio independente de comunicação. Confirmar com a organização o trajeto oficial, pontos de encontro, rede de apoio, contatos de emergência, horário de retorno, regras de acompanhamento e se existe um arquivo GPX ou mapa oficial para importação. O aplicativo não deve ser usado para criar uma rota inventada quando a organização ainda não publicou o percurso.
 
 ## Durante os dias 04 a 07 de setembro
 
-Usar **Trilha / Expedição** para registrar o caminho. Iniciar a rota somente quando começar o trecho que deve ser registrado, marcar pontos úteis como saída, encontro, pausa e retorno, e pausar a rota durante longas paradas. A alta precisão é reservada à gravação ativa; a tela ativa é opcional e deve ser usada apenas quando necessária, porque a autonomia real depende do aparelho, sinal, brilho, temperatura e bateria externa.
+Usar **Trilha / Expedição** para registrar o caminho. Iniciar a rota somente quando começar o trecho que deve ser registrado, marcar pontos úteis como saída, encontro, pausa e retorno, e pausar a rota durante longas paradas.
+
+**Plano de Bateria:**
+- A alta precisão (intervalo de 3 segundos, GPS contínuo) só é solicitada durante a **gravação ativa** da rota.
+- Ao pausar a rota ou mudar para o modo Cidade, o app retorna ao perfil econômico (intervalo de 15 segundos, precisão normal).
+- A renderização do mapa é suspensa automaticamente quando o celular é bloqueado ou a tela é trocada.
+- O botão **Manter tela ativa** é voluntário e só fica habilitado com rota ativa. Usá-lo consumirá bateria rapidamente devido ao brilho da tela; prefira bloquear o celular e deixar o GPS gravar em segundo plano (se o sistema operacional permitir).
+- Leve bateria externa (powerbank) suficiente para 4 dias, pois a busca por sinal de celular em áreas rurais gasta mais energia que o próprio GPS.
 
 Observar o HUD antes de tomar qualquer decisão: conferir o MGRS, a latitude/longitude, a precisão e a **idade do fixo**. Se a idade indicar um dado antigo, se a precisão estiver indisponível ou se a posição parecer incompatível com o local, parar e confirmar a situação usando a organização, a sinalização, o grupo e outras referências. Uma tela com mapa não confirma sozinha a posição física da pessoa.
 
