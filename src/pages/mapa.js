@@ -6,6 +6,7 @@ import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
+import { exportarRegistroLocal, importarRegistroLocal } from '../core/registro-offline.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const CENTRO_FALLBACK = [-43.21, -22.95];
@@ -89,16 +90,20 @@ export function mapaPage() {
   const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
   const offlineStatus = h('p', { className: 'mapa__offline-status', role: 'status' }, 'Baixe a área visível antes de sair sem internet.');
   const offlineClearButton = h('button', { className: 'mapa__offline-clear', type: 'button' }, 'LIMPAR ÁREA PREPARADA');
-  const selectBase = h('select', { className: 'mapa__select', ariaLabel: 'Base cartográfica' },
+  const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR REGISTRO');
+  const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR REGISTRO');
+  const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json', 'aria-label': 'Importar registro local JSON' });
+  const registroStatus = h('p', { className: 'mapa__registro-status', role: 'status' }, 'Backup local de rota, pontos e destino; sem sincronização.');
+  const selectBase = h('select', { className: 'mapa__select', 'aria-label': 'Base cartográfica' },
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
   );
   selectBase.value = 'terreno' in BASES ? 'terreno' : Object.keys(BASES)[0];
-  const selectUso = h('select', { className: 'mapa__select', ariaLabel: 'Modo de uso' },
+  const selectUso = h('select', { className: 'mapa__select', 'aria-label': 'Modo de uso' },
     h('option', { value: 'trilha' }, 'TRILHA / EXPEDIÇÃO'),
     h('option', { value: 'cidade' }, 'CIDADE / DIA A DIA')
   );
   selectUso.value = estado.get(CHAVES.MODO_USO, 'trilha');
-  const destinoInput = h('input', { className: 'mapa__destino-input', type: 'text', inputMode: 'decimal', placeholder: 'LAT, LON  ·  ex.: -23.55, -46.63', ariaLabel: 'Coordenadas do destino' });
+  const destinoInput = h('input', { className: 'mapa__destino-input', type: 'text', inputMode: 'decimal', placeholder: 'LAT, LON  ·  ex.: -23.55, -46.63', 'aria-label': 'Coordenadas do destino' });
   const destinoButton = h('button', { className: 'mapa__destino-button', type: 'button' }, 'DEFINIR DESTINO');
   const destinoMapButton = h('button', { className: 'mapa__destino-map-button', type: 'button' }, 'TOCAR NO MAPA');
   const destinoInfo = h('p', { className: 'mapa__destino-info' }, 'Cole coordenadas ou toque no mapa para definir um destino.');
@@ -112,6 +117,12 @@ export function mapaPage() {
     h('label', { className: 'mapa__uso-label' }, h('span', null, 'MODO DE USO'), selectUso),
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
+    h('div', { className: 'mapa__registro-card' },
+      h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DADOS LOCAIS'), h('span', { className: 'mapa__privacy' }, '⌖ JSON')),
+      h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroImportarButton),
+      registroArquivo,
+      registroStatus
+    ),
     h('div', { className: 'mapa__destino-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DESTINO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
       destinoInput,
@@ -300,6 +311,46 @@ export function mapaPage() {
     atualizarMarcadores();
   }
 
+  function exportarRegistro() {
+    try {
+      const conteudo = exportarRegistroLocal({ trilha, waypoints, destino });
+      const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/json;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `vanguard-registro-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      registroStatus.textContent = `${trilha.length} pontos de trilha, ${waypoints.length} waypoints e ${destino ? '1 destino' : 'nenhum destino'} exportados para este aparelho.`;
+    } catch (erro) {
+      registroStatus.textContent = erro?.message ?? 'Não foi possível exportar o registro local.';
+    }
+  }
+
+  async function importarRegistro(arquivo) {
+    if (!arquivo) return;
+    try {
+      const registro = importarRegistroLocal(await arquivo.text());
+      if (!window.confirm('Substituir a rota, os waypoints e o destino atuais pelo registro importado?')) return;
+      trilha = registro.trilha;
+      waypoints = registro.waypoints;
+      destino = registro.destino;
+      rotaAtiva = false;
+      estado.set(CHAVES.TRILHA, trilha);
+      estado.set(CHAVES.WAYPOINTS, waypoints);
+      estado.set(CHAVES.DESTINO, destino);
+      estado.set(CHAVES.ROTA_ATIVA, false);
+      pararGps?.setMode('cidade');
+      await configurarWakeLock(false);
+      registroStatus.textContent = `${trilha.length} pontos de trilha e ${waypoints.length} waypoints importados localmente. A rota foi deixada pausada por segurança.`;
+      atualizarSheet();
+      atualizarMarcadores();
+    } catch (erro) {
+      registroStatus.textContent = erro?.message ?? 'Não foi possível importar este registro.';
+    } finally {
+      registroArquivo.value = '';
+    }
+  }
+
   function adicionarPonto(e) {
     if (marcandoDestino) {
       destino = { id: `d-${Date.now()}`, nome: 'Destino', lat: e.lngLat.lat, lon: e.lngLat.lng, createdAt: Date.now() };
@@ -326,6 +377,9 @@ export function mapaPage() {
   wakeButton.onclick = () => configurarWakeLock(!wakeAtivo);
   centerButton.onclick = centralizar;
   clearButton.onclick = limparTrilha;
+  registroExportarButton.onclick = exportarRegistro;
+  registroImportarButton.onclick = () => registroArquivo.click();
+  registroArquivo.onchange = () => importarRegistro(registroArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;
   destinoMapButton.onclick = () => {
     marcandoDestino = !marcandoDestino;

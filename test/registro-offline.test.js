@@ -1,0 +1,56 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  exportarRegistroLocal,
+  importarRegistroLocal,
+  REGISTRO_SCHEMA,
+  REGISTRO_VERSION,
+  LIMITE_TRILHA,
+  LIMITE_WAYPOINTS,
+} from '../src/core/registro-offline.js';
+
+const ponto = (i = 0) => ({
+  id: `p-${i}`,
+  nome: `Ponto ${i}`,
+  lat: -23.55 + i / 1000,
+  lon: -46.63 - i / 1000,
+  accuracy: 8,
+  createdAt: 1700000000000 + i,
+});
+
+test('exportarRegistroLocal cria schema versionado com rota, pontos e destino', () => {
+  const texto = exportarRegistroLocal({ trilha: [ponto(1)], waypoints: [ponto(2)], destino: { ...ponto(3), nome: 'Destino' } });
+  const registro = JSON.parse(texto);
+  assert.equal(registro.schema, REGISTRO_SCHEMA);
+  assert.equal(registro.version, REGISTRO_VERSION);
+  assert.equal(registro.trilha.length, 1);
+  assert.equal(registro.waypoints.length, 1);
+  assert.equal(registro.destino.nome, 'Destino');
+});
+
+test('importarRegistroLocal normaliza pontos sem executar campos externos', () => {
+  const registro = importarRegistroLocal(JSON.stringify({
+    schema: REGISTRO_SCHEMA,
+    version: REGISTRO_VERSION,
+    trilha: [{ lat: '-23.55', lon: '-46.63', nome: '<script>alert(1)</script>' }],
+    waypoints: [],
+    destino: null,
+  }));
+  assert.equal(registro.trilha[0].lat, -23.55);
+  assert.equal(registro.trilha[0].nome, '<script>alert(1)</script>');
+});
+
+test('importarRegistroLocal rejeita schema incompatível e geometria inválida', () => {
+  assert.throws(() => importarRegistroLocal({ schema: 'outro', version: 1, trilha: [], waypoints: [], destino: null }), /Schema incompatível/);
+  assert.throws(() => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: [{ lat: 91, lon: 0 }], waypoints: [], destino: null }), /fora dos limites/);
+});
+
+test('exportarRegistroLocal aplica limites de trilha e waypoints', () => {
+  assert.throws(() => exportarRegistroLocal({ trilha: Array.from({ length: LIMITE_TRILHA + 1 }, (_, i) => ponto(i)) }), /acima do limite/);
+  assert.throws(() => exportarRegistroLocal({ waypoints: Array.from({ length: LIMITE_WAYPOINTS + 1 }, (_, i) => ponto(i)) }), /acima do limite/);
+});
+
+test('importarRegistroLocal exige arrays de dados', () => {
+  assert.throws(() => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: null, waypoints: [], destino: null }), /inválida/);
+  assert.throws(() => importarRegistroLocal('{ quebrado'), /JSON inválido/);
+});
