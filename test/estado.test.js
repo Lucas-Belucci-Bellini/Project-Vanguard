@@ -57,3 +57,31 @@ test('diagnostico informa schema sem dados pessoais', () => {
     prefixo: 'vanguard:',
   });
 });
+
+test('estado expõe falha de persistência sem perder o valor em memória do chamador', () => {
+  const original = globalThis.localStorage;
+  class FailingStorage {
+    getItem() { return null; }
+    setItem() {
+      const erro = new Error('quota cheia');
+      erro.name = 'QuotaExceededError';
+      throw erro;
+    }
+    removeItem() {}
+    key() { return null; }
+    get length() { return 0; }
+  }
+  globalThis.localStorage = new FailingStorage();
+  try {
+    const valor = { lat: -23.55, lon: -46.63 };
+    assert.deepEqual(estado.set(CHAVES.LOCAL, valor), valor);
+    assert.deepEqual(estado.statusPersistencia(), {
+      estado: 'FALHA',
+      chave: CHAVES.LOCAL,
+      erro: 'QuotaExceededError',
+    });
+    assert.equal(estado.get(CHAVES.LOCAL, null), null);
+  } finally {
+    globalThis.localStorage = original;
+  }
+});

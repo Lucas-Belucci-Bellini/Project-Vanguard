@@ -103,6 +103,17 @@ export function diagnosticoPage() {
         estado: capacidade.estado === 'AVAILABLE' ? 'ok' : 'atencao',
       }));
       const cache = await cacheStatus();
+      const persistencia = estado.statusPersistencia?.() ?? { estado: 'NAO_TESTADO', chave: null, erro: null };
+      const persistenciaItem = {
+        grupo: 'ARMAZENAMENTO',
+        nome: 'Última persistência',
+        valor: persistencia.estado === 'PERSISTIDO'
+          ? `PERSISTIDO · ${persistencia.chave}`
+          : persistencia.estado === 'FALHA'
+            ? `FALHA · ${persistencia.erro}`
+            : 'NÃO TESTADO',
+        estado: persistencia.estado === 'PERSISTIDO' ? 'ok' : 'atencao',
+      };
       const desempenho = desempenhoResumo();
       const gpsItem = dados.find((item) => item.nome === 'GPS/GNSS');
       if (gpsItem) gpsItem.valor = `${gps} · ${statusPosicao(posicao).estado}`;
@@ -114,7 +125,7 @@ export function diagnosticoPage() {
       const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
       const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...dados, localizacaoItem, ...capacidadeItens, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
+      render([...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {

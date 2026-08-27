@@ -10,6 +10,12 @@
 const PREFIXO = 'vanguard:';
 const CHAVE_META = '__meta';
 
+let ultimaPersistencia = {
+  estado: 'NAO_TESTADO',
+  chave: null,
+  erro: null,
+};
+
 export const ESQUEMA_ESTADO = 'vanguard-state';
 export const VERSAO_ESTADO = 1;
 
@@ -48,8 +54,14 @@ function eEnvelopeFuturo(valor) {
 function escreverBruto(chave, valor) {
   try {
     localStorage.setItem(PREFIXO + chave, JSON.stringify(valor));
+    ultimaPersistencia = { estado: 'PERSISTIDO', chave, erro: null };
     return true;
-  } catch {
+  } catch (erro) {
+    ultimaPersistencia = {
+      estado: 'FALHA',
+      chave,
+      erro: typeof erro?.name === 'string' && erro.name ? erro.name : 'ERRO_DE_ARMAZENAMENTO',
+    };
     return false;
   }
 }
@@ -146,6 +158,9 @@ export const estado = {
       version: VERSAO_ESTADO,
       prefixo: PREFIXO,
     };
+  },
+  statusPersistencia() {
+    return { ...ultimaPersistencia };
   },
 };
 
