@@ -7,9 +7,13 @@
 | Produto | Vanguard Field |
 | Versão do pacote | `1.0.0` |
 | Branch padrão | `main` |
-| Commit de `main` | `f69d53d03ec9c00d7465f0cc202c39c0e9a233eb` |
-| Release candidate | `v1.0.0-rc.1` |
+| Commit de `main` no momento da primeira preparação | `f69d53d03ec9c00d7465f0cc202c39e0c0e9a233eb` |
+| Release candidate publicada | `v1.0.0-rc.2` sobre o commit `11b3ccd` |
 | Pull request integrada | [#2 — Vanguard Field: base offline-first para release 1.0.0](https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/pull/2) |
+
+## Estado do snapshot e do código atual
+
+A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com a melhoria de exportação/importação JSON offline no commit `d390d55` e com a documentação de build versus release no commit `15942f8`. Esses commits foram publicados em `main` e validados como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuir essas mudanças como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
 
 ## O que está entregue
 
@@ -25,14 +29,14 @@ O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, preci
 
 | Verificação | Resultado |
 |---|---|
-| `npm test` | 86 testes aprovados, 0 falhas. |
+| `npm test` | 91 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
 | `npm run build` | Aprovado; bundle de produção gerado. |
 | `node --check public/sw.js` | Aprovado. |
 | `npm run mobile:android:debug` | Aprovado; `BUILD SUCCESSFUL`. |
 | APK | `android/app/build/outputs/apk/debug/app-debug.apk`, aproximadamente 4,4 MB. |
 | Preview HTTPS | `#/inicio` e `#/mapa` carregaram; MapLibre renderizou base topográfica; nenhum GPS fictício foi criado. |
 | Service worker | Registro ativo; `CACHE_STATUS` respondeu com cache `vanguard-field-tiles-v2` e 25 tiles observados no preview. |
-| CI / PR | Quatro checks automáticos aprovados antes do merge em `main`. |
+| `CI / PR` | Checks automáticos aprovados antes do merge da base; o commit posterior de exportação foi validado localmente e publicado em `main`. |
 
 ## Checklist antes da tag final
 
