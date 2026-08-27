@@ -13,6 +13,13 @@
 .sobrevivencia__notice { display: flex; gap: 12px; margin-bottom: 18px; padding: 13px 15px; background: var(--color-ambar-soft); border: var(--border-amber); }
 .sobrevivencia__notice strong { flex: 0 0 auto; color: var(--color-ambar); font-size: 9px; letter-spacing: var(--tracking-wide); }
 .sobrevivencia__notice p { margin: 0; font-size: 11px; }
+.sobrevivencia__tools { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(190px, .6fr); gap: 8px; margin-bottom: 5px; }
+.sobrevivencia__search, .sobrevivencia__filter { width: 100%; min-height: 38px; padding: 8px 10px; color: var(--color-text-primary); background: var(--color-surface); border: var(--border-base); font: inherit; font-size: 10px; }
+.sobrevivencia__search::placeholder { color: var(--color-text-muted); }
+.sobrevivencia__count { min-height: 16px; margin: 0 0 11px; color: var(--color-text-muted) !important; font-size: 9px; }
+.sobrevivencia__guia-meta { display: flex; justify-content: space-between; gap: 10px; padding: 0 12px 9px; color: var(--color-text-muted); font-size: 8px; letter-spacing: .04em; text-transform: uppercase; }
+.sobrevivencia__footer ul { margin: 7px 0 10px; padding-left: 17px; color: var(--color-text-muted); font-size: 10px; line-height: 1.55; }
+.sobrevivencia__footer a { color: var(--color-cyan); }
 .sobrevivencia__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .sobrevivencia__guia { background: var(--color-panel); border: var(--border-base); box-shadow: var(--shadow-panel); }
 .sobrevivencia__guia summary { display: flex; align-items: center; gap: 10px; min-height: 66px; padding: 10px 12px; cursor: pointer; list-style: none; }
@@ -43,6 +50,9 @@
   .sobrevivencia__checklist strong { display: block; margin-top: 6px; line-height: 1.5; }
   .sobrevivencia__notice strong { display: block; margin-bottom: 6px; }
   .sobrevivencia__grid { grid-template-columns: 1fr; }
+  .sobrevivencia__tools { grid-template-columns: 1fr; }
   .sobrevivencia__guia summary { min-height: 60px; }
+  .sobrevivencia__guia-meta { display: block; line-height: 1.5; }
+  .sobrevivencia__guia-meta span { display: block; }
   .sobrevivencia__guia-tag { display: none; }
 }
