@@ -11,6 +11,7 @@ import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, exportarRegistroKml, importarRegistroGpx, importarRegistroKml, importarRegistroLocal } from '../core/registro-offline.js';
+import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arquivo.js';
 import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
@@ -459,11 +460,11 @@ export function mapaPage() {
   async function importarRegistro(arquivo) {
     if (!arquivo) return;
     try {
+      const formato = detectarFormatoRegistro(arquivo).formato;
       const texto = await arquivo.text();
-      const nomeArquivo = arquivo.name ?? '';
-      const registro = /\.gpx$/i.test(nomeArquivo)
+      const registro = formato === FORMATOS_REGISTRO.GPX
         ? importarRegistroGpx(texto)
-        : /\.kml$/i.test(nomeArquivo)
+        : formato === FORMATOS_REGISTRO.KML
           ? importarRegistroKml(texto)
           : importarRegistroLocal(texto);
       if (!window.confirm('Substituir a rota, os waypoints e o destino atuais pelo registro importado?')) return;

@@ -88,3 +88,9 @@ A nova ordem Omega exige uma memória mais ampla que os arquivos Mobile V2 anter
 Esses arquivos foram criados com a separação entre implementação, teste, CI, artifact, assinatura, instalação, validação física e release. A implementação existente foi preservada: JS ES2022/Vite/MapLibre/Capacitor/PWA, GPS foreground-only, tracking local, JSON/GPX/KML, compartilhamento explícito e diagnóstico. A auditoria de marcadores encontrou somente placeholders legítimos de interface/comentários no escopo avaliado; não foram convertidos em features fictícias.
 
 A memória Omega mantém `IN PROGRESS` e `BLOCKED` onde faltam aparelhos, macOS/Xcode, signing, quota, modo avião, sensores, bateria ou distribuição. A release pública segue somente `v1.0.0-rc.2`.
+
+## Marco de importação defensiva de arquivos — 2026-08-27
+
+A auditoria do fluxo de importação identificou que o Mapa escolhia o parser somente pela extensão do nome. Para tratar diferenças entre navegador, Android e iOS sem expandir o escopo, foi criado `src/core/registro-arquivo.js`, um classificador puro que normaliza extensão/MIME, aceita JSON/GPX/KML por metadado disponível e rejeita conflito específico antes de ler o arquivo. O conteúdo continua sendo validado pelos parsers locais, com limites e schema existentes; não há rede, execução XML ou assinatura implícita.
+
+O Mapa foi integrado ao classificador, e `test/registro-arquivo.test.js` adicionou sete casos determinísticos. A suíte passou de 159 para 166 testes. O ADR-0022 registra a decisão e as limitações: MIME/extensão não autenticam conteúdo e Files/Share Sheet físicos ainda precisam de validação em aparelhos reais.

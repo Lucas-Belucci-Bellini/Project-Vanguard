@@ -8,18 +8,18 @@
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: capacidades observáveis, estado, observabilidade, offline-first e validação mobile |
 | **Current Task** | Validar KML, sessão Start/Pause/Resume/Stop, estados GPS, pausa/retomada ao ocultar o app, permissões, posição/frescor, modo avião, persistência, mapas preparados, lifecycle, sensores, performance e bateria em Android/Xiaomi/MIUI/HyperOS/iPhone; não assumir background GPS |
-| **Last Completed Task** | Importação/exportação KML 2.2 local integrada ao Mapa, com Point/LineString e parser conservador |
+| **Last Completed Task** | Validação defensiva de extensão/MIME na importação JSON/GPX/KML; conteúdo continua protegido pelos parsers locais |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
 | **Next Task** | Executar `MOBILE_V2_TEST_MATRIX.md` em aparelhos reais; priorizar KML/JSON/GPX, sessão da trilha, tela bloqueada, pausa/retomada do watcher, permissões, modo avião, bússola, update posterior e bateria |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 159 testes aprovados; build, sintaxe do SW, diff, auditoria e workflow Mobile Release artifact-only aprovados; KML, sessão/watcher GPS, persistência, permissões, compartilhamento, capacidades e diagnóstico `lat/lon` cobertos |
+| **Tests** | `npm test`: 166 testes aprovados; build, sintaxe do SW, diff, auditoria, sync Android/iOS e APK debug aprovados; validação de formato, KML, GPX, sessão/watcher GPS, persistência, permissões, compartilhamento, capacidades e diagnóstico `lat/lon` cobertos |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
+| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021/0022, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `d3175a0 docs(v2): registrar suporte kml`; CI `33124273565` concluído com sucesso; memória Omega criada nesta execução aguarda commit separado |
+| **Main** | `3f6945c docs(v2): registrar gates omega`; CI do commit de memória passou; unidade de validação de arquivos está no worktree e aguarda commit separado |
 
 ## Regra de conclusão
 

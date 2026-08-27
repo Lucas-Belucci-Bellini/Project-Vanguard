@@ -41,3 +41,18 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **`npm audit --omit=dev --audit-level=high`:** 0 vulnerabilidades.
 - **Release:** não executada; `v1.0.0` não criada; `v1.0.0-rc.2` continua a única release pública.
 - **Limitação:** esta unidade foi documental; não prova instalação, sensor, bateria, modo avião, assinatura, loja ou iOS IPA.
+
+## 2026-08-27 — unidade nova: validação defensiva de formato de registro
+
+- **Escopo:** `src/core/registro-arquivo.js`, integração do handler em `src/pages/mapa.js` e `test/registro-arquivo.test.js`.
+- **Comportamento:** normaliza extensão/MIME, aceita JSON/GPX/KML conhecidos, aceita um único sinal quando o outro é omitido e rejeita conflito específico antes de `arquivo.text()`.
+- **Segurança preservada:** o módulo não abre arquivo, não executa XML, não faz rede e não substitui a validação geométrica/schema dos parsers existentes. A substituição continua confirmada e a rota importada continua pausada.
+- **`npm test`:** 166 aprovados, 0 falhas.
+- **`npm run build`:** aprovado.
+- **`node --check public/sw.js`:** aprovado.
+- **`git diff --check`:** aprovado.
+- **`npm audit --omit=dev --audit-level=high`:** 0 vulnerabilidades.
+- **`npm run mobile:sync:android`:** aprovado; plugins Capacitor presentes.
+- **`npm run mobile:sync:ios`:** concluído dentro do gate composto; nenhum arquivo nativo versionado mudou.
+- **`npm run mobile:android:debug`:** `BUILD SUCCESSFUL`; artifact de teste, não release.
+- **Limitação:** MIME/extensão não autenticam conteúdo; validação física em Android/Xiaomi/iPhone, Files/Share Sheet, modo avião, bateria, signing e loja continuam pendentes.
