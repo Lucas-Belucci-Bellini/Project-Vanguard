@@ -86,7 +86,7 @@ Next Task:
 - Unidade anterior publicada como `b5a83c9 feat(v2): fortalecer acessibilidade da shell`; CI `33111683598` concluído com sucesso.
 - Unidade anterior publicada como `e0e632b security(v2): restringir destinos de atualizacao`; CI `33112962807` concluído com sucesso.
 - Unidade anterior publicada como `3d171e8 perf(v2): expor diagnostico de performance`; CI `33114175983` concluído com sucesso.
-- Unidade atual validada localmente com 129 testes, build web, preview do Mapa sem erro de console, audit de produção, sync Android/iOS e APK debug; commit/CI serão registrados após o push.
+- Unidade publicada como `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso. Validação local: 129 testes, build web, preview do Mapa sem erro de console, audit de produção, sync Android/iOS e APK debug.
 
 V2 Completion:
 IN PROGRESS

@@ -4,7 +4,7 @@
 
 O canvas sobreposto dos rótulos da grade agora evita redesenhar quando eventos `render` repetidos mantêm a mesma câmera, viewport, DPR e versão da grade. Mudanças visuais invalidam a chave; a função é pura e testada. GPS, MapLibre, cache, wake lock e frequência de localização não foram alterados.
 
-Evidência local: `npm test` com 129 testes aprovados, build web, preview `#/mapa` com base/controles/overlay carregados e console sem erro, audit de produção, sync Android/iOS e APK debug. A mudança não declara ganho percentual; FPS, bateria, memória total e suspensão nativa continuam dependentes de profiling físico. Decisão em `ADR-0009-deduplicacao-render-mapa.md`; validação em `VALIDACAO-MAPA-RENDER-PREVIEW-2026-08.md`.
+Evidência local: `npm test` com 129 testes aprovados, build web, preview `#/mapa` com base/controles/overlay carregados e console sem erro, audit de produção, sync Android/iOS e APK debug. A mudança não declara ganho percentual; FPS, bateria, memória total e suspensão nativa continuam dependentes de profiling físico. Decisão em `ADR-0009-deduplicacao-render-mapa.md`; validação em `VALIDACAO-MAPA-RENDER-PREVIEW-2026-08.md`. Publicado em `main` como `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso.
 
 ## 2026-08-27 — Diagnóstico de performance local
 

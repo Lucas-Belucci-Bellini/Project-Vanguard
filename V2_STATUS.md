@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
 | **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, ADR-0005/0006/0007/0008/0009, referências WCAG/performance e validações do Diagnóstico/Mapa versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | Nova unidade de renderização validada localmente; commit/CI desta continuação serão registrados após o push |
+| **Main** | `8706485 perf(v2): deduplicar render do mapa`; CI `33115313412` concluído com sucesso |
 
 ## Regra de conclusão
 
