@@ -28,6 +28,7 @@
 .socorro__alert-time { margin-left: auto; color: var(--color-text-muted); font-size: 9px; }
 @keyframes socorro-pulse { 70%, 100% { box-shadow: 0 0 0 9px rgba(255,65,54,0); } }
 .socorro__alert-actions { display: grid; gap: 8px; margin-top: 13px; }
+.socorro__message-state { display: block; color: var(--color-text-muted); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .socorro__share-button { background: var(--color-cyan); border-color: var(--color-cyan); color: var(--color-bg); font-weight: var(--font-weight-bold); }
 .socorro__cancel-button { background: transparent; color: var(--color-text-muted); }
 .socorro__section { padding-top: 26px; }
@@ -45,4 +46,4 @@
 .socorro__checklist li { padding: 11px 12px; background: var(--color-surface); border-left: 2px solid var(--color-cyan-edge); }
 .socorro__checklist b { color: var(--color-text-primary); }
 
-@media (min-width: 700px) { .socorro__scroll { padding-right: 32px; padding-left: 32px; } .socorro__explain-grid { grid-template-columns: 1fr 1fr; } .socorro__alert-actions { grid-template-columns: 1fr auto; } }
+@media (min-width: 700px) { .socorro__scroll { padding-right: 32px; padding-left: 32px; } .socorro__explain-grid { grid-template-columns: 1fr 1fr; } .socorro__alert-actions { grid-template-columns: 1fr auto; } .socorro__message-state { grid-column: 1 / -1; } }
