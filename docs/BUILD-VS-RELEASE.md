@@ -28,3 +28,7 @@ Esse padrão será aplicado ao Vanguard sem copiar nomes ou comandos desnecessá
 Toda mudança de código deve ser validada e publicada em `main` por commit ou pull request. Isso não deve criar uma release automaticamente. Uma release só deve ser criada quando o usuário ou o processo de lançamento solicitar uma tag de release, os checks estiverem verdes e os artefatos forem identificados como debug, não assinado ou distribuível.
 
 O APK debug atual continua disponível para testes locais. O iOS permanece dependente de macOS, Xcode, conta Apple e assinatura; gerar o projeto Capacitor ou executar build web não equivale a publicar uma IPA.
+
+## Prova operacional em `main`
+
+Em 2026-08-27, a execução manual [33030058663](https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/actions/runs/33030058663) foi disparada sobre `main` com `version=1.0.0` e sem `publish_tag`. O workflow terminou com sucesso, gerando os artifacts `vanguard-android-debug-apk` e `vanguard-android-release-aab-unsigned`. A etapa **Publicar release explicitamente solicitada** foi pulada, e a lista do GitHub continuou contendo apenas a pré-release `v1.0.0-rc.2`. Esta é a separação operacional desejada: build/artifacts podem ser produzidos sem criar uma release.
