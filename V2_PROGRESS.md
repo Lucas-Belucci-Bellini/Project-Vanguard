@@ -141,3 +141,11 @@ A prova confirma o caminho remoto de build/artifacts e não confirma instalaçã
 A auditoria identificou que o watcher GPS tinha callbacks de posição/erro, mas não expunha estados operacionais claros. `src/core/localizacao.js` agora emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILABLE` e `STOPPED`, aceita APIs injetáveis em testes e expõe `setPaused(true/false)`.
 
 O Mapa integra o estado ao HUD e limpa o watcher quando a página fica oculta, retomando-o no retorno ao foreground. Isto é uma política foreground-only, não tracking em background. `test/localizacao.test.js` cobre Web, Capacitor injetado, pausa, retomada, cleanup e ausência de API. A suíte chegou a 154 testes; build, sync Android/iOS e APK debug passaram. O ADR-0019 registra limites e a necessidade de validação física em tela bloqueada/suspensão.
+
+## Marco Mobile V2 — suporte KML local — 2026-08-27
+
+A FASE 14 do prompt foi atendida de forma incremental: `src/core/registro-offline.js` agora exporta e importa um subconjunto seguro de KML 2.2. `Point` representa waypoints/destino e `LineString` representa trilha; as coordenadas seguem `longitude,latitude[,altitude]`, com validação geográfica e limites locais existentes.
+
+O Mapa integra `EXPORTAR KML`, compartilhamento explícito e importação por `.kml`. O parser trata o XML como dados, não executa scripts/links/NetworkLink, ignora elementos não suportados e rejeita raiz ausente, ausência de pontos, coordenadas inválidas e arquivos acima do limite. A suíte chegou a 159 testes aprovados; build, sync Android/iOS, APK debug e CI `33124173644` passaram.
+
+Interoperabilidade completa com o ecossistema KML, Files/Share Sheet e uso físico em Android/iOS continuam pendentes. O ADR-0021 registra o contrato.

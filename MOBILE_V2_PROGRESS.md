@@ -72,3 +72,11 @@ A auditoria do prompt Mobile V2 confirmou que o Mapa tinha somente alternância 
 O Mapa agora oferece `INICIAR ROTA`, `PAUSAR ROTA`, `RETOMAR ROTA` e `PARAR E GUARDAR`; a Home distingue `GRAVAÇÃO ATIVA`, `ROTA PAUSADA` e `REGISTRO PRONTO`. Pausar impede novos pontos, preservando o registro local; parar não apaga, exporta nem compartilha. A pausa manual permanece separada da pausa de lifecycle foreground-only.
 
 `test/trilha-sessao.test.js` cobre transições válidas e eventos inválidos; os testes de localização cobrem o watcher. A suíte chegou a 156 testes, com build, sync Capacitor, auditoria e APK debug aprovados. Sessão real, tela bloqueada, suspensão, retomada e consumo de bateria continuam pendentes em dispositivos.
+
+## Marco de importação/exportação KML — 2026-08-27
+
+A auditoria da FASE 14 do prompt identificou que o Vanguard oferecia JSON e GPX, mas não KML. Foi adicionado suporte local conservador em `src/core/registro-offline.js`: `Point` representa waypoints/destino e `LineString` representa a trilha; coordenadas seguem `longitude,latitude[,altitude]`, com limites geográficos e de quantidade preservados.
+
+O Mapa oferece `EXPORTAR KML`, integra o mesmo adaptador de compartilhamento explícito e aceita `.kml` na importação. O parser trata o conteúdo como dados, escapa/decodifica nomes e ignora elementos não suportados; não executa scripts, links nem dados externos. `test/registro-offline.test.js` cobre exportação, importação, XML escapado, altitude, raiz ausente, arquivo vazio e coordenadas inválidas. A suíte chegou a 159 testes aprovados.
+
+Interoperabilidade completa de KML, Files/Share Sheet em aparelho e comportamento físico continuam pendentes; o recurso não é uma promessa de sincronização ou mapa oficial.

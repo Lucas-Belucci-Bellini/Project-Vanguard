@@ -56,6 +56,10 @@ O watcher compartilhado emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILA
 
 A sessão local usa `STOPPED`, `ACTIVE` e `PAUSED` em `src/core/trilha-sessao.js`. O Mapa oferece `INICIAR ROTA`, `PAUSAR ROTA`, `RETOMAR ROTA` e `PARAR E GUARDAR`; a chave `rotaPausada` é persistida sem remover a chave legada `rotaAtiva`. Pausar a sessão impede a inclusão de novos pontos, mas não simula nem habilita tracking em background. Ocultar a página continua sendo tratado pelo watcher `FOREGROUND_ONLY`, e `STOP` não exporta, compartilha ou apaga o registro.
 
+## D-015 — KML é suportado por subconjunto local seguro
+
+O produto passa a aceitar KML 2.2 somente para `Point` e `LineString`. Coordenadas são lidas como `longitude,latitude[,altitude]`, nomes são XML-escapados/decodificados e os mesmos limites geográficos e de quantidade do contrato local são aplicados. O parser trata o arquivo como texto, sem `DOMParser` executável, scripts, links ou dados externos; elementos desconhecidos são ignorados. O Mapa oferece exportação/compartilhamento KML e importação por extensão `.kml`. Interoperabilidade completa com todo o ecossistema KML continua fora do contrato.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)

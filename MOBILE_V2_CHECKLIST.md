@@ -29,6 +29,8 @@
 
 | MV2-022 | Android/iOS/PWA | Tracking local Start/Pause/Resume/Stop | TESTED | `src/core/trilha-sessao.js`, `CHAVES.ROTA_PAUSADA`, controles do Mapa e resumo da Home | máquina pura em `test/trilha-sessao.test.js`; suíte total 156 | Node/CI; sessão real, tela bloqueada, suspensão e bateria pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0020 |
 
+| MV2-023 | Android/iOS/PWA | Importação e exportação KML 2.2 | TESTED | `exportarRegistroKml`/`importarRegistroKml`; Point e LineString; Mapa aceita `.kml` | XML escapado, coordenadas 2D/3D, normalização e rejeições cobertos em `test/registro-offline.test.js` | Node/CI; Files, Share Sheet e interoperabilidade física pendentes | `MOBILE_V2_RELEASE.md`, `MOBILE_V2_DECISIONS.md` |
+
 ## Regra de encerramento
 
 Nenhum item bloqueado por hardware, assinatura, quota, ciclo de vida ou integração pode ser promovido automaticamente para `VERIFIED` ou `COMPLETE`. A tag `v1.0.0` permanece fora deste ciclo até que os gates do checklist de campo sejam executados e registrados.

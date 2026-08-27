@@ -7,19 +7,19 @@
 | **Version** | `2.x` em construção; pacote atual `1.0.0` |
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening: capacidades observáveis, estado, observabilidade, offline-first e validação mobile |
-| **Current Task** | Validar sessão Start/Pause/Resume/Stop, estados GPS, pausa/retomada ao ocultar o app, permissões, posição/frescor, modo avião, persistência, mapas preparados, lifecycle, sensores, performance e bateria em Android/Xiaomi/MIUI/HyperOS/iPhone; não assumir background GPS |
-| **Last Completed Task** | Controle local de trilha Start/Pause/Resume/Stop integrado ao Mapa e à Home, separado da pausa de lifecycle GPS |
+| **Current Task** | Validar KML, sessão Start/Pause/Resume/Stop, estados GPS, pausa/retomada ao ocultar o app, permissões, posição/frescor, modo avião, persistência, mapas preparados, lifecycle, sensores, performance e bateria em Android/Xiaomi/MIUI/HyperOS/iPhone; não assumir background GPS |
+| **Last Completed Task** | Importação/exportação KML 2.2 local integrada ao Mapa, com Point/LineString e parser conservador |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, bateria/background, assinatura/distribuição e teste offline real |
-| **Next Task** | Executar `MOBILE_V2_TEST_MATRIX.md` em aparelhos reais; priorizar sessão da trilha, tela bloqueada, pausa/retomada do watcher, permissões, modo avião, import/export, bússola, update posterior e bateria |
+| **Next Task** | Executar `MOBILE_V2_TEST_MATRIX.md` em aparelhos reais; priorizar KML/JSON/GPX, sessão da trilha, tela bloqueada, pausa/retomada do watcher, permissões, modo avião, bússola, update posterior e bateria |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
-| **Tests** | `npm test`: 156 testes aprovados; build, sintaxe do SW, diff, auditoria e workflow Mobile Release artifact-only aprovados; sessão/watcher GPS, persistência, permissões, compartilhamento, capacidades e diagnóstico `lat/lon` cobertos |
+| **Tests** | `npm test`: 159 testes aprovados; build, sintaxe do SW, diff, auditoria e workflow Mobile Release artifact-only aprovados; KML, sessão/watcher GPS, persistência, permissões, compartilhamento, capacidades e diagnóstico `lat/lon` cobertos |
 | **PWA** | Shell e tiles com service worker; atualização confirmada; cache de tiles permanece limitado e não prova cobertura completa |
 | **Android** | Capacitor debug compilado com `@capacitor/geolocation@8.2.2` + `@capacitor/app@8.1.1`; `versionCode 100`, `versionName 1.0.0`; release assinada ainda não configurada |
 | **iOS** | Plugin sincronizado e descrições foreground no `Info.plist`; build/assinatura e validação física exigem macOS, Xcode e conta Apple |
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico |
-| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha versionados |
+| **Documentation** | README, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `3d859f6 feat(v2): completar controle de trilha`; CI `33123639075` concluído com sucesso; documentação desta unidade aguarda commit separado |
+| **Main** | `3d859f6 feat(v2): completar controle de trilha`; CI `33123639075` concluído com sucesso; documentação KML desta unidade aguarda commit separado |
 
 ## Regra de conclusão
 
