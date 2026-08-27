@@ -9,14 +9,14 @@
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
 | **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
 | **Current Task** | Manter a memória Omega completa e preparar os gates de dispositivo, lifecycle, offline, assinatura e distribuição |
-| **Last Completed** | Catálogo informativo de rotas de peregrinação e seletor no mapa; sem traçados inventados; aguardando commit desta rodada |
+| **Last Completed** | Fixo manual de maior precisão no botão Centralizar, mantendo watcher de cidade econômico; aguardando commit desta rodada |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
-| **Tests** | `npm test`: 173 testes aprovados; configuração, atualização, camadas, Service Worker, catálogo de rotas, registros e diagnóstico cobertos |
+| **Tests** | `npm test`: 173 testes aprovados; localização manual, configuração, atualização, camadas, Service Worker, catálogo de rotas, registros e diagnóstico cobertos |
 | **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
 | **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
-| **GPS** | Capacitor foreground + fallback Web/PWA; estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; posição normalizada `lat/lon`; background não implementado |
+| **GPS** | Capacitor foreground + fallback Web/PWA; watcher de cidade econômico e trilha foreground de alta precisão; botão Centralizar solicita novo fixo manual (`maximumAge: 0`, alta precisão); estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; background não implementado |
 | **Compass** | UI/fallback GPS existentes; sensor físico e calibração `BROWSER DEPENDENT`/`DEVICE DEPENDENT` |
 | **Maps** | MapLibre, MGRS, grade, centralização, waypoints, destino, quatro bases, rótulos OSM/ArcGIS e planner de tiles; cobertura/provedor/quota não garantidos |
 | **Offline** | shell, estado local, manual, contexto e tiles preparados; base + nomes/limites cacheados no `v3`; modo avião, quota e reabertura física pendentes |
@@ -37,7 +37,7 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `c6dbb59 fix(v2): restaurar camadas cartograficas`; CI `33127120249` concluído com sucesso; catálogo de rotas está no worktree e aguarda commit separado |
+| **Main** | `7538f9c feat(v2): catalogar rotas de peregrinacao`; CI `33127728576` concluído com sucesso; melhoria de fixo manual está no worktree e aguarda commit separado |
 | **Next Task** | Executar os gates de `MOBILE_V2_DEVICE_MATRIX.md` e, depois, revisar assinatura/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
@@ -54,7 +54,8 @@
 10. Validação defensiva de formato JSON/GPX/KML — `1e0da64`, CI `33124902546`.
 11. Configuração pública compartilhada sem segredos — `54d6c72`, CI `33126077429`, ADR-0024.
 12. Correção cartográfica sem CARTO/API key e preparo offline de rótulos — `c6dbb59`, CI `33127120249`, ADR-0025.
-13. Catálogo de rotas de peregrinação sem geometria inventada — testes locais, ADR-0026; commit pendente.
+13. Catálogo de rotas de peregrinação sem geometria inventada — `7538f9c`, CI `33127728576`, ADR-0026.
+14. Fixo manual de maior precisão no botão Centralizar — testes locais, ADR-0027; commit pendente.
 
 ## Regra de evidência
 

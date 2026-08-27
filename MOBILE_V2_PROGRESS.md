@@ -122,3 +122,11 @@ A pesquisa verificou fontes institucionais do Caminhos dos Anjos, Caminho da Fé
 O catálogo mostra nomes, tipo, região, fontes e cidades publicadas quando disponíveis. Todas as rotas confirmadas continuam como `REFERÊNCIA · TRAÇADO LOCAL NECESSÁRIO`, pois a existência de cidades ou uma lei de reconhecimento não fornece automaticamente um GPX/KML navegável. A Rota do Carvalho aparece como `NÃO CONFIRMADA · FORA DA NAVEGAÇÃO`.
 
 Foram adicionados `test/rotas-peregrinacao.test.js`, `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md` e `docs/adr/ADR-0026-catalogo-rotas-peregrinacao.md`. O total local chegou a 173 testes aprovados. A funcionalidade é civil, local-first e permanece separada da wiki virtual de Arma 3 e de seus módulos balísticos legados.
+
+## Marco de fixo manual de maior precisão — 2026-08-27
+
+A auditoria confirmou que o watcher contínuo do modo cidade usa o perfil econômico, enquanto o botão **Centrar** apenas reposicionava a câmera sobre o último ponto ou solicitava uma consulta padrão. Foi adicionado o perfil `manual`, com `enableHighAccuracy: true`, `maximumAge: 0` e timeout de 20 segundos, usado somente após ação explícita da pessoa.
+
+O botão agora solicita um novo fixo, atualiza HUD, marcador, destino e câmera com a leitura recebida e informa a precisão real retornada pelo aparelho. O watcher de cidade continua econômico; o watcher de trilha continua de maior precisão. A melhoria não aplica snap-to-road, não mascara `accuracy` e não transforma um ambiente interno em localização de precisão de edifício.
+
+Foram atualizados `MOBILE_V2_TEST_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md` e `MOBILE_V2_STATUS.md`, além do ADR-0027. O cenário físico T-005A compara o resultado externo e interno e permanece `PENDENTE` até execução em aparelho real.

@@ -340,8 +340,29 @@ export function mapaPage() {
   }
 
   function centralizar() {
-    if (mapa && posicao) mapa.flyTo({ center: [posicao.lon, posicao.lat], zoom: Math.max(mapa.getZoom(), 15), duration: 500 });
-    else if (mapa) solicitarPosicao({ onPosition: (pos) => { posicao = pos; atualizarHud(); mapa.flyTo({ center: [pos.lon, pos.lat], zoom: 15 }); }, onError: () => { sheetStatus.textContent = 'Permita o GPS nas configurações do aparelho para centralizar.'; } });
+    if (!mapa) return;
+    centerButton.disabled = true;
+    centerButton.textContent = 'BUSCANDO FIXO…';
+    solicitarPosicao({
+      mode: 'manual',
+      onPosition: (pos) => {
+        posicao = pos;
+        atualizarHud();
+        atualizarSheet();
+        atualizarMarcadores();
+        mapa.flyTo({ center: [pos.lon, pos.lat], zoom: Math.max(mapa.getZoom(), 15), duration: 500 });
+        sheetStatus.textContent = `Novo fixo recebido · ${precisaoLabel(pos.accuracy)} · confirme o ponto no aparelho.`;
+      },
+      onError: (erro) => {
+        sheetStatus.textContent = erro?.code === 1
+          ? 'Permita o GPS nas configurações do aparelho para centralizar.'
+          : 'Não foi possível obter um novo fixo de maior precisão.';
+      },
+    });
+    window.setTimeout(() => {
+      centerButton.disabled = false;
+      centerButton.textContent = '⌾ CENTRAR';
+    }, 21_000);
   }
 
   async function configurarWakeLock(ativo) {

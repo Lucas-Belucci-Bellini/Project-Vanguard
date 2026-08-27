@@ -4,7 +4,7 @@
 
 | Área | Feature | Estado do código | Cobertura atual | Limite/evidência pendente |
 |---|---|---|---|---|
-| Navegação | GPS/GNSS local, MGRS, rumo, distância | Implementado | testes do motor, localização e diagnóstico | sinal, precisão e aparelho real |
+| Navegação | GPS/GNSS local, MGRS, rumo, distância e fixo manual sob ação explícita | Implementado | testes do motor, localização, frescor e política `manual` | sinal, precisão, ambiente interno/externo e aparelho real |
 | Tracking | Start, Pause, Resume, Stop, Save, Restore, Export | Implementado | máquina `trilha-sessao`, registro JSON/GPX/KML | lifecycle, tela bloqueada e bateria |
 | Pontos | Waypoints e destino | Implementado | validação, estado e serialização | uso touch em dispositivo |
 | Mapas | MapLibre, quatro bases, nomes/limites, centralização, grade e tiles preparados | Implementado | contratos das camadas, build, planner e política do SW; OSM/ArcGIS sem CARTO/API key | provedor, cobertura, quota e modo avião; cidades de referência não são uma rota oficial |

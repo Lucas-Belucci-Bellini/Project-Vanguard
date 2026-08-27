@@ -4,10 +4,12 @@ import { estado, CHAVES } from './estado.js';
  * Política de energia compartilhada pela PWA e pela camada Capacitor.
  * Os valores são preferências para o sistema operacional, não intervalos
  * garantidos. Alta precisão só é usada quando a pessoa inicia uma trilha ou
- * pede uma posição de emergência.
+ * pede uma posição de emergência ou usa a centralização manual para tentar um
+ * novo fixo de maior precisão.
  */
 export const POLITICA_LOCALIZACAO = {
   consulta: { enableHighAccuracy: false, maximumAge: 30000, timeout: 10000, minDistanceM: 0 },
+  manual: { enableHighAccuracy: true, maximumAge: 0, timeout: 20000, minDistanceM: 0 },
   cidade: { enableHighAccuracy: false, maximumAge: 15000, timeout: 12000, minDistanceM: 12 },
   trilha: { enableHighAccuracy: true, maximumAge: 3000, timeout: 20000, minDistanceM: 3 },
   bussola: { enableHighAccuracy: false, maximumAge: 5000, timeout: 12000, minDistanceM: 0 },

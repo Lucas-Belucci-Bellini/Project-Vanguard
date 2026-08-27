@@ -53,7 +53,10 @@ test('idade e frescor do fixo distinguem posição atual, antiga e inválida', (
   assert.equal(frescorPosicao({ timestamp: agora + 1 }, agora), 'indisponível');
 });
 
-test('política de localização reserva alta precisão para trilha e emergência', () => {
+test('política de localização reserva alta precisão para trilha, emergência e fixo manual', () => {
+  assert.equal(opcoesLocalizacao('manual').enableHighAccuracy, true);
+  assert.equal(opcoesLocalizacao('manual').maximumAge, 0);
+  assert.equal(opcoesLocalizacao('manual').timeout, 20000);
   assert.equal(opcoesLocalizacao('cidade').enableHighAccuracy, false);
   assert.equal(opcoesLocalizacao('cidade').minDistanceM, 12);
   assert.equal(opcoesLocalizacao('bussola').enableHighAccuracy, false);

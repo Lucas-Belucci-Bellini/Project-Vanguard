@@ -108,3 +108,15 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Testes:** `npm test` chegou a 173 aprovados, 0 falhas; `test/rotas-peregrinacao.test.js` cobre catálogo, Rota do Carvalho não confirmada e imutabilidade.
 - **Documentação:** `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md` e `docs/adr/ADR-0026-catalogo-rotas-peregrinacao.md`.
 - **Limite:** esta unidade não cria navegação turn-by-turn, não incorpora geometrias de terceiros, não valida segurança de percurso e não muda a classificação da Rota do Carvalho sem nova fonte confiável.
+
+## 2026-08-27 — unidade nova: fixo manual de maior precisão
+
+- **Execution:** rodada contínua Mobile V2/Omega após o catálogo de rotas.
+- **Objective:** reduzir a dependência do último fixo ao tocar em Centralizar, sem prometer precisão de prédio e sem manter alta precisão ativa continuamente.
+- **Implemented:** perfil `manual` em `src/core/localizacao.js`; `solicitarPosicao({ mode: 'manual' })` no botão Centralizar; atualização do HUD, marcadores, destino e câmera após novo fixo.
+- **Policy:** modo cidade permanece econômico; trilha permanece em alta precisão; alta precisão manual ocorre apenas por ação explícita.
+- **Tests:** `npm test` aprovado com 173 testes; cobertura do perfil manual inclui alta precisão, `maximumAge: 0` e timeout de 20 s.
+- **Documentation:** `docs/adr/ADR-0027-fixo-manual-alta-precisao.md`, `MOBILE_V2_TEST_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_STATUS.md` e `MOBILE_V2_PROGRESS.md`.
+- **Physical blocker:** cenário T-005A continua pendente em Android/iPhone: comparar área externa aberta com interior do prédio, registrar `±N m`, horário e comportamento sem descartar a incerteza.
+- **Security/privacy:** localização permanece local e foreground-only; GPS posiciona e não transmite; nenhuma correção visual, snap-to-road ou combinação artificial de leituras foi adicionada.
+- **Status:** IN PROGRESS até gates locais, CI e validação física.

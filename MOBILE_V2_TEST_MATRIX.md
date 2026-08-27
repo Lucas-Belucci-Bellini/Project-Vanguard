@@ -9,6 +9,7 @@
 | T-003 | Permissão GPS negada/restrita | PENDENTE | PENDENTE | PENDENTE | `PERMISSÃO NEGADA`/estado equivalente e fallback sem crash |
 | T-004 | GPS desligado ou sem sinal | PENDENTE | PENDENTE | PENDENTE | erro compreensível; nenhum fixo inventado |
 | T-005 | Fixo antigo/frescor | PENDENTE | PENDENTE | PENDENTE | HUD/diagnóstico distinguem posição atual, antiga e inválida |
+| T-005A | Fixo manual externo vs. ambiente interno | PENDENTE | PENDENTE | PENDENTE | botão Centralizar solicita leitura atual, exibe `±N m`, horário e limitações; não prometer precisão de prédio |
 | T-006 | Troca foreground/background | PENDENTE | PENDENTE | PENDENTE | lifecycle aparece como observação; não se presume tracking contínuo |
 | T-007 | Tela bloqueada e retomada | PENDENTE | PENDENTE | PENDENTE | comportamento documentado, sem loop/wakelock indevido |
 | T-008 | Mapa com toque | PENDENTE | PENDENTE | PENDENTE | pinch, duplo toque, arraste, rotação, marcador e centralização |
@@ -29,7 +30,8 @@
 
 | Área | Resultado |
 |---|---|
-| Contratos GPS, normalização, frescor e distância | Node: aprovado |
+| Contratos GPS, normalização, frescor, distância e opções do fixo manual | Node: aprovado; `manual` usa alta precisão, `maximumAge: 0` e timeout de 20 s |
+
 | Diagnóstico, inclusive posição persistida `lat/lon` | Node: aprovado; regressão publicada em `f9da500` |
 | Capacidades observáveis | Node: aprovado; GPS/orientação/storage/rede/bateria/compartilhamento e estados `AVAILABLE`/`UNAVAILABLE`/`DENIED`/`NOT_SUPPORTED` cobertos em `test/capacidades.test.js` |
 | Planner e filtro do Service Worker | Node/VM: aprovado; limite defensivo de 256 URLs |
