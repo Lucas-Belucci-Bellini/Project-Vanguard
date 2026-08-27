@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizarPosicao, precisaoLabel, velocidadeLabel, opcoesLocalizacao, distanciaLocalM } from '../src/core/localizacao.js';
+import { normalizarPosicao, precisaoLabel, velocidadeLabel, opcoesLocalizacao, distanciaLocalM, idadePosicaoMs, idadePosicaoLabel, frescorPosicao } from '../src/core/localizacao.js';
 
 test('normalizarPosicao converte a leitura nativa para o contrato do app', () => {
   const atual = normalizarPosicao({
@@ -39,6 +39,18 @@ test('formatadores não inventam precisão ou velocidade quando faltam dados', (
   assert.equal(precisaoLabel(null), 'precisão indisponível');
   assert.equal(velocidadeLabel(null), '—');
   assert.equal(velocidadeLabel(2), '7.2 km/h');
+});
+
+test('idade e frescor do fixo distinguem posição atual, antiga e inválida', () => {
+  const agora = 1_700_000_000_000;
+  const atual = { timestamp: agora - 5_000 };
+  assert.equal(idadePosicaoMs(atual, agora), 5_000);
+  assert.equal(idadePosicaoLabel(atual, agora), 'agora');
+  assert.equal(frescorPosicao(atual, agora), 'atual');
+  assert.equal(idadePosicaoLabel({ timestamp: agora - 2 * 60_000 }, agora), 'há 2 min');
+  assert.equal(frescorPosicao({ timestamp: agora - 10 * 60_000 }, agora), 'antigo');
+  assert.equal(idadePosicaoLabel({ timestamp: 'não é data' }, agora), 'idade indisponível');
+  assert.equal(frescorPosicao({ timestamp: agora + 1 }, agora), 'indisponível');
 });
 
 test('política de localização reserva alta precisão para trilha e emergência', () => {

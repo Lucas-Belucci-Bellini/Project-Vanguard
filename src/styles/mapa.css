@@ -8,6 +8,7 @@
 .mapa__hud-coord { overflow: hidden; color: var(--color-cyan); font-size: 13px; font-weight: var(--font-weight-bold); letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
 .mapa__hud-meta { color: var(--color-text-secondary); font-size: 9px; }
 .mapa__gps-pill { display: flex; align-items: center; gap: 6px; padding: 6px 9px; background: var(--color-overlay); border: var(--border-base); color: var(--color-text-secondary); font-size: 9px; }
+.mapa__gps-label.is-stale { color: var(--color-amber); }
 .mapa__gps-dot { background: var(--color-cyan); box-shadow: 0 0 8px var(--color-cyan); }
 .mapa__hint { position: absolute; top: 82px; left: 50%; z-index: var(--z-overlay); display: none; transform: translateX(-50%); padding: 7px 10px; background: var(--color-cyan); color: var(--color-bg); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-wide); pointer-events: none; }
 .mapa__hint.is-visible { display: block; }

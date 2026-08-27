@@ -11,7 +11,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | Área | Comportamento |
 |---|---|
 | **Início** | Painel de campo, ativação explícita do GPS, atalhos, tutorial de primeiro uso e cartão local de prontidão offline. |
-| **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição**, **Cidade / Dia a dia** e **Mar / Referência**, com destino por coordenadas ou toque no mapa. O mapa mostra o contexto civil e a zona local ativa, quando houver, com fonte e validade. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. O status detalhado mostra o total agregado no aparelho e, quando disponível, a última base, área, zoom e relação de tiles solicitados/salvos. |
+| **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição**, **Cidade / Dia a dia** e **Mar / Referência**, com destino por coordenadas ou toque no mapa. O mapa mostra o contexto civil e a zona local ativa, quando houver, com fonte e validade. O HUD exibe a idade do último fixo e marca posições antigas como atenção; isso não melhora a precisão nem confirma que o aparelho ainda está naquele ponto. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. O status detalhado mostra o total agregado no aparelho e, quando disponível, a última base, área, zoom e relação de tiles solicitados/salvos. |
 | **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada, limpeza manual e resumo de pontos, tempo registrado e velocidade média quando os horários existem. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado e a trilha pode ser exportada em GPX 1.1, sempre sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
 | **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
 | **Socorro** | Captura da posição, criação de pacote externo validado, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência, com estados explícitos e sem confirmação de entrega. |
@@ -24,7 +24,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 
 ## Modo offline-first
 
-Depois do primeiro carregamento, a shell do Vanguard, as telas, a posição, a bússola, as rotas, os pontos, os destinos, as zonas importadas e o manual de sobrevivência podem continuar funcionando sem internet. Na tela inicial, o cartão **Prontidão offline** resume posição, mapa preparado, dados locais, manual e comunicação independente; ele é uma conferência local, não um teste de cobertura nem uma confirmação de SOS. No mapa, mova-se até a área desejada, escolha a base cartográfica e toque em **Preparar área offline** enquanto ainda estiver conectado. O aplicativo guarda até 256 URLs por preparação da área visível e de níveis próximos, informa quando a estimativa excede esse limite, mostra o status do cache e permite limpar os mapas com confirmação. O total é agregado ao aparelho e os metadados da última tentativa não garantem cobertura completa da área; prepare novamente depois de mover o mapa ou trocar de base.
+Depois do primeiro carregamento, a shell do Vanguard, as telas, a posição, a bússola, as rotas, os pontos, os destinos, as zonas importadas e o manual de sobrevivência podem continuar funcionando sem internet. No HUD do mapa, `agora` significa que o último fixo tem menos de 10 segundos; depois disso a idade é mostrada em minutos, horas ou dias. Um fixo antigo é apenas um dado histórico e deve ser confirmado antes de tomar decisões de navegação ou socorro. Na tela inicial, o cartão **Prontidão offline** resume posição, mapa preparado, dados locais, manual e comunicação independente; ele é uma conferência local, não um teste de cobertura nem uma confirmação de SOS. No mapa, mova-se até a área desejada, escolha a base cartográfica e toque em **Preparar área offline** enquanto ainda estiver conectado. O aplicativo guarda até 256 URLs por preparação da área visível e de níveis próximos, informa quando a estimativa excede esse limite, mostra o status do cache e permite limpar os mapas com confirmação. O total é agregado ao aparelho e os metadados da última tentativa não garantem cobertura completa da área; prepare novamente depois de mover o mapa ou trocar de base.
 
 A internet continua sendo necessária para obter tiles que ainda não foram baixados, receber avisos novos, enviar e-mail, sincronizar eventos, abrir o futuro checkout Asaas e transmitir um SOS por serviço externo. O modo Mar não transforma imagem de satélite em carta náutica nem estima profundidade; use produtos oficiais e informações atualizadas das autoridades. O backup JSON de rota, waypoints e destino é criado e lido localmente, sem conta ou rede. Arquivos GPX também podem ser importados localmente; pontos de trilha e waypoints são validados e a rota importada fica pausada. O GPS/GNSS e a bússola podem fornecer dados locais sem rede, mas nenhum dos dois transmite um pedido de socorro sozinho.
 
@@ -47,7 +47,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 106 testes do motor geográfico e contratos civis
+npm test          # 107 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 
@@ -61,7 +61,7 @@ Para testar no Android ou em um Xiaomi, abra a versão publicada em um navegador
 src/
   core/
     estado.js          persistência local versionada e chaves compartilhadas
-    localizacao.js     normalização do GPS e ciclo de acompanhamento
+    localizacao.js     normalização do GPS, ciclo de acompanhamento e idade do fixo
     contexto.js        detecção por zonas, validade e JSON versionado
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
     registro-offline.js backup JSON e exportação GPX local

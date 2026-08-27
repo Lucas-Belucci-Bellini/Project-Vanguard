@@ -44,6 +44,32 @@ export function velocidadeLabel(speed) {
   return `${(speed * 3.6).toFixed(1)} km/h`;
 }
 
+export function idadePosicaoMs(posicao, agora = Date.now()) {
+  const instante = Number(posicao?.timestamp ?? posicao?.createdAt);
+  if (!Number.isFinite(instante) || !Number.isFinite(agora) || instante < 0 || agora < instante) return null;
+  return agora - instante;
+}
+
+export function frescorPosicao(posicao, agora = Date.now()) {
+  const idade = idadePosicaoMs(posicao, agora);
+  if (idade == null) return 'indisponível';
+  if (idade < 60_000) return 'atual';
+  if (idade < 5 * 60_000) return 'recente';
+  if (idade < 24 * 60 * 60_000) return 'antigo';
+  return 'muito antigo';
+}
+
+export function idadePosicaoLabel(posicao, agora = Date.now()) {
+  const idade = idadePosicaoMs(posicao, agora);
+  if (idade == null) return 'idade indisponível';
+  if (idade < 10_000) return 'agora';
+  const minutos = Math.floor(idade / 60_000);
+  if (minutos < 60) return `há ${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  if (horas < 24) return `há ${horas} h`;
+  return `há ${Math.floor(horas / 24)} d`;
+}
+
 export function distanciaLocalM(a, b) {
   if (!a || !b || !Number.isFinite(a.lat) || !Number.isFinite(a.lon) || !Number.isFinite(b.lat) || !Number.isFinite(b.lon)) return Infinity;
   const rad = Math.PI / 180;

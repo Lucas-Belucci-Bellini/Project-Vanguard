@@ -1,7 +1,7 @@
 import '../styles/mapa.css';
 import { h, empty, dist, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
-import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel } from '../core/localizacao.js';
+import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel, idadePosicaoLabel, frescorPosicao } from '../core/localizacao.js';
 import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
@@ -194,12 +194,15 @@ export function mapaPage() {
     if (!posicao) {
       topoLocal.textContent = 'AGUARDANDO GPS';
       topoMeta.textContent = 'POSIÇÃO NÃO CONFIRMADA';
+      estadoGps.classList.remove('is-stale');
       estadoGps.textContent = 'GPS DESLIGADO';
       return;
     }
     try { topoLocal.textContent = latLonParaMGRS(posicao.lat, posicao.lon, 5, true); } catch { topoLocal.textContent = `${num(posicao.lat, 5)}, ${num(posicao.lon, 5)}`; }
-    topoMeta.textContent = `${num(posicao.lat, 5)}, ${num(posicao.lon, 5)} · ${precisaoLabel(posicao.accuracy)}`;
-    estadoGps.textContent = `GPS ${precisaoLabel(posicao.accuracy)}`;
+    const frescor = frescorPosicao(posicao);
+    topoMeta.textContent = `${num(posicao.lat, 5)}, ${num(posicao.lon, 5)} · ${precisaoLabel(posicao.accuracy)} · ${idadePosicaoLabel(posicao)}`;
+    estadoGps.classList.toggle('is-stale', frescor === 'antigo' || frescor === 'muito antigo');
+    estadoGps.textContent = `GPS ${precisaoLabel(posicao.accuracy)} · ${frescor}`;
   }
 
   function atualizarDestino() {
@@ -490,8 +493,10 @@ export function mapaPage() {
     atualizarMarcadores();
     if (rotaAtiva && wakeAtivo) configurarWakeLock(true);
   };
-  document.addEventListener('visibilitychange', aoMudarVisibilidade);
-
+    document.addEventListener('visibilitychange', aoMudarVisibilidade);
+  const intervaloFrescor = window.setInterval(() => {
+    if (!document.hidden) atualizarHud();
+  }, 10_000);
   (async () => {
     const maplibregl = await carregarMapLibre();
     if (desmontado) return;
@@ -682,5 +687,5 @@ export function mapaPage() {
   atualizarHud();
   atualizarDestino();
   atualizarSheet();
-  return { elemento: raiz, desmontar: () => { desmontado = true; document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
 }
