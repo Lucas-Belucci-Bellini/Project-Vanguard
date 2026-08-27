@@ -50,3 +50,11 @@ A auditoria encontrou que o Diagnóstico consultava somente a Permissions API We
 Os estados `CONCEDIDA`, `NEGADA`, `NÃO SOLICITADA`, `INDISPONÍVEL` e `BROWSER DEPENDENT` são preservados. Um erro do bridge ou estado desconhecido não é tratado como permissão concedida. A integração não adiciona background GPS, não altera o Manifest/Info.plist e não substitui a verificação nativa de prompts, Configurações, GPS desligado ou tela bloqueada.
 
 `test/permissoes.test.js` cobre plugin concedido/negado, ausência de request, Permissions API Web, ausência de APIs e falha do bridge. A suíte local chegou a 150 testes aprovados; build web, sintaxe do Service Worker, auditoria de produção, sync Android/iOS e APK debug também passaram.
+
+## Marco de release mobile artifact-only — 2026-08-27
+
+A autenticação do GitHub foi revalidada e o CI documental da persistência concluiu com sucesso no run `33121423458`. Em seguida, foi estudado o processo do [Projeto-Baluarte](https://github.com/Lucas-Belucci-Bellini/Projeto-Baluarte): workflow mobile separado, dispatch/tag explícito, APK debug para teste, AAB não assinado para assinatura posterior, teste físico antes da distribuição e handoff iOS dependente de macOS/Xcode.
+
+O Vanguard executou o workflow manual `33121937373` sobre `main`, com `version=1.0.0` e sem `publish_tag`. O job Android passou, gerou e enviou `vanguard-android-debug-apk` e `vanguard-android-release-aab-unsigned`, e pulou a etapa de publicação. Os artifacts foram baixados e tiveram seus tipos e SHA-256 registrados em `MOBILE_V2_RELEASE.md`. A lista de releases permaneceu somente com `v1.0.0-rc.2`.
+
+Este teste confirma o caminho remoto de artifacts e a separação build/artifact/release. Não confirma instalação em aparelho, assinatura, Play Console, iOS, TestFlight ou release pública.

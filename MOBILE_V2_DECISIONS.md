@@ -44,6 +44,10 @@ A camada `src/core/capacidades.js` classifica somente o que o ambiente expõe, u
 
 `estado.set()` mantém o valor retornado e o comportamento dos listeners, mas `src/core/estado.js` registra o resultado da última escrita em `statusPersistencia()`. O Diagnóstico exibe `PERSISTIDO`, `FALHA` ou `NÃO TESTADO`; erros como `QuotaExceededError` não são silenciosamente apresentados como backup confirmado. A leitura continua com fallback seguro e a implementação não migra para IndexedDB sem medição e necessidade comprovada.
 
+## D-012 — Release mobile começa por artifacts
+
+O workflow Mobile Release aceita um dispatch com versão e `publish_tag` vazio para gerar artifacts sem publicar. O teste `33121937373` confirmou APK debug e AAB não assinado, com a etapa de release pulada. O padrão foi comparado ao workflow e ao handoff mobile do Projeto-Baluarte, mas nomes, IDs e limites do Vanguard permanecem próprios. Tag, assinatura, instalação, loja e iOS continuam gates posteriores e deliberados.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)

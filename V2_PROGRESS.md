@@ -127,3 +127,11 @@ A unidade está coberta por `test/compartilhamento.test.js`. A validação local
 A auditoria confirmou que `estado.set()` ignorava silenciosamente falhas de `localStorage.setItem()`, o que poderia aparentar que trilhas, waypoints ou alertas foram salvos quando a quota ou o WebView rejeitava a escrita. `src/core/estado.js` agora mantém o contrato de retorno e listeners, mas registra `statusPersistencia()` com `PERSISTIDO`, `FALHA` ou `NAO_TESTADO`; o Diagnóstico mostra a última tentativa no grupo `ARMAZENAMENTO`.
 
 `test/estado.test.js` cobre `QuotaExceededError` e confirma que a falha não é convertida em persistência confirmada. A unidade foi publicada como `cd47a0c fix(v2): sinalizar falha de persistencia`, com CI `33121288900` aprovado. O ADR-0017 registra os limites: quota real, reinstalação, limpeza do sistema e durabilidade física continuam pendentes.
+
+## Marco Mobile V2 — teste de release artifact-only — 2026-08-27
+
+A autenticação do GitHub foi recuperada após o erro transitório `HTTP 401`. O processo do Projeto-Baluarte foi consultado como referência: dispatch ou tag explícitos, APK debug e AAB não assinado como artifacts, etapa de publicação condicionada e handoff separado para teste físico/assinatura/iOS.
+
+O Vanguard executou o workflow manual `33121937373` sobre `main`, com `version=1.0.0` e sem `publish_tag`. O job Android foi aprovado, os artifacts `vanguard-android-debug-apk` e `vanguard-android-release-aab-unsigned` foram baixados, seus tipos e SHA-256 foram registrados em `MOBILE_V2_RELEASE.md`, e a etapa de publicação foi pulada. A lista de releases continuou contendo somente `v1.0.0-rc.2`.
+
+A prova confirma o caminho remoto de build/artifacts e não confirma instalação, assinatura, Play Console, iOS, TestFlight ou release pública. A tag/release final permanece deliberadamente fora desta execução.
