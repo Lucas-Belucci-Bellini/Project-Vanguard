@@ -36,6 +36,7 @@
 | Build web e sintaxe do Service Worker | aprovado |
 | Sync Capacitor Android/iOS | aprovado no ambiente Linux |
 | APK debug | `BUILD SUCCESSFUL`; artifact de teste |
+| Estados do watcher GPS | Node: `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`, pausa e retomada foreground-only cobertas em `test/localizacao.test.js` |
 | Workflow Mobile Release artifact-only | run `33121937373` aprovado; APK debug e AAB não assinado baixados, tipos e SHA-256 registrados em `MOBILE_V2_RELEASE.md`; etapa de publicação pulada |
 
 ## Procedimento de registro

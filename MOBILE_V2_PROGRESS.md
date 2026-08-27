@@ -58,3 +58,9 @@ A autenticação do GitHub foi revalidada e o CI documental da persistência con
 O Vanguard executou o workflow manual `33121937373` sobre `main`, com `version=1.0.0` e sem `publish_tag`. O job Android passou, gerou e enviou `vanguard-android-debug-apk` e `vanguard-android-release-aab-unsigned`, e pulou a etapa de publicação. Os artifacts foram baixados e tiveram seus tipos e SHA-256 registrados em `MOBILE_V2_RELEASE.md`. A lista de releases permaneceu somente com `v1.0.0-rc.2`.
 
 Este teste confirma o caminho remoto de artifacts e a separação build/artifact/release. Não confirma instalação em aparelho, assinatura, Play Console, iOS, TestFlight ou release pública.
+
+## Marco de estados GPS foreground-only — 2026-08-27
+
+A auditoria encontrou que o watcher GPS tinha callbacks de posição e erro, mas não expunha estados operacionais para a UI. `src/core/localizacao.js` agora emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILABLE` e `STOPPED`, aceita APIs injetáveis para testes e expõe `setPaused(true/false)`.
+
+O Mapa usa esses estados no HUD e pausa o watcher quando a página fica oculta, retomando-o ao voltar ao foreground. Essa é uma política foreground-only e não uma implementação de tracking em background. `test/localizacao.test.js` cobre Web, Capacitor injetado, pausa, retomada, cleanup e ausência de API. A suíte local chegou a 154 testes, e build, sync Android/iOS e APK debug passaram.

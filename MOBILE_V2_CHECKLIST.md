@@ -25,6 +25,8 @@
 | MV2-019 | Android/iOS/PWA | Leitura de permissão GPS | TESTED | `src/platform/permissoes.js`; Capacitor `checkPermissions()` e Permissions API Web sem prompt automático | plugin concedido/negado, Web granted/denied/prompt, bridge/API ausentes | Node/CI; prompts nativos e mudanças em Configurações pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0016 |
 | MV2-020 | Android/iOS/PWA | Falha de persistência e quota | TESTED | `estado.statusPersistencia()` e grupo `ARMAZENAMENTO` no Diagnóstico; `estado.set()` mantém o contrato | escrita normal e `QuotaExceededError` cobertos em `test/estado.test.js` | Node/CI; quota, reinstalação, limpeza do SO e persistência física pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0017 |
 
+| MV2-021 | Android/iOS/PWA | Estados do acompanhamento GPS foreground-only | TESTED | `src/core/localizacao.js` emite `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; Mapa usa `setPaused()` ao ocultar/retomar | Web, Capacitor injetado, cleanup e ausência de API cobertos em `test/localizacao.test.js` | Node/CI; tela bloqueada, suspensão e retorno físico pendentes | `MOBILE_V2_DECISIONS.md`, ADR-0019 |
+
 ## Regra de encerramento
 
 Nenhum item bloqueado por hardware, assinatura, quota, ciclo de vida ou integração pode ser promovido automaticamente para `VERIFIED` ou `COMPLETE`. A tag `v1.0.0` permanece fora deste ciclo até que os gates do checklist de campo sejam executados e registrados.

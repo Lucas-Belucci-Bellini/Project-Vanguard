@@ -135,3 +135,9 @@ A autenticação do GitHub foi recuperada após o erro transitório `HTTP 401`. 
 O Vanguard executou o workflow manual `33121937373` sobre `main`, com `version=1.0.0` e sem `publish_tag`. O job Android foi aprovado, os artifacts `vanguard-android-debug-apk` e `vanguard-android-release-aab-unsigned` foram baixados, seus tipos e SHA-256 foram registrados em `MOBILE_V2_RELEASE.md`, e a etapa de publicação foi pulada. A lista de releases continuou contendo somente `v1.0.0-rc.2`.
 
 A prova confirma o caminho remoto de build/artifacts e não confirma instalação, assinatura, Play Console, iOS, TestFlight ou release pública. A tag/release final permanece deliberadamente fora desta execução.
+
+## Marco Mobile V2 — estados GPS foreground-only — 2026-08-27
+
+A auditoria identificou que o watcher GPS tinha callbacks de posição/erro, mas não expunha estados operacionais claros. `src/core/localizacao.js` agora emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILABLE` e `STOPPED`, aceita APIs injetáveis em testes e expõe `setPaused(true/false)`.
+
+O Mapa integra o estado ao HUD e limpa o watcher quando a página fica oculta, retomando-o no retorno ao foreground. Isto é uma política foreground-only, não tracking em background. `test/localizacao.test.js` cobre Web, Capacitor injetado, pausa, retomada, cleanup e ausência de API. A suíte chegou a 154 testes; build, sync Android/iOS e APK debug passaram. O ADR-0019 registra limites e a necessidade de validação física em tela bloqueada/suspensão.

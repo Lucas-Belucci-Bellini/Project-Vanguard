@@ -48,6 +48,10 @@ A camada `src/core/capacidades.js` classifica somente o que o ambiente expõe, u
 
 O workflow Mobile Release aceita um dispatch com versão e `publish_tag` vazio para gerar artifacts sem publicar. O teste `33121937373` confirmou APK debug e AAB não assinado, com a etapa de release pulada. O padrão foi comparado ao workflow e ao handoff mobile do Projeto-Baluarte, mas nomes, IDs e limites do Vanguard permanecem próprios. Tag, assinatura, instalação, loja e iOS continuam gates posteriores e deliberados.
 
+## D-013 — Acompanhamento GPS explicita pausa foreground-only
+
+O watcher compartilhado emite `STARTING`, `ACTIVE`, `PAUSED`, `ERROR`, `UNAVAILABLE` e `STOPPED`. O Mapa chama `setPaused(true)` quando fica oculto e `setPaused(false)` ao retornar. Essa decisão evita afirmar que o GPS segue executando em background; não adiciona localização em segundo plano, foreground service ou modos especiais de execução. A continuidade, o retorno após suspensão e o comportamento em tela bloqueada ainda precisam de validação física.
+
 ## Referências técnicas
 
 [1]: [Capacitor — Geolocation Plugin API](https://capacitorjs.com/docs/apis/geolocation)
