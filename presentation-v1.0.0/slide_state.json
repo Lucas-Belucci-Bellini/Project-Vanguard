@@ -1,0 +1,122 @@
+{
+  "project_info": {
+    "title": "Vanguard Field v1.0.0",
+    "created": 1787849689.746,
+    "last_updated": 1787850030.221,
+    "total_slides": 10
+  },
+  "slides": [
+    {
+      "id": "capa",
+      "state": "edited",
+      "pageNum": 1
+    },
+    {
+      "id": "status_release",
+      "state": "edited",
+      "pageNum": 2
+    },
+    {
+      "id": "offline_first",
+      "state": "edited",
+      "pageNum": 3
+    },
+    {
+      "id": "gps_mgrs",
+      "state": "edited",
+      "pageNum": 4
+    },
+    {
+      "id": "registros",
+      "state": "edited",
+      "pageNum": 5
+    },
+    {
+      "id": "contexto_sobrevivencia",
+      "state": "edited",
+      "pageNum": 6
+    },
+    {
+      "id": "socorro_limites",
+      "state": "edited",
+      "pageNum": 7
+    },
+    {
+      "id": "mobile_validacao",
+      "state": "edited",
+      "pageNum": 8
+    },
+    {
+      "id": "peregrinacao",
+      "state": "edited",
+      "pageNum": 9
+    },
+    {
+      "id": "proximos_passos",
+      "state": "edited",
+      "pageNum": 10
+    }
+  ],
+  "outline": [
+    {
+      "id": "capa",
+      "title": "Vanguard Field v1.0.0",
+      "summary": "Resumo da futura versão final: navegação civil offline-first, GPS/MGRS e preparação para teste de campo.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "status_release",
+      "title": "A tag final ainda depende de gates reais",
+      "summary": "A v1.0.0 está planejada, mas a tag final só deve ser criada depois dos testes em aparelhos reais, validação de distribuição e decisão explícita.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "offline_first",
+      "title": "Offline-first com transparência operacional",
+      "summary": "Shell, dados locais, manual, trilhas, waypoints e mapas previamente preparados podem continuar disponíveis sem internet, com limites explícitos.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "gps_mgrs",
+      "title": "GPS e MGRS transformam posição em referência",
+      "summary": "O app mostra coordenadas, precisão, MGRS, rumo, distância e idade do último fixo; posição não é comunicação nem garantia de atualidade.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "registros",
+      "title": "Registros locais continuam interoperáveis",
+      "summary": "JSON versionado e GPX 1.1 permitem backup e troca local de trilhas, com validação e rota importada pausada.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "contexto_sobrevivencia",
+      "title": "Contexto civil orienta sem inventar alertas",
+      "summary": "Modos de uso, zonas locais, modo Mar e manual de sobrevivência ajudam a organizar decisões, sempre com fontes e limites visíveis.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "socorro_limites",
+      "title": "Socorro preparado não é resgate acionado",
+      "summary": "O pacote local contém dados úteis para compartilhamento manual, mas não envia SOS, não confirma entrega e não substitui comunicação externa.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "mobile_validacao",
+      "title": "Build validado não é release publicada",
+      "summary": "Testes web e Android debug passaram; artifacts técnicos continuam separados de tag, assinatura, distribuição e release final.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "peregrinacao",
+      "title": "Caminhos dos Anjos: teste de campo planejado",
+      "summary": "Plano para a peregrinação de 04 a 07 de setembro de 2026, saída de Londrina às 23h de 04/09, com confirmação prévia do trajeto e rede de apoio.",
+      "image_plan": "Use a suitable image if needed"
+    },
+    {
+      "id": "proximos_passos",
+      "title": "O caminho até v1.0.0 final",
+      "summary": "Checklist final: validar em Android/Xiaomi/iPhone, testar rede e bateria, confirmar segurança operacional, revisar distribuição e só então criar a tag.",
+      "image_plan": "Use a suitable image if needed"
+    }
+  ]
+}

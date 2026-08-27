@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Build validado não é release publicada</title>
+<style>
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+.slide-container { width: 1280px; min-height: 720px; background: #0b1014; color: #e8f0f2; font-family: Arial, Helvetica, sans-serif; padding-top: 56px; padding-left: 76px; padding-right: 76px; }
+.kicker { color: #20d5d2; font-size: 13px; letter-spacing: 3px; font-weight: 700; text-transform: uppercase; }
+h1 { margin-top: 14px; margin-bottom: 40px; font-size: 42px; letter-spacing: -1px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.col { padding: 30px; border: 1px solid #28434a; background: rgba(32, 213, 210, 0.03); }
+.col.pending { background: rgba(242, 184, 75, 0.03); border-color: rgba(242, 184, 75, 0.3); }
+.col h2 { font-size: 24px; margin-top: 0; margin-bottom: 24px; color: #20d5d2; border-bottom: 1px solid #20d5d2; padding-bottom: 12px; }
+.col.pending h2 { color: #f2b84b; border-bottom-color: #f2b84b; }
+.list-item { margin-bottom: 18px; }
+.list-item h3 { font-size: 18px; margin: 0 0 6px 0; color: #e8f0f2; }
+.list-item p { font-size: 15px; color: #b4c6ca; margin: 0; line-height: 1.4; }
+.source { margin-top: 40px; color: #71888e; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="slide-container">
+  <div class="kicker">MOBILE E PROCESSO DE ENTREGA</div>
+  <h1>Build validado não é release publicada</h1>
+  <div class="split">
+    <div class="col">
+      <h2>O que temos hoje (Artifacts)</h2>
+      <div class="list-item">
+        <h3>Testes e Web</h3>
+        <p>107 testes aprovados, build web gerado e service worker validado no CI.</p>
+      </div>
+      <div class="list-item">
+        <h3>Android Debug</h3>
+        <p>APK de debug compilado com sucesso (~4,4 MB). Serve apenas para testes técnicos locais.</p>
+      </div>
+      <div class="list-item">
+        <h3>Código em main</h3>
+        <p>Todas as melhorias integradas e validadas, mas sem criação automática de tag.</p>
+      </div>
+    </div>
+    <div class="col pending">
+      <h2>O que falta para Release</h2>
+      <div class="list-item">
+        <h3>Assinatura e Keystore</h3>
+        <p>A release distribuível Android exige assinatura. O iOS exige macOS, Xcode e conta Apple.</p>
+      </div>
+      <div class="list-item">
+        <h3>Testes em Dispositivos Reais</h3>
+        <p>Validação de permissões, bateria, perda de rede e acessibilidade em aparelhos físicos.</p>
+      </div>
+      <div class="list-item">
+        <h3>Tag e Publicação Explícita</h3>
+        <p>A tag v1.0.0 só será criada após os gates de distribuição. Até lá, a rc.2 é a única release.</p>
+      </div>
+    </div>
+  </div>
+  <div class="source">Fonte interna: docs/BUILD-VS-RELEASE.md · docs/NOTAS-DE-LANCAMENTO-V1.0.0.md</div>
+</div>
+</body>
+</html>

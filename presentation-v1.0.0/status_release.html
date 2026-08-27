@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gates da v1.0.0</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; }
+.slide-container { width: 1280px; min-height: 720px; background: #0b1014; color: #e8f0f2; font-family: Arial, Helvetica, sans-serif; padding: 58px 76px 0; }
+.kicker { color: #20d5d2; font-size: 13px; letter-spacing: 3px; font-weight: 700; }
+h1 { margin: 16px 0 34px; font-size: 42px; letter-spacing: -1px; }
+.track { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; position: relative; }
+.track::before { content: ""; position: absolute; top: 45px; left: 10%; right: 10%; height: 2px; background: #28434a; }
+.stage { position: relative; min-height: 240px; padding-top: 0; }
+.marker { width: 18px; height: 18px; margin-bottom: 18px; background: #20d5d2; border: 4px solid #0b1014; outline: 1px solid #20d5d2; }
+.stage.pending .marker { background: #f2b84b; outline-color: #f2b84b; }
+.stage h2 { margin: 0 0 12px; font-size: 23px; }
+.stage .label { color: #89a0a5; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+.stage p { max-width: 320px; color: #b4c6ca; font-size: 17px; line-height: 1.45; }
+.pending h2, .pending .label { color: #f2b84b; }
+.gates { margin-top: 18px; border-top: 1px solid #28434a; padding-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 44px; }
+.gates div { color: #c4d3d6; font-size: 15px; line-height: 1.35; }
+.gates strong { color: #20d5d2; }
+.source { margin-top: 20px; color: #71888e; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="slide-container">
+  <div class="kicker">CONTRATO OPERACIONAL DE ENTREGA</div>
+  <h1>A tag final ainda depende de gates reais</h1>
+  <div class="track">
+    <section class="stage"><div class="marker"></div><div class="label">Estado atual</div><h2>Build validado</h2><p>107 testes, build web, service worker e Android debug passaram no commit atual de <strong>main</strong>.</p></section>
+    <section class="stage"><div class="marker"></div><div class="label">Publicado</div><h2>Release candidate</h2><p><strong>v1.0.0-rc.2</strong> é o único snapshot imutável publicado; commits posteriores não alteram a candidate.</p></section>
+    <section class="stage pending"><div class="marker"></div><div class="label">Pendente</div><h2>v1.0.0 final</h2><p>A tag exige teste de campo, dispositivos reais, distribuição assinada e decisão explícita de publicação.</p></section>
+  </div>
+  <div class="gates">
+    <div><strong>Dispositivos:</strong> Android/Xiaomi e iPhone real.</div>
+    <div><strong>Rede:</strong> perda, retorno e comportamento offline real.</div>
+    <div><strong>Energia:</strong> rota ativa, pausa, brilho e bateria externa.</div>
+    <div><strong>Distribuição:</strong> assinatura Android/iOS e revisão final.</div>
+  </div>
+  <div class="source">Fonte interna: docs/RELEASE-1.0.0.md · docs/BUILD-VS-RELEASE.md</div>
+</div>
+</body>
+</html>

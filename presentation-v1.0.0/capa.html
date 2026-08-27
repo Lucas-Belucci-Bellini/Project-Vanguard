@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vanguard Field v1.0.0</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide-container { width: 1280px; min-height: 720px; position: relative; overflow: hidden; background: #0b1014; color: #e8f0f2; font-family: Arial, Helvetica, sans-serif; }
+    .grid { position: absolute; inset: 0; opacity: .18; background-image: linear-gradient(#1e3138 1px, transparent 1px), linear-gradient(90deg, #1e3138 1px, transparent 1px); background-size: 56px 56px; }
+    .rail { position: absolute; top: 0; left: 0; width: 18px; min-height: 640px; background: #20d5d2; }
+    .route { position: absolute; right: 70px; top: 98px; width: 420px; height: 420px; border: 1px solid #20d5d2; border-radius: 50%; opacity: .65; }
+    .route::before, .route::after { content: ""; position: absolute; border: 1px solid #20d5d2; border-radius: 50%; }
+    .route::before { inset: 48px; opacity: .55; }
+    .route::after { inset: 112px; opacity: .45; }
+    .dot { position: absolute; right: 258px; top: 270px; width: 14px; height: 14px; border-radius: 50%; background: #f2b84b; box-shadow: 0 0 0 10px rgba(242,184,75,.13), 0 0 28px rgba(242,184,75,.45); }
+    .content { position: relative; z-index: 2; padding: 112px 0 0 108px; width: 720px; }
+    .eyebrow { color: #20d5d2; font-size: 15px; letter-spacing: 4px; font-weight: 700; }
+    h1 { margin: 28px 0 18px; font-size: 76px; line-height: .98; letter-spacing: -3px; }
+    .subtitle { width: 600px; color: #b4c6ca; font-size: 25px; line-height: 1.35; }
+    .status { margin-top: 34px; display: inline-block; padding: 12px 16px; border: 1px solid #f2b84b; color: #f2b84b; font-size: 14px; letter-spacing: 1px; }
+    .footer { position: absolute; left: 108px; right: 82px; bottom: 48px; display: flex; justify-content: space-between; color: #789197; font-size: 13px; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <div class="grid"></div><div class="rail"></div><div class="route"></div><div class="dot"></div>
+    <div class="content">
+      <div class="eyebrow">VANGUARD FIELD · RELEASE BRIEF</div>
+      <h1>v1.0.0</h1>
+      <div class="subtitle">Navegação civil offline-first para cidade, caminhada, expedição, mar e proteção civil.</div>
+      <div class="status">NOTAS PREPARADAS · TAG FINAL PENDENTE</div>
+    </div>
+    <div class="footer"><span>GPS · MGRS · TRILHA · CONTEXTO</span><span>Agosto de 2026</span></div>
+  </div>
+</body>
+</html>
