@@ -5,6 +5,7 @@ import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel
 import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE } from '../data/camadas-mapa.js';
+import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { exportarRegistroLocal, exportarRegistroGpx, importarRegistroGpx, importarRegistroLocal } from '../core/registro-offline.js';
 
@@ -109,6 +110,7 @@ export function mapaPage() {
     h('strong', null, 'MODO MAR · REFERÊNCIA'),
     h('p', null, 'Satélite e topografia ajudam a orientar, mas não mostram profundidade segura nem substituem carta náutica oficial atualizada, avisos aos navegantes, marés, sonar ou julgamento local.')
   );
+  const contextoStatus = h('p', { className: 'mapa__contexto-status', role: 'status' }, 'Contexto local: aguardando posição. Não há alerta oficial automático.');
   const destinoInput = h('input', { className: 'mapa__destino-input', type: 'text', inputMode: 'decimal', placeholder: 'LAT, LON  ·  ex.: -23.55, -46.63', 'aria-label': 'Coordenadas do destino' });
   const destinoButton = h('button', { className: 'mapa__destino-button', type: 'button' }, 'DEFINIR DESTINO');
   const destinoMapButton = h('button', { className: 'mapa__destino-map-button', type: 'button' }, 'TOCAR NO MAPA');
@@ -122,6 +124,10 @@ export function mapaPage() {
     ),
     h('label', { className: 'mapa__uso-label' }, h('span', null, 'MODO DE USO'), selectUso),
     modoMarInfo,
+    h('div', { className: 'mapa__contexto-card' },
+      h('span', { className: 'mapa__kicker' }, 'CONTEXTO CIVIL'),
+      contextoStatus
+    ),
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
     h('div', { className: 'mapa__registro-card' },
@@ -210,8 +216,22 @@ export function mapaPage() {
       : 'Destino salvo; distância indisponível nesta geometria.';
   }
 
+  function atualizarContextoMapa() {
+    const padrao = estado.get(CHAVES.CONTEXTO, 'cidade');
+    const resultado = detectarContexto(posicao, estado.get(CHAVES.ZONAS, []), padrao);
+    const contexto = contextoPorId(resultado.contexto?.id ?? padrao);
+    contextoStatus.classList.toggle('is-zone', Boolean(resultado.zona));
+    if (resultado.zona) {
+      const validade = resultado.zona.validadeEm ? ` · válido até ${new Date(resultado.zona.validadeEm).toLocaleDateString()}` : ' · sem expiração informada';
+      contextoStatus.textContent = `${contexto.nome} · ${resultado.zona.nome} · fonte: ${resultado.zona.fonte}${validade}. Confirme com a autoridade local; não é alerta oficial automático.`;
+      return;
+    }
+    contextoStatus.textContent = `${contexto.nome} · ${resultado.confianca}. Sem zona local ativa e sem alerta oficial automático.`;
+  }
+
   function atualizarSheet() {
     modoMarInfo.classList.toggle('is-visible', selectUso.value === 'mar');
+    atualizarContextoMapa();
     sheet.querySelector('.mapa__route-distance').textContent = dist(distanciaTrilha());
     routeButton.textContent = rotaAtiva ? 'PAUSAR ROTA' : 'INICIAR ROTA';
     routeButton.classList.toggle('is-active', rotaAtiva);
