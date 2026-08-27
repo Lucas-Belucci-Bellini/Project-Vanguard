@@ -12,7 +12,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 |---|---|
 | **Início** | Painel de campo, ativação explícita do GPS, atalhos e tutorial de primeiro uso. |
 | **Mapa** | Mapa MapLibre, bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Inclui os modos **Trilha / Expedição** e **Cidade / Dia a dia**, com destino por coordenadas ou toque no mapa. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. |
-| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado, sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
+| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada e limpeza manual. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado e a trilha pode ser exportada em GPX 1.1, sempre sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
 | **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
 | **Socorro** | Captura da posição, criação de pacote externo validado, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência, com estados explícitos e sem confirmação de entrega. |
 | **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
@@ -30,7 +30,7 @@ A internet continua sendo necessária para obter tiles que ainda não foram baix
 
 ## Como usar em uma expedição
 
-Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho. A alta precisão só é solicitada durante a gravação ativa; ao pausar, o mapa retorna ao perfil econômico. A opção **Manter tela ativa** é voluntária e só fica disponível durante uma rota ativa.
+Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho. Em **Dados locais**, use **Exportar JSON** para backup completo, **Exportar GPX** para abrir a trilha em outro aplicativo compatível, ou **Importar JSON** para restaurar um backup; a importação substitui os dados atuais somente após confirmação e deixa a rota pausada. A alta precisão só é solicitada durante a gravação ativa; ao pausar, o mapa retorna ao perfil econômico. A opção **Manter tela ativa** é voluntária e só fica disponível durante uma rota ativa.
 
 Na tela **Bússola**, toque em **Ativar sensor do aparelho**. A mesma ferramenta pode orientar uma caminhada no bairro, uma corrida ou uma travessia em área remota. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
 
@@ -47,7 +47,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 96 testes do motor geográfico e contratos civis
+npm test          # 98 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 
@@ -64,7 +64,7 @@ src/
     localizacao.js     normalização do GPS e ciclo de acompanhamento
     contexto.js        detecção por zonas, validade e JSON versionado
     mapa-offline.js    planejamento seguro de tiles e antimeridiano
-    registro-offline.js backup JSON de rota e waypoints
+    registro-offline.js backup JSON e exportação GPX local
     fila-offline.js    fila local para sincronização posterior
   engine/
     geo.js             distância e azimute geodésicos
