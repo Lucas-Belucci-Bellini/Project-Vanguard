@@ -26,11 +26,11 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 
 Depois do primeiro carregamento, a shell do Vanguard, as telas, a posição, a bússola, as rotas, os pontos, os destinos, as zonas importadas e o manual de sobrevivência podem continuar funcionando sem internet. No mapa, mova-se até a área desejada, escolha a base cartográfica e toque em **Preparar área offline** enquanto ainda estiver conectado. O aplicativo guarda até 256 URLs por preparação da área visível e de níveis próximos, informa quando a estimativa excede esse limite, mostra o status do cache e permite limpar os mapas com confirmação; prepare novamente depois de mover o mapa ou trocar de base.
 
-A internet continua sendo necessária para obter tiles que ainda não foram baixados, receber avisos novos, enviar e-mail, sincronizar eventos, abrir o futuro checkout Asaas e transmitir um SOS por serviço externo. O backup JSON de rota, waypoints e destino é criado e lido localmente, sem conta ou rede. O GPS/GNSS e a bússola podem fornecer dados locais sem rede, mas nenhum dos dois transmite um pedido de socorro sozinho.
+A internet continua sendo necessária para obter tiles que ainda não foram baixados, receber avisos novos, enviar e-mail, sincronizar eventos, abrir o futuro checkout Asaas e transmitir um SOS por serviço externo. O backup JSON de rota, waypoints e destino é criado e lido localmente, sem conta ou rede. Arquivos GPX também podem ser importados localmente; pontos de trilha e waypoints são validados e a rota importada fica pausada. O GPS/GNSS e a bússola podem fornecer dados locais sem rede, mas nenhum dos dois transmite um pedido de socorro sozinho.
 
 ## Como usar em uma expedição
 
-Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho. Em **Dados locais**, use **Exportar JSON** para backup completo, **Exportar GPX** para abrir a trilha em outro aplicativo compatível, ou **Importar JSON** para restaurar um backup; a importação substitui os dados atuais somente após confirmação e deixa a rota pausada. A alta precisão só é solicitada durante a gravação ativa; ao pausar, o mapa retorna ao perfil econômico. A opção **Manter tela ativa** é voluntária e só fica disponível durante uma rota ativa.
+Para usar no dia a dia, abra o **Mapa**, selecione **Cidade / Dia a dia**, ative o GPS e defina um destino colando latitude/longitude ou tocando em **Tocar no mapa**. O Vanguard mostra a distância geográfica e o rumo até o destino; ele não depende de uma conta ou de um servidor próprio para guardar essa informação. Para uma caminhada urbana ou expedição, selecione **Trilha / Expedição**, toque em **Iniciar rota** e use **Marcar ponto** em acampamentos, bifurcações, travessias, estacionamentos ou outros locais importantes. A rota é registrada no armazenamento local do aparelho. Em **Dados locais**, use **Exportar JSON** para backup completo, **Exportar GPX** para abrir a trilha em outro aplicativo compatível, ou **Importar JSON/GPX** para restaurar um backup ou trazer uma trilha compatível; a importação substitui os dados atuais somente após confirmação e deixa a rota pausada. A alta precisão só é solicitada durante a gravação ativa; ao pausar, o mapa retorna ao perfil econômico. A opção **Manter tela ativa** é voluntária e só fica disponível durante uma rota ativa.
 
 Na tela **Bússola**, toque em **Ativar sensor do aparelho**. A mesma ferramenta pode orientar uma caminhada no bairro, uma corrida ou uma travessia em área remota. Segure o telefone plano e longe de objetos magnéticos; se a leitura parecer errada, calibre o aparelho conforme as instruções do próprio sistema e compare a direção com o deslocamento observado no mapa.
 
@@ -47,7 +47,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 98 testes do motor geográfico e contratos civis
+npm test          # 100 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 
