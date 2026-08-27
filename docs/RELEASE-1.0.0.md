@@ -13,7 +13,9 @@
 
 ## Estado do snapshot e do código atual
 
-A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com a melhoria de exportação/importação JSON offline no commit `d390d55`, a documentação de build versus release no commit `15942f8`, o workflow móvel separado no commit `47aefaa` e a persistência versionada no commit `d5802a7`, a exportação GPX no commit `0517728`, a documentação correspondente no commit `2bf7993`, a importação GPX no commit `cb7508d` e a atualização do tutorial no commit `4c260cc`. Esses commits foram publicados em `main` e validados como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuir essas mudanças como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
+O resumo público das mudanças da futura versão está em [`docs/NOTAS-DE-LANCAMENTO-V1.0.0.md`](./NOTAS-DE-LANCAMENTO-V1.0.0.md).
+
+A tag `v1.0.0-rc.2` é um snapshot imutável da release candidate. Depois dela, o código de `main` avançou com exportação/importação JSON offline, persistência versionada, exportação/importação GPX, documentação do contrato build versus release, workflow móvel separado, modo Mar responsável, contexto civil no mapa, prontidão offline, resumo da trilha, status detalhado do cache cartográfico e indicação da idade do último fixo GPS. O commit atual de `main` é `52f13c2`. Essas mudanças foram publicadas e validadas como código, mas **não alteram nem recriam automaticamente a release `v1.0.0-rc.2`**. Para distribuí-las como nova candidate, seria necessário criar e publicar uma nova tag candidate de forma explícita.
 
 ## O que está entregue
 
@@ -23,20 +25,20 @@ O mapa oferece bases com atribuição, cache local de tiles visualizados/prepara
 
 As zonas de proteção civil podem guardar fonte, atualização, validade opcional, centro, raio e contexto. O motor ignora zonas expiradas, recusa coordenadas fora dos limites geográficos e suporta exportação/importação JSON com schema e versão. O manual de sobrevivência é um catálogo local versionado, com fontes, data de revisão, tags, busca e filtros.
 
-O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, precisão e horário. Compartilhar pelo sistema operacional ou copiar para a área de transferência não é tratado como entrega, confirmação de provedor ou acionamento de resgate. A fila offline permanece bloqueada para pagamentos, SOS, emergência, rádio e mensageiro satelital. O mapa também exporta e importa trilhas GPX localmente; a importação valida pontos e deixa a rota pausada.
+O Modo Socorro cria um pacote local validado com MGRS, latitude/longitude, precisão e horário. Compartilhar pelo sistema operacional ou copiar para a área de transferência não é tratado como entrega, confirmação de provedor ou acionamento de resgate. A fila offline permanece bloqueada para pagamentos, SOS, emergência, rádio e mensageiro satelital. O mapa também exporta e importa trilhas GPX localmente; a importação valida pontos e deixa a rota pausada. O HUD do mapa mostra a idade do último fixo e sinaliza posições antigas; isso não confirma que a pessoa ainda está naquele ponto.
 
 ## Validação reproduzida
 
 | Verificação | Resultado |
 |---|---|
-| `npm test` | 100 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
+| `npm test` | 107 testes aprovados, 0 falhas no código atual de `main`. A tag `v1.0.0-rc.2` anterior tinha 86 testes. |
 | `npm run build` | Aprovado; bundle de produção gerado. |
 | `node --check public/sw.js` | Aprovado. |
 | `npm run mobile:android:debug` | Aprovado; `BUILD SUCCESSFUL`. |
 | APK | `android/app/build/outputs/apk/debug/app-debug.apk`, aproximadamente 4,4 MB. |
 | Preview HTTPS | `#/inicio` e `#/mapa` carregaram; MapLibre renderizou base topográfica; nenhum GPS fictício foi criado. |
 | Service worker | Registro ativo; `CACHE_STATUS` respondeu com cache `vanguard-field-tiles-v2` e 25 tiles observados no preview. |
-| `CI / PR` | Checks automáticos aprovados nos commits publicados em `main`, incluindo a persistência versionada. |
+| `CI / PR` | CI da `main` aprovado; a execução mais recente desta validação foi `33032317555`, no commit `52f13c2`. |
 
 ## Checklist antes da tag final
 
