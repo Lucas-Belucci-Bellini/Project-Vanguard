@@ -20,6 +20,7 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 | **Apoiar projeto** | Tela pública em modo preparado para futuras doações via checkout hospedado do Asaas com PIX e cartão, sem cobrança real enquanto as credenciais não forem configuradas. |
 | **Contexto** | Modos Cidade, Expedição, Mar, Zona de Desastre, Área Contaminada e Área de Conflito, com zonas locais e avisos por fonte. |
 | **Sobrevivência** | Manual offline de primeiros passos, abrigo, água, primeiros socorros, sinalização, alimentação e conduta em áreas com possíveis explosivos. |
+| **Mapa de funcionalidades** | Inventário completo da visão do produto, com status, dependências, limites e próximos passos em [`docs/MAPA-DE-FUNCIONALIDADES.md`](docs/MAPA-DE-FUNCIONALIDADES.md). |
 
 ## Modo offline-first
 
@@ -46,7 +47,7 @@ Um celular comum não transforma automaticamente essa posição em um pedido de 
 ```bash
 npm install
 npm run dev       # http://localhost:5174
-npm test          # 68 testes do motor geográfico e legado
+npm test          # 74 testes do motor geográfico e contratos civis
 npm run build     # gera dist/
 ```
 
@@ -83,6 +84,8 @@ public/
 
 docs/
   ASAAS-INTEGRACAO.md  contrato, auditoria, webhook e ativação futura
+  CONTEXTOS-E-SEGURANCA.md fontes e limites de proteção civil
+  MAPA-DE-FUNCIONALIDADES.md inventário completo da visão e do estado do produto
 
 test/                  testes determinísticos do motor
 ```
@@ -99,7 +102,7 @@ O histórico e o CSV são instrumentos de organização e auditoria. Eles não c
 
 A localização permanece no dispositivo por padrão. O modo Socorro não chama serviços externos e não simula uma confirmação de recebimento. A mensagem compartilhada inclui coordenadas MGRS, latitude/longitude, precisão e horário para que a pessoa possa escolher o canal correto.
 
-O mapa online usa fontes públicas com atribuição, mas isso não significa que as imagens estejam disponíveis offline. Para uma versão de campo mais robusta, a próxima etapa deve incluir pacotes de tiles pré-baixados por área, expiração e verificação de integridade, além de uma integração opt-in com um provedor real de mensagens via satélite.
+O mapa online usa fontes públicas com atribuição. A versão atual já permite preparar tiles da área visível por cache local, mas isso não equivale a um pacote cartográfico oficial completo; uma etapa futura deve adicionar pacotes versionados, expiração, verificação de integridade e cartas náuticas oficiais. Também permanece futura uma integração opt-in com um provedor real de mensagens via satélite.
 
 ## Observação sobre o código legado
 

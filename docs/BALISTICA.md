@@ -392,3 +392,9 @@ O módulo cospe números de 4 dígitos com aparência de autoridade. Onde ele pa
 
 Ferramenta de **treino e simulação**. Tudo isto aparece na tela `#/sobre` do
 app — não escondido em rodapé.
+
+---
+
+## Nota de escopo atual — Vanguard Field
+
+Este documento descreve exclusivamente o módulo balístico legado preservado no repositório original. Ele não representa o produto principal atual, não é usado pelo fluxo civil de navegação, sobrevivência ou proteção civil e não deve ser interpretado como manual operacional. O escopo atual está em `README.md`, `docs/MAPA-DE-FUNCIONALIDADES.md` e `docs/CONTEXTOS-E-SEGURANCA.md`.

@@ -1,14 +1,16 @@
-# 🗺️ Mega-Plano — Project Vanguard (GPS topográfico tático)
+# 🗺️ Mega-Plano — Project Vanguard (navegação offline-first e proteção civil)
 
-> App **mobile + web** de navegação com a estética e a funcionalidade do mapa
-> tático do Arma 3, trazidas para o mundo real. Funciona acoplado ao
-> [Projeto Baluarte](https://github.com/Lucas-Belucci-Bellini/Projeto-Baluarte).
+> Aplicativo **mobile + web** de navegação multiuso para cidade, caminhada,
+> expedição, mar e preparação para emergências. A interface usa o mapa, GPS/GNSS,
+> bússola, trilha local, sobrevivência e modos de contexto para reduzir exposição
+> e facilitar pedido de ajuda. Funciona de forma independente e mantém integração
+> técnica opcional com o [Projeto Baluarte](https://github.com/Lucas-Belucci-Bellini/Projeto-Baluarte).
 >
-> **Estado:** a base geográfica deste plano já estava entregue neste repositório.
-> A interface principal foi recriada como **Vanguard Field**, priorizando
-> navegação civil, bússola, registro local de trilha e preparação responsável
-> de coordenadas para socorro. O computador de tiro permanece isolado como
-> módulo legado, preservado apenas para compatibilidade histórica e testes.
+> **Estado:** o produto principal é o **Vanguard Field**, com navegação urbana,
+> expedição, operação offline, zonas civis, manual de sobrevivência e preparação
+> de SOS. O computador de tiro permanece isolado como módulo legado, preservado
+> apenas para compatibilidade histórica e testes; ele não representa o objetivo
+> civil atual do aplicativo.
 
 ---
 
@@ -198,6 +200,21 @@ Trocados por `data-modo` no `<html>`; só variáveis mudam, nenhum componente sa
 
 ---
 
+## 3.5 Direção atual: Vanguard Field
+
+A camada de produto atual está descrita em [`MAPA-DE-FUNCIONALIDADES.md`](MAPA-DE-FUNCIONALIDADES.md). Ela registra a diferença entre o que já funciona localmente, o que está preparado para integração e o que requer hardware ou fontes externas.
+
+| Frente atual | Entrega e critério de segurança |
+|---|---|
+| Cidade e dia a dia | Destino por coordenada/toque, distância, rumo, pontos e rota local. |
+| Expedição | Bússola, MGRS, trilha, waypoints, retorno e Modo Socorro preparado. |
+| Offline-first | Shell PWA, armazenamento local, pré-cache da área visível e manual de sobrevivência. |
+| Contexto civil | Cidade, Expedição, Mar, Desastre, Área Contaminada e Área de Conflito, com fonte e data de zonas. |
+| Sobrevivência | Primeiros passos, abrigo, água, sinalização, alimentação conservadora e conduta diante de explosivos. |
+| Equipamentos | Contratos para Geiger/dosímetro, satélite, beacon, rádio e sonar; nenhum é simulado pelo celular. |
+| Proteção | Nunca tratar GPS como comunicação, mapa como radar ou estimativa como alerta confirmado. |
+| Doações | Asaas PIX/cartão em modo preparado, com auditoria e sem coleta de CPF/CNPJ de doadores. |
+
 ## 4. Roadmap
 
 ### ✅ Fase 1 — Fundações (ENTREGUE)
@@ -213,7 +230,7 @@ Trocados por `data-modo` no `<html>`; só variáveis mudam, nenhum componente sa
 | 1.7 | Design system Mil-Spec + 3 modos de tela | `src/styles/variables.css` |
 | 1.8 | Mapa tático com grade MGRS sobreposta e rótulos de carta | `src/pages/mapa.js` |
 | 1.9 | Computador de tiro | `src/pages/tiro.js` |
-| 1.10 | **65 testes** ancorados em constantes geodésicas publicadas | `test/` |
+| 1.10 | **74 testes** entre motor geográfico, localização, contextos e contratos civis | `test/` |
 
 ### 🔜 Fase 2 — Navegação de campo (2 sprints)
 
@@ -330,6 +347,6 @@ grandeza. Tudo listado na tela `#/sobre` — não escondido em rodapé.
 ```bash
 npm install
 npm run dev      # http://localhost:5174
-npm test         # 65 testes do motor
+npm test         # 74 testes do motor e dos contratos civis
 npm run build    # dist/
 ```

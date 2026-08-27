@@ -247,3 +247,11 @@ integração.
 - **Não** ligar rastreio de posição por padrão.
 - **Não** apresentar os dados de armamento como tabela de tiro oficial. Eles são
   referência de modelo — o aviso da tela `#/sobre` acompanha a integração.
+
+---
+
+## Nota de escopo atual — Vanguard Field
+
+Este documento preserva o contrato histórico de integração com o Projeto Baluarte. O produto principal atual é o Vanguard Field civil, offline-first e orientado a navegação, sobrevivência e proteção civil. Recursos de esquadrão, WebSocket e cálculo balístico descritos aqui não fazem parte do fluxo recomendado do aplicativo atual.
+
+Para a visão vigente, consulte `README.md`, `docs/MAPA-DE-FUNCIONALIDADES.md` e `docs/CONTEXTOS-E-SEGURANCA.md`. A integração futura deve priorizar dados civis, fontes oficiais, privacidade, auditoria e confirmação explícita de qualquer transmissão.
