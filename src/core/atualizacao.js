@@ -7,6 +7,18 @@
 export const VERSAO_ATUAL = '1.0.0';
 export const URL_RELEASES = 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases';
 export const URL_RELEASE_MAIS_RECENTE = 'https://api.github.com/repos/Lucas-Belucci-Bellini/Project-Vanguard/releases/latest';
+const CAMINHO_REPOSITORIO_OFICIAL = '/Lucas-Belucci-Bellini/Project-Vanguard/';
+
+function urlOficial(url) {
+  if (typeof url !== 'string') return null;
+  try {
+    const candidata = new URL(url);
+    if (candidata.protocol !== 'https:' || candidata.origin !== 'https://github.com' || !candidata.pathname.startsWith(CAMINHO_REPOSITORIO_OFICIAL)) return null;
+    return candidata.toString();
+  } catch {
+    return null;
+  }
+}
 
 function partesVersao(valor) {
   const texto = String(valor ?? '').trim().replace(/^v/i, '');
@@ -50,10 +62,7 @@ export function urlDownload(release) {
   const apk = Array.isArray(release.assets)
     ? release.assets.find((asset) => typeof asset?.name === 'string' && asset.name.toLowerCase().endsWith('.apk'))
     : null;
-  if (typeof apk?.browser_download_url === 'string' && apk.browser_download_url.startsWith('https://')) {
-    return apk.browser_download_url;
-  }
-  return typeof release.html_url === 'string' && release.html_url.startsWith('https://')
-    ? release.html_url
-    : URL_RELEASES;
+  const downloadOficial = urlOficial(apk?.browser_download_url);
+  if (downloadOficial) return downloadOficial;
+  return urlOficial(release.html_url) || URL_RELEASES;
 }

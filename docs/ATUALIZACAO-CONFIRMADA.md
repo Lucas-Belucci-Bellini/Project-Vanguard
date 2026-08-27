@@ -10,7 +10,7 @@ Esse fluxo evita trocar a versão enquanto alguém está usando o mapa ou confer
 
 ## O que acontece no APK Capacitor
 
-Um APK não pode instalar uma nova versão de si próprio de forma segura dentro da página web. Quando uma release oficial posterior está disponível e há conexão, o botão **ATUALIZAÇÃO · vX.Y.Z** pede confirmação e abre a página ou o asset HTTPS oficial do GitHub. O navegador/WebView e o instalador do Android continuam responsáveis por baixar, verificar e pedir a confirmação de instalação.
+Um APK não pode instalar uma nova versão de si próprio de forma segura dentro da página web. Quando uma release oficial posterior está disponível e há conexão, o botão **ATUALIZAÇÃO · vX.Y.Z** pede confirmação e abre somente a página ou o asset HTTPS do caminho oficial `github.com/Lucas-Belucci-Bellini/Project-Vanguard/`. Se o payload trouxer um asset fora dessa origem, o app usa a página fixa de releases como fallback. O navegador/WebView e o instalador do Android continuam responsáveis por baixar, verificar e pedir a confirmação de instalação.
 
 Portanto, o botão não é um sistema de atualização silenciosa, não baixa APK em segundo plano e não promete atualizar em uma área sem internet. Para corrigir ou substituir um APK distribuído fora da loja, a nova release precisa ter uma versão maior, como `v1.0.1`, e o usuário precisa concluir o fluxo do sistema operacional.
 
@@ -28,4 +28,4 @@ Antes de uma caminhada de quatro dias, instalar e testar a versão desejada aind
 
 ## Para desenvolvedores
 
-O fluxo oficial deve sempre publicar artefatos por HTTPS e usar uma versão semântica maior que a instalada. O código compara a tag da release, recusa rascunhos e URLs inseguras e abre a página oficial como fallback. A tag final `v1.0.0` continua deliberadamente separada de builds debug; hotfixes posteriores devem usar uma versão nova, e não sobrescrever uma tag existente.
+O fluxo oficial deve sempre publicar artefatos por HTTPS e usar uma versão semântica maior que a instalada. O código compara a tag da release, recusa rascunhos, aceita downloads apenas dentro da allowlist HTTPS do repositório oficial e abre a página oficial como fallback. A tag final `v1.0.0` continua deliberadamente separada de builds debug; hotfixes posteriores devem usar uma versão nova, e não sobrescrever uma tag existente.

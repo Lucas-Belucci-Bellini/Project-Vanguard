@@ -25,7 +25,7 @@
 | V2-019 | Diagnostics | Mostrar estado de app, GPS, rede, cache, bateria e lifecycle | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico` | 8 testes de diagnóstico/lifecycle + preview; validação física pendente | `V2_STATUS.md`, ADR-0005, README | IN_PROGRESS | 123 testes totais; browser validado; device pending |
 | V2-020 | Accessibility | Labels, salto de conteúdo, foco e leitores de tela | Shell com link de salto, `<main>` focável, ARIA explícito e foco pós-rota | DOM do preview validado; TalkBack/VoiceOver pendentes | ADR-0006, checklist mobile | IN_PROGRESS | Preview semântico; PHYSICAL VALIDATION REQUIRED |
 | V2-021 | Performance | Medir startup, mapa, memória e bundle | Métricas locais/documentais | Profiling real pendente | `MEGA-PLANO.md` | IN_PROGRESS | Bundle/build; sem profiling completo |
-| V2-022 | Updates | Detectar, confirmar, recarregar/abrir release | `atualizacao.js`, UI e SW | Teste com versão posterior pendente | atualização confirmada | IN_PROGRESS | Build local |
+| V2-022 | Updates | Detectar, confirmar, recarregar/abrir release | `atualizacao.js`, `atualizacao-ui.js` e SW; allowlist HTTPS oficial | Teste unitário de waiting, negar, confirmar, `SKIP_WAITING`, reload e limpeza; release posterior pendente | atualização confirmada, ADR-0007 | IN_PROGRESS | 124 testes; fluxo PWA fake validado; release posterior pending |
 | V2-023 | Release | Tag assinada e artefatos distribuíveis | Workflow separado; signing externo | GPG/SSH, APK/AAB/IPA reais pendentes | comandos de tag | BLOCKED | Candidate `rc.2` |
 | V2-024 | Legacy | Não ampliar balística/armamento | Módulos isolados | Revisão de escopo | `CLAUDE.md` | VERIFIED | LEGACY-RESTRICTED |
 

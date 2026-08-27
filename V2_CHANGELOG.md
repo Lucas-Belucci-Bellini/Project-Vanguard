@@ -1,5 +1,11 @@
 # Project Vanguard V2 — changelog de construção
 
+## 2026-08-27 — Update confirmado com destino seguro
+
+O núcleo de atualização agora aceita somente assets e páginas HTTPS no caminho oficial `github.com/Lucas-Belucci-Bellini/Project-Vanguard/`; payloads externos, esquemas inseguros ou caminhos parecidos voltam à página fixa de releases. O fluxo PWA waiting foi coberto com teste determinístico para detecção, negar, confirmar, `SKIP_WAITING`, `controllerchange`, reload e remoção de listeners. O APK continua sem auto-instalação e nenhuma release foi criada nesta unidade.
+
+Evidência local: `npm test` com 124 testes aprovados, build web, service worker válido, audit de produção sem vulnerabilidades, sync Android/iOS e APK debug compilado. Decisão e limites em `ADR-0007-allowlist-download-atualizacao.md`.
+
 ## 2026-08-27 — Hardening de acessibilidade da shell
 
 Implementado link **Pular para o conteúdo principal**, landmark `<main>` focável, foco após troca de rota, `aria-busy`, status global ao vivo e alertas semânticos. O helper DOM agora serializa explicitamente os atalhos ARIA históricos (`ariaLabel`, `ariaHidden`, `ariaCurrent`, `ariaLive` e `ariaBusy`). A ativação do link de salto não interfere no hash-router.

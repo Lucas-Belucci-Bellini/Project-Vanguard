@@ -25,7 +25,7 @@
 | PWA | Manifest, shell e service worker | IN_PROGRESS | `public/sw.js`, `index.html` | Testar instalação e reload offline |
 | ANDROID | Capacitor + Geolocation foreground + App lifecycle | IN_PROGRESS | APK debug, Gradle, `@capacitor/app@8.1.1` e permissões coarse/fine | Assinatura, permissões e hardware/lifecycle pendentes |
 | IOS | Capacitor iOS + Geolocation foreground + App lifecycle | BLOCKED | Plugins sincronizados, `Package.swift` e descrições foreground | Mac/Xcode/Apple, permissões e lifecycle necessários |
-| UPDATES | Update confirmado | IN_PROGRESS | `atualizacao.js`, UI e SW | Testar release posterior |
+| UPDATES | Update confirmado | IN_PROGRESS | `atualizacao.js`, `atualizacao-ui.js`, SW, allowlist HTTPS oficial e teste waiting/confirmado | Testar release posterior real e instalador do sistema |
 | DONATIONS | Tela preparada | NOT_CONFIGURED | Sem checkout/credenciais | Não ativar sem integração real |
 | DIAGNOSTICS | Diagnóstico local dedicado | IN_PROGRESS | `src/core/diagnostico.js`, `src/core/ciclo-vida.js`, `src/pages/diagnostico.js`, rota `#/diagnostico`, 8 testes | Validar em navegador e aparelhos reais; sem telemetria oculta |
 | SETTINGS | Configuração/tema local | IMPLEMENTED | Shell e estado | Expandir somente com necessidade |

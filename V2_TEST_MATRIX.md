@@ -16,7 +16,7 @@
 | T-012 | Compass | Android/iOS | Sensor presente, negado, ausente e calibração | Fonte do rumo clara; fallback seguro | Device required | BLOCKED |
 | T-013 | Battery | Android/Xiaomi/iOS | Rota ativa, pausa, tela bloqueada, retorno e quatro dias | Consumo medido; sem promessa universal | Plano de campo | BLOCKED |
 | T-014 | Lifecycle | Browser/Android/Xiaomi/iOS | Foreground, troca de app, reinício, permissões e background | Estado do app observável; dados não somem silenciosamente | `ciclo-vida.js` + `@capacitor/app` sincronizado; teste físico requerido | IN_PROGRESS |
-| T-015 | Update | PWA/APK | SW waiting, negar, confirmar, release posterior e offline | Atualização confirmada; APK abre origem oficial | Código + build; posterior pendente | IN_PROGRESS |
+| T-015 | Update | PWA/APK | SW waiting, negar, confirmar, `SKIP_WAITING`, reload, allowlist, release posterior e offline | Atualização confirmada; APK abre apenas origem oficial | 1 teste de UI PWA fake + testes de versões/URL; posterior pendente | IN_PROGRESS |
 | T-016 | Accessibility | Browser/Android/iOS | Link de salto, foco pós-rota, ARIA, TalkBack, VoiceOver e contraste | Fluxos principais compreensíveis | Preview DOM + `helpers.test.js`; device required para leitores de tela/contraste | IN_PROGRESS |
 | T-017 | Diagnostics | Browser/PWA/mobile | Versão, rede, GPS, frescor, fonte, cache, bateria, lifecycle e service worker | Estado local honesto e sem telemetria escondida | Diagnóstico + 8 testes de diagnóstico/lifecycle + preview; aparelhos pendentes | IN_PROGRESS |
 | T-018 | Security | Node/browser | URL abusiva, payload malformado, segredo e XSS | Rejeição/escape e nenhum segredo no bundle | Revisão contínua | IN_PROGRESS |

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { compararVersoes, releaseMaisNova, nomeVersao, urlDownload } from '../src/core/atualizacao.js';
+import { compararVersoes, releaseMaisNova, nomeVersao, urlDownload, URL_RELEASES } from '../src/core/atualizacao.js';
 
 test('compararVersoes ordena versões finais e pré-releases', () => {
   assert.equal(compararVersoes('v1.0.1', '1.0.0'), 1);
@@ -29,8 +29,9 @@ test('nomeVersao extrai tag pública sem alterar o objeto remoto', () => {
   assert.equal(nomeVersao(undefined), null);
 });
 
-test('urlDownload prioriza APK HTTPS e não aceita URL externa insegura', () => {
-  assert.equal(urlDownload({ assets: [{ name: 'vanguard.apk', browser_download_url: 'https://github.com/exemplo/app.apk' }] }), 'https://github.com/exemplo/app.apk');
-  assert.equal(urlDownload({ html_url: 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/tag/v1.0.1' }), 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/tag/v1.0.1');
-  assert.equal(urlDownload({ assets: [{ name: 'vanguard.apk', browser_download_url: 'javascript:alert(1)' }], html_url: 'http://inseguro.test' }), 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases');
+test('urlDownload aceita somente APK e página HTTPS do repositório oficial', () => {
+  assert.equal(urlDownload({ assets: [{ name: 'vanguard.apk', browser_download_url: 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/download/v1.0.1/vanguard.apk' }] }), 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/download/v1.0.1/vanguard.apk');
+  assert.equal(urlDownload({ assets: [{ name: 'vanguard.apk', browser_download_url: 'https://github.com/exemplo/app.apk' }], html_url: 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/tag/v1.0.1' }), 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/tag/v1.0.1');
+  assert.equal(urlDownload({ assets: [{ name: 'vanguard.apk', browser_download_url: 'javascript:alert(1)' }], html_url: 'http://inseguro.test' }), URL_RELEASES);
+  assert.equal(urlDownload({ assets: [{ name: 'vanguard.apk', browser_download_url: 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard.evil/releases/download/v1.0.1/app.apk' }] }), URL_RELEASES);
 });
