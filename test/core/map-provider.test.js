@@ -16,10 +16,23 @@ test('MapProvider rejeita definição sem tiles', () => {
   assert.throws(() => criarMapProvider({ id: 'demo', nome: 'Demo' }), /MapProvider inválido/);
 });
 
+test('MapProvider rejeita tile vazio', () => {
+  const resultado = validarMapProvider({ id: 'demo', nome: 'Demo', tiles: ['  '] });
+  assert.equal(resultado.valido, false);
+  assert.match(resultado.erros.join(' '), /cada tile/);
+});
+
+test('MapProvider rejeita tileSize inválido', () => {
+  const resultado = validarMapProvider({ id: 'demo', nome: 'Demo', tiles: ['https://example.test/{z}/{x}/{y}.png'], tileSize: 0 });
+  assert.equal(resultado.valido, false);
+  assert.match(resultado.erros.join(' '), /tileSize/);
+});
+
 test('providerDeCamada preserva créditos e permite adaptador de renderização', () => {
   const renderizar = () => 'ok';
-  const provider = providerDeCamada({ id: 'base', nome: 'Base', tiles: ['https://example.test/{z}/{x}/{y}.png'], creditos: 'Fonte' }, { renderizar });
+  const provider = providerDeCamada({ id: 'base', nome: 'Base', tiles: [' https://example.test/{z}/{x}/{y}.png '], creditos: 'Fonte' }, { renderizar });
   assert.equal(provider.creditos, 'Fonte');
+  assert.equal(provider.tiles[0], 'https://example.test/{z}/{x}/{y}.png');
   assert.equal(provider.renderizar(), 'ok');
 });
 
