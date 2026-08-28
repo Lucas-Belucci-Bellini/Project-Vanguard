@@ -34,6 +34,7 @@ export function criarControleAtualizacao() {
   let releaseConhecida = null;
   let registroConhecido = null;
   let removido = false;
+  let timerVerificacao = null;
 
   function mostrar({ texto, titulo, atualizarServiceWorker, url }) {
     if (removido) return;
@@ -83,7 +84,7 @@ export function criarControleAtualizacao() {
       });
       if (!resposta.ok) return;
       const release = await resposta.json();
-      if (!releaseMaisNova(release, VERSAO_ATUAL)) return;
+      if (removido || !releaseMaisNova(release, VERSAO_ATUAL)) return;
       releaseConhecida = release;
       const versao = nomeVersao(release) || 'nova versão';
       mostrar({
@@ -117,12 +118,19 @@ export function criarControleAtualizacao() {
     observarRegistro(registro);
     verificarServiceWorker(registro);
   }).catch(() => {});
-  setTimeout(verificarRelease, 2500);
+  timerVerificacao = setTimeout(() => {
+    timerVerificacao = null;
+    verificarRelease();
+  }, 2500);
 
   return {
     elemento: botao,
     desmontar() {
       removido = true;
+      if (timerVerificacao !== null) {
+        clearTimeout(timerVerificacao);
+        timerVerificacao = null;
+      }
       removeEventListener('vanguard:sw-ready', aoServiceWorkerPronto);
       removeEventListener('online', aoOnline);
       document.removeEventListener('visibilitychange', aoVisivel);

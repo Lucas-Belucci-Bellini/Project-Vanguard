@@ -34,7 +34,7 @@ class FakeElement {
 }
 
 function instalarAmbienteFake() {
-  const globais = ['document', 'navigator', 'window', 'fetch', 'Node', 'setTimeout', 'addEventListener', 'removeEventListener'];
+  const globais = ['document', 'navigator', 'window', 'fetch', 'Node', 'setTimeout', 'clearTimeout', 'addEventListener', 'removeEventListener'];
   const anteriores = new Map(globais.map((nome) => [nome, Object.getOwnPropertyDescriptor(globalThis, nome)]));
   const eventos = new Map();
   const eventosDocumento = new Map();
@@ -48,6 +48,17 @@ function instalarAmbienteFake() {
   let recarregamentos = 0;
   let urlAtribuida = null;
   const mensagens = [];
+  const timers = [];
+  let proximoTimer = 1;
+  const setTimeoutFake = (callback, delay) => {
+    const timer = { id: proximoTimer++, callback, delay, cancelado: false };
+    timers.push(timer);
+    return timer.id;
+  };
+  const clearTimeoutFake = (id) => {
+    const timer = timers.find((item) => item.id === id);
+    if (timer) timer.cancelado = true;
+  };
 
   const adicionar = (colecao, nome, callback) => {
     if (!colecao.has(nome)) colecao.set(nome, new Set());
@@ -85,7 +96,8 @@ function instalarAmbienteFake() {
   Object.defineProperty(globalThis, 'window', { configurable: true, value: janela });
   Object.defineProperty(globalThis, 'fetch', { configurable: true, value: async () => ({ ok: false }) });
   Object.defineProperty(globalThis, 'Node', { configurable: true, value: FakeElement });
-  Object.defineProperty(globalThis, 'setTimeout', { configurable: true, value: () => 0 });
+  Object.defineProperty(globalThis, 'setTimeout', { configurable: true, value: setTimeoutFake });
+  Object.defineProperty(globalThis, 'clearTimeout', { configurable: true, value: clearTimeoutFake });
   Object.defineProperty(globalThis, 'addEventListener', { configurable: true, value: (nome, callback) => adicionar(eventos, nome, callback) });
   Object.defineProperty(globalThis, 'removeEventListener', { configurable: true, value: (nome, callback) => remover(eventos, nome, callback) });
 
@@ -97,6 +109,7 @@ function instalarAmbienteFake() {
     eventosServiceWorker,
     registro,
     mensagens,
+    timers,
     get confirmacao() { return confirmacao; },
     set confirmacao(valor) { confirmacao = valor; },
     get recarregamentos() { return recarregamentos; },
@@ -136,7 +149,10 @@ test('controle PWA detecta waiting, respeita negar/confirmar e remove listeners'
     for (const callback of controllerChange || []) callback();
     assert.equal(ambiente.recarregamentos, 1);
 
+    const timerVerificacao = ambiente.timers.find((timer) => timer.delay === 2500);
+    assert.ok(timerVerificacao);
     controle.desmontar();
+    assert.equal(timerVerificacao.cancelado, true);
     assert.equal(ambiente.eventos.get('vanguard:sw-ready')?.size || 0, 0);
     assert.equal(ambiente.eventosDocumento.get('visibilitychange')?.size || 0, 0);
   } finally {
