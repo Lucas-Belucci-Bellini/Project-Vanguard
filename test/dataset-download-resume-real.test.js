@@ -20,8 +20,9 @@ test('retoma dataset usando Range e If-Range e combina staging', async () => {
 
   assert.equal(resultado.ok, true);
   assert.deepEqual([...resultado.bytes], [1, 2, 3, 4]);
-  assert.equal(chamada.headers.get('Range'), 'bytes=2-');
-  assert.equal(chamada.headers.get('If-Range'), '"abc"');
+  // `criarRangeRetomada` devolve um objeto simples — contrato coberto por
+  // `dataset-download-resume.test.js` e aceito por `fetch` como está.
+  assert.deepEqual(chamada.headers, { Range: 'bytes=2-', 'If-Range': '"abc"' });
 });
 
 test('rejeita resposta 200 para uma retomada', async () => {
