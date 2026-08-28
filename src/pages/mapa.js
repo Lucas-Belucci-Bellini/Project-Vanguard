@@ -10,6 +10,7 @@ import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha } from '../core/trilha.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
+import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, exportarRegistroKml, importarRegistroGpx, importarRegistroKml, importarRegistroLocal } from '../core/registro-offline.js';
 import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arquivo.js';
@@ -229,6 +230,33 @@ export function mapaPage() {
   let ultimaChaveRotulos = null;
   let wakeLock = null;
   let wakeAtivo = false;
+  const controleCentralizacao = criarControleCentralizacao({
+    solicitar: solicitarPosicao,
+    onInicio: () => {
+      centerButton.disabled = true;
+      centerButton.textContent = 'BUSCANDO FIXO…';
+    },
+    onPosition: (pos) => {
+      if (desmontado) return;
+      posicao = pos;
+      atualizarHud();
+      atualizarSheet();
+      atualizarMarcadores();
+      mapa?.flyTo({ center: [pos.lon, pos.lat], zoom: Math.max(mapa.getZoom(), 15), duration: 500 });
+      sheetStatus.textContent = `Novo fixo recebido · ${precisaoLabel(pos.accuracy)} · confirme o ponto no aparelho.`;
+    },
+    onError: (erro) => {
+      if (desmontado) return;
+      sheetStatus.textContent = erro?.code === 1
+        ? 'Permita o GPS nas configurações do aparelho para centralizar.'
+        : 'Não foi possível obter um novo fixo de maior precisão.';
+    },
+    onFim: () => {
+      if (desmontado) return;
+      centerButton.disabled = false;
+      centerButton.textContent = '⌾ CENTRAR';
+    },
+  });
 
   function distanciaTrilha() {
     let total = 0;
@@ -340,29 +368,8 @@ export function mapaPage() {
   }
 
   function centralizar() {
-    if (!mapa) return;
-    centerButton.disabled = true;
-    centerButton.textContent = 'BUSCANDO FIXO…';
-    solicitarPosicao({
-      mode: 'manual',
-      onPosition: (pos) => {
-        posicao = pos;
-        atualizarHud();
-        atualizarSheet();
-        atualizarMarcadores();
-        mapa.flyTo({ center: [pos.lon, pos.lat], zoom: Math.max(mapa.getZoom(), 15), duration: 500 });
-        sheetStatus.textContent = `Novo fixo recebido · ${precisaoLabel(pos.accuracy)} · confirme o ponto no aparelho.`;
-      },
-      onError: (erro) => {
-        sheetStatus.textContent = erro?.code === 1
-          ? 'Permita o GPS nas configurações do aparelho para centralizar.'
-          : 'Não foi possível obter um novo fixo de maior precisão.';
-      },
-    });
-    window.setTimeout(() => {
-      centerButton.disabled = false;
-      centerButton.textContent = '⌾ CENTRAR';
-    }, 21_000);
+    if (!mapa || desmontado) return;
+    controleCentralizacao.iniciar();
   }
 
   async function configurarWakeLock(ativo) {
@@ -379,7 +386,7 @@ export function mapaPage() {
       wakeLock.addEventListener?.('release', () => {
         wakeLock = null;
         wakeAtivo = false;
-        atualizarSheet();
+        if (!desmontado) atualizarSheet();
       });
     } catch {
       wakeLock = null;
@@ -848,5 +855,5 @@ export function mapaPage() {
   atualizarHud();
   atualizarDestino();
   atualizarSheet();
-  return { elemento: raiz, desmontar: () => { desmontado = true; window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; controleCentralizacao.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
 }
