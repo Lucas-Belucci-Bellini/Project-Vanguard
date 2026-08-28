@@ -33,6 +33,7 @@ import {
   verificarPacoteDataset,
 } from './dataset-transacao.js';
 import { FONTES_DATASET_ATUAIS, avaliarCatalogoFontes, avaliarFonteDataset, ESTADOS_GOVERNANCA_FONTE } from '../data/fontes-dataset.js';
+import { verificarIntegridadeDataset } from './dataset-integridade.js';
 
 export const ESTADOS_RECUPERACAO_DATASET = Object.freeze({
   LIMPO: 'CLEAN',
@@ -266,7 +267,33 @@ export function criarSincronizacaoDataset({
      * reprovada é gravada como falha antes de retornar, para que o rollback
      * continue possível depois de um encerramento abrupto.
      */
-    verificar({ bytes, checksum } = {}) {
+    async verificarBytes(bytes) {
+      const leitura = transacaoAtual();
+      if (!leitura.ok) return leitura;
+      if (!leitura.valor) return falha('SEM_TRANSACAO', 'Não há transação de dataset em andamento.');
+      if (leitura.valor.estado !== ESTADOS_SYNC_DATASET.VERIFYING) {
+        return falha('ESTADO_INVALIDO', 'Os bytes só podem ser verificados no estado VERIFYING.');
+      }
+
+      const integridade = await verificarIntegridadeDataset(bytes, leitura.valor.novo.checksum);
+      if (!integridade.ok) {
+        const falhada = falharTransacaoDataset(leitura.valor, {
+          codigo: integridade.codigo,
+          motivo: integridade.motivo,
+        });
+        if (!falhada.ok) return falhada;
+        const salvo = persistir(falhada.transacao);
+        if (!salvo.ok) return salvo;
+        return { ...integridade, transacao: falhada.transacao };
+      }
+
+      return this.verificar({
+        bytes: integridade.bytes,
+        checksum: integridade.checksumCalculado,
+      });
+    },
+
+        verificar({ bytes, checksum } = {}) {
       const leitura = transacaoAtual();
       if (!leitura.ok) return leitura;
       if (!leitura.valor) return falha('SEM_TRANSACAO', 'Não há transação de dataset em andamento.');
