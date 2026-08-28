@@ -7,7 +7,7 @@ UI (src/pages, src/ui, src/styles)
         ↓
 APPLICATION / ciclo de tela (src/main.js)
         ↓
-CORE (estado, localização, trilha, contexto, registros, atualização)
+CORE (estado, localização, trilha, contexto, registros, atualização, contrato do mapa)
         ↓
 ENGINE (geo, MGRS, ângulos e cálculos puros)
         ↓
@@ -18,6 +18,12 @@ INTEGRAÇÕES OPCIONAIS (MapLibre, service worker, APIs do dispositivo)
 
 A estrutura existente tem prioridade. A criação de uma pasta nova exige uma função clara e uma decisão registrada.
 
+## Decisão — MapProvider
+
+O Vanguard não deve acoplar a aplicação ao MapLibre nem a um fornecedor de tiles. `src/core/map-provider.js` define o contrato mínimo para uma fonte cartográfica: identidade, tiles, limites de zoom, atribuição e adaptador opcional de renderização. A UI e o estado tático não devem depender de URLs ou APIs de um provedor específico.
+
+A primeira implementação continua compatível com o catálogo existente em `src/data/camadas-mapa.js`. Esta etapa não troca o provedor atual, não baixa dados em massa e não altera a política de licenciamento. O objetivo é permitir substituição controlada e futura estratégia offline por pacotes licenciados.
+
 ## Caminhos críticos
 
 | Caminho | Fluxo | Estado/limite |
@@ -25,7 +31,8 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | GPS → HUD | `@capacitor/geolocation` foreground nativo ou `navigator.geolocation` → `src/core/localizacao.js` → normalização → `engine/mgrs.js` → mapa/HUD | Posição local; fonte, precisão e idade devem ser visíveis |
 | GPS → trilha | posição normalizada → filtro de distância/tempo → `estado.js` → resumo `trilha.js` | Alta precisão somente em rota ativa; sistema operacional define frequência |
 | Mapa → destino | toque/coordenadas → validação → distância/azimute `engine/geo.js` → HUD | Não é roteamento viário completo |
-| Mapa → tiles | MapLibre → `planejarTilesDoViewport()` → templates únicos → `public/sw.js` allowlist/deduplicação → Cache Storage | Pré-cache limitado a 256 URLs; cache parcial não prova cobertura; resposta do provedor/quota dependem do ambiente |
+| Mapa → provider | UI → `src/core/map-provider.js` → camada em `src/data/camadas-mapa.js` → adaptador MapLibre | Provider intercambiável; dados do usuário ficam fora do provider |
+| Mapa → tiles | provider → `planejarTilesDoViewport()` → templates únicos → `public/sw.js` allowlist/deduplicação → Cache Storage | Pré-cache limitado a 256 URLs; cache parcial não prova cobertura; resposta do provedor/quota dependem do ambiente |
 | Rota → backup | `estado.js` → `registro-offline.js` → JSON/GPX → download local | Importação confirma, valida e pausa a rota |
 | Contexto → mapa | zonas JSON → `core/contexto.js` → validade/prioridade → cartão local | Não é alerta oficial automático |
 | Manual → sobrevivência | catálogo local → filtros/busca → tela | Disponível offline; fontes e revisão visíveis |
@@ -37,7 +44,6 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 | Diagnóstico → observabilidade | APIs locais → `src/core/diagnostico.js`/`src/core/ciclo-vida.js` → `src/pages/diagnostico.js` → estado local | Sem telemetria oculta; bateria, sensores e lifecycle podem estar indisponíveis |
 | Diagnóstico → performance | `performance.getEntriesByType('navigation')` e `performance.memory` opcional → `desempenhoResumo()` → grupo `DESEMPENHO` | Medição local de DOM/carga/heap disponível; não mede FPS, bateria ou memória total |
 | Shell → acessibilidade | `src/main.js` cria skip link, `<main>` focável e estados ARIA → `src/ui/helpers.js` serializa atributos → `src/styles/base.css` mantém foco visível | Melhora navegação sem declarar conformidade WCAG; TalkBack/VoiceOver e contraste ainda exigem campo |
-
 | Home → prontidão offline | `estado.js` posição/mapas/trilha/waypoints → `prontidao-offline.js` → cartão `ANTES DE SAIR` em `inicio.js` | Posição válida sem timestamp, futura ou com relógio inválido fica em `atencao`; GPS não é comunicação |
 
 ## Armazenamento
