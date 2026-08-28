@@ -321,3 +321,11 @@ O bloco funcional de tracking GPS experimental em background foi publicado em `4
 A unidade OMEGA-027 foi revisada e mesclada em `main` pelo PR #3, commit `2382b01`. O módulo `src/core/dataset-sync.js` agora costura manifesto, transação, storage e governança de fontes, com recuperação de interrupções e ordem de gravação explícita. A unidade permanece TESTED/IN PROGRESS: não cria download, pacote, endpoint ou prova de durabilidade física.
 
 O próximo gargalo verificável continua sendo a validação física do background GPS (T-021–T-030) e, separadamente, a obtenção de uma fonte cartográfica realmente licenciada para redistribuição offline. Nenhum resultado de CI ou build será usado para marcar hardware, bateria, modo avião, quota, assinatura ou distribuição como verificados.
+
+
+## 2026-08-28 — integridade criptográfica dos bytes do dataset
+
+A fundação de sync foi estendida com `src/core/dataset-integridade.js`, usando Web Crypto SHA-256 sobre os bytes reais recebidos. O orquestrador ganhou `verificarBytes(bytes)`, que calcula o digest antes de chamar a verificação de tamanho/checksum e registra falha na transação quando os bytes não correspondem ao manifesto. Foram adicionados testes para Uint8Array, ArrayBuffer, DataView, checksum válido, divergente e ambiente sem Web Crypto.
+
+Esta unidade **não baixa nem armazena** o pacote e não prova durabilidade física. Ela fecha somente a lacuna de cálculo real de checksum; download, endpoint, staging físico, quota, power-loss recovery e fonte cartográfica licenciada continuam pendentes.
+
