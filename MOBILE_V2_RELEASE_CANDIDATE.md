@@ -8,7 +8,7 @@
 |---|---|
 | Produto | Vanguard Field |
 | Linha de versão de trabalho | `2.x.x` em construção; o pacote atual ainda declara `1.0.0` |
-| Commit avaliado | `06cc503 feat(v2): formalizar transacao atomica de dataset` |
+| Commit avaliado | `4aa6556 feat(v2): isolar storage de dataset` |
 | Branch | `main` |
 | Tag V2 candidate | Não criada |
 | Release pública | Somente `v1.0.0-rc.2`, da linha anterior |
@@ -31,12 +31,12 @@ O commit indicado é o snapshot funcional publicado em `main`; ele não deve ser
 
 | Área | Resultado atual | Limite |
 |---|---|---|
-| Testes automatizados | `npm test`: 187 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
+| Testes automatizados | `npm test`: 194 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
 | Build | aprovado no commit avaliado | não é release |
 | Service Worker | sintaxe e contratos aprovados | não prova quota/cobertura offline física |
 | Auditoria de produção | 0 vulnerabilidades reportadas no último gate | não é auditoria completa de segurança operacional |
 | Privacidade | dados locais por padrão, sem telemetria/sincronização automática | revisão física e operacional pendente |
-| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanups assíncronos, manifesto e transação pura de dataset | GPS não transmite; Socorro não confirma entrega/resgate |
+| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanups assíncronos, manifesto, transação e storage isolado de dataset | GPS não transmite; Socorro não confirma entrega/resgate |
 | Legado | wiki/ambiente virtual de Arma 3 isolado, somente videogame/testes | não adaptar para ambientes ou operações reais |
 
 ## Artifacts conhecidos
@@ -67,7 +67,7 @@ release pública autorizada
 
 Ainda faltam instalação e validação em Android comum, Android recente, Xiaomi/MIUI/HyperOS, iPhone e iPad; teste de GPS externo/interno e T-005A; lifecycle e tela bloqueada; modo avião e quota de Cache Storage; bússola; Files/Share Sheet; bateria de quatro dias; configuração de signing Android; macOS/Xcode, Apple signing e IPA; inspeção de AAB assinado; atualização posterior em aparelho; e autorização de distribuição.
 
-A precisão do GPS continua dependente do sistema, do receptor, do ambiente e do provedor. O botão Centralizar agora pede um fixo manual sem reutilizar posição em cache, mas não garante precisão dentro de prédio. O controle PWA cancela o timer inicial no cleanup, mas o update posterior ainda não foi validado em aparelho. O manifesto de dataset é apenas contrato de validação: não existe pacote mundial, índice local, checksum calculado ou sync. As rotas de peregrinação continuam referências informativas; sem GPX/KML oficial ou autorizado, não há navegação de rota oficial.
+A precisão do GPS continua dependente do sistema, do receptor, do ambiente e do provedor. O botão Centralizar agora pede um fixo manual sem reutilizar posição em cache, mas não garante precisão dentro de prédio. O controle PWA cancela o timer inicial no cleanup, mas o update posterior ainda não foi validado em aparelho. O manifesto, a transação e o storage de dataset são fundações locais: não existe pacote mundial, índice local, checksum calculado de arquivo, atomicidade física ou sync. As rotas de peregrinação continuam referências informativas; sem GPX/KML oficial ou autorizado, não há navegação de rota oficial.
 
 ## Gates antes de criar uma candidate real
 
@@ -79,6 +79,7 @@ Uma candidate V2 só poderá ser criada depois de confirmar o commit-alvo, a ver
 - `docs/adr/ADR-0029-cleanup-atualizacao-pwa.md` — decisão e limites do cleanup do update PWA.
 - `docs/adr/ADR-0030-manifesto-dataset-offline.md` — contrato e limites do manifesto de dataset.
 - `docs/adr/ADR-0031-transacao-atomica-dataset.md` — máquina pura de staging, ativação e rollback.
+- `docs/adr/ADR-0032-storage-dataset-isolado.md` — adapter e namespace local de manifesto/transação.
 - `MOBILE_V2_RELEASE_STATUS.md` — estado operacional dos gates.
 - `MOBILE_V2_BUILD_MATRIX.md` — build e artifacts.
 - `MOBILE_V2_DEVICE_MATRIX.md` — aparelhos e casos físicos.

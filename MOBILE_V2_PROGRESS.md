@@ -186,3 +186,13 @@ A máquina pura reserva o dataset desde `IDLE`, passa por `CHECKING`, `AVAILABLE
 `test/dataset-transacao.test.js` cobre lock concorrente, fluxo feliz, staging antes da troca, tamanho/checksum inválidos, cancelamento, rollback, transições inválidas, ativação sem staging, versão igual e datasetId divergente. A suíte local passou com 187 testes.
 
 A unidade é uma máquina de contrato, não um sync de produção. Não há download, cálculo SHA-256 de bytes, storage de staging, persistência da transação, recuperação após power loss, retry/resume, endpoint ou pacote autorizado. O cache técnico de tiles e o store local dos dados do usuário continuam separados.
+
+## Marco de storage isolado de dataset — 2026-08-28
+
+A auditoria confirmou que o store oficial de `src/core/estado.js` é destinado aos dados da pessoa e que o Cache Storage do Service Worker é apenas cache técnico de shell/tiles. Para não misturar camadas, foi criado `src/core/dataset-storage.js` como adapter injetável com namespace próprio para manifesto ativo e transação de dataset.
+
+O adapter usa envelopes versionados (`vanguard-dataset-storage`, versão 1), valida o manifesto na escrita e leitura, valida o estado básico da transação, identifica envelopes corrompidos ou incompatíveis e reporta `STORAGE_UNAVAILABLE`/`STORAGE_WRITE_FAILED`/`STORAGE_READ_FAILED`/`STORAGE_REMOVE_FAILED` sem transformar falha em sucesso silencioso. `limparTransacao()` não remove o manifesto ativo nem chaves de dados do usuário.
+
+`test/dataset-storage.test.js` cobre normalização, rejeição, corrupção, isolamento de trilha, limpeza seletiva, estado inválido, backend ausente e falha de quota/escrita. A suíte local passou com 194 testes.
+
+Este adapter ainda não fornece atomicidade de disco, storage binário de pacotes, checksum calculado sobre bytes, recuperação após power loss, migração/reinstalação, quota física ou sync. Nenhum pacote cartográfico mundial ou regional foi incorporado, e fonte/licença de redistribuição permanece não confirmada.

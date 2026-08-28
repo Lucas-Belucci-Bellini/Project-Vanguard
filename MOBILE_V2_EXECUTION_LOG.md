@@ -230,3 +230,18 @@ A rodada entregou contrato, testes e documentação, não um dataset mundial. O 
 - **Documentation:** ADR-0031, `OFFLINE_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md`, `MOBILE_V2_RELEASE_CANDIDATE.md` e este log foram atualizados.
 - **Blockers:** armazenamento gerenciado, pacote/fonte/licença, cálculo real de checksum, atomicidade no dispositivo, recovery, teste offline e validação PWA/Android/iOS permanecem pendentes.
 - **Status:** IN PROGRESS / BLOCKED; nenhuma tag, release, signing ou artifact novo foi criado.
+
+## 2026-08-28 — storage isolado de dataset e transação
+
+- **Execution:** continuação do Global Offline Data Engine após a máquina pura de transação.
+- **Estado inicial:** `main` limpa e alinhada no commit `809826d`; CI `33131157977` concluído com sucesso.
+- **Phase:** dataset storage / metadata persistence foundation.
+- **Audit:** `src/core/estado.js` permanece store oficial dos dados do usuário; `public/sw.js` permanece cache técnico de shell/tiles; não existia fronteira persistente para manifesto ativo e transação.
+- **Implemented:** `src/core/dataset-storage.js`, adapter injetável com chaves `vanguard:maps:dataset:active` e `vanguard:maps:dataset:transaction`, envelopes versionados, validação de manifesto/transação, diagnóstico e falhas explícitas.
+- **Isolation:** a unidade não escreve nem limpa trilhas, waypoints, rotas, configurações ou preparação de emergência; `limparTransacao()` remove somente a chave temporária do dataset.
+- **Tests:** `test/dataset-storage.test.js` cobre leitura/escrita normalizada, manifesto inválido, envelope corrompido, isolamento, limpeza seletiva, estado inválido, backend ausente e falha de quota/escrita; `npm test`: 194 aprovados e 0 falhas.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria reportou 0 vulnerabilidades.
+- **Commit:** código/testes/ADR publicados em `4aa6556 feat(v2): isolar storage de dataset`; CI `33131381528` concluído com sucesso.
+- **Documentation:** `docs/adr/ADR-0032-storage-dataset-isolado.md`, `OFFLINE_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_RELEASE_CANDIDATE.md`, `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md` e este log foram alinhados.
+- **Limits:** `localStorage` é apenas o backend compatível desta fundação; ainda não há storage atômico de disco, pacote binário, checksum calculado de bytes, download, endpoint, retry/resume, startup recovery ou teste físico de quota/power loss.
+- **Status:** IN PROGRESS / BLOCKED; nenhuma tag, release, signing ou artifact novo foi criado.

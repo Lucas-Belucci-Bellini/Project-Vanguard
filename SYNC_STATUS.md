@@ -6,7 +6,7 @@
 
 O aplicativo possui duas capacidades diferentes: atualização confirmada do Service Worker/aplicativo e preparo local de tiles. O controle de atualização PWA consulta uma release oficial do software quando há rede; ele não consulta manifesto de mapa, não baixa pacote cartográfico e não altera dados locais do usuário. O Service Worker usa cache-first e mensagens limitadas para preparar/consultar/limpar tiles.
 
-A camada de manifesto (`src/core/dataset-manifest.js`) fornece validação estrutural e classificação de frescor. A máquina pura em `src/core/dataset-transacao.js` agora formaliza lock por dataset, estados `CHECKING` a `COMPLETE`, staging, verificação de tamanho/checksum esperado, cancelamento e rollback. Ela não executa I/O e ainda não é um `DatasetUpdater` de produção.
+A camada de manifesto (`src/core/dataset-manifest.js`) fornece validação estrutural e classificação de frescor. A máquina pura em `src/core/dataset-transacao.js` formaliza lock por dataset, estados `CHECKING` a `COMPLETE`, staging, verificação de tamanho/checksum esperado, cancelamento e rollback. O adapter `src/core/dataset-storage.js` persiste apenas manifesto ativo e transação em envelopes próprios, com diagnóstico e falhas explícitas. Essas peças não executam download e ainda não são um `DatasetUpdater` de produção.
 
 | Capacidade | Estado | Limite factual |
 |---|---|---|
@@ -16,9 +16,9 @@ A camada de manifesto (`src/core/dataset-manifest.js`) fornece validação estru
 | Check de versão de dataset | Parcial, contrato puro | `estadoFrescorDataset()` classifica manifesto fornecido; não busca manifestos |
 | Download de pacote | Não implementado | não há backend ou fonte autorizada definida |
 | SHA-256 de pacote | Não implementado | manifesto registra o valor esperado; arquivo não é verificado |
-| Staging/ativação atômica | Parcial, máquina pura | `dataset-transacao.js` preserva o ativo até `COMPLETE` e exige staging verificado; não grava nem troca arquivos |
+| Staging/ativação atômica | Parcial, máquina + storage isolado | `dataset-transacao.js` preserva o ativo até `COMPLETE`; `dataset-storage.js` guarda metadados/transação em namespace próprio | localStorage não oferece atomicidade física, nem troca de arquivos, power-loss ou recovery |
 | Resume/retry/cancel | Cancelamento puro implementado; resume/retry não | cancelamento só muda estado e marca limpeza temporária; download real ainda não existe |
-| Rollback/recovery | Rollback puro implementado; recovery não | preserva o snapshot ativo em `FAILED`/`ROLLED_BACK`; power loss e persistência ainda não existem |
+| Rollback/recovery | Rollback puro + persistência resumida; recovery não | preserva o snapshot ativo e salva transação em envelope próprio; power loss/startup recovery ainda não existem |
 | Histórico de sync | Não implementado | `MOBILE_V2_EXECUTION_LOG.md` é log de engenharia, não histórico persistente de dataset |
 
 ## Contrato futuro, ainda não ativado
@@ -29,4 +29,4 @@ O futuro sync não poderá enviar GPS, trilhas, waypoints, rotas ou dados de eme
 
 ## Bloqueios
 
-Ainda faltam uma fonte autorizada para redistribuição offline, registro de licenças/atribuições, formato de pacote, armazenamento específico, servidor/endpoint, limites de tamanho, estratégia full/delta, download real, checksum calculado de bytes, persistência da transação, recovery após power loss, testes de corrupção/queda/energia e validação em PWA/Android/iOS. Até que esses itens existam, o sistema não deve exibir `DATASET VERIFIED`, `SYNC COMPLETE` ou `WORLD MAP OFFLINE READY`.
+Ainda faltam uma fonte autorizada para redistribuição offline, registro de licenças/atribuições, formato de pacote, storage atômico apropriado, servidor/endpoint, limites de tamanho, estratégia full/delta, download real, checksum calculado de bytes, recovery após power loss/startup, testes de corrupção/queda/energia e validação em PWA/Android/iOS. Até que esses itens existam, o sistema não deve exibir `DATASET VERIFIED`, `SYNC COMPLETE` ou `WORLD MAP OFFLINE READY`.
