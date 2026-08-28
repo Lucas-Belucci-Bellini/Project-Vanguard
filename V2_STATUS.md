@@ -8,7 +8,7 @@
 | **Phase** | Fase 2 — Engine/GPS mobile foundation + lifecycle observability; V2 ainda `IN PROGRESS` |
 | **Milestone** | V2 Foundation Hardening + tentativa experimental de tracking GPS local em segundo plano, com validação mobile ainda pendente |
 | **Current Task** | Executar T-021–T-030 do background tracking em aparelhos reais e registrar lacunas, bateria, permissões e interrupções sem inventar continuidade |
-| **Last Completed Task** | Orquestração do ciclo de vida do dataset offline (`src/core/dataset-sync.js`), fechando a costura entre manifesto, transação, storage e gate de fontes; publicada em branch, ainda não mesclada em `main` |
+| **Last Completed Task** | Orquestração do ciclo de vida do dataset offline (`src/core/dataset-sync.js`), fechando a costura entre manifesto, transação, storage e gate de fontes; publicada e mesclada em `main` no commit `2382b01` |
 | **Current Blocker** | Validação física em Android/Xiaomi/iPhone, notificação, tela bloqueada, bateria/background, assinatura/distribuição e teste offline real |
 | **Next Task** | Publicar o fechamento documental e executar `MOBILE_V2_TEST_MATRIX.md`, priorizando T-021–T-030, além de KML/JSON/GPX, modo avião, bússola, update posterior e bateria |
 | **Build** | `npm run build` aprovado em `main`; build é artefato técnico |
@@ -19,7 +19,7 @@
 | **Security** | Posição local por padrão; sem SOS automático, hardware falso, integração militar ou expansão do legado balístico. O legado pertence a uma wiki separada de Arma 3, somente virtual/teste e nunca destinado a uso real |
 | **Documentation** | `docs/adr/ADR-0034-tracking-background-opt-in.md`, `MOBILE_V2_TEST_MATRIX.md` (T-021–T-030), `OFFLINE_DATA_STATUS.md`, `MAP_DATA_STATUS.md`, `SYNC_STATUS.md`, `DEVICE_CAPABILITIES.md`, `MOBILE_V2_RELEASE_CANDIDATE.md`, `docs/adr/ADR-0028-cleanup-centralizacao-manual.md`, `docs/adr/ADR-0029-cleanup-atualizacao-pwa.md`, `docs/adr/ADR-0030-manifesto-dataset-offline.md`, `docs/adr/ADR-0031-transacao-atomica-dataset.md`, `docs/adr/ADR-0032-storage-dataset-isolado.md`, `docs/adr/ADR-0033-governanca-fontes-cartograficas.md`, `docs/adr/ADR-0035-orquestracao-ciclo-vida-dataset.md`, README, `docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`, `docs/ROTAS-CAMINHOS-DOS-ANJOS.md`, `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md`, roadmap, notas de release, checklist mobile, plano de campo, atualização, tag, segurança, memória V2, memória MOBILE_V2, memória Omega (`MOBILE_V2_MASTER_CHECKLIST`, `FEATURE_MATRIX`, `BUILD_MATRIX`, `RELEASE_STATUS`, `DEVICE_MATRIX`, `EXECUTION_LOG`), ADR-0005/0006/0007/0008/0009/0010/0011/0012/0013/0014/0015/0016/0017/0018/0019/0020/0021/0022/0023/0024/0025/0026/0027, referências do Baluarte, WCAG/performance e validações do Diagnóstico/Mapa/Home/tiles/SW/capacidades/compartilhamento/permissões/persistência/release artifact-only/GPS/trilha/KML/fixo manual versionados |
 | **Release Readiness** | `BLOCKED`: candidate pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `4b3855b feat(v2): adicionar tracking gps experimental em background`; push concluído; CI `33134403140` concluído com sucesso; nenhuma tag/release criada |
+| **Main** | `2382b01 feat(v2): orquestrar ciclo de vida do dataset offline`; PR #3 mesclado em `main`; nenhuma tag/release criada |
 
 ## Regra de conclusão
 
