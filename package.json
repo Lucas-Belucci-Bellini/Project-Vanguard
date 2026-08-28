@@ -28,6 +28,7 @@
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.2",
     "@capacitor/ios": "^8.5.0",
+    "@capgo/background-geolocation": "^8.4.3",
     "maplibre-gl": "^4.7.1"
   }
 }

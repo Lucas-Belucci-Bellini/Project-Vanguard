@@ -1,5 +1,8 @@
 {
   "appId": "com.projectvanguard.field",
   "appName": "Vanguard Field",
-  "webDir": "dist"
+  "webDir": "dist",
+  "android": {
+    "useLegacyBridge": true
+  }
 }

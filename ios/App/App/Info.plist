@@ -8,9 +8,13 @@
 	<string>en</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>O Vanguard Field usa sua localização enquanto você navega ou registra uma rota no aparelho.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>O Vanguard Field pode solicitar localização adicional quando uma função de navegação compatível exigir; o app informa claramente o estado e não envia sua posição automaticamente.</string>
-	<key>CFBundleDisplayName</key>
+  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+  <string>O Vanguard Field pode solicitar localização adicional quando uma função de navegação compatível exigir; o app informa claramente o estado e não envia sua posição automaticamente.</string>
+  <key>UIBackgroundModes</key>
+  <array>
+    <string>location</string>
+  </array>
+  <key>CFBundleDisplayName</key>
         <string>Vanguard Field</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>

@@ -11,6 +11,7 @@ import { resumoTrilha } from '../core/trilha.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
+import { criarControleBackground, ESTADOS_BACKGROUND } from '../core/background-localizacao.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, exportarRegistroKml, importarRegistroGpx, importarRegistroKml, importarRegistroLocal } from '../core/registro-offline.js';
 import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arquivo.js';
@@ -111,6 +112,8 @@ export function mapaPage() {
   const routeButton = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR ROTA');
   const stopRouteButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'PARAR E GUARDAR');
   const wakeButton = h('button', { className: 'mapa__wake-button', type: 'button', 'aria-pressed': 'false' }, 'MANTER TELA ATIVA: DESLIGADO');
+  const backgroundButton = h('button', { className: 'mapa__background-button', type: 'button', 'aria-pressed': 'false' }, 'ATIVAR GPS EM 2º PLANO');
+  const backgroundStatus = h('p', { className: 'mapa__background-status', role: 'status' }, 'Disponível no APK de teste; não envia localização para servidor.');
   const centerButton = h('button', { className: 'mapa__quick-button', type: 'button' }, '⌾ CENTRAR');
   const clearButton = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'LIMPAR TRILHA');
   const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
@@ -197,6 +200,8 @@ export function mapaPage() {
         routeButton,
         stopRouteButton,
         wakeButton,
+        backgroundButton,
+        backgroundStatus,
         sheetStatus
     ),
     h('div', { className: 'mapa__map-actions' }, modoBotao, h('button', { className: 'mapa__socorro-button', type: 'button', onclick: () => { location.hash = '#/socorro'; } }, 'MODO SOCORRO →'))
@@ -230,6 +235,27 @@ export function mapaPage() {
   let ultimaChaveRotulos = null;
   let wakeLock = null;
   let wakeAtivo = false;
+  let backgroundEstado = ESTADOS_BACKGROUND.IDLE;
+  let backgroundMensagem = 'Disponível no APK de teste; não envia localização para servidor.';
+
+  function registrarPosicao(nova) {
+    const anterior = posicao;
+    posicao = nova;
+    if (rotaAtiva && !rotaPausada && (!anterior || haversine(anterior, nova) >= 5)) {
+      trilha = [...trilha, nova].slice(-4000);
+      estado.set(CHAVES.TRILHA, trilha);
+    }
+    if (!document.hidden) {
+      atualizarHud();
+      atualizarSheet();
+      atualizarMarcadores();
+      if (mapa && primeiraPosicao) {
+        primeiraPosicao = false;
+        mapa.flyTo({ center: [nova.lon, nova.lat], zoom: 15, duration: 700 });
+      }
+    }
+  }
+
   const controleCentralizacao = criarControleCentralizacao({
     solicitar: solicitarPosicao,
     onInicio: () => {
@@ -257,6 +283,32 @@ export function mapaPage() {
       centerButton.textContent = '⌾ CENTRAR';
     },
   });
+
+  const backgroundControle = criarControleBackground({
+    onPosition: registrarPosicao,
+    onState: ({ status, erro } = {}) => {
+      backgroundEstado = status ?? backgroundEstado;
+      if (status === ESTADOS_BACKGROUND.STARTING) backgroundMensagem = 'Solicitando permissões e iniciando serviço nativo; mantenha a sessão ativa.';
+      if (status === ESTADOS_BACKGROUND.ACTIVE) backgroundMensagem = 'GPS em segundo plano ativo. O sistema exibirá uma notificação; pontos continuam locais.';
+      if (status === ESTADOS_BACKGROUND.STOPPED) backgroundMensagem = 'GPS em segundo plano encerrado; o registro continua no aparelho.';
+      if (status === ESTADOS_BACKGROUND.UNAVAILABLE) backgroundMensagem = 'Background tracking disponível somente no APK nativo de teste.';
+      if (status === ESTADOS_BACKGROUND.ERROR) backgroundMensagem = `Background tracking com erro${erro ? `: ${erro}` : '.'}`;
+      if (status === ESTADOS_BACKGROUND.ACTIVE || status === ESTADOS_BACKGROUND.STARTING) atualizarWatcherForeground();
+      if ([ESTADOS_BACKGROUND.ERROR, ESTADOS_BACKGROUND.UNAVAILABLE, ESTADOS_BACKGROUND.STOPPED].includes(status) && !document.hidden) atualizarWatcherForeground();
+      if (!desmontado) atualizarSheet();
+    },
+    onError: (erro) => {
+      if (desmontado) return;
+      backgroundMensagem = `Não foi possível iniciar o background tracking${erro?.message ? `: ${erro.message}` : '.'}`;
+      atualizarSheet();
+    },
+  });
+
+  function atualizarWatcherForeground() {
+    if (!pararGps?.setPaused) return;
+    const manterPausado = document.hidden || backgroundEstado === ESTADOS_BACKGROUND.STARTING || backgroundEstado === ESTADOS_BACKGROUND.ACTIVE;
+    pararGps.setPaused(manterPausado);
+  }
 
   function distanciaTrilha() {
     let total = 0;
@@ -334,6 +386,14 @@ export function mapaPage() {
       ? 'TELA ATIVA INDISPONÍVEL NESTE APARELHO'
       : `MANTER TELA ATIVA: ${wakeAtivo ? 'LIGADO' : 'DESLIGADO'}`;
     wakeButton.setAttribute('aria-pressed', String(wakeAtivo));
+    const backgroundDisponivel = backgroundControle.podeIniciar();
+    const backgroundAtivo = backgroundEstado === ESTADOS_BACKGROUND.STARTING || backgroundEstado === ESTADOS_BACKGROUND.ACTIVE;
+    backgroundButton.disabled = !rotaAtiva || rotaPausada || !backgroundDisponivel || backgroundEstado === ESTADOS_BACKGROUND.STARTING;
+    backgroundButton.textContent = backgroundAtivo
+      ? 'PARAR GPS EM 2º PLANO'
+      : backgroundDisponivel ? 'ATIVAR GPS EM 2º PLANO' : 'GPS EM 2º PLANO: SOMENTE APK';
+    backgroundButton.setAttribute('aria-pressed', String(backgroundEstado === ESTADOS_BACKGROUND.ACTIVE));
+    backgroundStatus.textContent = backgroundMensagem;
     modoBotao.textContent = marcando ? 'CANCELAR MARCAÇÃO' : 'MARCAR PONTO';
     modoBotao.classList.toggle('is-active', marcando);
     destinoMapButton.textContent = marcandoDestino ? 'CANCELAR TOQUE' : 'TOCAR NO MAPA';
@@ -370,6 +430,30 @@ export function mapaPage() {
   function centralizar() {
     if (!mapa || desmontado) return;
     controleCentralizacao.iniciar();
+  }
+
+  async function alternarBackground() {
+    if (!rotaAtiva || rotaPausada) {
+      backgroundMensagem = 'Inicie uma rota ativa antes de usar o GPS em segundo plano.';
+      atualizarSheet();
+      return;
+    }
+    const ativo = backgroundEstado === ESTADOS_BACKGROUND.ACTIVE || backgroundEstado === ESTADOS_BACKGROUND.STARTING;
+    if (ativo) {
+      await backgroundControle.parar();
+      atualizarWatcherForeground();
+      return;
+    }
+    if (!window.confirm('Ativar GPS/trilha em segundo plano? O aparelho exibirá uma notificação, consumirá mais bateria e o sistema pode interromper o serviço. Nenhuma posição será enviada para servidor.')) return;
+    backgroundMensagem = 'Preparando o serviço nativo; aceite as permissões exibidas pelo aparelho.';
+    pararGps.setPaused?.(true);
+    atualizarSheet();
+    const iniciou = await backgroundControle.iniciar();
+    if (!iniciou) {
+      atualizarWatcherForeground();
+      return;
+    }
+    atualizarSheet();
   }
 
   async function configurarWakeLock(ativo) {
@@ -413,15 +497,19 @@ export function mapaPage() {
       trilha = [posicao];
       estado.set(CHAVES.TRILHA, trilha);
     }
-    if (!rotaAtiva || rotaPausada) configurarWakeLock(false);
+    if (!rotaAtiva || rotaPausada) {
+      configurarWakeLock(false);
+      void backgroundControle.parar();
+    }
     if (rotaAtiva && !rotaPausada) sheetStatus.textContent = 'Rota iniciada: gravação local ativa.';
     if (rotaAtiva && rotaPausada) sheetStatus.textContent = 'Rota pausada. Os pontos já registrados permanecem no aparelho.';
     atualizarSheet();
     atualizarMarcadores();
   }
 
-  function pararRota() {
+  async function pararRota() {
     if (!rotaAtiva) return;
+    await backgroundControle.parar();
     const proximo = transicionarTrilha(estadoTrilha({ ativa: rotaAtiva, pausada: rotaPausada }), 'STOP');
     rotaAtiva = proximo.ativa;
     rotaPausada = proximo.pausada;
@@ -429,12 +517,13 @@ export function mapaPage() {
     estado.set(CHAVES.ROTA_PAUSADA, rotaPausada);
     pararGps?.setMode('cidade');
     configurarWakeLock(false);
+    atualizarWatcherForeground();
     sheetStatus.textContent = `${trilha.length} pontos guardados localmente. Rota parada sem apagar o registro.`;
     atualizarSheet();
   }
 
   function limparTrilha() {
-    if (!trilha.length && !waypoints.length) return;
+    if (!trilha.length && !waypoints.length && !rotaAtiva && backgroundEstado === ESTADOS_BACKGROUND.IDLE) return;
     trilha = [];
     waypoints = [];
     rotaAtiva = false;
@@ -444,6 +533,7 @@ export function mapaPage() {
     estado.set(CHAVES.ROTA_ATIVA, false);
     estado.set(CHAVES.ROTA_PAUSADA, false);
     configurarWakeLock(false);
+    void backgroundControle.parar();
     pararGps?.setMode('cidade');
     sheetStatus.textContent = 'Trilha e pontos removidos deste aparelho.';
     atualizarSheet();
@@ -521,6 +611,7 @@ export function mapaPage() {
       destino = registro.destino;
       rotaAtiva = false;
       rotaPausada = false;
+      await backgroundControle.parar();
       estado.set(CHAVES.TRILHA, trilha);
       estado.set(CHAVES.WAYPOINTS, waypoints);
       estado.set(CHAVES.DESTINO, destino);
@@ -563,6 +654,7 @@ export function mapaPage() {
   routeButton.onclick = alternarRota;
   stopRouteButton.onclick = pararRota;
   wakeButton.onclick = () => configurarWakeLock(!wakeAtivo);
+  backgroundButton.onclick = alternarBackground;
   centerButton.onclick = centralizar;
   clearButton.onclick = limparTrilha;
   registroExportarButton.onclick = exportarRegistro;
@@ -598,20 +690,7 @@ export function mapaPage() {
 
   const pararGps = iniciarAcompanhamento({
     mode: 'cidade',
-    onPosition: (nova) => {
-      const anterior = posicao;
-      posicao = nova;
-      if (rotaAtiva && !rotaPausada && (!anterior || haversine(anterior, nova) >= 5)) {
-        trilha = [...trilha, nova].slice(-4000);
-        estado.set(CHAVES.TRILHA, trilha);
-      }
-      if (!document.hidden) {
-        atualizarHud();
-        atualizarSheet();
-        atualizarMarcadores();
-        if (mapa && primeiraPosicao) { primeiraPosicao = false; mapa.flyTo({ center: [nova.lon, nova.lat], zoom: 15, duration: 700 }); }
-      }
-    },
+    onPosition: registrarPosicao,
     onError: (erro) => {
       estadoGps.textContent = erro?.code === 1 ? 'PERMISSÃO NEGADA' : 'GPS INDISPONÍVEL';
       sheetStatus.textContent = erro?.code === 1 ? 'Ative a permissão de localização para usar o mapa ao vivo.' : 'Não foi possível obter um fixo agora.';
@@ -624,11 +703,11 @@ export function mapaPage() {
   const aoMudarVisibilidade = () => {
     if (document.hidden) {
       mapa?.stop();
-      pararGps.setPaused?.(true);
+      atualizarWatcherForeground();
       return;
     }
     mapa?.resize();
-    pararGps.setPaused?.(false);
+    atualizarWatcherForeground();
     atualizarHud();
     atualizarSheet();
     atualizarMarcadores();
@@ -855,5 +934,5 @@ export function mapaPage() {
   atualizarHud();
   atualizarDestino();
   atualizarSheet();
-  return { elemento: raiz, desmontar: () => { desmontado = true; controleCentralizacao.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (mapa) mapa.remove(); } };
 }

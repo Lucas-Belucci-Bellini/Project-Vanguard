@@ -62,6 +62,10 @@
 .mapa__route-button { width: 100%; background: var(--color-cyan-soft); border-color: var(--color-cyan-edge); color: var(--color-cyan); font-weight: var(--font-weight-bold); }
 .mapa__wake-button { width: 100%; min-height: 30px; margin-top: 6px; padding: 6px; color: var(--color-text-muted); background: transparent; border-color: var(--color-cyan-edge); font-size: 8px; letter-spacing: .04em; }
 .mapa__wake-button:disabled { opacity: .5; cursor: not-allowed; }
+.mapa__background-button { width: 100%; min-height: 34px; margin-top: 6px; padding: 7px; color: var(--color-amber); background: var(--color-amber-soft); border-color: var(--color-amber-edge); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: .03em; }
+.mapa__background-button:disabled { opacity: .5; cursor: not-allowed; }
+.mapa__background-button[aria-pressed='true'] { color: var(--color-bg); background: var(--color-amber); }
+.mapa__background-status { min-height: 18px; margin: 6px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
 .mapa__route-button.is-active { background: var(--color-cyan); color: var(--color-bg); }
 .mapa__sheet-status { min-height: 17px; margin-top: 8px; color: var(--color-text-muted); font-size: 9px; line-height: 1.5; }
 .mapa__map-actions button { min-height: 36px; }
