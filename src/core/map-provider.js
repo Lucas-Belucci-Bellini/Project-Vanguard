@@ -19,6 +19,12 @@ export function validarMapProvider(provider) {
 
   if (!Array.isArray(provider.tiles) || provider.tiles.length === 0) {
     erros.push('tiles deve ser um array não vazio');
+  } else if (provider.tiles.some((tile) => typeof tile !== 'string' || tile.trim() === '')) {
+    erros.push('cada tile deve ser uma string não vazia');
+  }
+
+  if (provider.tileSize != null && (!Number.isInteger(Number(provider.tileSize)) || Number(provider.tileSize) <= 0)) {
+    erros.push('tileSize deve ser um inteiro positivo');
   }
 
   if (provider.maxzoom != null && (!Number.isInteger(Number(provider.maxzoom)) || Number(provider.maxzoom) < 0)) {
@@ -37,7 +43,7 @@ export function criarMapProvider(definicao, adaptador = {}) {
   return Object.freeze({
     id: String(definicao.id),
     nome: String(definicao.nome),
-    tiles: [...definicao.tiles].map(String),
+    tiles: [...definicao.tiles].map((tile) => tile.trim()),
     tileSize: Number(definicao.tileSize ?? 256),
     maxzoom: Number(definicao.maxzoom ?? 16),
     creditos: String(definicao.creditos ?? ''),
