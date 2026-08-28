@@ -349,7 +349,7 @@ export function criarSincronizacaoDataset({
      * COMPLETE → limpeza. Uma interrupção em qualquer ponto é reconciliável
      * por `recuperar()`.
      */
-    ativar() {
+    async ativar() {
       const leitura = transacaoAtual();
       if (!leitura.ok) return leitura;
       if (!leitura.valor) return falha('SEM_TRANSACAO', 'Não há transação de dataset em andamento.');
