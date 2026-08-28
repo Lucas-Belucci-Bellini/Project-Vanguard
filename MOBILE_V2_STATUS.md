@@ -39,7 +39,7 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `57a387a feat(v2): validar manifesto de dataset offline`; push concluído; CI `33130481662` concluído com sucesso; memória documental desta unidade aguarda commit; nenhuma tag/release criada |
+| **Main** | `ae2edbe docs(v2): registrar arquitetura de dataset offline`; push concluído; CI `33130631235` concluído com sucesso; nenhuma tag/release criada |
 | **Next Task** | Auditar fonte/licença e armazenamento de dataset; depois executar T-005A/T-007/T-017 em aparelhos reais e retomar signing/distribuição sem publicar automaticamente |
 
 ## Unidades recentes

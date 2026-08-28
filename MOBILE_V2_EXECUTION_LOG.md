@@ -207,3 +207,9 @@ A validação desta unidade inclui `npm test` com 173 aprovados, build aprovado,
 - **Blockers:** fonte/licença de redistribuição, formato/pacote, armazenamento de dataset, índice, servidor, checksum calculado, staging, atomicidade, rollback, teste offline real e validação de aparelhos continuam pendentes.
 - **Next Task:** auditar fontes/licenças e escolher armazenamento para metadados; depois avaliar um pacote pequeno e autorizado, sem criar segundo sistema offline.
 - **Status:** IN PROGRESS / BLOCKED para dataset mundial, sync e validação física.
+
+## Fechamento da rodada — 2026-08-28
+
+O bloco funcional foi publicado em `57a387a feat(v2): validar manifesto de dataset offline`; o CI `33130481662` concluiu com sucesso. A memória e os status foram publicados em `ae2edbe docs(v2): registrar arquitetura de dataset offline`; o CI `33130631235` também concluiu com sucesso. `main` e `origin/main` permaneceram alinhadas e nenhum workflow de release foi disparado.
+
+A rodada entregou contrato, testes e documentação, não um dataset mundial. O projeto continua sem cobertura cartográfica offline mundial, busca local mundial, roteamento offline, pacote regional, sync, checksum calculado de arquivo, staging, ativação atômica, rollback ou licença de redistribuição confirmada. Os dados de usuário continuam separados do cache técnico de tiles.
