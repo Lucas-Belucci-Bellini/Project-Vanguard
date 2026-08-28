@@ -41,3 +41,10 @@ A V2 permanece `IN PROGRESS` até que cada item obrigatório tenha implementaç�
 Foi criado `src/core/dataset-package-storage.js`, um adapter assíncrono sobre IndexedDB dedicado exclusivamente aos bytes do pacote de dataset. Ele separa o artefato físico do manifesto/transação e dos dados do usuário, oferece salvar/ler/remover/limpar e reporta indisponibilidade e quota. Testes de contrato cobrem ambientes sem IndexedDB, validação de entrada e diagnóstico.
 
 **Limite:** esta unidade não é prova de atomicidade de disco, durabilidade contra power loss, quota física garantida nem teste em aparelho real. A integração final com o orquestrador deve ocorrer depois de validar o contrato físico no runtime alvo.
+
+
+## 2026-08-28 — integração do pacote físico ao sync
+
+O `dataset-sync` agora aceita um `packageStorage` injetável. A nova operação `armazenarBytes(bytes, metadata)` grava o artefato no storage físico dedicado e só avança para STAGING depois da verificação SHA-256 real. Na ativação, quando o storage físico foi fornecido, o pacote é relido e sua integridade/tamanho são conferidos novamente antes de gravar o manifesto ativo.
+
+Isso fecha a costura lógica entre transação, bytes físicos, integridade e ativação. Não é prova de durabilidade contra power loss nem de quota física em aparelhos reais; esses itens continuam como validação de runtime/hardware.
