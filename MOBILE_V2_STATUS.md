@@ -9,19 +9,19 @@
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
 | **Current Objective** | Evoluir de foundation/debug para uma plataforma de dados offline verificável e validação física; manter separadas cache, dataset e dados do usuário sem declarar capacidades não verificadas |
 | **Current Task** | Auditar fonte/licença e armazenamento para o futuro dataset; executar T-005A/T-007/T-017 em aparelhos quando disponíveis, sem inventar cobertura mundial |
-| **Last Completed** | Contrato puro de manifesto versionado de dataset, com checksum esperado, regiões e frescor; `57a387a`, CI `33130481662` concluído com sucesso |
+| **Last Completed** | Máquina pura de transação de dataset com lock, staging, verificação, ativação e rollback; `06cc503`, CI `33131026249` concluído com sucesso |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; update confirmado e timer inicial cancelável no cleanup; instalação, modo avião, quota, reabertura e update posterior físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
-| **Tests** | `npm test`: 181 testes aprovados; inclui manifesto de dataset, cleanups assíncronos, localização manual, configuração, camadas, Service Worker, catálogo, registros e diagnóstico |
+| **Tests** | `npm test`: 187 testes aprovados; inclui manifesto e transação de dataset, cleanups assíncronos, localização manual, configuração, camadas, Service Worker, catálogo, registros e diagnóstico |
 | **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
 | **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
 | **GPS** | Capacitor foreground + fallback Web/PWA; watcher de cidade econômico e trilha foreground de alta precisão; botão Centralizar solicita novo fixo manual (`maximumAge: 0`, alta precisão); estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; background não implementado |
 | **Compass** | UI/fallback GPS existentes; sensor físico e calibração `BROWSER DEPENDENT`/`DEVICE DEPENDENT` |
 | **Maps** | MapLibre, MGRS, grade, centralização, waypoints, destino, quatro bases, rótulos OSM/ArcGIS e planner de tiles; cobertura/provedor/quota não garantidos |
 | **Offline** | shell, estado local, manual, contexto e tiles preparados; cache `v3` e planner limitados; manifesto de dataset validado, mas mapa mundial gerenciado, modo avião, quota e reabertura física pendentes |
-| **Dataset** | Manifesto versionado validado em código puro; não há pacote mundial, índice local, fonte/licença de redistribuição ou dataset gerenciado incorporado |
-| **Sync** | Atualização confirmada do app e preparo de tiles existentes; não há sync de dataset, download, checksum calculado, staging, ativação atômica ou rollback |
+| **Dataset** | Manifesto e máquina de transação validados em código puro; não há pacote mundial, índice local, fonte/licença de redistribuição ou dataset gerenciado incorporado |
+| **Sync** | Atualização confirmada do app, preparo de tiles e máquina pura de sync; não há download, checksum calculado de arquivo, persistência, staging físico, ativação real ou rollback persistente |
 | **Storage** | `localStorage` com envelope versionado para dados de usuário; Cache Storage para shell/tiles; futuro dataset ainda sem armazenamento gerenciado; quota física pendente |
 | **Tracking** | `STOPPED`/`ACTIVE`/`PAUSED`, Start/Pause/Resume/Stop local; pontos preservados e Stop não exporta/apaga automaticamente |
 | **Waypoints** | Criar, persistir, visualizar e exportar localmente; uso touch físico pendente |
@@ -39,8 +39,8 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `ae2edbe docs(v2): registrar arquitetura de dataset offline`; push concluído; CI `33130631235` concluído com sucesso; nenhuma tag/release criada |
-| **Next Task** | Auditar fonte/licença e armazenamento de dataset; depois executar T-005A/T-007/T-017 em aparelhos reais e retomar signing/distribuição sem publicar automaticamente |
+| **Main** | `06cc503 feat(v2): formalizar transacao atomica de dataset`; push concluído; CI `33131026249` concluído com sucesso; nenhuma tag/release criada |
+| **Next Task** | Definir storage gerenciado de metadados/transações e registrar fontes/licenças; depois avaliar download autorizado, sem criar pacote mundial fictício |
 
 ## Unidades recentes
 
@@ -63,6 +63,7 @@
 17. Cleanup da centralização manual no mapa — `6d7c7fb`, ADR-0028, CI `33129339317`.
 18. Cleanup do timer de atualização PWA — `11767e6`, ADR-0029, CI `33129751294`.
 19. Manifesto versionado de dataset offline — `57a387a`, `test/dataset-manifest.test.js`, ADR-0030; dataset mundial e sync permanecem não implementados.
+20. Máquina pura de transação atômica — `src/core/dataset-transacao.js`, `test/dataset-transacao.test.js`, ADR-0031; I/O, storage e pacote continuam pendentes.
 
 ## Regra de evidência
 

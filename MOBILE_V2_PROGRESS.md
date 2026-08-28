@@ -176,3 +176,13 @@ Foi implementado `src/core/dataset-manifest.js` como primeiro bloco incremental 
 A cobertura em `test/dataset-manifest.test.js` verifica manifesto válido, schema/campos inválidos, regiões duplicadas, tamanho negativo, datas invertidas, normalização sem mutação e frescor por versão/idade/data futura. A suíte local chegou a 181 testes aprovados. `ADR-0030-manifesto-dataset-offline.md`, `OFFLINE_DATA_STATUS.md`, `MAP_DATA_STATUS.md` e `SYNC_STATUS.md` registram a separação entre dados do usuário, cache técnico, manifesto e futuro dataset gerenciado.
 
 O manifesto não cria cobertura mundial, busca offline, roteamento, sync, pacote regional ou autorização de redistribuição. O próximo bloco deve auditar fontes/licenças e escolha de armazenamento antes de qualquer download ou integração; a validação física PWA/Android/iOS permanece pendente.
+
+## Marco de transação atômica de dataset — 2026-08-28
+
+A auditoria do estado publicado confirmou que o manifesto de dataset já validava identidade, versão, regiões, licença e checksum esperado, mas não havia uma regra executável para preservar a versão ativa durante uma falha ou impedir duas atualizações simultâneas do mesmo dataset. O próximo gargalo foi fechado com `src/core/dataset-transacao.js`.
+
+A máquina pura reserva o dataset desde `IDLE`, passa por `CHECKING`, `AVAILABLE`, `DOWNLOADING`, `VERIFYING`, `STAGING` e `ACTIVATING`, e somente troca o snapshot `ativo` em `COMPLETE`. Tamanho e checksum fornecidos precisam coincidir com o manifesto antes do staging. Cancelamento antes da ativação remove apenas a referência temporária; falhas seguem para `FAILED` e podem ser revertidas para `ROLLED_BACK` preservando o ativo anterior. Estados terminais rejeitam nova execução.
+
+`test/dataset-transacao.test.js` cobre lock concorrente, fluxo feliz, staging antes da troca, tamanho/checksum inválidos, cancelamento, rollback, transições inválidas, ativação sem staging, versão igual e datasetId divergente. A suíte local passou com 187 testes.
+
+A unidade é uma máquina de contrato, não um sync de produção. Não há download, cálculo SHA-256 de bytes, storage de staging, persistência da transação, recuperação após power loss, retry/resume, endpoint ou pacote autorizado. O cache técnico de tiles e o store local dos dados do usuário continuam separados.

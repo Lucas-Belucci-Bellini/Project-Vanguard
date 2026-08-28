@@ -4,12 +4,12 @@
 
 | Target | Comando/processo | Estado | Evidência atual | Limite |
 |---|---|---|---|---|
-| Web | `npm run build` | Aprovado | build local e CI; manifesto de dataset é lógica compartilhada sem dataset empacotado | não prova instalação PWA nem aparelho |
+| Web | `npm run build` | Aprovado | build local e CI; manifesto/transação de dataset são lógica compartilhada sem dataset empacotado | não prova instalação PWA nem aparelho |
 | Service Worker | `node --check public/sw.js` + testes VM | Aprovado | CI/local | não prova quota nem modo avião |
-| Tests | `npm test` | Aprovado | 181 testes; inclui manifesto de dataset, localização manual, catálogo de rotas e cleanups assíncronos | não substitui validação física |
+| Tests | `npm test` | Aprovado | 187 testes; inclui manifesto e transação de dataset, localização manual, catálogo de rotas e cleanups assíncronos | não substitui validação física |
 | Android sync | `npm run mobile:sync:android` | Aprovado | projeto atualizado | não prova execução em Android |
 | iOS sync | `npm run mobile:sync:ios` | Aprovado no Linux | projeto atualizado | não substitui macOS/Xcode |
-| Android debug | `npm run mobile:android:debug` | Aprovado | APK debug de teste regenerado após o commit funcional; tamanho/hash devem ser registrados por execução | não é release nem distribuição |
+| Android debug | `npm run mobile:android:debug` | Aprovado | não necessário nesta unidade pura; gate anterior gerou APK debug de teste; tamanho/hash devem ser registrados por execução | não é release nem distribuição |
 | Android release/AAB | workflow manual artifact-only | Aprovado como geração | AAB não assinado do run `33121937373` | requer signing e revisão |
 | Android signed | keystore/credencial real | Bloqueado | nenhuma assinatura configurada | autorização e ambiente seguro |
 | iOS debug | Xcode em macOS | Bloqueado | apenas sync Linux | Mac, Xcode, conta/equipe Apple |

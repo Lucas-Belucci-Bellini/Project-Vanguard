@@ -8,13 +8,13 @@
 |---|---|
 | Produto | Vanguard Field |
 | Linha de versão de trabalho | `2.x.x` em construção; o pacote atual ainda declara `1.0.0` |
-| Commit avaliado | `57a387a feat(v2): validar manifesto de dataset offline` |
+| Commit avaliado | `06cc503 feat(v2): formalizar transacao atomica de dataset` |
 | Branch | `main` |
 | Tag V2 candidate | Não criada |
 | Release pública | Somente `v1.0.0-rc.2`, da linha anterior |
 | Status | `NOT READY / BLOCKED` |
 
-O commit indicado é o snapshot documental atual de `main`; ele não deve ser chamado de release candidate publicado. Uma candidate real exigiria decisão explícita, tag própria, artefatos correspondentes, notas e os gates descritos em `MOBILE_V2_RELEASE_STATUS.md`.
+O commit indicado é o snapshot funcional publicado em `main`; ele não deve ser chamado de release candidate publicado. Uma candidate real exigiria decisão explícita, tag própria, artefatos correspondentes, notas e os gates descritos em `MOBILE_V2_RELEASE_STATUS.md`.
 
 ## Estado por plataforma
 
@@ -31,12 +31,12 @@ O commit indicado é o snapshot documental atual de `main`; ele não deve ser ch
 
 | Área | Resultado atual | Limite |
 |---|---|---|
-| Testes automatizados | `npm test`: 181 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
+| Testes automatizados | `npm test`: 187 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
 | Build | aprovado no commit avaliado | não é release |
 | Service Worker | sintaxe e contratos aprovados | não prova quota/cobertura offline física |
 | Auditoria de produção | 0 vulnerabilidades reportadas no último gate | não é auditoria completa de segurança operacional |
 | Privacidade | dados locais por padrão, sem telemetria/sincronização automática | revisão física e operacional pendente |
-| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanups assíncronos e manifesto de dataset | GPS não transmite; Socorro não confirma entrega/resgate |
+| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanups assíncronos, manifesto e transação pura de dataset | GPS não transmite; Socorro não confirma entrega/resgate |
 | Legado | wiki/ambiente virtual de Arma 3 isolado, somente videogame/testes | não adaptar para ambientes ou operações reais |
 
 ## Artifacts conhecidos
@@ -78,6 +78,7 @@ Uma candidate V2 só poderá ser criada depois de confirmar o commit-alvo, a ver
 - `docs/adr/ADR-0028-cleanup-centralizacao-manual.md` — decisão e limites do cleanup assíncrono do mapa.
 - `docs/adr/ADR-0029-cleanup-atualizacao-pwa.md` — decisão e limites do cleanup do update PWA.
 - `docs/adr/ADR-0030-manifesto-dataset-offline.md` — contrato e limites do manifesto de dataset.
+- `docs/adr/ADR-0031-transacao-atomica-dataset.md` — máquina pura de staging, ativação e rollback.
 - `MOBILE_V2_RELEASE_STATUS.md` — estado operacional dos gates.
 - `MOBILE_V2_BUILD_MATRIX.md` — build e artifacts.
 - `MOBILE_V2_DEVICE_MATRIX.md` — aparelhos e casos físicos.

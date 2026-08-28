@@ -213,3 +213,20 @@ A validação desta unidade inclui `npm test` com 173 aprovados, build aprovado,
 O bloco funcional foi publicado em `57a387a feat(v2): validar manifesto de dataset offline`; o CI `33130481662` concluiu com sucesso. A memória e os status foram publicados em `ae2edbe docs(v2): registrar arquitetura de dataset offline`; o CI `33130631235` também concluiu com sucesso. `main` e `origin/main` permaneceram alinhadas e nenhum workflow de release foi disparado.
 
 A rodada entregou contrato, testes e documentação, não um dataset mundial. O projeto continua sem cobertura cartográfica offline mundial, busca local mundial, roteamento offline, pacote regional, sync, checksum calculado de arquivo, staging, ativação atômica, rollback ou licença de redistribuição confirmada. Os dados de usuário continuam separados do cache técnico de tiles.
+
+## 2026-08-28 — transação atômica de dataset offline
+
+- **Execution:** continuação do Global Offline Data Engine após o manifesto versionado.
+- **Estado inicial:** `main` limpa e alinhada no commit `68b2a97`; CIs recentes `33130481662`, `33130631235` e `33130691513` concluídos com sucesso.
+- **Phase:** dataset transaction / atomic update foundation.
+- **Audit:** manifesto validava metadados, mas não havia lock de atualização, staging, ativação explícita ou rollback preservando o ativo.
+- **Implemented:** `src/core/dataset-transacao.js`, com estados `IDLE`, `CHECKING`, `AVAILABLE`, `DOWNLOADING`, `VERIFYING`, `STAGING`, `ACTIVATING`, `COMPLETE`, `FAILED`, `ROLLED_BACK` e `CANCELLED`.
+- **Invariants:** uma transação não terminal reserva o dataset; o ativo só muda em `COMPLETE`; checksum/tamanho fornecidos precisam coincidir antes do staging; falha mantém o ativo anterior; estados terminais não podem ser reabertos.
+- **Tests:** `test/dataset-transacao.test.js` cobre concorrência, caminho feliz, staging, tamanho/checksum inválidos, cancelamento, rollback, transições inválidas, ativação sem staging e identidade/versão; `npm test`: 187 aprovados e 0 falhas.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria reportou 0 vulnerabilidades.
+- **Dataset:** nenhum pacote mundial ou regional foi incorporado; nenhum checksum de bytes foi calculado; fonte/licença de redistribuição permanece não confirmada.
+- **Sync:** máquina pura parcial implementada; não há download, endpoint, retry, resume, fila, I/O, persistência, power-loss recovery ou histórico persistente.
+- **Storage/privacy:** `src/core/estado.js` continua o store oficial de dados do usuário; cache do Service Worker permanece técnico; a transação não envia GPS, trilhas, waypoints, rotas ou emergência.
+- **Documentation:** ADR-0031, `OFFLINE_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md`, `MOBILE_V2_RELEASE_CANDIDATE.md` e este log foram atualizados.
+- **Blockers:** armazenamento gerenciado, pacote/fonte/licença, cálculo real de checksum, atomicidade no dispositivo, recovery, teste offline e validação PWA/Android/iOS permanecem pendentes.
+- **Status:** IN PROGRESS / BLOCKED; nenhuma tag, release, signing ou artifact novo foi criado.
