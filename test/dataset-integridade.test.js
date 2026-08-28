@@ -31,7 +31,7 @@ test('reprova bytes diferentes do checksum declarado', async () => {
   const resultado = await verificarIntegridadeDataset(UTF8.encode('abd'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   assert.equal(resultado.ok, false);
   assert.equal(resultado.codigo, 'CHECKSUM_INVALIDO');
-  assert.notEqual(resultado.checksumCalculado, resultado);
+  assert.notEqual(resultado.checksumCalculado, 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
 });
 
 test('reprova checksum esperado malformado antes de calcular', async () => {
