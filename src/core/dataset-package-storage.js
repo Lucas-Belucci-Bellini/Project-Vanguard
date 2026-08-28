@@ -106,7 +106,7 @@ export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {
           datasetId,
           bytes: copia,
           sizeBytes: copia.byteLength,
-          metadata: structuredClone?.(metadata) ?? metadata,
+          metadata: typeof globalThis.structuredClone === 'function' ? globalThis.structuredClone(metadata) : metadata,
           updatedAt: Date.now(),
         }));
         return { ok: true, datasetId, sizeBytes: copia.byteLength };
