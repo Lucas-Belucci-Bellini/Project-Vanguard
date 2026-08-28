@@ -166,3 +166,13 @@ A auditoria do controle global de atualização identificou um timer inicial de 
 `test/atualizacao-ui.test.js` passou a usar timers fake e verifica a janela de 2,5 segundos, seu cancelamento no cleanup, a remoção dos listeners e o fluxo waiting/negação/confirmação. A execução final passou com 176 testes. O ADR-0029 registra a decisão e seus limites. O commit `11767e6 fix(v2): limpar timer da atualizacao pwa` foi publicado em `main` e o CI `33129751294` concluiu com sucesso.
 
 A unidade prova o contrato assíncrono local. Não prova instalação PWA, modo avião, quota, reabertura, confirmação do sistema operacional, WebView ou atualização posterior em aparelho. T-017 e T-018 permanecem pendentes.
+
+## Marco de manifesto versionado do Global Offline Data Engine — 2026-08-28
+
+A nova ordem de continuidade pediu uma plataforma de dados offline mundial, mas a auditoria confirmou que o repositório atual ainda possui somente planner de tiles e cache técnico do Service Worker. Não há dataset mundial empacotado, índice local de cidades/estradas, pipeline de processamento, fonte com redistribuição offline comprovada, armazenamento gerenciado de mapas, checksum calculado de pacote, staging ou rollback. O cache público de tiles não foi promovido indevidamente a “mapa mundial offline”.
+
+Foi implementado `src/core/dataset-manifest.js` como primeiro bloco incremental e puro. O contrato valida `schema`, `manifestVersion`, `datasetId`, versão, `formatVersion`, datas UTC, origem, licença, checksum SHA-256 esperado, compatibilidade mínima e regiões com tamanho/checksum. Também classifica o frescor fornecido como `CURRENT`, `STALE` ou `UNKNOWN`, sem fazer rede, persistência, download ou ativação.
+
+A cobertura em `test/dataset-manifest.test.js` verifica manifesto válido, schema/campos inválidos, regiões duplicadas, tamanho negativo, datas invertidas, normalização sem mutação e frescor por versão/idade/data futura. A suíte local chegou a 181 testes aprovados. `ADR-0030-manifesto-dataset-offline.md`, `OFFLINE_DATA_STATUS.md`, `MAP_DATA_STATUS.md` e `SYNC_STATUS.md` registram a separação entre dados do usuário, cache técnico, manifesto e futuro dataset gerenciado.
+
+O manifesto não cria cobertura mundial, busca offline, roteamento, sync, pacote regional ou autorização de redistribuição. O próximo bloco deve auditar fontes/licenças e escolha de armazenamento antes de qualquer download ou integração; a validação física PWA/Android/iOS permanece pendente.

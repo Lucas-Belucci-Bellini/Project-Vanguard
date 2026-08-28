@@ -7,26 +7,28 @@
 | **Version** | `2.x` em construção; pacote compartilhado atual `1.0.0` |
 | **Phase** | Mobile foundation + GPS/tracking/offline hardening; `IN PROGRESS` |
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
-| **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada; manter timers e listeners assíncronos com cleanup sem declarar capacidades não verificadas |
-| **Current Task** | Validar em aparelhos o lifecycle, o cleanup de centralização e o update PWA; continuar usando `DEVICE_CAPABILITIES.md` e `MOBILE_V2_RELEASE_CANDIDATE.md` sem inventar suporte |
-| **Last Completed** | Cleanup da centralização manual e do timer inicial de atualização PWA; `11767e6`, CI `33129751294` concluído com sucesso |
+| **Current Objective** | Evoluir de foundation/debug para uma plataforma de dados offline verificável e validação física; manter separadas cache, dataset e dados do usuário sem declarar capacidades não verificadas |
+| **Current Task** | Auditar fonte/licença e armazenamento para o futuro dataset; executar T-005A/T-007/T-017 em aparelhos quando disponíveis, sem inventar cobertura mundial |
+| **Last Completed** | Contrato puro de manifesto versionado de dataset, com checksum esperado, regiões e frescor; `57a387a`, CI `33130481662` concluído com sucesso |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; update confirmado e timer inicial cancelável no cleanup; instalação, modo avião, quota, reabertura e update posterior físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
-| **Tests** | `npm test`: 176 testes aprovados; inclui cleanup de centralização, timer inicial de atualização, localização manual, configuração, camadas, Service Worker, catálogo, registros e diagnóstico |
+| **Tests** | `npm test`: 181 testes aprovados; inclui manifesto de dataset, cleanups assíncronos, localização manual, configuração, camadas, Service Worker, catálogo, registros e diagnóstico |
 | **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
 | **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
 | **GPS** | Capacitor foreground + fallback Web/PWA; watcher de cidade econômico e trilha foreground de alta precisão; botão Centralizar solicita novo fixo manual (`maximumAge: 0`, alta precisão); estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; background não implementado |
 | **Compass** | UI/fallback GPS existentes; sensor físico e calibração `BROWSER DEPENDENT`/`DEVICE DEPENDENT` |
 | **Maps** | MapLibre, MGRS, grade, centralização, waypoints, destino, quatro bases, rótulos OSM/ArcGIS e planner de tiles; cobertura/provedor/quota não garantidos |
-| **Offline** | shell, estado local, manual, contexto e tiles preparados; base + nomes/limites cacheados no `v3`; modo avião, quota e reabertura física pendentes |
-| **Storage** | `localStorage` com envelope versionado; Cache Storage para shell/tiles; última persistência distingue `PERSISTIDO`/`FALHA`; quota física pendente |
+| **Offline** | shell, estado local, manual, contexto e tiles preparados; cache `v3` e planner limitados; manifesto de dataset validado, mas mapa mundial gerenciado, modo avião, quota e reabertura física pendentes |
+| **Dataset** | Manifesto versionado validado em código puro; não há pacote mundial, índice local, fonte/licença de redistribuição ou dataset gerenciado incorporado |
+| **Sync** | Atualização confirmada do app e preparo de tiles existentes; não há sync de dataset, download, checksum calculado, staging, ativação atômica ou rollback |
+| **Storage** | `localStorage` com envelope versionado para dados de usuário; Cache Storage para shell/tiles; futuro dataset ainda sem armazenamento gerenciado; quota física pendente |
 | **Tracking** | `STOPPED`/`ACTIVE`/`PAUSED`, Start/Pause/Resume/Stop local; pontos preservados e Stop não exporta/apaga automaticamente |
 | **Waypoints** | Criar, persistir, visualizar e exportar localmente; uso touch físico pendente |
 | **Routes** | Trilha local, destino, JSON/GPX/KML e catálogo informativo de peregrinações; Caminhos dos Anjos, Caminho da Fé, Rota do Rosário e Caminho Sagrado sem geometria local ainda; Rota do Carvalho não confirmada |
 | **Sharing** | Texto, coordenadas, JSON, GPX e KML via ação explícita, com Web Share/clipboard/download fallback; Share Sheet/Files físico pendente |
 | **Emergency Preparation** | Socorro prepara coordenadas/pacote e compartilha manualmente; não envia SOS, não confirma entrega/resgate e não transmite via satélite |
-| **Security** | Civil/local-first; sem telemetria automática, hardware falso, integração militar ou expansão do legado balístico. O legado é uma wiki separada de Arma 3, criada apenas para testes/simulação no videogame e nunca para uso real. A API de satélite real foi contingência histórica do processo de construção, não pedido do usuário nem mapa do jogo |
+| **Security** | Civil/local-first; manifesto não baixa nem executa código; sem telemetria automática, hardware falso, integração militar ou expansão do legado balístico. O legado é uma wiki separada de Arma 3, criada apenas para testes/simulação no videogame e nunca para uso real. A API de satélite real foi contingência histórica do processo de construção, não pedido do usuário nem mapa do jogo |
 | **Privacy** | Dados locais por padrão; sem sincronização automática; pagamentos/Asaas/Supabase/e-mail fiscal `NOT_CONFIGURED` |
 | **Accessibility** | Shell com skip link, landmarks, foco e ARIA; leitor de tela, touch e safe areas precisam de validação física |
 | **Performance** | Métricas locais de navegação/memória opcional; profiling físico e bateria de quatro dias pendentes |
@@ -37,8 +39,8 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `11767e6 fix(v2): limpar timer da atualizacao pwa`; push concluído; CI `33129751294` concluído com sucesso; nenhuma tag/release criada |
-| **Next Task** | Confirmar T-005A/T-007/T-017 em aparelhos reais; verificar centralização, Wake Lock, troca de rota, tela bloqueada e update confirmado; depois retomar signing/distribuição sem publicar automaticamente |
+| **Main** | `57a387a feat(v2): validar manifesto de dataset offline`; push concluído; CI `33130481662` concluído com sucesso; memória documental desta unidade aguarda commit; nenhuma tag/release criada |
+| **Next Task** | Auditar fonte/licença e armazenamento de dataset; depois executar T-005A/T-007/T-017 em aparelhos reais e retomar signing/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
 
@@ -60,6 +62,7 @@
 16. Memória factual de release candidate V2 — `MOBILE_V2_RELEASE_CANDIDATE.md`, `1ac26e9`, CI `33128822658`.
 17. Cleanup da centralização manual no mapa — `6d7c7fb`, ADR-0028, CI `33129339317`.
 18. Cleanup do timer de atualização PWA — `11767e6`, ADR-0029, CI `33129751294`.
+19. Manifesto versionado de dataset offline — `57a387a`, `test/dataset-manifest.test.js`, ADR-0030; dataset mundial e sync permanecem não implementados.
 
 ## Regra de evidência
 

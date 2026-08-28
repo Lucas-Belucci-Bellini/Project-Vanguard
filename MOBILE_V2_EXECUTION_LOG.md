@@ -1,6 +1,6 @@
 # Vanguard Field — Mobile V2 Omega Execution Log
 
-> Log resumido e append-only das execuções relevantes. Atualizado em 2026-08-27.
+> Log resumido e append-only das execuções relevantes. Atualizado em 2026-08-28.
 
 ## 2026-08-27 — auditoria Omega e estado inicial
 
@@ -185,3 +185,25 @@ A validação desta unidade inclui `npm test` com 173 aprovados, build aprovado,
 - **Blockers:** instalação PWA, modo avião/quota, reabertura, update posterior em aparelho, lifecycle, Android/Xiaomi/iPhone físicos, bateria, signing Android, macOS/Xcode/iOS, AAB/IPA e distribuição continuam pendentes.
 - **Next Task:** executar T-005A/T-007/T-017 quando houver aparelhos; sem hardware, escolher apenas outro gargalo seguro e verificável.
 - **Status:** IN PROGRESS / BLOCKED nos gates físicos e de distribuição.
+
+## 2026-08-28 — manifesto versionado de dataset offline
+
+- **Execution:** continuação Omega após o cleanup do update PWA, seguindo a nova ordem de Global Offline Data Engine.
+- **Estado inicial:** `main` limpa e alinhada com `origin/main` em `0e0eda0`; CI `33129865687` anterior concluído com sucesso.
+- **Phase:** Dataset architecture / offline-first foundation.
+- **Milestone:** introduzir identidade, versão e integridade esperada de dataset sem transformar cache de tiles em dataset mundial.
+- **Objective:** criar um contrato mínimo e verificável para manifestos de dados cartográficos locais.
+- **Audit:** `src/core/mapa-offline.js` calcula até 256 URLs de tiles do viewport; `public/sw.js` mantém cache técnico de shell/tiles; `src/core/estado.js` mantém envelopes v1 de dados do usuário. Não havia manifesto, pacote regional, índice, staging, ativação atômica, rollback ou sync de dataset.
+- **Implemented:** `src/core/dataset-manifest.js`, com `schema`, versão de manifesto, `datasetId`, versão, `formatVersion`, datas UTC, source, license, checksum SHA-256 esperado, `minimumAppVersion`, regiões e estados `CURRENT`/`STALE`/`UNKNOWN`.
+- **Tests:** `test/dataset-manifest.test.js` cobre manifesto válido, campos inválidos, regiões duplicadas, tamanho negativo, datas invertidas, normalização sem mutação e frescor. `npm test`: 181 aprovados e 0 falhas.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria reportou 0 vulnerabilidades.
+- **Android/iOS:** nenhum arquivo de plataforma foi alterado nesta unidade; não houve novo signing, instalação, IPA ou validação física.
+- **PWA/offline:** o Service Worker e o planner de tiles não foram substituídos. Não houve declaração de mapa mundial offline, busca local ou roteamento offline.
+- **Dataset:** nenhum pacote mundial ou regional foi incorporado; nenhuma fonte foi considerada autorizada para redistribuição offline; o manifesto registra checksum esperado, mas não calcula hash de arquivo.
+- **Sync:** nenhum download, retry, resume, fila de datasets, staging, ativação, rollback ou evento de sincronização foi implementado.
+- **Storage:** dados do usuário continuam no store local oficial; dataset gerenciado permanece separado e sem armazenamento definido.
+- **Security/privacy:** sem scraping/bulk-download de tiles públicos, sem rede no módulo puro, sem execução de código, sem envio de GPS/trilhas/waypoints/rotas e sem alteração do escopo civil/Arma 3 restrito.
+- **Documentation:** `ADR-0030-manifesto-dataset-offline.md`, `OFFLINE_DATA_STATUS.md`, `MAP_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md` e este log alinhados.
+- **Blockers:** fonte/licença de redistribuição, formato/pacote, armazenamento de dataset, índice, servidor, checksum calculado, staging, atomicidade, rollback, teste offline real e validação de aparelhos continuam pendentes.
+- **Next Task:** auditar fontes/licenças e escolher armazenamento para metadados; depois avaliar um pacote pequeno e autorizado, sem criar segundo sistema offline.
+- **Status:** IN PROGRESS / BLOCKED para dataset mundial, sync e validação física.

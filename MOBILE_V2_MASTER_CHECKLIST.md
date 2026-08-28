@@ -24,6 +24,8 @@
 | OMEGA-018 | Release | Distribution | Debug → release → signed → installed → validated → AAB/store-ready | workflow artifact-only, sem signing | workflow `33121937373` | APK/AAB hashes registrados | `MOBILE_V2_RELEASE.md`, ADR-0018 | BLOCKED | keystore, Apple signing e gates físicos |
 | OMEGA-019 | Shared | Route catalog | Catálogo informativo de rotas de peregrinação com fontes e estados de evidência | `src/data/rotas-peregrinacao.js`, seletor no Mapa; sem geometria inventada | testes do catálogo e imutabilidade | Node/CI e fontes públicas | `docs/ROTAS-PEREGRINACAO-REFERENCIAS.md`, ADR-0026 | IN_PROGRESS | GPX/KML oficial/autorizado e validação de rota física |
 | OMEGA-020 | Shared/Device | Capability matrix | Matriz de capacidades Web/Android/iOS com hardware, permissão e fallback | `DEVICE_CAPABILITIES.md`, baseada nos contratos existentes | revisão documental, build/testes existentes | código, CI e sync; sem validação física | `DEVICE_CAPABILITIES.md`, `MOBILE_V2_DEVICE_MATRIX.md` | IN_PROGRESS | instalação, sensores, GPS, bateria, offline e lifecycle em aparelhos reais |
+| OMEGA-021 | Shared | Offline dataset | Manifesto versionado de dataset com identidade, regiões, licença, checksum esperado, compatibilidade e frescor | `src/core/dataset-manifest.js`; contrato puro, sem rede ou persistência | `test/dataset-manifest.test.js` | Node/local; não há dataset mundial empacotado | `docs/adr/ADR-0030-manifesto-dataset-offline.md`, `OFFLINE_DATA_STATUS.md`, `MAP_DATA_STATUS.md`, `SYNC_STATUS.md` | TESTED | fonte/licença, pacote, armazenamento, índice, staging, checksum calculado, ativação e teste offline real |
+
 
 ## Regra de encerramento
 
