@@ -6,7 +6,7 @@
 
 O Vanguard Field possui funcionamento local para dados da pessoa, GPS foreground, trilhas, waypoints, rotas locais, manual, preparação de socorro e exportações. O mapa possui um planner de tiles e o Service Worker mantém cache técnico de shell/tiles. Essas capacidades são diferentes de um dataset cartográfico mundial gerenciado.
 
-A primeira camada do Global Offline Data Engine foi criada em `src/core/dataset-manifest.js`. Ela valida e normaliza o contrato mínimo de um manifesto versionado, incluindo identidade, versão, regiões, origem, licença, tamanho, checksum SHA-256, compatibilidade mínima e frescor. A máquina complementar em `src/core/dataset-transacao.js` formaliza a sequência de staging, verificação, ativação e rollback. `src/core/dataset-storage.js` acrescenta um adapter isolado para persistir manifesto ativo e transação em envelopes próprios. `src/data/fontes-dataset.js` acrescenta o gate de governança para impedir que uma camada online seja confundida com fonte de pacote. As peças são injetáveis/testáveis; não tornam o cache técnico um dataset.
+A primeira camada do Global Offline Data Engine foi criada em `src/core/dataset-manifest.js`. Ela valida e normaliza o contrato mínimo de um manifesto versionado, incluindo identidade, versão, regiões, origem, licença, tamanho, checksum SHA-256, compatibilidade mínima e frescor. A máquina complementar em `src/core/dataset-transacao.js` formaliza a sequência de staging, verificação, ativação e rollback. `src/core/dataset-storage.js` acrescenta um adapter isolado para persistir manifesto ativo e transação em envelopes próprios. `src/data/fontes-dataset.js` acrescenta o gate de governança para impedir que uma camada online seja confundida com fonte de pacote. `src/core/dataset-sync.js` costura as quatro peças num ciclo de vida único, com ordem de gravação definida e reconciliação de partida para atualização interrompida. As peças são injetáveis/testáveis; não tornam o cache técnico um dataset.
 
 | Camada | Estado | Evidência | Limite |
 |---|---|---|---|
@@ -15,9 +15,10 @@ A primeira camada do Global Offline Data Engine foi criada em `src/core/dataset-
 | Manifesto de dataset | Implementado e testado | `src/core/dataset-manifest.js`, `test/dataset-manifest.test.js`, ADR-0030 | ainda não existe pacote cartográfico gerenciado |
 | Storage de dataset | Adapter isolado parcial | `src/core/dataset-storage.js`, `test/dataset-storage.test.js`, ADR-0032; chaves próprias para ativo/transação | não é storage atômico de disco, não cobre quota física ou power loss |
 | Governança de fontes | Gate imutável parcial | `src/data/fontes-dataset.js`, `test/fontes-dataset.test.js`, ADR-0033; todos os critérios precisam ser confirmados | nenhum provedor atual foi aprovado para pacote offline |
+| Ciclo de vida do dataset | Orquestração implementada e testada | `src/core/dataset-sync.js`, `test/dataset-sync.test.js`, ADR-0035; gate na entrada e recuperação de interrupção | não baixa, não calcula hash de bytes e não prova durabilidade física; sem interface |
 | Dataset mundial | Não implementado | nenhum pacote/manifesto oficial empacotado | fonte, licença, pipeline, formato, armazenamento e distribuição |
 | Busca offline de lugares | Não declarada | não há índice local mundial | só pode ser ativada com dataset/index real |
-| Sync de dataset | Máquina + adapter local parcial | `src/core/dataset-transacao.js` e `src/core/dataset-storage.js`, testes e ADRs 0031/0032 | sem endpoint, download, checksum de bytes, staging atômico físico ou pacote autorizado |
+| Sync de dataset | Máquina, adapter e orquestração locais | `dataset-transacao.js`, `dataset-storage.js` e `dataset-sync.js`, testes e ADRs 0031/0032/0035 | sem endpoint, download, checksum de bytes, staging atômico físico ou pacote autorizado |
 
 ## Regras de segurança e honestidade
 
@@ -29,4 +30,4 @@ Dados de mapa e dados da pessoa permanecem separados. Nenhum fluxo de atualizaç
 
 ## Próximo bloco
 
-A próxima unidade deve definir fonte autorizada e backend de storage apropriado para um pacote regional controlado. Não deve tratar `localStorage` como atomicidade física, aprovar provedor apenas por renderizar online, criar pacote mundial fictício, fazer scraping de tiles, exigir geocodificação online ou prometer roteamento offline.
+Com a costura fechada, o gargalo deixou de ser de código e passou a ser de origem: a próxima unidade depende de uma fonte autorizada por contrato e de um backend de storage apropriado para um pacote regional controlado. Enquanto `avaliarCatalogoFontes()` mantiver `podeCriarPacote: false`, `iniciar()` recusa qualquer transação — e nenhuma interface de download deve ser exposta. Não deve tratar `localStorage` como atomicidade física, aprovar provedor apenas por renderizar online, criar pacote mundial fictício, fazer scraping de tiles, exigir geocodificação online ou prometer roteamento offline.

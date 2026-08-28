@@ -221,6 +221,20 @@ A suíte passou com 206 testes, o build Web e a auditoria de produção passaram
 
 O experimento ainda não prova continuidade após tela bloqueada, Home/Recents, encerramento do processo, política Xiaomi/MIUI/HyperOS, modo avião, bateria ou iOS. Os casos T-021 a T-030 foram adicionados à `MOBILE_V2_TEST_MATRIX.md`; nenhum pode ser marcado `VERIFIED` por build ou CI. A decisão completa e as referências de plataforma estão em `docs/adr/ADR-0034-tracking-background-opt-in.md`; o procedimento operacional está em `docs/ROTEIRO-TESTE-BACKGROUND-GPS.md`.
 
+## Marco de orquestração do ciclo de vida do dataset — 2026-08-28
+
+As quatro peças da fundação do dataset offline existiam isoladas: manifesto (ADR-0030), transação pura (ADR-0031), storage isolado (ADR-0032) e gate de fontes (ADR-0033). Nenhuma delas conhecia as outras. `src/core/dataset-sync.js` fecha essa costura e é o único ponto que combina os quatro módulos.
+
+A contribuição real não é uma função nova: é a **ordem de gravação**. A ativação acontece em quatro passos — transação como `ACTIVATING`, escrita do manifesto ativo, transação como `COMPLETE`, remoção do registro — de modo que o ativo só é escrito depois do primeiro passo estar gravado e a transação só é apagada depois do segundo ter sucesso. Uma queda entre eles deixa de ser ambígua.
+
+`recuperar()` reconcilia na partida o que sobrou de uma interrupção, classificando em `CLEAN`, `RESIDUAL`, `INTERRUPTED`, `ACTIVATION_CONFIRMED`, `ACTIVATION_REVERTED`, `ROLLBACK_APPLIED` ou `UNREADABLE`. O caso ambíguo — queda durante `ACTIVATING` — é decidido comparando `datasetId`, `version` e `checksum` do ativo gravado com o manifesto novo. Download interrompido nunca é retomado: bytes parciais não verificados não têm garantia de integridade, e o checksum do manifesto cobre o pacote inteiro, não um prefixo.
+
+O gate de governança passou a ser aplicado na entrada, em `iniciar()`, e exige `sourceId` explícito: um manifesto não se autoriza pelo próprio campo textual `source`. Com o catálogo atual isso significa que abrir transação é recusado para as oito fontes registradas — comportamento correto, coberto por teste.
+
+A suíte passou com 223 testes; os dezessete casos novos incluem os quatro pontos de queda da ativação, verificação reprovada por checksum e por tamanho, falha de escrita do ativo com preservação do anterior, transação concorrente, resíduo terminal, envelope ilegível e ausência de armazenamento. Os testes de interrupção não simulam exceções: reconstroem no armazenamento o estado que uma queda deixaria e reabrem o orquestrador sobre o mesmo backend, que é o que o app faz ao ser reaberto. Três mutações deliberadas no módulo (comparação de manifesto sempre verdadeira, gate sempre aprovando, limpeza da transação removida) reprovaram a suíte, confirmando que os testes prendem o comportamento.
+
+Nenhuma interface foi criada. Enquanto nenhuma fonte estiver aprovada, um botão de download seria promessa sem lastro. Não houve download, cálculo de SHA-256 sobre bytes, endpoint, pacote, alteração de URL ou prova de durabilidade física. A decisão completa está em `docs/adr/ADR-0035-orquestracao-ciclo-vida-dataset.md`.
+
 ## Próximo passo operacional
 
 Instalar o APK debug somente em aparelho de teste, registrar modelo/versão/bateria/permissões/notificação, preparar uma área cartográfica enquanto houver rede, iniciar uma rota local, aceitar explicitamente o background tracking, bloquear a tela por 10–20 minutos, voltar ao app, parar a sessão e a rota, conferir quantidade/timestamps/precisão/lacunas e exportar JSON+GPX. O teste deve levar power bank e comunicação independente. Nenhum resultado deve ser extrapolado para quatro dias ou para iOS sem evidência física.

@@ -295,3 +295,22 @@ A unidade fechou um gate técnico negativo: nenhum provedor atual está automati
 ## Fechamento da rodada — 2026-08-28
 
 O bloco funcional de tracking GPS experimental em background foi publicado em `4b3855b`; o CI `33134403140` concluiu com sucesso. A documentação atualizada, a ADR-0034 e o roteiro físico serão publicados em commit separado após revisão final. O APK gerado é um artifact debug local para instalação consciente em aparelho de teste; não é release, candidate, build assinado ou garantia de continuidade.
+
+## 2026-08-28 — orquestração do ciclo de vida do dataset
+
+- **Execution:** continuação do bloco de dataset offline; unidade classificada como código + teste + documentação, sem release, artifact ou interface.
+- **Estado inicial:** `main` limpa e alinhada em `c0ca171`; worktree limpa; somente `v1.0.0-rc.2` pública.
+- **Auditoria de partida:** os seis commits das rodadas anteriores (`4aa6556`, `094bd6a`, `7c963f0`, `edf0682`, `cb476e4`, `d3bf340`) foram confirmados como ancestrais de `HEAD`, com todos os arquivos presentes. Constatado que `dataset-manifest`, `dataset-transacao`, `dataset-storage` e `fontes-dataset` só eram importados entre si e por testes: nenhuma página do app os consumia.
+- **Implemented:** `src/core/dataset-sync.js` com `criarSincronizacaoDataset({ storage, fontes, relogio })` e as operações `estado`, `recuperar`, `iniciar`, `avancar`, `verificar`, `ativar`, `cancelar`, `falhar` e `rollback`.
+- **Ordem de gravação:** ativação em quatro gravações (`ACTIVATING` → manifesto ativo → `COMPLETE` → limpeza). O ativo só é escrito depois de `ACTIVATING` estar gravado; a transação só é apagada depois do ativo ter sucesso.
+- **Recovery:** `recuperar()` classifica em `CLEAN`, `RESIDUAL`, `INTERRUPTED`, `ACTIVATION_CONFIRMED`, `ACTIVATION_REVERTED`, `ROLLBACK_APPLIED` e `UNREADABLE`. O caso `ACTIVATING` é decidido comparando `datasetId`, `version` e `checksum`. Download interrompido nunca é retomado.
+- **Gate:** governança aplicada em `iniciar()` com `sourceId` obrigatório e explícito. Com o catálogo atual, todas as oito fontes são recusadas; há teste cobrindo a recusa do catálogo real.
+- **Invariantes:** o orquestrador lê o armazenamento a cada operação, sem cache em memória; falhas de leitura e escrita são propagadas com o código do storage e nunca convertidas em ausência de dado; uma gravação que falha impede o avanço do estado; as chaves de trilha, waypoint, rota, configuração e emergência não são tocadas.
+- **Tests:** `test/dataset-sync.test.js` com dezessete casos; `npm test`: 223 aprovados e 0 falhas.
+- **Defeito próprio encontrado e corrigido:** na primeira escrita, `estado().podeIniciar` usava `podeCriarPacote`, que exige o catálogo inteiro aprovado, enquanto `iniciar()` exige apenas a fonte declarada. Num catálogo misto o retrato diria "não dá" com origem válida disponível. O predicado passou a ser `fontesAptas.length > 0` e um teste de catálogo misto prende o comportamento.
+- **Verificação dos testes:** três mutações deliberadas no módulo reprovaram a suíte — `mesmoManifesto` sempre verdadeiro (1 falha), gate de fonte sempre aprovando (1 falha) e `encerrar()` sem limpar a transação (6 falhas). A suíte prende o comportamento, não apenas o executa.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria de produção reportou 0 vulnerabilidades.
+- **Documentation:** ADR-0035, `OFFLINE_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_MASTER_CHECKLIST.md` (OMEGA-027), `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md` e este log. Uma linha malformada da tabela de `SYNC_STATUS.md` (quatro colunas em tabela de três) foi corrigida na mesma passagem.
+- **Não feito, deliberadamente:** nenhuma interface de usuário, nenhum download, nenhum cálculo de SHA-256 sobre bytes, nenhum endpoint, nenhum pacote, nenhuma alteração de URL de camada e nenhuma aprovação de fonte. Enquanto nenhuma fonte estiver aprovada, expor um botão de download seria promessa sem lastro.
+- **Limits:** a garantia adicionada é de ordem, não de durabilidade física. Quota real, escrita atômica de disco e power loss em aparelho continuam sem prova. O gargalo do dataset mundial permanece de origem — fonte licenciada para redistribuição —, não de código.
+- **Status:** IN PROGRESS / BLOCKED para dataset mundial, endpoint, pacote, storage físico, aparelhos reais, signing e distribuição. Nenhuma tag, release, signing ou artifact novo foi criado.
