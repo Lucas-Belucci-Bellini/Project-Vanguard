@@ -22,6 +22,8 @@ A estrutura existente tem prioridade. A criação de uma pasta nova exige uma fu
 
 O Vanguard não deve acoplar a aplicação ao MapLibre nem a um fornecedor de tiles. `src/core/map-provider.js` define o contrato mínimo para uma fonte cartográfica: identidade, tiles, limites de zoom, atribuição e adaptador opcional de renderização. A UI e o estado tático não devem depender de URLs ou APIs de um provedor específico.
 
+`src/core/map-provider-registry.js` mantém o catálogo de providers disponíveis e concentra registro, consulta, exigência e remoção. Isso permite selecionar uma fonte cartográfica sem espalhar condicionais de provider pela aplicação.
+
 A primeira implementação continua compatível com o catálogo existente em `src/data/camadas-mapa.js`. Esta etapa não troca o provedor atual, não baixa dados em massa e não altera a política de licenciamento. O objetivo é permitir substituição controlada e futura estratégia offline por pacotes licenciados.
 
 ## Caminhos críticos
@@ -31,7 +33,7 @@ A primeira implementação continua compatível com o catálogo existente em `sr
 | GPS → HUD | `@capacitor/geolocation` foreground nativo ou `navigator.geolocation` → `src/core/localizacao.js` → normalização → `engine/mgrs.js` → mapa/HUD | Posição local; fonte, precisão e idade devem ser visíveis |
 | GPS → trilha | posição normalizada → filtro de distância/tempo → `estado.js` → resumo `trilha.js` | Alta precisão somente em rota ativa; sistema operacional define frequência |
 | Mapa → destino | toque/coordenadas → validação → distância/azimute `engine/geo.js` → HUD | Não é roteamento viário completo |
-| Mapa → provider | UI → `src/core/map-provider.js` → camada em `src/data/camadas-mapa.js` → adaptador MapLibre | Provider intercambiável; dados do usuário ficam fora do provider |
+| Mapa → provider | UI → `src/core/map-provider.js` → `src/core/map-provider-registry.js` → camada em `src/data/camadas-mapa.js` → adaptador MapLibre | Provider intercambiável; dados do usuário ficam fora do provider |
 | Mapa → tiles | provider → `planejarTilesDoViewport()` → templates únicos → `public/sw.js` allowlist/deduplicação → Cache Storage | Pré-cache limitado a 256 URLs; cache parcial não prova cobertura; resposta do provedor/quota dependem do ambiente |
 | Rota → backup | `estado.js` → `registro-offline.js` → JSON/GPX → download local | Importação confirma, valida e pausa a rota |
 | Contexto → mapa | zonas JSON → `core/contexto.js` → validade/prioridade → cartão local | Não é alerta oficial automático |
