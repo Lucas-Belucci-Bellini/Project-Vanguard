@@ -140,3 +140,25 @@ A auditoria do estado remoto confirmou `main` alinhada no commit `d8bf3a1`, cinc
 O registro separa Web/PWA, Android debug, Android release/AAB, Android signed/installed, iOS sync, archive/IPA, validação física e store readiness. O APK debug e o AAB não assinado do run `33121937373` continuam evidência de artifact-only e não foram atribuídos automaticamente ao snapshot `d8bf3a1`.
 
 A validação desta unidade inclui `npm test` com 173 aprovados, build aprovado, sintaxe do Service Worker, `git diff --check`, auditoria de produção sem vulnerabilidades e estrutura do documento candidate conferida. Ainda faltam instalação, signing, aparelhos reais, macOS/Xcode, modo avião, sensores, bateria, Share Sheet/Files, inspeção de distribuição e autorização deliberada.
+
+## 2026-08-28 — cleanup da centralização manual no mapa
+
+- **Execution:** continuação Omega após a memória de release candidate.
+- **Estado Git inicial:** `main` limpa e alinhada com `origin/main` em `1ac26e9`; CI `33128822658` anterior concluído com sucesso.
+- **Phase:** Mobile foundation + lifecycle observability.
+- **Milestone:** reduzir trabalho assíncrono sobrevivente à desmontagem da página do mapa.
+- **Objective:** limpar o timer de 21 segundos do botão Centralizar e impedir callbacks tardios de atualizarem uma UI/instância MapLibre já removida.
+- **Implemented:** `src/core/centralizacao-manual.js` com estados `LIVRE`/`BUSCANDO`/`ENCERRADA`, reentrada bloqueada, timer injetável/cancelável e descarte após cleanup; integração em `src/pages/mapa.js`.
+- **Fixed:** `mapaPage()` agora desmonta o controlador antes de parar o GPS; o listener de `release` do Wake Lock não chama `atualizarSheet()` depois da desmontagem.
+- **Tests:** a primeira execução falhou porque o novo teste não importava `test` de `node:test`; o harness foi corrigido. Execução final: `npm test` com 176 aprovados e 0 falhas.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria reportou 0 vulnerabilidades.
+- **Android:** `npm run mobile:android:debug` aprovado com `BUILD SUCCESSFUL`; APK continua artifact debug/teste, não release.
+- **iOS:** nenhum build Xcode/signing/IPA executado; ambiente Linux continua `ENVIRONMENT BLOCKED`.
+- **PWA:** build compartilhado aprovado; não houve nova validação física de instalação, modo avião ou quota.
+- **Artifacts:** apenas APK debug local regenerado pelo gate mobile; nenhum artifact assinado, AAB distribuível ou IPA.
+- **Security/privacy:** sem permissões novas, sem background GPS, sem telemetria, sem transmissão automática e sem alteração do legado Arma 3 restrito a videogame/testes.
+- **Documentation:** `ADR-0028-cleanup-centralizacao-manual.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_RELEASE_CANDIDATE.md` e este log alinhados.
+- **Commit:** `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa`; push para `origin/main` concluído.
+- **Blockers:** lifecycle/tela bloqueada, Wake Lock real, GPS interno/externo, modo avião/quota, Files/Share Sheet, bateria de quatro dias, signing Android, macOS/Xcode/iOS, AAB assinado e distribuição continuam pendentes.
+- **Next Task:** aguardar CI e, com aparelho disponível, executar T-005A/T-007; sem aparelho, escolher somente outro gargalo seguro e verificável.
+- **Status:** IN PROGRESS / BLOCKED nos gates físicos e de distribuição.

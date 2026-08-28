@@ -8,7 +8,7 @@
 |---|---|
 | Produto | Vanguard Field |
 | Linha de versão de trabalho | `2.x.x` em construção; o pacote atual ainda declara `1.0.0` |
-| Commit avaliado | `d8bf3a1 docs(v2): registrar matriz de capacidades` |
+| Commit avaliado | `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa` |
 | Branch | `main` |
 | Tag V2 candidate | Não criada |
 | Release pública | Somente `v1.0.0-rc.2`, da linha anterior |
@@ -31,12 +31,12 @@ O commit indicado é o snapshot documental atual de `main`; ele não deve ser ch
 
 | Área | Resultado atual | Limite |
 |---|---|---|
-| Testes automatizados | `npm test`: 173 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
+| Testes automatizados | `npm test`: 176 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
 | Build | aprovado no commit avaliado | não é release |
 | Service Worker | sintaxe e contratos aprovados | não prova quota/cobertura offline física |
 | Auditoria de produção | 0 vulnerabilidades reportadas no último gate | não é auditoria completa de segurança operacional |
 | Privacidade | dados locais por padrão, sem telemetria/sincronização automática | revisão física e operacional pendente |
-| Escopo civil | GPS, mapa, trilha, MGRS, preparação e compartilhamento manual | GPS não transmite; Socorro não confirma entrega/resgate |
+| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual e cleanup de callbacks do mapa | GPS não transmite; Socorro não confirma entrega/resgate |
 | Legado | wiki/ambiente virtual de Arma 3 isolado, somente videogame/testes | não adaptar para ambientes ou operações reais |
 
 ## Artifacts conhecidos
@@ -71,10 +71,11 @@ A precisão do GPS continua dependente do sistema, do receptor, do ambiente e do
 
 ## Gates antes de criar uma candidate real
 
-Uma candidate V2 só poderá ser criada depois de confirmar o commit-alvo, a versão e as notas; executar testes/build/auditoria; revisar permissões e privacidade; gerar artifacts identificados; obter signing quando a distribuição for pretendida; executar instalação e validação física conforme `MOBILE_V2_DEVICE_MATRIX.md`; e registrar falhas, hashes e decisão de publicação. A ausência de macOS/Xcode ou de aparelhos reais deve permanecer `BLOCKED`, nunca ser convertida em `VERIFIED`.
+Uma candidate V2 só poderá ser criada depois de confirmar o commit-alvo, a versão e as notas; executar testes/build/auditoria; revisar permissões e privacidade; gerar artifacts identificados; obter signing quando a distribuição for pretendida; executar instalação e validação física conforme `MOBILE_V2_DEVICE_MATRIX.md`; e registrar falhas, hashes e decisão de publicação. A ausência de macOS/Xcode ou de aparelhos reais deve permanecer `BLOCKED`, nunca ser convertida em `VERIFIED`. O cleanup da centralização manual está implementado e coberto por testes locais, mas ainda precisa de validação física de lifecycle, tela bloqueada e Wake Lock.
 
 ## Documentos relacionados
 
+- `docs/adr/ADR-0028-cleanup-centralizacao-manual.md` — decisão e limites do cleanup assíncrono.
 - `MOBILE_V2_RELEASE_STATUS.md` — estado operacional dos gates.
 - `MOBILE_V2_BUILD_MATRIX.md` — build e artifacts.
 - `MOBILE_V2_DEVICE_MATRIX.md` — aparelhos e casos físicos.

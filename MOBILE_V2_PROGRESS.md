@@ -146,3 +146,13 @@ A auditoria do estado real confirmou que não existia `MOBILE_V2_RELEASE_CANDIDA
 O documento classifica o snapshot como `NOT READY / BLOCKED`: ele não cria tag, não publica release e não atribui os hashes do workflow artifact-only ao snapshot atual. A única release pública continua sendo `v1.0.0-rc.2`. Os blockers físicos e de distribuição permanecem Android/Xiaomi/iPhone/iPad reais, GPS/sensores, modo avião/quota, lifecycle, bateria, Files/Share Sheet, signing, macOS/Xcode, IPA, AAB assinado e lojas.
 
 `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_STATUS.md` e `V2_STATUS.md` foram alinhados com o novo registro. A documentação aguarda o commit desta rodada.
+
+## Marco de cleanup da centralização manual — 2026-08-28
+
+A auditoria do consumidor `mapaPage` encontrou um gargalo de lifecycle: o botão Centralizar agendava diretamente um timer de 21 segundos e seus callbacks de posição/erro não tinham um contrato explícito para sobreviver ou não à desmontagem da página. O mapa é desmontado na troca de rota, portanto esse fluxo podia deixar trabalho assíncrono associado à tela anterior.
+
+Foi criado `src/core/centralizacao-manual.js`, um controlador puro com estados `LIVRE`, `BUSCANDO` e `ENCERRADA`, reentrada bloqueada, timer injetável/cancelável e descarte de callbacks tardios. `src/pages/mapa.js` passou a usá-lo e também evita que o listener de `release` do Wake Lock atualize a UI depois da desmontagem. Não foram adicionadas permissões, background GPS ou correção artificial de precisão.
+
+`test/centralizacao-manual.test.js` cobre janela de 21 segundos, reentrada, posição/erro durante busca, finalização, cancelamento, cleanup e callbacks tardios. A primeira execução da suíte falhou por ausência do import do runner `node:test`; o harness foi corrigido e a execução seguinte passou com 176 testes. O commit funcional `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa` foi publicado em `main`; a documentação de estado desta unidade aguarda seu CI.
+
+A mudança melhora o contrato de cleanup local, mas não prova GPS, Wake Lock, tela bloqueada, suspensão, bateria ou lifecycle físico. T-005A/T-007 continuam dependentes de Android/Xiaomi/iPhone reais.

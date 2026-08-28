@@ -1,6 +1,6 @@
 # Vanguard Field — MOBILE V2 STATUS
 
-> Registro persistente da execução Mobile V2 Omega. Atualizado em **2026-08-27** a partir do estado real de `main`. Este arquivo não declara a V2 completa sem evidência física.
+> Registro persistente da execução Mobile V2 Omega. Atualizado em **2026-08-28** a partir do estado real de `main`. Este arquivo não declara a V2 completa sem evidência física.
 
 | Campo | Estado atual |
 |---|---|
@@ -8,12 +8,12 @@
 | **Phase** | Mobile foundation + GPS/tracking/offline hardening; `IN PROGRESS` |
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
 | **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
-| **Current Task** | Usar `DEVICE_CAPABILITIES.md` e `MOBILE_V2_RELEASE_CANDIDATE.md` para orientar os gates de dispositivo, lifecycle, offline, assinatura e distribuição sem inventar suporte |
-| **Last Completed** | Matriz de capacidades Web/Android/iOS e registro factual do release candidate; `d8bf3a1`, CI `33128514144` |
+| **Current Task** | Validar em aparelhos o lifecycle e o cleanup de centralização; continuar usando `DEVICE_CAPABILITIES.md` e `MOBILE_V2_RELEASE_CANDIDATE.md` sem inventar suporte |
+| **Last Completed** | Cleanup da centralização manual no mapa, callbacks tardios e Wake Lock após desmontagem; `6d7c7fb`, CI pendente desta rodada |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
-| **Tests** | `npm test`: 173 testes aprovados; localização manual, configuração, atualização, camadas, Service Worker, catálogo de rotas, registros e diagnóstico cobertos |
+| **Tests** | `npm test`: 176 testes aprovados; inclui controlador de centralização, localização manual, configuração, atualização, camadas, Service Worker, catálogo, registros e diagnóstico |
 | **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
 | **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
 | **GPS** | Capacitor foreground + fallback Web/PWA; watcher de cidade econômico e trilha foreground de alta precisão; botão Centralizar solicita novo fixo manual (`maximumAge: 0`, alta precisão); estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; background não implementado |
@@ -37,8 +37,8 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `d8bf3a1 docs(v2): registrar matriz de capacidades`; CI `33128514144` concluído com sucesso; `MOBILE_V2_RELEASE_CANDIDATE.md` e seu alinhamento estão no worktree e aguardam commit documental |
-| **Next Task** | Executar T-005A e os demais gates de `MOBILE_V2_DEVICE_MATRIX.md`, usando `DEVICE_CAPABILITIES.md`; depois revisar assinatura/distribuição sem publicar automaticamente |
+| **Main** | `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa`; push concluído; CI desta rodada pendente; nenhuma tag/release criada |
+| **Next Task** | Confirmar T-005A/T-007 em aparelhos reais; verificar que centralização, Wake Lock, troca de rota e tela bloqueada não deixam callbacks/timers vivos; depois retomar signing/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
 
@@ -57,7 +57,8 @@
 13. Catálogo de rotas de peregrinação sem geometria inventada — `7538f9c`, CI `33127728576`, ADR-0026.
 14. Fixo manual de maior precisão no botão Centralizar — `e7bfb10`, CI `33128218221`, ADR-0027.
 15. Matriz de capacidades Web/Android/iOS — `d8bf3a1`, CI `33128514144`, `DEVICE_CAPABILITIES.md`.
-16. Memória factual de release candidate V2 — `MOBILE_V2_RELEASE_CANDIDATE.md`; commit documental pendente.
+16. Memória factual de release candidate V2 — `MOBILE_V2_RELEASE_CANDIDATE.md`, `1ac26e9`, CI `33128822658`.
+17. Cleanup da centralização manual no mapa — `6d7c7fb`, ADR-0028; CI desta rodada pendente.
 
 ## Regra de evidência
 
