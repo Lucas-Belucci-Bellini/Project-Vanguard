@@ -14,7 +14,7 @@ A camada de manifesto (`src/core/dataset-manifest.js`) fornece validação estru
 | Planejar/preparar tiles | Implementado | cache técnico de viewport limitado a 256 URLs |
 | Manifesto de dataset | Implementado/testado | valida metadados e checksum esperado; não baixa nem calcula hash |
 | Check de versão de dataset | Parcial, contrato puro | `estadoFrescorDataset()` classifica manifesto fornecido; não busca manifestos |
-| Download de pacote | Não implementado | não há backend ou fonte autorizada definida |
+| Download de pacote | Não implementado | não há backend nem fonte autorizada; `avaliarCatalogoFontes()` não libera pacote |
 | SHA-256 de pacote | Não implementado | manifesto registra o valor esperado; arquivo não é verificado |
 | Staging/ativação atômica | Parcial, máquina + storage isolado | `dataset-transacao.js` preserva o ativo até `COMPLETE`; `dataset-storage.js` guarda metadados/transação em namespace próprio | localStorage não oferece atomicidade física, nem troca de arquivos, power-loss ou recovery |
 | Resume/retry/cancel | Cancelamento puro implementado; resume/retry não | cancelamento só muda estado e marca limpeza temporária; download real ainda não existe |
@@ -23,10 +23,10 @@ A camada de manifesto (`src/core/dataset-manifest.js`) fornece validação estru
 
 ## Contrato futuro, ainda não ativado
 
-Quando houver fonte, licença, formato e infraestrutura aprovados, o fluxo deverá ser local-first: verificar manifesto, comparar versão, checar armazenamento, baixar para staging, calcular checksum, validar schema/compatibilidade, ativar atomicamente e preservar o dataset anterior até a confirmação. Falha, corrupção ou falta de espaço devem manter o estado anterior utilizável.
+Quando houver fonte, licença, formato e infraestrutura aprovados, o fluxo deverá ser local-first: aprovar a fonte pelo gate de governança, verificar manifesto, comparar versão, checar armazenamento, baixar para staging, calcular checksum, validar schema/compatibilidade, ativar atomicamente e preservar o dataset anterior até a confirmação. Falha, corrupção ou falta de espaço devem manter o estado anterior utilizável.
 
 O futuro sync não poderá enviar GPS, trilhas, waypoints, rotas ou dados de emergência ao servidor sem uma funcionalidade explícita, consentimento e política separada. O update de dados também não deve executar código arbitrário: dados de mapa e atualização de software são canais distintos.
 
 ## Bloqueios
 
-Ainda faltam uma fonte autorizada para redistribuição offline, registro de licenças/atribuições, formato de pacote, storage atômico apropriado, servidor/endpoint, limites de tamanho, estratégia full/delta, download real, checksum calculado de bytes, recovery após power loss/startup, testes de corrupção/queda/energia e validação em PWA/Android/iOS. Até que esses itens existam, o sistema não deve exibir `DATASET VERIFIED`, `SYNC COMPLETE` ou `WORLD MAP OFFLINE READY`.
+Ainda faltam uma fonte autorizada aprovada pelo catálogo, registro de licenças/atribuições, formato de pacote, storage atômico apropriado, servidor/endpoint, limites de tamanho, estratégia full/delta, download real, checksum calculado de bytes, recovery após power loss/startup, testes de corrupção/queda/energia e validação em PWA/Android/iOS. Até que esses itens existam, o sistema não deve exibir `DATASET VERIFIED`, `SYNC COMPLETE` ou `WORLD MAP OFFLINE READY`.

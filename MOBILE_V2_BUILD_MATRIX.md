@@ -4,9 +4,9 @@
 
 | Target | Comando/processo | Estado | Evidência atual | Limite |
 |---|---|---|---|---|
-| Web | `npm run build` | Aprovado | build local e CI; manifesto/transação/storage de dataset são lógica compartilhada sem dataset empacotado | não prova instalação PWA nem aparelho |
+| Web | `npm run build` | Aprovado | build local e CI; manifesto/transação/storage/governança de fontes são lógica compartilhada sem dataset empacotado | não prova instalação PWA nem aparelho |
 | Service Worker | `node --check public/sw.js` + testes VM | Aprovado | CI/local | não prova quota nem modo avião |
-| Tests | `npm test` | Aprovado | 194 testes; inclui manifesto, transação e storage isolado de dataset, localização manual, catálogo de rotas e cleanups assíncronos | não substitui validação física |
+| Tests | `npm test` | Aprovado | 200 testes; inclui manifesto, transação, storage isolado e governança de fontes, localização manual, catálogo de rotas e cleanups assíncronos | não substitui validação física |
 | Android sync | `npm run mobile:sync:android` | Aprovado | projeto atualizado | não prova execução em Android |
 | iOS sync | `npm run mobile:sync:ios` | Aprovado no Linux | projeto atualizado | não substitui macOS/Xcode |
 | Android debug | `npm run mobile:android:debug` | Aprovado | não necessário nesta unidade pura; gate anterior gerou APK debug de teste; tamanho/hash devem ser registrados por execução | não é release nem distribuição |

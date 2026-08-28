@@ -251,3 +251,20 @@ A rodada entregou contrato, testes e documentação, não um dataset mundial. O 
 O bloco funcional foi publicado em `4aa6556 feat(v2): isolar storage de dataset`; o CI `33131381528` concluiu com sucesso. O alinhamento das memórias foi publicado em `094bd6a docs(v2): registrar storage isolado de dataset`; o CI `33131481446` concluiu com sucesso. `main` e `origin/main` permaneceram alinhadas e nenhum workflow de release foi disparado.
 
 A rodada entregou uma fronteira local isolada para metadados e transações, não um storage de pacotes mundial. O projeto continua sem atomicidade de disco, checksum calculado de bytes, download, endpoint, retry/resume, recuperação após power loss, fonte/licença de redistribuição confirmada, pacote cartográfico ou validação offline em aparelho.
+
+## 2026-08-28 — governança de fontes cartográficas
+
+- **Execution:** continuação do Global Offline Data Engine após o adapter de storage isolado.
+- **Estado inicial:** `main` limpa e alinhada no commit `7c963f0`; CI `33131536514` concluído com sucesso.
+- **Phase:** cartographic source governance / offline redistribution gate.
+- **Audit:** `src/data/camadas-mapa.js` contém Google Satellite, OpenTopoMap, OpenStreetMap, Esri World Imagery, ArcGIS Boundaries and Places, NASA GIBS, GEBCO WMS e Mapzen/AWS Terrain Tiles; todos são usados como renderização online/cache técnico, não como dataset gerenciado.
+- **Research:** políticas oficiais consultadas para OSM, Google Maps Platform, OpenTopoMap, Esri, NASA Earthdata, GEBCO e AWS Terrain Tiles; as fontes foram registradas com data da rodada e links no ADR-0033/MAP_DATA_STATUS.
+- **Implemented:** `src/data/fontes-dataset.js`, catálogo imutável com oito critérios obrigatórios e estados `APPROVED`, `REVIEW_REQUIRED`, `NOT_APPROVED` e `UNKNOWN`.
+- **Gate:** somente oito critérios explicitamente `true` permitem `APPROVED`; o catálogo atual mantém `podeCriarPacote: false`. Nenhum endpoint atual foi aprovado automaticamente para redistribuição offline.
+- **Safety:** nenhuma alteração de URL, scraping, bulk download, prefetch mundial, geocodificação obrigatória ou dataset foi criada. A política OSM de tiles públicos não é usada como autorização de pacote.
+- **Tests:** `test/fontes-dataset.test.js` cobre catálogo atual, aprovação condicional, revisão por critério, registro malformado, catálogo inválido e imutabilidade; `npm test`: 200 aprovados e 0 falhas.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria reportou 0 vulnerabilidades.
+- **Commit:** código/testes/ADR publicados em `edf0682 feat(v2): governar fontes cartograficas`; CI `33131867028` concluído com sucesso.
+- **Documentation:** ADR-0033, `MAP_DATA_STATUS.md`, `OFFLINE_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_RELEASE_CANDIDATE.md`, `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md` e este log foram alinhados.
+- **Limits:** o catálogo é um gate técnico, não licença ou parecer jurídico; ainda faltam contrato específico, formato/pipeline, pacote, checksum de bytes, download e storage atômico.
+- **Status:** IN PROGRESS / BLOCKED; nenhuma tag, release, signing ou artifact novo foi criado.

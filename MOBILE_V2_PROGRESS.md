@@ -196,3 +196,15 @@ O adapter usa envelopes versionados (`vanguard-dataset-storage`, versão 1), val
 `test/dataset-storage.test.js` cobre normalização, rejeição, corrupção, isolamento de trilha, limpeza seletiva, estado inválido, backend ausente e falha de quota/escrita. A suíte local passou com 194 testes.
 
 Este adapter ainda não fornece atomicidade de disco, storage binário de pacotes, checksum calculado sobre bytes, recuperação após power loss, migração/reinstalação, quota física ou sync. Nenhum pacote cartográfico mundial ou regional foi incorporado, e fonte/licença de redistribuição permanece não confirmada.
+
+## Marco de governança de fontes cartográficas — 2026-08-28
+
+A auditoria do catálogo em `src/data/camadas-mapa.js` confirmou que o app usa endpoints de Google Satellite, OpenTopoMap, OpenStreetMap, Esri World Imagery, ArcGIS World Boundaries and Places, NASA GIBS, GEBCO WMS e Mapzen/AWS Terrain Tiles. Renderizar uma camada online não é prova de direito para copiar, pré-buscar, armazenar ou redistribuir um pacote offline.
+
+Foi criado `src/data/fontes-dataset.js` com catálogo imutável e `avaliarFonteDataset()`. Cada fonte precisa declarar URL HTTPS, política oficial, uso atual e oito critérios: licença, redistribuição, uso offline, uso comercial, atribuição, política de atualização, direitos de armazenamento e restrições do provedor. Somente oito valores `true` produzem `APPROVED`; registro inválido vira `UNKNOWN`; critério não confirmado permanece `REVIEW_REQUIRED`. O catálogo atual mantém `podeCriarPacote: false`.
+
+A política oficial do servidor de tiles do OpenStreetMap proíbe bulk download, prefetch e uso offline; a documentação do Google restringe prefetch, armazenamento e uso offline conforme o acordo aplicável. OpenTopoMap declara CC-BY-SA e uso em aplicações com atribuição; GEBCO informa uso gratuito/domínio público com condições; NASA exige validar a fonte específica e material de terceiros; AWS aponta documentação de atribuição para Terrain Tiles; e a Esri exige atenção aos termos específicos do serviço. Nenhuma dessas constatações foi usada para autorizar pacote do Vanguard.
+
+`test/fontes-dataset.test.js` cobre catálogo válido mas não aprovado, aprovação somente com todos os critérios, revisão por critério ausente, registro inválido, catálogo inválido e imutabilidade. A suíte local chegou a 200 testes aprovados.
+
+A unidade não alterou URLs, não fez scraping, não baixou tiles e não criou dataset. O cache técnico continua limitado ao seu escopo, e qualquer pacote mundial/regional permanece bloqueado até haver fonte autorizada, contrato aplicável, pipeline, formato, storage e validação do uso pretendido.
