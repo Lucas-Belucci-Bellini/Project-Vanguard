@@ -31,3 +31,11 @@ O futuro sync não poderá enviar GPS, trilhas, waypoints, rotas ou dados de eme
 ## Bloqueios
 
 Ainda faltam uma fonte autorizada aprovada pelo catálogo, registro de licenças/atribuições, formato de pacote, storage atômico apropriado, servidor/endpoint, limites de tamanho, estratégia full/delta, download real, checksum calculado de bytes, durabilidade física verificada em aparelho após power loss real, testes de corrupção/queda/energia em hardware e validação em PWA/Android/iOS. Até que esses itens existam, o sistema não deve exibir `DATASET VERIFIED`, `SYNC COMPLETE` ou `WORLD MAP OFFLINE READY`.
+
+
+## 2026-08-28 — integridade criptográfica dos bytes do dataset
+
+A fundação de sync foi estendida com `src/core/dataset-integridade.js`, usando Web Crypto SHA-256 sobre os bytes reais recebidos. O orquestrador ganhou `verificarBytes(bytes)`, que calcula o digest antes de chamar a verificação de tamanho/checksum e registra falha na transação quando os bytes não correspondem ao manifesto. Foram adicionados testes para Uint8Array, ArrayBuffer, DataView, checksum válido, divergente e ambiente sem Web Crypto.
+
+Esta unidade **não baixa nem armazena** o pacote e não prova durabilidade física. Ela fecha somente a lacuna de cálculo real de checksum; download, endpoint, staging físico, quota, power-loss recovery e fonte cartográfica licenciada continuam pendentes.
+
