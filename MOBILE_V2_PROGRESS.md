@@ -138,3 +138,11 @@ A auditoria Omega confirmou que `DEVICE_CAPABILITIES.md` ainda não existia. Foi
 A matriz não declara suporte físico onde só há código, sync, CI, preview ou APK debug. Android real, Xiaomi/MIUI/HyperOS, iPhone e iPad continuam pendentes para instalação, GPS, sensores, modo avião, cache, lifecycle, bateria e compartilhamento. O documento também reforça a separação entre o Vanguard Field civil, os mapas do mundo real e a wiki virtual de Arma 3.
 
 `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_DEVICE_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_STATUS.md` e `V2_STATUS.md` foram alinhados com a matriz. A unidade é documental e aguarda os gates locais e o CI desta rodada.
+
+## Marco de memória de release candidate V2 — 2026-08-28
+
+A auditoria do estado real confirmou que não existia `MOBILE_V2_RELEASE_CANDIDATE.md`. Foi criado um registro operacional para o snapshot de `main` em `d8bf3a1`, separando explicitamente código, build, APK debug, AAB não assinado, signing, instalação, validação, IPA, distribuição e release pública.
+
+O documento classifica o snapshot como `NOT READY / BLOCKED`: ele não cria tag, não publica release e não atribui os hashes do workflow artifact-only ao snapshot atual. A única release pública continua sendo `v1.0.0-rc.2`. Os blockers físicos e de distribuição permanecem Android/Xiaomi/iPhone/iPad reais, GPS/sensores, modo avião/quota, lifecycle, bateria, Files/Share Sheet, signing, macOS/Xcode, IPA, AAB assinado e lojas.
+
+`MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_STATUS.md` e `V2_STATUS.md` foram alinhados com o novo registro. A documentação aguarda o commit desta rodada.

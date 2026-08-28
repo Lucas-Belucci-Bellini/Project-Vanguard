@@ -132,3 +132,11 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Blockers:** Android/Xiaomi/iPhone/iPad reais, GPS/sensores, lifecycle, cache offline, bateria, Files/Share Sheet, signing e distribuição.
 - **Next Task:** executar os casos da `MOBILE_V2_DEVICE_MATRIX.md`, começando por T-005A e instalação Android debug quando houver aparelho disponível.
 - **Status:** IN PROGRESS até gates e validação física.
+
+## 2026-08-28 — memória operacional de release candidate
+
+A auditoria do estado remoto confirmou `main` alinhada no commit `d8bf3a1`, cinco CIs recentes verdes e somente `v1.0.0-rc.2` publicada. O arquivo `MOBILE_V2_RELEASE_CANDIDATE.md` foi criado como registro factual de prontidão, com estado `NOT READY / BLOCKED`; ele não cria tag nem release.
+
+O registro separa Web/PWA, Android debug, Android release/AAB, Android signed/installed, iOS sync, archive/IPA, validação física e store readiness. O APK debug e o AAB não assinado do run `33121937373` continuam evidência de artifact-only e não foram atribuídos automaticamente ao snapshot `d8bf3a1`.
+
+A validação desta unidade inclui `npm test` com 173 aprovados, build aprovado, sintaxe do Service Worker, `git diff --check`, auditoria de produção sem vulnerabilidades e estrutura do documento candidate conferida. Ainda faltam instalação, signing, aparelhos reais, macOS/Xcode, modo avião, sensores, bateria, Share Sheet/Files, inspeção de distribuição e autorização deliberada.
