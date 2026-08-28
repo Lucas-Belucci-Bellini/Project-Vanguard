@@ -6,7 +6,7 @@
 |---|---|---|---|
 | Código em `main` | Aprovado | `main` publicada no commit funcional `4b3855b`; CI `33134403140` concluído com sucesso; inclui tracking background experimental | continuar gates sem regressão e teste físico |
 | Web/PWA build | Aprovado | `npm run build`, `npm test` (206), `node --check public/sw.js` e CI `33134403140`; background não carrega plugin no Web | instalação/modo avião/update posterior físicos |
-| Android debug | Aprovado | `assembleDebug`; `android/app/build/outputs/apk/debug/app-debug.apk`, 8.816.910 bytes, SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; artefato experimental de teste | instalar em Android real e executar T-021–T-029 |
+| Android debug | Aprovado | `assembleDebug`; `android/app/build/outputs/apk/debug/app-debug.apk`, 8.816.910 bytes, SHA-256 `afbf0c0091e9b8e02fcdfff2e31c48f0b969a3dea508afd1ea6b7be04fc96db5`; artefato experimental de teste | instalar em Android real e executar T-021–T-029 |
 | Android release/AAB | Artifact-only aprovado | run `33121937373`, AAB não assinado e hash registrado | keystore e signing deliberado |
 | Android signed | Bloqueado | nenhuma keystore configurada | autorização, keystore e ambiente seguro |
 | Android installed | Bloqueado | nenhum aparelho validado | instalar APK assinado/de teste e registrar log |

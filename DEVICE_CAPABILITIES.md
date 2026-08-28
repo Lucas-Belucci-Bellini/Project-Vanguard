@@ -42,7 +42,7 @@ A API de satélite real usada historicamente como contingência de construção 
 |---|---|---|
 | `npm test`, build e CI | contratos compartilhados, sintaxe e integração de build | sensor, precisão física, bateria, instalação ou modo avião |
 | `npx cap sync android/ios` | cópia do build e sincronização do projeto | build assinado, instalação ou funcionamento no aparelho |
-| `npm run mobile:android:debug` | compilação de um artifact debug com plugin background sincronizado | release, signing, loja ou validação de campo; o hash `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff` identifica apenas o APK local desta rodada |
+| `npm run mobile:android:debug` | compilação de um artifact debug com plugin background sincronizado | release, signing, loja ou validação de campo; o hash `afbf0c0091e9b8e02fcdfff2e31c48f0b969a3dea508afd1ea6b7be04fc96db5` identifica apenas o APK local desta rodada |
 | preview Web | carregamento visual e interações básicas observadas | cobertura cartográfica universal ou cache offline real |
 
 ## Documentos relacionados

@@ -40,7 +40,7 @@ A distância de 5 m e o intervalo mínimo de 5 s são filtros de entrega, não g
 
 A execução automatizada cobre contrato, normalização, reentrada, stop, erro, callback tardio, desmontagem e indisponibilidade Web em `test/background-localizacao.test.js`. A validação física permanece pendente nos casos T-021 a T-030 de `MOBILE_V2_TEST_MATRIX.md`: consentimento, notificação, tela bloqueada, Home/Recents, retorno, parada, limpeza, permissões negadas, modo avião, Xiaomi/HyperOS, bateria e iOS.
 
-O APK produzido nesta rodada é somente `app-debug.apk`, com `versionName 1.0.0`, `versionCode 100`, tamanho de 8.816.910 bytes e SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`. Esse hash identifica um artefato local de teste; não é assinatura, candidate ou release pública.
+O APK produzido nesta rodada é somente `app-debug.apk`, com `versionName 1.0.0`, `versionCode 100`, tamanho de 8.816.910 bytes e SHA-256 `afbf0c0091e9b8e02fcdfff2e31c48f0b969a3dea508afd1ea6b7be04fc96db5`. Esse hash identifica um artefato local de teste; não é assinatura, candidate ou release pública.
 
 ## Consequências
 

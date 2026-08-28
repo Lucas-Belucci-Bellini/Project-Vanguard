@@ -9,7 +9,7 @@
 | Tests | `npm test` | Aprovado | 206 testes; inclui controlador background, manifesto, transação, storage isolado e governança de fontes, localização manual, catálogo de rotas e cleanups assíncronos | não substitui validação física |
 | Android sync | `npm run mobile:sync:android` | Aprovado | projeto atualizado com `@capgo/background-geolocation@8.4.3` e manifesto app-owned sem boot/geofence ativos | não prova execução em Android |
 | iOS sync | `npm run mobile:sync:ios` | Aprovado no Linux | plugin incluído no `Package.swift` e `UIBackgroundModes=location` preparado | não substitui macOS/Xcode ou dispositivo Apple |
-| Android debug | `npm run mobile:android:debug` | Aprovado | `app-debug.apk`, 8.816.910 bytes, SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; background plugin compilado | não é release, assinatura nem validação física |
+| Android debug | `npm run mobile:android:debug` | Aprovado | `app-debug.apk`, 8.816.910 bytes, SHA-256 `afbf0c0091e9b8e02fcdfff2e31c48f0b969a3dea508afd1ea6b7be04fc96db5`; background plugin compilado | não é release, assinatura nem validação física |
 | Android release/AAB | workflow manual artifact-only | Aprovado como geração | AAB não assinado do run `33121937373` | requer signing e revisão |
 | Android signed | keystore/credencial real | Bloqueado | nenhuma assinatura configurada | autorização e ambiente seguro |
 | iOS debug | Xcode em macOS | Bloqueado | apenas sync Linux | Mac, Xcode, conta/equipe Apple |

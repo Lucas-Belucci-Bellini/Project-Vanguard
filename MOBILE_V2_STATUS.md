@@ -32,7 +32,7 @@
 | **Privacy** | Dados locais por padrão; sem sincronização automática; pagamentos/Asaas/Supabase/e-mail fiscal `NOT_CONFIGURED` |
 | **Accessibility** | Shell com skip link, landmarks, foco e ARIA; leitor de tela, touch e safe areas precisam de validação física |
 | **Performance** | Métricas locais de navegação/memória opcional; background aumenta potencialmente o consumo; profiling físico e bateria de quatro dias pendentes |
-| **Debug Build** | `npm run mobile:android:debug` aprovado; `android/app/build/outputs/apk/debug/app-debug.apk`, 8.816.910 bytes, SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; APK debug de teste, não distribuição |
+| **Debug Build** | `npm run mobile:android:debug` aprovado; `android/app/build/outputs/apk/debug/app-debug.apk`, 8.816.910 bytes, SHA-256 `afbf0c0091e9b8e02fcdfff2e31c48f0b969a3dea508afd1ea6b7be04fc96db5`; APK debug de teste, não distribuição |
 | **Release Build** | Geração remota artifact-only exercitada; AAB não assinado, sem publicação |
 | **Signed Build** | `BLOCKED`; nenhuma keystore/certificado real configurado |
 | **AAB** | Artifact não assinado gerado no run `33121937373`; não apto para loja |

@@ -41,7 +41,7 @@ O commit indicado é o snapshot funcional publicado em `main`; ele não deve ser
 
 ## Artifacts conhecidos
 
-O workflow móvel artifact-only já provou a geração, sem publicação, de um APK debug e de um AAB não assinado no run `33121937373`. Nesta unidade, o build local gerou `android/app/build/outputs/apk/debug/app-debug.apk` com 8.816.910 bytes e SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`. Esse arquivo é somente um artifact local de teste, não assinado e não distribuível como release; nenhum artifact assinado de Android ou iOS está anexado a este registro.
+O workflow móvel artifact-only já provou a geração, sem publicação, de um APK debug e de um AAB não assinado no run `33121937373`. Nesta unidade, o build local gerou `android/app/build/outputs/apk/debug/app-debug.apk` com 8.816.910 bytes e SHA-256 `afbf0c0091e9b8e02fcdfff2e31c48f0b969a3dea508afd1ea6b7be04fc96db5`. Esse arquivo é somente um artifact local de teste, não assinado e não distribuível como release; nenhum artifact assinado de Android ou iOS está anexado a este registro.
 
 A distinção operacional permanece:
 
