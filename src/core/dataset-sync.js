@@ -34,6 +34,7 @@ import {
 } from './dataset-transacao.js';
 import { FONTES_DATASET_ATUAIS, avaliarCatalogoFontes, avaliarFonteDataset, ESTADOS_GOVERNANCA_FONTE } from '../data/fontes-dataset.js';
 import { verificarIntegridadeDataset } from './dataset-integridade.js';
+import { criarPackageStorage } from './dataset-package-storage.js';
 
 export const ESTADOS_RECUPERACAO_DATASET = Object.freeze({
   LIMPO: 'CLEAN',
@@ -68,6 +69,7 @@ export function criarSincronizacaoDataset({
   storage = criarStorageDataset(),
   fontes = FONTES_DATASET_ATUAIS,
   relogio = () => Date.now(),
+  packageStorage = null,
 } = {}) {
   const agora = () => {
     const valor = Number(relogio());
@@ -267,6 +269,37 @@ export function criarSincronizacaoDataset({
      * reprovada é gravada como falha antes de retornar, para que o rollback
      * continue possível depois de um encerramento abrupto.
      */
+    async armazenarBytes(bytes, metadata = {}) {
+      const leitura = transacaoAtual();
+      if (!leitura.ok) return leitura;
+      if (!leitura.valor) return falha('SEM_TRANSACAO', 'Não há transação de dataset em andamento.');
+      if (leitura.valor.estado !== ESTADOS_SYNC_DATASET.VERIFYING) {
+        return falha('ESTADO_INVALIDO', 'Os bytes só podem ser armazenados no estado VERIFYING.');
+      }
+      const backend = packageStorage ?? criarPackageStorage();
+      if (!backend.disponivel) return backend.diagnostico();
+      const salvo = await backend.salvarPacote(leitura.valor.novo.datasetId, bytes, {
+        version: leitura.valor.novo.version,
+        checksum: leitura.valor.novo.checksum,
+        ...metadata,
+      });
+      if (!salvo.ok) {
+        const falhada = falharTransacaoDataset(leitura.valor, {
+          codigo: salvo.codigo,
+          motivo: salvo.motivo,
+        });
+        if (!falhada.ok) return falhada;
+        const persistido = persistir(falhada.transacao);
+        return persistido.ok ? { ...salvo, transacao: falhada.transacao } : persistido;
+      }
+      const verificado = await this.verificarBytes(bytes);
+      if (!verificado.ok) {
+        await backend.removerPacote(leitura.valor.novo.datasetId);
+        return verificado;
+      }
+      return { ...verificado, pacote: salvo };
+    },
+
     async verificarBytes(bytes) {
       const leitura = transacaoAtual();
       if (!leitura.ok) return leitura;
@@ -320,6 +353,15 @@ export function criarSincronizacaoDataset({
       const leitura = transacaoAtual();
       if (!leitura.ok) return leitura;
       if (!leitura.valor) return falha('SEM_TRANSACAO', 'Não há transação de dataset em andamento.');
+
+      if (packageStorage) {
+        const pacote = await packageStorage.lerPacote(leitura.valor.novo.datasetId);
+        if (!pacote.ok) return pacote;
+        if (!pacote.pacote) return falha('PACOTE_NAO_ENCONTRADO', 'O pacote físico não existe para ativação.');
+        const integridade = await verificarIntegridadeDataset(pacote.pacote.bytes, leitura.valor.novo.checksum);
+        if (!integridade.ok) return falha(integridade.codigo, integridade.motivo);
+        if (integridade.bytes !== leitura.valor.totalBytes) return falha('TAMANHO_INVALIDO', 'O pacote físico não corresponde ao tamanho declarado.');
+      }
 
       const solicitada = solicitarAtivacaoDataset(leitura.valor);
       if (!solicitada.ok) return solicitada;
