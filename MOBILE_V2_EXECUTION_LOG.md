@@ -329,3 +329,10 @@ A fundação de sync foi estendida com `src/core/dataset-integridade.js`, usando
 
 Esta unidade **não baixa nem armazena** o pacote e não prova durabilidade física. Ela fecha somente a lacuna de cálculo real de checksum; download, endpoint, staging físico, quota, power-loss recovery e fonte cartográfica licenciada continuam pendentes.
 
+
+
+## 2026-08-28 — integração do pacote físico ao sync
+
+O `dataset-sync` agora aceita um `packageStorage` injetável. A nova operação `armazenarBytes(bytes, metadata)` grava o artefato no storage físico dedicado e só avança para STAGING depois da verificação SHA-256 real. Na ativação, quando o storage físico foi fornecido, o pacote é relido e sua integridade/tamanho são conferidos novamente antes de gravar o manifesto ativo.
+
+Isso fecha a costura lógica entre transação, bytes físicos, integridade e ativação. Não é prova de durabilidade contra power loss nem de quota física em aparelhos reais; esses itens continuam como validação de runtime/hardware.
