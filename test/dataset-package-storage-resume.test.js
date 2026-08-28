@@ -4,11 +4,19 @@ import { criarPackageStorage, PACKAGE_STATES } from '../src/core/dataset-package
 
 function criarIndexedDBFake() {
   const registros = new Map();
+  // Toda requisição precisa disparar `onsuccess`: o adapter resolve a promessa
+  // dentro desse callback, então uma requisição muda que nunca o chama deixa a
+  // promessa pendente para sempre e o teste é cancelado pelo runner.
+  function requisicao(result) {
+    const req = { result, onsuccess: null, onerror: null };
+    queueMicrotask(() => req.onsuccess?.());
+    return req;
+  }
   const store = {
-    put(value) { registros.set(value.datasetId, structuredClone(value)); return { onsuccess: null, onerror: null, result: value }; },
-    get(id) { const req = { result: registros.get(id) ? structuredClone(registros.get(id)) : undefined, onsuccess: null, onerror: null }; queueMicrotask(() => req.onsuccess?.()); return req; },
-    delete(id) { registros.delete(id); return { onsuccess: null, onerror: null, result: undefined }; },
-    clear() { registros.clear(); return { onsuccess: null, onerror: null, result: undefined }; },
+    put(value) { registros.set(value.datasetId, structuredClone(value)); return requisicao(value); },
+    get(id) { return requisicao(registros.get(id) ? structuredClone(registros.get(id)) : undefined); },
+    delete(id) { registros.delete(id); return requisicao(undefined); },
+    clear() { registros.clear(); return requisicao(undefined); },
   };
   return {
     open() {

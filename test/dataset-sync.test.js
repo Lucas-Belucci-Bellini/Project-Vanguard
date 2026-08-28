@@ -78,11 +78,11 @@ function ateStaging(sync, novo = NOVO) {
   assert.equal(sync.verificar({ bytes: TOTAL_BYTES, checksum: novo.checksum }).ok, true);
 }
 
-test('ciclo completo ativa o novo manifesto e não deixa transação residual', () => {
+test('ciclo completo ativa o novo manifesto e não deixa transação residual', async () => {
   const { backend, storage, sync } = ambiente({ ativo: ATIVO });
   ateStaging(sync);
 
-  const ativada = sync.ativar();
+  const ativada = await sync.ativar();
   assert.equal(ativada.ok, true);
   assert.equal(ativada.transacao.estado, 'COMPLETE');
   assert.equal(storage.lerAtivo().valor.version, NOVO.version);
@@ -240,7 +240,7 @@ test('tamanho divergente reprova a verificação antes de qualquer ativação', 
   assert.equal(storage.lerAtivo().valor.version, ATIVO.version);
 });
 
-test('falha ao gravar o manifesto ativo preserva o dataset anterior e registra a falha', () => {
+test('falha ao gravar o manifesto ativo preserva o dataset anterior e registra a falha', async () => {
   const { backend, storage, sync } = ambiente({ ativo: ATIVO });
   ateStaging(sync);
 
@@ -250,7 +250,7 @@ test('falha ao gravar o manifesto ativo preserva o dataset anterior e registra a
     setItemOriginal(chave, valor);
   };
 
-  const resultado = sync.ativar();
+  const resultado = await sync.ativar();
   assert.equal(resultado.ok, false);
   assert.equal(resultado.codigo, 'STORAGE_WRITE_FAILED');
 
@@ -315,14 +315,13 @@ test('catálogo misto: uma fonte apta já habilita início, e a inapta continua 
   assert.equal(sync.iniciar(NOVO, { sourceId: inapta.sourceId }).codigo, 'FONTE_NAO_APROVADA');
   assert.equal(sync.iniciar(NOVO, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
 });
-\n
 test('verificarBytes calcula SHA-256 dos bytes reais antes do staging', async () => {
   const { storage, sync } = ambiente({ ativo: ATIVO });
   const bytes = new Uint8Array(TOTAL_BYTES);
   const primeiro = new TextEncoder().encode('Vanguard');
   bytes.set(primeiro);
 
-  const novoComHash = manifesto('2026.08.3', '7c4d6f9b5a9d0c3b4f7b8f4a7e7b0c4c8f0f5b0c3f8e6a0f4b8d1d2c5e4f3a2b1');
+  const novoComHash = manifesto('2026.08.3', '7c4d6f9b5a9d0c3b4f7b8f4a7e7b0c4c8f0f5b0c3f8e6a0f4b8d1d2c5e4f3a2b');
   // O hash acima é deliberadamente incorreto; a API deve registrar a reprovação.
   assert.equal(sync.iniciar(novoComHash, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
   assert.equal(sync.avancar('CHECKING').ok, true);

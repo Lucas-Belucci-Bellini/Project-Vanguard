@@ -17,6 +17,14 @@ function indisponivel() {
   return { ok: false, codigo: 'PACKAGE_STORAGE_UNAVAILABLE', motivo: 'IndexedDB não está disponível neste ambiente.' };
 }
 function idValido(datasetId) { return typeof datasetId === 'string' && datasetId.trim().length > 0; }
+// Validação de argumento é função pura do argumento: não depende do backend e
+// é compartilhada pelas duas versões da API para que não possam divergir.
+function validarDatasetId(datasetId) {
+  return idValido(datasetId) ? null : { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' };
+}
+function validarBytes(bytes, motivo) {
+  return normalizarBytes(bytes) ? null : { ok: false, codigo: 'BYTES_INVALIDOS', motivo };
+}
 function normalizarBytes(bytes) {
   if (!(bytes instanceof ArrayBuffer) && !ArrayBuffer.isView(bytes) && !(bytes instanceof Uint8Array)) return null;
   return bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -45,10 +53,18 @@ function transacao(db, modo, operacao) {
 }
 
 export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {}) {
+  // Sem backend, um argumento inválido ainda é reportado como tal: o chamador
+  // precisa distinguir "meu argumento está errado" de "este ambiente não tem
+  // storage físico". A ordem é a mesma da implementação real abaixo.
   if (!indexedDBImpl) return {
-    disponivel: false, diagnostico: () => indisponivel(), salvarPacote: async () => indisponivel(),
-    lerPacote: async () => indisponivel(), anexarPacoteStaging: async () => indisponivel(),
-    promoverPacote: async () => indisponivel(), removerPacote: async () => indisponivel(), limparTudo: async () => indisponivel(),
+    disponivel: false,
+    diagnostico: () => indisponivel(),
+    salvarPacote: async (datasetId, bytes) => validarDatasetId(datasetId) ?? validarBytes(bytes, 'bytes precisa ser ArrayBuffer ou uma visão de buffer.') ?? indisponivel(),
+    lerPacote: async (datasetId) => validarDatasetId(datasetId) ?? indisponivel(),
+    anexarPacoteStaging: async (datasetId, sufixo) => validarDatasetId(datasetId) ?? validarBytes(sufixo, 'sufixo precisa ser bytes válidos.') ?? indisponivel(),
+    promoverPacote: async (datasetId) => validarDatasetId(datasetId) ?? indisponivel(),
+    removerPacote: async (datasetId) => validarDatasetId(datasetId) ?? indisponivel(),
+    limparTudo: async () => indisponivel(),
   };
 
   async function executar(fn) {
@@ -62,9 +78,9 @@ export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {
     disponivel: true,
     diagnostico: () => ({ ok: true, disponivel: true, backend: 'indexedDB', database: DB_DATASET_PACKAGE, version: VERSION_DATASET_PACKAGE, store: STORE_DATASET_PACKAGE }),
     async salvarPacote(datasetId, bytes, metadata = {}) {
-      if (!idValido(datasetId)) return { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' };
+      const invalido = validarDatasetId(datasetId) ?? validarBytes(bytes, 'bytes precisa ser ArrayBuffer ou uma visão de buffer.');
+      if (invalido) return invalido;
       const dados = normalizarBytes(bytes);
-      if (!dados) return { ok: false, codigo: 'BYTES_INVALIDOS', motivo: 'bytes precisa ser ArrayBuffer ou uma visão de buffer.' };
       const copia = new Uint8Array(dados);
       return executar(async (db) => {
         await transacao(db, 'readwrite', (store) => store.put({ datasetId, bytes: copia, sizeBytes: copia.byteLength, state: PACKAGE_STATES.STAGING, metadata: typeof globalThis.structuredClone === 'function' ? globalThis.structuredClone(metadata) : metadata, updatedAt: Date.now() }));
@@ -72,13 +88,14 @@ export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {
       });
     },
     async lerPacote(datasetId) {
-      if (!idValido(datasetId)) return { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' };
+      const invalido = validarDatasetId(datasetId);
+      if (invalido) return invalido;
       return executar(async (db) => { const registro = await transacao(db, 'readonly', (store) => store.get(datasetId)); return !registro ? { ok: true, pacote: null } : { ok: true, pacote: { ...registro, bytes: new Uint8Array(registro.bytes) } }; });
     },
     async anexarPacoteStaging(datasetId, sufixo, metadata = {}) {
-      if (!idValido(datasetId)) return { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' };
+      const invalido = validarDatasetId(datasetId) ?? validarBytes(sufixo, 'sufixo precisa ser bytes válidos.');
+      if (invalido) return invalido;
       const dados = normalizarBytes(sufixo);
-      if (!dados) return { ok: false, codigo: 'BYTES_INVALIDOS', motivo: 'sufixo precisa ser bytes válidos.' };
       const copia = new Uint8Array(dados);
       return executar(async (db) => {
         const atual = await transacao(db, 'readonly', (store) => store.get(datasetId));
@@ -93,10 +110,11 @@ export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {
       });
     },
     async promoverPacote(datasetId) {
-      if (!idValido(datasetId)) return { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' };
+      const invalido = validarDatasetId(datasetId);
+      if (invalido) return invalido;
       return executar(async (db) => { const registro = await transacao(db, 'readonly', (store) => store.get(datasetId)); if (!registro) return { ok: false, codigo: 'PACKAGE_NOT_FOUND', motivo: 'O pacote físico não existe.' }; registro.state = PACKAGE_STATES.ACTIVE; await transacao(db, 'readwrite', (store) => store.put(registro)); return { ok: true, datasetId, state: registro.state }; });
     },
-    async removerPacote(datasetId) { if (!idValido(datasetId)) return { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' }; return executar(async (db) => { await transacao(db, 'readwrite', (store) => store.delete(datasetId)); return { ok: true, datasetId }; }); },
+    async removerPacote(datasetId) { const invalido = validarDatasetId(datasetId); if (invalido) return invalido; return executar(async (db) => { await transacao(db, 'readwrite', (store) => store.delete(datasetId)); return { ok: true, datasetId }; }); },
     async limparTudo() { return executar(async (db) => { await transacao(db, 'readwrite', (store) => store.clear()); return { ok: true }; }); },
   };
   return api;
