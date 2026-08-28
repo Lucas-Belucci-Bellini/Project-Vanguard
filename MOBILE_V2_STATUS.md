@@ -8,8 +8,8 @@
 | **Phase** | Mobile foundation + GPS/tracking/offline hardening; `IN PROGRESS` |
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
 | **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
-| **Current Task** | Manter a memória Omega completa e preparar os gates de dispositivo, lifecycle, offline, assinatura e distribuição |
-| **Last Completed** | Fixo manual de maior precisão no botão Centralizar, mantendo watcher de cidade econômico; aguardando commit desta rodada |
+| **Current Task** | Usar `DEVICE_CAPABILITIES.md` para orientar os gates de dispositivo, lifecycle, offline, assinatura e distribuição sem inventar suporte |
+| **Last Completed** | Fixo manual de maior precisão no botão Centralizar, mantendo watcher de cidade econômico; `e7bfb10`, CI `33128218221` |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
 | **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
@@ -37,8 +37,8 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `7538f9c feat(v2): catalogar rotas de peregrinacao`; CI `33127728576` concluído com sucesso; melhoria de fixo manual está no worktree e aguarda commit separado |
-| **Next Task** | Executar os gates de `MOBILE_V2_DEVICE_MATRIX.md` e, depois, revisar assinatura/distribuição sem publicar automaticamente |
+| **Main** | `e7bfb10 fix(v2): solicitar fixo manual de maior precisao`; CI `33128218221` concluído com sucesso; `DEVICE_CAPABILITIES.md` está no worktree e aguarda commit documental |
+| **Next Task** | Executar T-005A e os demais gates de `MOBILE_V2_DEVICE_MATRIX.md`, usando `DEVICE_CAPABILITIES.md`; depois revisar assinatura/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
 
@@ -55,7 +55,8 @@
 11. Configuração pública compartilhada sem segredos — `54d6c72`, CI `33126077429`, ADR-0024.
 12. Correção cartográfica sem CARTO/API key e preparo offline de rótulos — `c6dbb59`, CI `33127120249`, ADR-0025.
 13. Catálogo de rotas de peregrinação sem geometria inventada — `7538f9c`, CI `33127728576`, ADR-0026.
-14. Fixo manual de maior precisão no botão Centralizar — testes locais, ADR-0027; commit pendente.
+14. Fixo manual de maior precisão no botão Centralizar — `e7bfb10`, CI `33128218221`, ADR-0027.
+15. Matriz de capacidades Web/Android/iOS — `DEVICE_CAPABILITIES.md`; commit documental pendente.
 
 ## Regra de evidência
 

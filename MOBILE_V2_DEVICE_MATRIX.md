@@ -1,6 +1,6 @@
 # Vanguard Field — Mobile V2 Device Matrix
 
-> Matriz de dispositivos atualizada em 2026-08-27. `VERIFIED` só será usado após execução observável no dispositivo ou simulador correspondente.
+> Matriz de dispositivos atualizada em 2026-08-27. `VERIFIED` só será usado após execução observável no dispositivo ou simulador correspondente. A matriz de capacidades por feature, plataforma, hardware, permissão e fallback está em `DEVICE_CAPABILITIES.md`.
 
 | Device/platform | Build/sync | Install | Required checks | Current status | Evidence needed |
 |---|---|---|---|---|---|

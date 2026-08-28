@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | Web | `npm run build` | Aprovado | build local e CI | não prova instalação PWA nem aparelho |
 | Service Worker | `node --check public/sw.js` + testes VM | Aprovado | CI/local | não prova quota nem modo avião |
-| Tests | `npm test` | Aprovado | 159 testes | não substitui validação física |
+| Tests | `npm test` | Aprovado | 173 testes; inclui localização manual e catálogo de rotas | não substitui validação física |
 | Android sync | `npm run mobile:sync:android` | Aprovado | projeto atualizado | não prova execução em Android |
 | iOS sync | `npm run mobile:sync:ios` | Aprovado no Linux | projeto atualizado | não substitui macOS/Xcode |
 | Android debug | `npm run mobile:android:debug` | Aprovado | APK debug de teste, 8.284.399 bytes no ciclo anterior | não é release nem distribuição |
@@ -14,7 +14,7 @@
 | Android signed | keystore/credencial real | Bloqueado | nenhuma assinatura configurada | autorização e ambiente seguro |
 | iOS debug | Xcode em macOS | Bloqueado | apenas sync Linux | Mac, Xcode, conta/equipe Apple |
 | iOS archive/IPA | Xcode + signing | Bloqueado | nenhum IPA | assinatura e dispositivo |
-| Device install | Android/iOS real | Bloqueado | nenhum aparelho validado nesta execução | logs, permissões e matriz física |
+| Device install | Android/iOS real | Bloqueado | nenhum aparelho validado nesta execução; consultar `DEVICE_CAPABILITIES.md` e `MOBILE_V2_DEVICE_MATRIX.md` | logs, permissões e matriz física |
 | Store ready | Play/App Store | Bloqueado | nenhuma publicação | política, revisão e autorização explícita |
 
 ## Regras de reprodutibilidade

@@ -120,3 +120,15 @@ Toda nova entrada deve registrar data, estado de Git, commit, comandos, resultad
 - **Physical blocker:** cenário T-005A continua pendente em Android/iPhone: comparar área externa aberta com interior do prédio, registrar `±N m`, horário e comportamento sem descartar a incerteza.
 - **Security/privacy:** localização permanece local e foreground-only; GPS posiciona e não transmite; nenhuma correção visual, snap-to-road ou combinação artificial de leituras foi adicionada.
 - **Status:** IN PROGRESS até gates locais, CI e validação física.
+
+## 2026-08-27 — unidade documental: matriz de capacidades por plataforma
+
+- **Execution:** nova execução contínua a partir de `e7bfb10`; auditoria confirmou que `DEVICE_CAPABILITIES.md` estava ausente.
+- **Objective:** tornar explícitas as diferenças entre Web/PWA, Android e iOS por feature, hardware, permissão e fallback, sem afirmar suporte físico não testado.
+- **Implemented:** `DEVICE_CAPABILITIES.md`, com GPS/GNSS foreground, fixo manual, tracking, background não implementado, MGRS, mapas, tiles offline, storage, bússola, Wake Lock, share, Files, manual offline, diagnóstico, atualização, bateria, lifecycle e catálogo de rotas.
+- **Documentation:** `MOBILE_V2_DEVICE_MATRIX.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md` e `MOBILE_V2_PROGRESS.md` alinhados; item OMEGA-020 criado como `IN_PROGRESS`.
+- **Evidence:** código, testes, build, sync, CI e APK debug só provam seus escopos. Não houve aparelho real, macOS/Xcode, assinatura, loja ou modo avião físico nesta rodada.
+- **Security/privacy:** sem permissões novas, sem secrets, sem background GPS, sem telemetria e sem mapa/rota inventados. O Vanguard Field civil permanece separado da wiki virtual de Arma 3 e dos módulos balísticos legados.
+- **Blockers:** Android/Xiaomi/iPhone/iPad reais, GPS/sensores, lifecycle, cache offline, bateria, Files/Share Sheet, signing e distribuição.
+- **Next Task:** executar os casos da `MOBILE_V2_DEVICE_MATRIX.md`, começando por T-005A e instalação Android debug quando houver aparelho disponível.
+- **Status:** IN PROGRESS até gates e validação física.

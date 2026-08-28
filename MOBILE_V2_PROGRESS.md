@@ -130,3 +130,11 @@ A auditoria confirmou que o watcher contínuo do modo cidade usa o perfil econô
 O botão agora solicita um novo fixo, atualiza HUD, marcador, destino e câmera com a leitura recebida e informa a precisão real retornada pelo aparelho. O watcher de cidade continua econômico; o watcher de trilha continua de maior precisão. A melhoria não aplica snap-to-road, não mascara `accuracy` e não transforma um ambiente interno em localização de precisão de edifício.
 
 Foram atualizados `MOBILE_V2_TEST_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md` e `MOBILE_V2_STATUS.md`, além do ADR-0027. O cenário físico T-005A compara o resultado externo e interno e permanece `PENDENTE` até execução em aparelho real.
+
+## Marco de matriz de capacidades por plataforma — 2026-08-27
+
+A auditoria Omega confirmou que `DEVICE_CAPABILITIES.md` ainda não existia. Foi criada uma matriz que separa Web, Android e iOS por feature, hardware necessário, permissão, fallback e estado de evidência. Ela cobre GPS/GNSS foreground, fixo manual, tracking, background não implementado, MGRS, mapas, tiles offline, storage, bússola, Wake Lock, compartilhamento, Files, manual offline, diagnóstico, updates, bateria, lifecycle e catálogo de rotas.
+
+A matriz não declara suporte físico onde só há código, sync, CI, preview ou APK debug. Android real, Xiaomi/MIUI/HyperOS, iPhone e iPad continuam pendentes para instalação, GPS, sensores, modo avião, cache, lifecycle, bateria e compartilhamento. O documento também reforça a separação entre o Vanguard Field civil, os mapas do mundo real e a wiki virtual de Arma 3.
+
+`MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_DEVICE_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_STATUS.md` e `V2_STATUS.md` foram alinhados com a matriz. A unidade é documental e aguarda os gates locais e o CI desta rodada.
