@@ -31,3 +31,11 @@ Dados de mapa e dados da pessoa permanecem separados. Nenhum fluxo de atualizaç
 ## Próximo bloco
 
 Com a costura fechada, o gargalo deixou de ser de código e passou a ser de origem: a próxima unidade depende de uma fonte autorizada por contrato e de um backend de storage apropriado para um pacote regional controlado. Enquanto `avaliarCatalogoFontes()` mantiver `podeCriarPacote: false`, `iniciar()` recusa qualquer transação — e nenhuma interface de download deve ser exposta. Não deve tratar `localStorage` como atomicidade física, aprovar provedor apenas por renderizar online, criar pacote mundial fictício, fazer scraping de tiles, exigir geocodificação online ou prometer roteamento offline.
+
+
+## 2026-08-28 — integridade criptográfica dos bytes do dataset
+
+A fundação de sync foi estendida com `src/core/dataset-integridade.js`, usando Web Crypto SHA-256 sobre os bytes reais recebidos. O orquestrador ganhou `verificarBytes(bytes)`, que calcula o digest antes de chamar a verificação de tamanho/checksum e registra falha na transação quando os bytes não correspondem ao manifesto. Foram adicionados testes para Uint8Array, ArrayBuffer, DataView, checksum válido, divergente e ambiente sem Web Crypto.
+
+Esta unidade **não baixa nem armazena** o pacote e não prova durabilidade física. Ela fecha somente a lacuna de cálculo real de checksum; download, endpoint, staging físico, quota, power-loss recovery e fonte cartográfica licenciada continuam pendentes.
+
