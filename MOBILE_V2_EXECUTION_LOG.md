@@ -245,3 +245,9 @@ A rodada entregou contrato, testes e documentação, não um dataset mundial. O 
 - **Documentation:** `docs/adr/ADR-0032-storage-dataset-isolado.md`, `OFFLINE_DATA_STATUS.md`, `SYNC_STATUS.md`, `MOBILE_V2_BUILD_MATRIX.md`, `MOBILE_V2_MASTER_CHECKLIST.md`, `MOBILE_V2_RELEASE_CANDIDATE.md`, `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md` e este log foram alinhados.
 - **Limits:** `localStorage` é apenas o backend compatível desta fundação; ainda não há storage atômico de disco, pacote binário, checksum calculado de bytes, download, endpoint, retry/resume, startup recovery ou teste físico de quota/power loss.
 - **Status:** IN PROGRESS / BLOCKED; nenhuma tag, release, signing ou artifact novo foi criado.
+
+## Fechamento da rodada — 2026-08-28
+
+O bloco funcional foi publicado em `4aa6556 feat(v2): isolar storage de dataset`; o CI `33131381528` concluiu com sucesso. O alinhamento das memórias foi publicado em `094bd6a docs(v2): registrar storage isolado de dataset`; o CI `33131481446` concluiu com sucesso. `main` e `origin/main` permaneceram alinhadas e nenhum workflow de release foi disparado.
+
+A rodada entregou uma fronteira local isolada para metadados e transações, não um storage de pacotes mundial. O projeto continua sem atomicidade de disco, checksum calculado de bytes, download, endpoint, retry/resume, recuperação após power loss, fonte/licença de redistribuição confirmada, pacote cartográfico ou validação offline em aparelho.
