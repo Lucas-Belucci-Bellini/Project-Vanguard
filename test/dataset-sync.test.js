@@ -430,6 +430,8 @@ test('armazenarBytes remove pacote físico quando o checksum real falha', async 
   const resultado = await sync.armazenarBytes(new TextEncoder().encode('abc'));
   assert.equal(resultado.ok, true);
   assert.equal(resultado.transacao.estado, 'STAGING');
-  // O storage fake foi salvo com bytes corretos; a verificação ocorre sobre esses mesmos bytes.
+  const ativado = await sync.ativar();
+  assert.equal(ativado.ok, false);
+  assert.equal(ativado.codigo, 'CHECKSUM_INVALIDO');
   assert.equal(removido, false);
 });
