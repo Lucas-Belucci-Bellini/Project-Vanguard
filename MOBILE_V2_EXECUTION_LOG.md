@@ -314,3 +314,10 @@ O bloco funcional de tracking GPS experimental em background foi publicado em `4
 - **Não feito, deliberadamente:** nenhuma interface de usuário, nenhum download, nenhum cálculo de SHA-256 sobre bytes, nenhum endpoint, nenhum pacote, nenhuma alteração de URL de camada e nenhuma aprovação de fonte. Enquanto nenhuma fonte estiver aprovada, expor um botão de download seria promessa sem lastro.
 - **Limits:** a garantia adicionada é de ordem, não de durabilidade física. Quota real, escrita atômica de disco e power loss em aparelho continuam sem prova. O gargalo do dataset mundial permanece de origem — fonte licenciada para redistribuição —, não de código.
 - **Status:** IN PROGRESS / BLOCKED para dataset mundial, endpoint, pacote, storage físico, aparelhos reais, signing e distribuição. Nenhuma tag, release, signing ou artifact novo foi criado.
+
+
+## Fechamento da orquestração do dataset — 2026-08-28
+
+A unidade OMEGA-027 foi revisada e mesclada em `main` pelo PR #3, commit `2382b01`. O módulo `src/core/dataset-sync.js` agora costura manifesto, transação, storage e governança de fontes, com recuperação de interrupções e ordem de gravação explícita. A unidade permanece TESTED/IN PROGRESS: não cria download, pacote, endpoint ou prova de durabilidade física.
+
+O próximo gargalo verificável continua sendo a validação física do background GPS (T-021–T-030) e, separadamente, a obtenção de uma fonte cartográfica realmente licenciada para redistribuição offline. Nenhum resultado de CI ou build será usado para marcar hardware, bateria, modo avião, quota, assinatura ou distribuição como verificados.
