@@ -219,7 +219,7 @@ No Android, o manifesto mesclado contém serviço foreground `location`, `FOREGR
 
 A suíte passou com 206 testes, o build Web e a auditoria de produção passaram, os syncs Android/iOS passaram e `npm run mobile:android:debug` terminou com `BUILD SUCCESSFUL`. O commit funcional `4b3855b feat(v2): adicionar tracking gps experimental em background` foi publicado em `main`; o CI `33134403140` concluiu com sucesso. O APK local `android/app/build/outputs/apk/debug/app-debug.apk` tem 8.816.910 bytes e SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; ele é um artifact debug de teste, não signing, candidate ou release.
 
-O experimento ainda não prova continuidade após tela bloqueada, Home/Recents, encerramento do processo, política Xiaomi/MIUI/HyperOS, modo avião, bateria ou iOS. Os casos T-021 a T-030 foram adicionados à `MOBILE_V2_TEST_MATRIX.md`; nenhum pode ser marcado `VERIFIED` por build ou CI. A decisão completa e as referências de plataforma estão em `docs/adr/ADR-0034-tracking-background-opt-in.md`.
+O experimento ainda não prova continuidade após tela bloqueada, Home/Recents, encerramento do processo, política Xiaomi/MIUI/HyperOS, modo avião, bateria ou iOS. Os casos T-021 a T-030 foram adicionados à `MOBILE_V2_TEST_MATRIX.md`; nenhum pode ser marcado `VERIFIED` por build ou CI. A decisão completa e as referências de plataforma estão em `docs/adr/ADR-0034-tracking-background-opt-in.md`; o procedimento operacional está em `docs/ROTEIRO-TESTE-BACKGROUND-GPS.md`.
 
 ## Próximo passo operacional
 
