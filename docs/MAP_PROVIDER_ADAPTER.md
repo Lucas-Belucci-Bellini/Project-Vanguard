@@ -7,9 +7,9 @@ O Vanguard mantém o motor cartográfico atrás de um adapter. O domínio não d
 ## Fluxo
 
 ```text
-MapProvider
+Tela do mapa
     ↓
-MapProviderRegistry
+Map Engine
     ↓
 MapProviderRuntime
     ↓
@@ -18,16 +18,19 @@ MapLibreAdapter
 maplibre-gl
 ```
 
+O `MapProviderRegistry` continua disponível para seleção e registro de providers, enquanto `map-engine.js` fornece a composição de alto nível usada pela aplicação.
+
 ## Responsabilidades
 
-- `MapProvider` descreve os dados e capacidades do provider.
-- `MapProviderRegistry` resolve providers por ID.
-- `MapProviderRuntime` valida o provider e conecta sua configuração ao adapter.
-- `MapLibreAdapter` é o ponto desta camada que conhece `MapLibre.Map`.
-- O adapter recebe a implementação do MapLibre por injeção, facilitando testes e futura substituição.
+- `MapProvider`: contrato dos dados e capacidades do provider.
+- `MapProviderRegistry`: catálogo de providers registrados.
+- `MapProviderRuntime`: valida e conecta provider ao adapter.
+- `MapLibreAdapter`: único ponto desta camada que conhece `MapLibre.Map`.
+- `map-engine.js`: composição de alto nível para a aplicação, incluindo carregamento assíncrono do motor.
 - A camada tática continua separada: trilhas, waypoints, destino e overlays não pertencem ao adapter.
-- A troca futura para outro motor/provider deve exigir somente um novo adapter, sem reescrever o domínio tático.
 
-## Estado atual
+## Migração
 
-O runtime bridge foi adicionado sem substituir o fluxo visual existente. A integração com a tela atual deve ser feita em uma etapa separada, depois dos testes do contrato, evitando uma migração destrutiva.
+O engine pode ser adotado pela página atual de forma incremental. A página fornece o container e as opções de visualização, sem precisar conhecer a implementação do adapter.
+
+A implementação atual ainda não remove o fluxo legado. A substituição deve ocorrer depois da validação visual e dos testes de integração.
