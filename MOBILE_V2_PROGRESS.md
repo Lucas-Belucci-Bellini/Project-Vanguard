@@ -208,3 +208,21 @@ A política oficial do servidor de tiles do OpenStreetMap proíbe bulk download,
 `test/fontes-dataset.test.js` cobre catálogo válido mas não aprovado, aprovação somente com todos os critérios, revisão por critério ausente, registro inválido, catálogo inválido e imutabilidade. A suíte local chegou a 200 testes aprovados.
 
 A unidade não alterou URLs, não fez scraping, não baixou tiles e não criou dataset. O cache técnico continua limitado ao seu escopo, e qualquer pacote mundial/regional permanece bloqueado até haver fonte autorizada, contrato aplicável, pipeline, formato, storage e validação do uso pretendido.
+
+## Marco de tracking GPS experimental em segundo plano — 2026-08-28
+
+A ordem de continuidade pediu uma tentativa real de manter a trilha com a tela bloqueada antes da peregrinação. A solução escolhida é explicitamente experimental, opt-in e local: `@capgo/background-geolocation@8.4.3` foi integrado ao Capacitor 8, o mapa ganhou o controle **ATIVAR GPS EM 2º PLANO** somente durante uma rota ativa e a confirmação informa consumo maior, notificação persistente, interrupções possíveis e ausência de envio remoto.
+
+`src/core/background-localizacao.js` implementa os estados `IDLE`, `STARTING`, `ACTIVE`, `STOPPED`, `ERROR` e `UNAVAILABLE`, normaliza leituras nativas e ignora callbacks tardios. Durante a sessão nativa, o watcher foreground é pausado para evitar duplicação. `PARAR E GUARDAR`, `LIMPAR TRILHA`, importação, desmontagem e erro encerram ou invalidam a sessão conforme o contrato; o foreground só é restaurado automaticamente quando a página está visível.
+
+No Android, o manifesto mesclado contém serviço foreground `location`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS` e `WAKE_LOCK`. O app desabilita os receivers de geofence/boot fornecidos pelo plugin e remove `RECEIVE_BOOT_COMPLETED`; não configura `ACCESS_BACKGROUND_LOCATION`, geofence, URL, headers, POST, auto-início ou upload. No iOS, `UIBackgroundModes=location` foi preparado e o plugin foi sincronizado, mas build, signing, instalação e teste continuam bloqueados por falta de macOS/Xcode/dispositivo Apple.
+
+A suíte passou com 206 testes, o build Web e a auditoria de produção passaram, os syncs Android/iOS passaram e `npm run mobile:android:debug` terminou com `BUILD SUCCESSFUL`. O commit funcional `4b3855b feat(v2): adicionar tracking gps experimental em background` foi publicado em `main`; o CI `33134403140` concluiu com sucesso. O APK local `android/app/build/outputs/apk/debug/app-debug.apk` tem 8.816.910 bytes e SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; ele é um artifact debug de teste, não signing, candidate ou release.
+
+O experimento ainda não prova continuidade após tela bloqueada, Home/Recents, encerramento do processo, política Xiaomi/MIUI/HyperOS, modo avião, bateria ou iOS. Os casos T-021 a T-030 foram adicionados à `MOBILE_V2_TEST_MATRIX.md`; nenhum pode ser marcado `VERIFIED` por build ou CI. A decisão completa e as referências de plataforma estão em `docs/adr/ADR-0034-tracking-background-opt-in.md`.
+
+## Próximo passo operacional
+
+Instalar o APK debug somente em aparelho de teste, registrar modelo/versão/bateria/permissões/notificação, preparar uma área cartográfica enquanto houver rede, iniciar uma rota local, aceitar explicitamente o background tracking, bloquear a tela por 10–20 minutos, voltar ao app, parar a sessão e a rota, conferir quantidade/timestamps/precisão/lacunas e exportar JSON+GPX. O teste deve levar power bank e comunicação independente. Nenhum resultado deve ser extrapolado para quatro dias ou para iOS sem evidência física.
+
+A opção A permanece posterior e separada: exportação/contribuição manual voluntária somente após a rota, WeatherProvider sem chave embutida e manual offline de sobrevivência com fontes, região, data de revisão e limites explícitos. A versão de pacote continua `1.0.0`; não foi criada `0.7.0`, tag ou release nesta unidade.

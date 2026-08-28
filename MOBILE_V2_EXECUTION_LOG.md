@@ -274,3 +274,24 @@ A rodada entregou uma fronteira local isolada para metadados e transações, nã
 O catálogo funcional foi publicado em `edf0682 feat(v2): governar fontes cartograficas`; o CI `33131867028` concluiu com sucesso. As memórias de governança foram publicadas em `cb476e4 docs(v2): registrar governanca de fontes`; o CI `33131968614` concluiu com sucesso. `main` e `origin/main` permaneceram alinhadas e a worktree ficou limpa.
 
 A unidade fechou um gate técnico negativo: nenhum provedor atual está automaticamente apto a originar pacote offline. O projeto continua sem dataset mundial/regional distribuível, e nenhuma tag, release, signing ou artifact novo foi criado.
+
+## 2026-08-28 — tracking GPS experimental em segundo plano
+
+- **Execution:** continuação urgente para permitir teste real de caminhada com tela bloqueada antes da peregrinação; mudança classificada como código + configuração nativa + artifact debug, não release.
+- **Estado inicial:** `main` limpa e alinhada em `d3bf340`; CI `33132011040` concluído com sucesso; somente `v1.0.0-rc.2` pública.
+- **Implemented:** `src/core/background-localizacao.js` com estados `IDLE`/`STARTING`/`ACTIVE`/`STOPPED`/`ERROR`/`UNAVAILABLE`, normalização, reentrada bloqueada, stop, teardown e callbacks tardios ignorados; UI no Mapa somente durante rota ativa, com `confirm` explícito e status observável.
+- **Single source:** o callback background alimenta o mesmo registrador local da trilha; o watcher foreground é pausado durante `STARTING`/`ACTIVE` e só volta quando a sessão termina/falha e a página está visível. `PARAR E GUARDAR`, `LIMPAR TRILHA`, importação e desmontagem encerram a sessão.
+- **Privacy:** não foram configurados `url`, `headers`, POST, geofence, `ACCESS_BACKGROUND_LOCATION`, auto-início no boot, reconexão ou upload. Dados permanecem no store local; exportação/contribuição voluntária continua manual e pós-rota.
+- **Android:** `@capgo/background-geolocation@8.4.3` sincronizado; manifesto mesclado contém serviço `foregroundServiceType=location`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS` e `WAKE_LOCK`. Receivers `GeofenceBroadcastReceiver`/`GeofenceBootReceiver` foram desabilitados pelo manifesto app-owned e `RECEIVE_BOOT_COMPLETED` removido.
+- **iOS:** plugin sincronizado e `UIBackgroundModes=location` preparado no `Info.plist`; sem macOS/Xcode, signing, archive, IPA ou dispositivo Apple. Classificação: `ENVIRONMENT BLOCKED`.
+- **Tests:** `npm test` passou com 206 testes e 0 falhas; `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` passaram; auditoria de produção reportou 0 vulnerabilidades.
+- **Mobile gates:** `npm run mobile:sync:android`, `npm run mobile:sync:ios` e `npm run mobile:android:debug` passaram; build Gradle `BUILD SUCCESSFUL`.
+- **Artifact:** `android/app/build/outputs/apk/debug/app-debug.apk`, `versionName 1.0.0`, `versionCode 100`, 8.816.910 bytes, SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; somente APK debug/teste, não assinado, não candidate e não release.
+- **Commit/CI:** funcional publicado como `4b3855b feat(v2): adicionar tracking gps experimental em background`; CI `33134403140` concluído com sucesso; `main` e `origin/main` alinhadas após o push funcional.
+- **Documentation:** ADR-0034, matriz T-021–T-030, capabilities, blockers, checklist Omega, build matrix, release status/candidate, V2 status/progress, BUILD-VS-RELEASE e este log foram atualizados para o fechamento documental separado.
+- **Limits:** nenhuma validação física foi feita. Tela bloqueada, Home/Recents, encerramento do processo, permissões, notificação Android 13+, Xiaomi/MIUI/HyperOS, modo avião, lacunas, bateria e iOS continuam pendentes; não há promessa de tracking contínuo ou quatro dias.
+- **Status:** código funcional publicado; documentação de fechamento pronta para o segundo commit/CI; physical validation `BLOCKED`; release/signing/store `BLOCKED`; nenhuma tag ou release criada.
+
+## Fechamento da rodada — 2026-08-28
+
+O bloco funcional de tracking GPS experimental em background foi publicado em `4b3855b`; o CI `33134403140` concluiu com sucesso. A documentação atualizada e a ADR-0034 serão publicadas em commit separado após revisão final. O APK gerado é um artifact debug local para instalação consciente em aparelho de teste; não é release, candidate, build assinado ou garantia de continuidade.

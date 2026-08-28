@@ -4,17 +4,17 @@
 
 | Gate | Estado | Evidência | Próximo requisito |
 |---|---|---|---|
-| Código em `main` | Aprovado | `main` publicada no commit funcional `edf0682`; CI `33131867028` concluído com sucesso | continuar gates sem regressão |
-| Web/PWA build | Aprovado | `npm run build` e CI `33131867028`; manifesto, transação, storage e governança de fontes validados sem dataset empacotado | instalação/modo avião/update posterior físicos |
-| Android debug | Aprovado | `assembleDebug` e APK de teste | instalar em Android real |
+| Código em `main` | Aprovado | `main` publicada no commit funcional `4b3855b`; CI `33134403140` concluído com sucesso; inclui tracking background experimental | continuar gates sem regressão e teste físico |
+| Web/PWA build | Aprovado | `npm run build`, `npm test` (206), `node --check public/sw.js` e CI `33134403140`; background não carrega plugin no Web | instalação/modo avião/update posterior físicos |
+| Android debug | Aprovado | `assembleDebug`; `android/app/build/outputs/apk/debug/app-debug.apk`, 8.816.910 bytes, SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`; artefato experimental de teste | instalar em Android real e executar T-021–T-029 |
 | Android release/AAB | Artifact-only aprovado | run `33121937373`, AAB não assinado e hash registrado | keystore e signing deliberado |
 | Android signed | Bloqueado | nenhuma keystore configurada | autorização, keystore e ambiente seguro |
 | Android installed | Bloqueado | nenhum aparelho validado | instalar APK assinado/de teste e registrar log |
-| iOS sync | Aprovado no Linux | `mobile:sync:ios` | macOS/Xcode |
+| iOS sync | Aprovado no Linux | `mobile:sync:ios`; plugin sincronizado e `UIBackgroundModes=location` preparado | macOS/Xcode e dispositivo Apple |
 | iOS build/archive/IPA | Bloqueado | nenhum IPA | conta/equipe Apple, signing e Mac |
-| Physical validation | Bloqueado | nenhum ciclo de campo concluído | matriz Android/Xiaomi/iPhone |
+| Physical validation | Bloqueado | nenhum ciclo de campo concluído; background permanece `EXPERIMENTAL`/`DEVICE DEPENDENT` | executar T-021–T-030, registrar permissões, lacunas e bateria |
 | Store readiness | Bloqueado | nenhuma publicação | revisão, signing, política e autorização |
-| Candidate V2 documental | `NOT READY / BLOCKED` | `MOBILE_V2_RELEASE_CANDIDATE.md` registra o snapshot funcional `edf0682`; nenhuma tag candidate V2 | não chamar o documento de release publicada |
+| Candidate V2 documental | `NOT READY / BLOCKED` | `MOBILE_V2_RELEASE_CANDIDATE.md` continua factual; `4b3855b` é código em main, não candidate publicada | não chamar o documento de release publicada |
 | Public release | `v1.0.0-rc.2` existente | única release listada no GitHub | não criar `v1.0.0` automaticamente |
 
 ## Política de publicação

@@ -8,7 +8,7 @@
 |---|---|
 | Produto | Vanguard Field |
 | Linha de versão de trabalho | `2.x.x` em construção; o pacote atual ainda declara `1.0.0` |
-| Commit avaliado | `edf0682 feat(v2): governar fontes cartograficas` |
+| Commit avaliado | `4b3855b feat(v2): adicionar tracking gps experimental em background` |
 | Branch | `main` |
 | Tag V2 candidate | Não criada |
 | Release pública | Somente `v1.0.0-rc.2`, da linha anterior |
@@ -22,26 +22,26 @@ O commit indicado é o snapshot funcional publicado em `main`; ele não deve ser
 |---|---|---|---|
 | Web | Build técnico aprovado | `npm run build`, testes e CI | smoke e revisão da experiência no navegador-alvo |
 | PWA | Implementada | shell, Service Worker, update confirmado, cache local e timer inicial cancelável | instalação, modo avião, quota, reabertura e update posterior físicos |
-| Android debug | Compilável | `npm run mobile:android:debug`; `BUILD SUCCESSFUL` em ciclos locais | instalar, abrir e validar funções em aparelho real |
+| Android debug | Compilável | `npm run mobile:android:debug`; `BUILD SUCCESSFUL`; plugin background compilado e manifesto mesclado inspecionado | instalar, abrir e executar T-021–T-029 em aparelho real |
 | Android release | Não configurada | nenhum signing real | keystore segura, configuração de release, build e inspeção |
 | Android AAB | Artifact-only anterior | run `33121937373`, AAB não assinado | signing, inspeção do manifest e critérios de distribuição |
-| iOS | Projeto sincronizado | `npm run mobile:sync:ios` no Linux | macOS, Xcode, archive, signing, IPA, instalação e teste |
+| iOS | Projeto sincronizado/preparado | `npm run mobile:sync:ios` no Linux; plugin e `UIBackgroundModes=location` presentes | macOS, Xcode, archive, signing, IPA, instalação e T-030 |
 
 ## Testes e segurança
 
 | Área | Resultado atual | Limite |
 |---|---|---|
-| Testes automatizados | `npm test`: 200 aprovados, 0 falhas | não substitui aparelho, sensor ou modo avião |
+| Testes automatizados | `npm test`: 206 aprovados, 0 falhas; inclui `test/background-localizacao.test.js` | não substitui aparelho, sensor, tela bloqueada ou modo avião |
 | Build | aprovado no commit avaliado | não é release |
 | Service Worker | sintaxe e contratos aprovados | não prova quota/cobertura offline física |
 | Auditoria de produção | 0 vulnerabilidades reportadas no último gate | não é auditoria completa de segurança operacional |
 | Privacidade | dados locais por padrão, sem telemetria/sincronização automática | revisão física e operacional pendente |
-| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanups assíncronos, manifesto, transação, storage isolado e governança de fontes | GPS não transmite; Socorro não confirma entrega/resgate |
+| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanups assíncronos, background experimental opt-in, manifesto, transação, storage isolado e governança de fontes | GPS não transmite; background não garante continuidade; Socorro não confirma entrega/resgate |
 | Legado | wiki/ambiente virtual de Arma 3 isolado, somente videogame/testes | não adaptar para ambientes ou operações reais |
 
 ## Artifacts conhecidos
 
-O workflow móvel artifact-only já provou a geração, sem publicação, de um APK debug e de um AAB não assinado no run `33121937373`. Os hashes registrados em `MOBILE_V2_RELEASE.md` são evidência daquele run e não devem ser atribuídos automaticamente ao snapshot atual. Nenhum artifact assinado de Android ou iOS está anexado a este registro.
+O workflow móvel artifact-only já provou a geração, sem publicação, de um APK debug e de um AAB não assinado no run `33121937373`. Nesta unidade, o build local gerou `android/app/build/outputs/apk/debug/app-debug.apk` com 8.816.910 bytes e SHA-256 `0c948c698b833dc4a6389804afe7e6f2826f0c134f8a507de3fa55b07e3541ff`. Esse arquivo é somente um artifact local de teste, não assinado e não distribuível como release; nenhum artifact assinado de Android ou iOS está anexado a este registro.
 
 A distinção operacional permanece:
 
@@ -65,7 +65,7 @@ release pública autorizada
 
 ## Known issues e blockers
 
-Ainda faltam instalação e validação em Android comum, Android recente, Xiaomi/MIUI/HyperOS, iPhone e iPad; teste de GPS externo/interno e T-005A; lifecycle e tela bloqueada; modo avião e quota de Cache Storage; bússola; Files/Share Sheet; bateria de quatro dias; configuração de signing Android; macOS/Xcode, Apple signing e IPA; inspeção de AAB assinado; atualização posterior em aparelho; e autorização de distribuição.
+Ainda faltam instalação e validação em Android comum, Android recente, Xiaomi/MIUI/HyperOS, iPhone e iPad; T-021–T-030 de consentimento, notificação, tela bloqueada, Home/Recents, permissões, modo avião, bateria e lacunas; teste de GPS externo/interno e T-005A; modo avião e quota de Cache Storage; bússola; Files/Share Sheet; configuração de signing Android; macOS/Xcode, Apple signing e IPA; inspeção de AAB assinado; atualização posterior em aparelho; e autorização de distribuição.
 
 A precisão do GPS continua dependente do sistema, do receptor, do ambiente e do provedor. O botão Centralizar agora pede um fixo manual sem reutilizar posição em cache, mas não garante precisão dentro de prédio. O controle PWA cancela o timer inicial no cleanup, mas o update posterior ainda não foi validado em aparelho. O manifesto, a transação, o storage e a governança de fontes são fundações locais: não existe pacote mundial, índice local, checksum calculado de arquivo, atomicidade física ou sync. Nenhuma fonte atual foi aprovada automaticamente para redistribuição offline. As rotas de peregrinação continuam referências informativas; sem GPX/KML oficial ou autorizado, não há navegação de rota oficial.
 
@@ -81,6 +81,7 @@ Uma candidate V2 só poderá ser criada depois de confirmar o commit-alvo, a ver
 - `docs/adr/ADR-0031-transacao-atomica-dataset.md` — máquina pura de staging, ativação e rollback.
 - `docs/adr/ADR-0032-storage-dataset-isolado.md` — adapter e namespace local de manifesto/transação.
 - `docs/adr/ADR-0033-governanca-fontes-cartograficas.md` — gate de licença, atribuição e uso offline.
+- `docs/adr/ADR-0034-tracking-background-opt-in.md` — decisão do experimento nativo local, opt-in e limites de plataforma.
 - `MOBILE_V2_RELEASE_STATUS.md` — estado operacional dos gates.
 - `MOBILE_V2_BUILD_MATRIX.md` — build e artifacts.
 - `MOBILE_V2_DEVICE_MATRIX.md` — aparelhos e casos físicos.

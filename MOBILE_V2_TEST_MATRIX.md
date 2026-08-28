@@ -25,6 +25,16 @@
 | T-018 | Update APK | PENDENTE | PENDENTE | PENDENTE | origem oficial abre após confirmação; instalador decide instalação |
 | T-019 | Acessibilidade | PENDENTE | PENDENTE | PENDENTE | teclado/leitor/tamanho de toque/foco verificados |
 | T-020 | Bateria em quatro dias | PENDENTE | PENDENTE | PENDENTE | medição conforme plano de operação; sem promessa universal |
+| T-021 | Opt-in explícito para background tracking | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | rota ativa, confirmação visível e estado `SOLICITANDO` antes do serviço |
+| T-022 | Notificação persistente e permissão de notificações | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | Android 13+ mostra notificação após opt-in; recusa fica observável; não iniciar silenciosamente |
+| T-023 | Tela bloqueada por 10–20 minutos | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | ao reabrir, verificar timestamps, quantidade, precisão e lacunas; sem garantia de continuidade |
+| T-024 | Home/Recents e retorno ao app | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | serviço e trilha local permanecem observáveis ou interrupção é informada; nenhum ponto inventado |
+| T-025 | Encerrar pelo botão `PARAR E GUARDAR` | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | serviço nativo para, pontos permanecem locais e watcher foreground volta somente com página visível |
+| T-026 | `LIMPAR TRILHA` com background ativo | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | serviço para e trilha/waypoints são removidos somente após ação local explícita |
+| T-027 | GPS, localização ou notificação negados | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | estado `ERRO`/`INDISPONÍVEL`, fallback foreground seguro quando visível e nenhum upload |
+| T-028 | Modo avião/offline durante background | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | posição e exportação continuam locais; ausência de rede não altera o fluxo |
+| T-029 | Xiaomi/MIUI/HyperOS e economia de bateria | PENDENTE | PENDENTE | ENVIRONMENT BLOCKED | registrar otimização de bateria, auto-start e interrupções; não orientar bypass inseguro |
+| T-030 | iOS background location | ENVIRONMENT BLOCKED | ENVIRONMENT BLOCKED | ENVIRONMENT BLOCKED | requer macOS/Xcode, permissões, capability e dispositivo Apple; nenhuma alegação sem teste físico |
 
 ## Cobertura automatizada atual
 
@@ -40,7 +50,9 @@
 | APK debug | `BUILD SUCCESSFUL`; artifact de teste |
 | Estados do watcher GPS | Node: `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`, pausa e retomada foreground-only cobertas em `test/localizacao.test.js` |
 | Workflow Mobile Release artifact-only | run `33121937373` aprovado; APK debug e AAB não assinado baixados, tipos e SHA-256 registrados em `MOBILE_V2_RELEASE.md`; etapa de publicação pulada |
+| Controlador background local | Node: aprovado; opt-in nativo, normalização, reentrada, stop, callbacks tardios, erro, desmontagem e fallback Web em `test/background-localizacao.test.js` |
+| Manifesto Android do APK desta rodada | aprovado; `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS`, `WAKE_LOCK` e serviço `foregroundServiceType=location`; receivers de geofence/boot desabilitados e `ACCESS_BACKGROUND_LOCATION` ausente |
 
 ## Procedimento de registro
 
-Para cada caso, anotar aparelho/modelo/versão do sistema, versão do app, rede, bateria inicial/final, horário, resultado, mensagem exibida e evidência local. Não registrar CPF, coordenadas ou dados pessoais em relatório compartilhado sem necessidade. O plano da peregrinação em `docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md` continua sendo planejamento de campo, não gatilho de release.
+Para cada caso, anotar aparelho/modelo/versão do sistema, versão do app, rede, bateria inicial/final, horário, resultado, mensagem exibida e evidência local. Para T-021–T-030, registrar também se a notificação foi permitida, se o serviço foi interrompido pelo SO/fabricante e se houve lacunas temporais. Não concluir que a trilha foi contínua apenas porque o app reabriu. Não registrar CPF, coordenadas ou dados pessoais em relatório compartilhado sem necessidade. O plano da peregrinação em `docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md` continua sendo planejamento de campo, não gatilho de release.
