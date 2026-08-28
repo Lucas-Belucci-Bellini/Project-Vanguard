@@ -12,6 +12,7 @@
 export const DB_DATASET_PACKAGE = 'vanguard-dataset-package';
 export const VERSION_DATASET_PACKAGE = 1;
 export const STORE_DATASET_PACKAGE = 'packages';
+export const PACKAGE_STATES = Object.freeze({ STAGING: 'STAGING', ACTIVE: 'ACTIVE' });
 
 function indisponivel() {
   return { ok: false, codigo: 'PACKAGE_STORAGE_UNAVAILABLE', motivo: 'IndexedDB não está disponível neste ambiente.' };
@@ -106,6 +107,7 @@ export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {
           datasetId,
           bytes: copia,
           sizeBytes: copia.byteLength,
+          state: PACKAGE_STATES.STAGING,
           metadata: typeof globalThis.structuredClone === 'function' ? globalThis.structuredClone(metadata) : metadata,
           updatedAt: Date.now(),
         }));
@@ -119,6 +121,17 @@ export function criarPackageStorage({ indexedDBImpl = globalThis.indexedDB } = {
         const registro = await transacao(db, 'readonly', (store) => store.get(datasetId));
         if (!registro) return { ok: true, pacote: null };
         return { ok: true, pacote: { ...registro, bytes: new Uint8Array(registro.bytes) } };
+      });
+    },
+
+    async promoverPacote(datasetId) {
+      if (!idValido(datasetId)) return { ok: false, codigo: 'DATASET_ID_INVALIDO', motivo: 'datasetId é obrigatório.' };
+      return executar(async (db) => {
+        const registro = await transacao(db, 'readonly', (store) => store.get(datasetId));
+        if (!registro) return { ok: false, codigo: 'PACKAGE_NOT_FOUND', motivo: 'O pacote físico não existe.' };
+        registro.state = PACKAGE_STATES.ACTIVE;
+        await transacao(db, 'readwrite', (store) => store.put(registro));
+        return { ok: true, datasetId, state: registro.state };
       });
     },
 
