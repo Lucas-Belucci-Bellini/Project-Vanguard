@@ -39,7 +39,7 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `4b3855b feat(v2): adicionar tracking gps experimental em background`; push concluído; CI `33134403140` concluído com sucesso; nenhuma tag/release criada |
+| **Main** | `2382b01 feat(v2): orquestrar ciclo de vida do dataset offline`; PR #3 mesclado em `main`; nenhuma tag/release criada |
 | **Next Task** | Publicar o fechamento documental e executar o roteiro físico do background tracking; depois separar o trabalho posterior da opção A (WeatherProvider sem chave, manual revisado e exportação voluntária pós-rota) sem criar `0.7.0` silenciosamente |
 
 ## Unidades recentes
