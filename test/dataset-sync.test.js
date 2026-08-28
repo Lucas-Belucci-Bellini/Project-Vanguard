@@ -315,3 +315,44 @@ test('catálogo misto: uma fonte apta já habilita início, e a inapta continua 
   assert.equal(sync.iniciar(NOVO, { sourceId: inapta.sourceId }).codigo, 'FONTE_NAO_APROVADA');
   assert.equal(sync.iniciar(NOVO, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
 });
+\n
+test('verificarBytes calcula SHA-256 dos bytes reais antes do staging', async () => {
+  const { storage, sync } = ambiente({ ativo: ATIVO });
+  const bytes = new Uint8Array(TOTAL_BYTES);
+  const primeiro = new TextEncoder().encode('Vanguard');
+  bytes.set(primeiro);
+
+  const novoComHash = manifesto('2026.08.3', '7c4d6f9b5a9d0c3b4f7b8f4a7e7b0c4c8f0f5b0c3f8e6a0f4b8d1d2c5e4f3a2b1');
+  // O hash acima é deliberadamente incorreto; a API deve registrar a reprovação.
+  assert.equal(sync.iniciar(novoComHash, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
+  assert.equal(sync.avancar('CHECKING').ok, true);
+  assert.equal(sync.avancar('AVAILABLE').ok, true);
+  assert.equal(sync.avancar('DOWNLOADING').ok, true);
+  assert.equal(sync.avancar('VERIFYING').ok, true);
+
+  const resultado = await sync.verificarBytes(bytes);
+  assert.equal(resultado.ok, false);
+  assert.equal(resultado.codigo, 'CHECKSUM_INVALIDO');
+  assert.equal(storage.lerTransacao().valor.estado, 'FAILED');
+});
+
+test('verificarBytes aceita bytes cujo SHA-256 corresponde ao manifesto', async () => {
+  const { storage, sync } = ambiente({ ativo: ATIVO });
+  const bytes = new TextEncoder().encode('abc');
+  const checksum = 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
+  const novo = {
+    ...manifesto('2026.08.4', checksum),
+    regions: [{ id: 'trecho-1', version: '2026.08.4', sizeBytes: 3, checksum }],
+  };
+
+  assert.equal(sync.iniciar(novo, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
+  assert.equal(sync.avancar('CHECKING').ok, true);
+  assert.equal(sync.avancar('AVAILABLE').ok, true);
+  assert.equal(sync.avancar('DOWNLOADING').ok, true);
+  assert.equal(sync.avancar('VERIFYING').ok, true);
+
+  const resultado = await sync.verificarBytes(bytes);
+  assert.equal(resultado.ok, true);
+  assert.equal(resultado.transacao.estado, 'STAGING');
+  assert.equal(storage.lerTransacao().valor.staging.checksum, checksum);
+});
