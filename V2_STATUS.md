@@ -34,3 +34,10 @@ A V2 permanece `IN PROGRESS` até que cada item obrigatório tenha implementaç�
 | **PHYSICAL VALIDATION REQUIRED** | Android/Xiaomi/iOS, consumo, permissões, ciclo de vida, background e distribuição |
 | **LEGACY-RESTRICTED** | Wiki/ambiente separado de Arma 3 e seus módulos balísticos de videogame; nunca adaptar para ambientes reais, controle de tiro, armamento ou automação operacional |
 | **V3** | Itens não necessários para a definição de pronto da V2, registrados em `V3_BACKLOG.md` |
+
+
+## 2026-08-28 — storage físico de pacote iniciado
+
+Foi criado `src/core/dataset-package-storage.js`, um adapter assíncrono sobre IndexedDB dedicado exclusivamente aos bytes do pacote de dataset. Ele separa o artefato físico do manifesto/transação e dos dados do usuário, oferece salvar/ler/remover/limpar e reporta indisponibilidade e quota. Testes de contrato cobrem ambientes sem IndexedDB, validação de entrada e diagnóstico.
+
+**Limite:** esta unidade não é prova de atomicidade de disco, durabilidade contra power loss, quota física garantida nem teste em aparelho real. A integração final com o orquestrador deve ocorrer depois de validar o contrato físico no runtime alvo.
