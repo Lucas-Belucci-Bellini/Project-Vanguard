@@ -11,20 +11,23 @@ MapProvider
     ↓
 MapProviderRegistry
     ↓
+MapProviderRuntime
+    ↓
 MapLibreAdapter
     ↓
 maplibre-gl
 ```
 
-## Regras
+## Responsabilidades
 
 - `MapProvider` descreve os dados e capacidades do provider.
 - `MapProviderRegistry` resolve providers por ID.
-- `MapLibreAdapter` é o único ponto desta camada que conhece `MapLibre.Map`.
+- `MapProviderRuntime` valida o provider e conecta sua configuração ao adapter.
+- `MapLibreAdapter` é o ponto desta camada que conhece `MapLibre.Map`.
 - O adapter recebe a implementação do MapLibre por injeção, facilitando testes e futura substituição.
 - A camada tática continua separada: trilhas, waypoints, destino e overlays não pertencem ao adapter.
 - A troca futura para outro motor/provider deve exigir somente um novo adapter, sem reescrever o domínio tático.
 
 ## Estado atual
 
-O adapter foi adicionado sem substituir o fluxo visual existente. A integração com a tela atual deve ser feita depois dos testes do contrato, evitando uma migração destrutiva.
+O runtime bridge foi adicionado sem substituir o fluxo visual existente. A integração com a tela atual deve ser feita em uma etapa separada, depois dos testes do contrato, evitando uma migração destrutiva.
