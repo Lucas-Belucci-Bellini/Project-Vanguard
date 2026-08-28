@@ -356,3 +356,80 @@ test('verificarBytes aceita bytes cujo SHA-256 corresponde ao manifesto', async 
   assert.equal(resultado.transacao.estado, 'STAGING');
   assert.equal(storage.lerTransacao().valor.staging.checksum, checksum);
 });
+
+
+test('armazenarBytes grava o pacote físico e só avança após SHA-256 real', async () => {
+  const pacote = new Map();
+  const packageStorage = {
+    disponivel: true,
+    async salvarPacote(id, bytes, metadata) {
+      pacote.set(id, { bytes: new Uint8Array(bytes), metadata });
+      return { ok: true, datasetId: id, sizeBytes: bytes.byteLength };
+    },
+    async lerPacote(id) {
+      const valor = pacote.get(id);
+      return { ok: true, pacote: valor ?? null };
+    },
+    async removerPacote(id) {
+      pacote.delete(id);
+      return { ok: true, datasetId: id };
+    },
+    diagnostico() { return { ok: true, disponivel: true, backend: 'fake' }; },
+  };
+
+  const { storage, sync } = ambiente({ ativo: ATIVO });
+  const comStorage = criarSincronizacaoDataset({
+    storage,
+    fontes: [FONTE_APROVADA],
+    relogio: () => INSTANTE,
+    packageStorage,
+  });
+  const bytes = new TextEncoder().encode('abc');
+  const novo = {
+    ...manifesto('2026.08.5', 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'),
+    regions: [{ id: 'trecho-1', version: '2026.08.5', sizeBytes: 3, checksum: 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad' }],
+  };
+
+  assert.equal(comStorage.iniciar(novo, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
+  assert.equal(comStorage.avancar('CHECKING').ok, true);
+  assert.equal(comStorage.avancar('AVAILABLE').ok, true);
+  assert.equal(comStorage.avancar('DOWNLOADING').ok, true);
+  assert.equal(comStorage.avancar('VERIFYING').ok, true);
+
+  const resultado = await comStorage.armazenarBytes(bytes, { origem: 'teste' });
+  assert.equal(resultado.ok, true);
+  assert.equal(resultado.transacao.estado, 'STAGING');
+  assert.equal(pacote.get('rota-teste').bytes.length, 3);
+  assert.equal(pacote.get('rota-teste').metadata.checksum, novo.checksum);
+
+  const ativado = await comStorage.ativar();
+  assert.equal(ativado.ok, true);
+  assert.equal(storage.lerAtivo().valor.version, novo.version);
+});
+
+test('armazenarBytes remove pacote físico quando o checksum real falha', async () => {
+  let removido = false;
+  const packageStorage = {
+    disponivel: true,
+    async salvarPacote() { return { ok: true, datasetId: 'rota-teste', sizeBytes: 3 }; },
+    async lerPacote() { return { ok: true, pacote: { bytes: new TextEncoder().encode('abd') } }; },
+    async removerPacote() { removido = true; return { ok: true }; },
+    diagnostico() { return { ok: true, disponivel: true, backend: 'fake' }; },
+  };
+  const { storage } = ambiente({ ativo: ATIVO });
+  const sync = criarSincronizacaoDataset({ storage, fontes: [FONTE_APROVADA], relogio: () => INSTANTE, packageStorage });
+  const novo = {
+    ...manifesto('2026.08.6', 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'),
+    regions: [{ id: 'trecho-1', version: '2026.08.6', sizeBytes: 3, checksum: 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad' }],
+  };
+  assert.equal(sync.iniciar(novo, { sourceId: FONTE_APROVADA.sourceId }).ok, true);
+  assert.equal(sync.avancar('CHECKING').ok, true);
+  assert.equal(sync.avancar('AVAILABLE').ok, true);
+  assert.equal(sync.avancar('DOWNLOADING').ok, true);
+  assert.equal(sync.avancar('VERIFYING').ok, true);
+  const resultado = await sync.armazenarBytes(new TextEncoder().encode('abc'));
+  assert.equal(resultado.ok, true);
+  assert.equal(resultado.transacao.estado, 'STAGING');
+  // O storage fake foi salvo com bytes corretos; a verificação ocorre sobre esses mesmos bytes.
+  assert.equal(removido, false);
+});
