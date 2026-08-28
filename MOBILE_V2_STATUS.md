@@ -7,13 +7,13 @@
 | **Version** | `2.x` em construção; pacote compartilhado atual `1.0.0` |
 | **Phase** | Mobile foundation + GPS/tracking/offline hardening; `IN PROGRESS` |
 | **Milestone** | Omega memory baseline: código compartilhado, GPS foreground-only, tracking local, import/export JSON/GPX/KML, diagnóstico e artifacts separados |
-| **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada sem declarar capacidades não verificadas |
-| **Current Task** | Validar em aparelhos o lifecycle e o cleanup de centralização; continuar usando `DEVICE_CAPABILITIES.md` e `MOBILE_V2_RELEASE_CANDIDATE.md` sem inventar suporte |
-| **Last Completed** | Cleanup da centralização manual no mapa, callbacks tardios e Wake Lock após desmontagem; `6d7c7fb`, CI pendente desta rodada |
+| **Current Objective** | Evoluir de foundation/debug para validação física e distribuição deliberada; manter timers e listeners assíncronos com cleanup sem declarar capacidades não verificadas |
+| **Current Task** | Validar em aparelhos o lifecycle, o cleanup de centralização e o update PWA; continuar usando `DEVICE_CAPABILITIES.md` e `MOBILE_V2_RELEASE_CANDIDATE.md` sem inventar suporte |
+| **Last Completed** | Cleanup da centralização manual e do timer inicial de atualização PWA; `11767e6`, CI `33129751294` concluído com sucesso |
 | **Current Blocker** | Android/iPhone reais, Xiaomi/MIUI/HyperOS, modo avião, quota, sensores, bateria, assinatura, macOS/Xcode e distribuição |
-| **PWA** | Build e service worker presentes; shell/estado/tile cache e update confirmado; instalação e modo avião físicos pendentes |
+| **PWA** | Build e service worker presentes; update confirmado e timer inicial cancelável no cleanup; instalação, modo avião, quota, reabertura e update posterior físicos pendentes |
 | **Web** | Vite/MapLibre/JS ES2022; fallback Web para GPS, permissões, compartilhamento e diagnóstico; build aprovado |
-| **Tests** | `npm test`: 176 testes aprovados; inclui controlador de centralização, localização manual, configuração, atualização, camadas, Service Worker, catálogo, registros e diagnóstico |
+| **Tests** | `npm test`: 176 testes aprovados; inclui cleanup de centralização, timer inicial de atualização, localização manual, configuração, camadas, Service Worker, catálogo, registros e diagnóstico |
 | **Android** | Capacitor presente; `com.projectvanguard.field`; coarse/fine foreground; APK debug compilado; instalação e aparelho real pendentes |
 | **iOS** | Capacitor presente; bundle `com.projectvanguard.field`; deployment target iOS 15; sync no Linux; macOS/Xcode, signing, IPA e aparelho pendentes |
 | **GPS** | Capacitor foreground + fallback Web/PWA; watcher de cidade econômico e trilha foreground de alta precisão; botão Centralizar solicita novo fixo manual (`maximumAge: 0`, alta precisão); estados `STARTING`/`ACTIVE`/`PAUSED`/`ERROR`/`UNAVAILABLE`/`STOPPED`; background não implementado |
@@ -37,8 +37,8 @@
 | **IPA** | `BLOCKED`; requer macOS/Xcode, equipe Apple e signing |
 | **Store Readiness** | `BLOCKED`; faltam signing, instalação, validação, revisão e autorização deliberada |
 | **Release** | `BLOCKED`; única release pública `v1.0.0-rc.2`; tag final `v1.0.0` não criada |
-| **Main** | `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa`; push concluído; CI desta rodada pendente; nenhuma tag/release criada |
-| **Next Task** | Confirmar T-005A/T-007 em aparelhos reais; verificar que centralização, Wake Lock, troca de rota e tela bloqueada não deixam callbacks/timers vivos; depois retomar signing/distribuição sem publicar automaticamente |
+| **Main** | `11767e6 fix(v2): limpar timer da atualizacao pwa`; push concluído; CI `33129751294` concluído com sucesso; nenhuma tag/release criada |
+| **Next Task** | Confirmar T-005A/T-007/T-017 em aparelhos reais; verificar centralização, Wake Lock, troca de rota, tela bloqueada e update confirmado; depois retomar signing/distribuição sem publicar automaticamente |
 
 ## Unidades recentes
 
@@ -58,7 +58,8 @@
 14. Fixo manual de maior precisão no botão Centralizar — `e7bfb10`, CI `33128218221`, ADR-0027.
 15. Matriz de capacidades Web/Android/iOS — `d8bf3a1`, CI `33128514144`, `DEVICE_CAPABILITIES.md`.
 16. Memória factual de release candidate V2 — `MOBILE_V2_RELEASE_CANDIDATE.md`, `1ac26e9`, CI `33128822658`.
-17. Cleanup da centralização manual no mapa — `6d7c7fb`, ADR-0028; CI desta rodada pendente.
+17. Cleanup da centralização manual no mapa — `6d7c7fb`, ADR-0028, CI `33129339317`.
+18. Cleanup do timer de atualização PWA — `11767e6`, ADR-0029, CI `33129751294`.
 
 ## Regra de evidência
 

@@ -4,8 +4,8 @@
 
 | Gate | Estado | Evidência | Próximo requisito |
 |---|---|---|---|
-| Código em `main` | Aprovado | `main` publicada no commit funcional `6d7c7fb`; CI desta rodada pendente | continuar gates sem regressão |
-| Web/PWA build | Aprovado | `npm run build` e CI | instalação/modo avião físicos |
+| Código em `main` | Aprovado | `main` publicada no commit funcional `11767e6`; CI `33129751294` concluído com sucesso | continuar gates sem regressão |
+| Web/PWA build | Aprovado | `npm run build`, `npm run mobile:android:debug` e CI `33129751294`; cleanup do timer PWA coberto localmente | instalação/modo avião/update posterior físicos |
 | Android debug | Aprovado | `assembleDebug` e APK de teste | instalar em Android real |
 | Android release/AAB | Artifact-only aprovado | run `33121937373`, AAB não assinado e hash registrado | keystore e signing deliberado |
 | Android signed | Bloqueado | nenhuma keystore configurada | autorização, keystore e ambiente seguro |
@@ -14,7 +14,7 @@
 | iOS build/archive/IPA | Bloqueado | nenhum IPA | conta/equipe Apple, signing e Mac |
 | Physical validation | Bloqueado | nenhum ciclo de campo concluído | matriz Android/Xiaomi/iPhone |
 | Store readiness | Bloqueado | nenhuma publicação | revisão, signing, política e autorização |
-| Candidate V2 documental | `NOT READY / BLOCKED` | `MOBILE_V2_RELEASE_CANDIDATE.md` registra o snapshot funcional `6d7c7fb`; nenhuma tag candidate V2 | não chamar o documento de release publicada |
+| Candidate V2 documental | `NOT READY / BLOCKED` | `MOBILE_V2_RELEASE_CANDIDATE.md` registra o snapshot funcional `11767e6`; nenhuma tag candidate V2 | não chamar o documento de release publicada |
 | Public release | `v1.0.0-rc.2` existente | única release listada no GitHub | não criar `v1.0.0` automaticamente |
 
 ## Política de publicação

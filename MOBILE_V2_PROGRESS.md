@@ -156,3 +156,13 @@ Foi criado `src/core/centralizacao-manual.js`, um controlador puro com estados `
 `test/centralizacao-manual.test.js` cobre janela de 21 segundos, reentrada, posição/erro durante busca, finalização, cancelamento, cleanup e callbacks tardios. A primeira execução da suíte falhou por ausência do import do runner `node:test`; o harness foi corrigido e a execução seguinte passou com 176 testes. O commit funcional `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa` foi publicado em `main`; a documentação de estado desta unidade aguarda seu CI.
 
 A mudança melhora o contrato de cleanup local, mas não prova GPS, Wake Lock, tela bloqueada, suspensão, bateria ou lifecycle físico. T-005A/T-007 continuam dependentes de Android/Xiaomi/iPhone reais.
+
+## Marco de cleanup da atualização PWA — 2026-08-28
+
+A auditoria do controle global de atualização identificou um timer inicial de 2,5 segundos sem identificador guardado: `setTimeout(verificarRelease, 2500)` podia continuar associado a uma instância do controle depois de `desmontar()`. Como o controle vive na shell e consulta uma release oficial somente quando há rede, o cleanup precisava ser autossuficiente e não depender da troca de páginas.
+
+`src/core/atualizacao-ui.js` agora guarda o timer, limpa o identificador quando a verificação começa e o cancela na desmontagem. A resposta remota também é descartada quando o controle foi desmontado enquanto `fetch()` ou `response.json()` aguardava. A confirmação explícita do Service Worker, a allowlist HTTPS e o comportamento offline foram preservados; não há instalação silenciosa nem alteração de versão.
+
+`test/atualizacao-ui.test.js` passou a usar timers fake e verifica a janela de 2,5 segundos, seu cancelamento no cleanup, a remoção dos listeners e o fluxo waiting/negação/confirmação. A execução final passou com 176 testes. O ADR-0029 registra a decisão e seus limites. O commit `11767e6 fix(v2): limpar timer da atualizacao pwa` foi publicado em `main` e o CI `33129751294` concluiu com sucesso.
+
+A unidade prova o contrato assíncrono local. Não prova instalação PWA, modo avião, quota, reabertura, confirmação do sistema operacional, WebView ou atualização posterior em aparelho. T-017 e T-018 permanecem pendentes.

@@ -8,7 +8,7 @@
 |---|---|
 | Produto | Vanguard Field |
 | Linha de versão de trabalho | `2.x.x` em construção; o pacote atual ainda declara `1.0.0` |
-| Commit avaliado | `6d7c7fb fix(v2): limpar centralizacao ao desmontar mapa` |
+| Commit avaliado | `11767e6 fix(v2): limpar timer da atualizacao pwa` |
 | Branch | `main` |
 | Tag V2 candidate | Não criada |
 | Release pública | Somente `v1.0.0-rc.2`, da linha anterior |
@@ -21,7 +21,7 @@ O commit indicado é o snapshot documental atual de `main`; ele não deve ser ch
 | Plataforma | Estado | Evidência atual | Falta para candidate verificável |
 |---|---|---|---|
 | Web | Build técnico aprovado | `npm run build`, testes e CI | smoke e revisão da experiência no navegador-alvo |
-| PWA | Implementada | shell, Service Worker, update confirmado e cache local | instalação, modo avião, quota e reabertura físicas |
+| PWA | Implementada | shell, Service Worker, update confirmado, cache local e timer inicial cancelável | instalação, modo avião, quota, reabertura e update posterior físicos |
 | Android debug | Compilável | `npm run mobile:android:debug`; `BUILD SUCCESSFUL` em ciclos locais | instalar, abrir e validar funções em aparelho real |
 | Android release | Não configurada | nenhum signing real | keystore segura, configuração de release, build e inspeção |
 | Android AAB | Artifact-only anterior | run `33121937373`, AAB não assinado | signing, inspeção do manifest e critérios de distribuição |
@@ -36,7 +36,7 @@ O commit indicado é o snapshot documental atual de `main`; ele não deve ser ch
 | Service Worker | sintaxe e contratos aprovados | não prova quota/cobertura offline física |
 | Auditoria de produção | 0 vulnerabilidades reportadas no último gate | não é auditoria completa de segurança operacional |
 | Privacidade | dados locais por padrão, sem telemetria/sincronização automática | revisão física e operacional pendente |
-| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual e cleanup de callbacks do mapa | GPS não transmite; Socorro não confirma entrega/resgate |
+| Escopo civil | GPS, mapa, trilha, MGRS, preparação, compartilhamento manual, cleanup do mapa e cleanup do update PWA | GPS não transmite; Socorro não confirma entrega/resgate |
 | Legado | wiki/ambiente virtual de Arma 3 isolado, somente videogame/testes | não adaptar para ambientes ou operações reais |
 
 ## Artifacts conhecidos
@@ -67,7 +67,7 @@ release pública autorizada
 
 Ainda faltam instalação e validação em Android comum, Android recente, Xiaomi/MIUI/HyperOS, iPhone e iPad; teste de GPS externo/interno e T-005A; lifecycle e tela bloqueada; modo avião e quota de Cache Storage; bússola; Files/Share Sheet; bateria de quatro dias; configuração de signing Android; macOS/Xcode, Apple signing e IPA; inspeção de AAB assinado; atualização posterior em aparelho; e autorização de distribuição.
 
-A precisão do GPS continua dependente do sistema, do receptor, do ambiente e do provedor. O botão Centralizar agora pede um fixo manual sem reutilizar posição em cache, mas não garante precisão dentro de prédio. As rotas de peregrinação continuam referências informativas; sem GPX/KML oficial ou autorizado, não há navegação de rota oficial.
+A precisão do GPS continua dependente do sistema, do receptor, do ambiente e do provedor. O botão Centralizar agora pede um fixo manual sem reutilizar posição em cache, mas não garante precisão dentro de prédio. O controle PWA cancela o timer inicial no cleanup, mas o update posterior ainda não foi validado em aparelho. As rotas de peregrinação continuam referências informativas; sem GPX/KML oficial ou autorizado, não há navegação de rota oficial.
 
 ## Gates antes de criar uma candidate real
 
@@ -75,7 +75,8 @@ Uma candidate V2 só poderá ser criada depois de confirmar o commit-alvo, a ver
 
 ## Documentos relacionados
 
-- `docs/adr/ADR-0028-cleanup-centralizacao-manual.md` — decisão e limites do cleanup assíncrono.
+- `docs/adr/ADR-0028-cleanup-centralizacao-manual.md` — decisão e limites do cleanup assíncrono do mapa.
+- `docs/adr/ADR-0029-cleanup-atualizacao-pwa.md` — decisão e limites do cleanup do update PWA.
 - `MOBILE_V2_RELEASE_STATUS.md` — estado operacional dos gates.
 - `MOBILE_V2_BUILD_MATRIX.md` — build e artifacts.
 - `MOBILE_V2_DEVICE_MATRIX.md` — aparelhos e casos físicos.

@@ -162,3 +162,26 @@ A validação desta unidade inclui `npm test` com 173 aprovados, build aprovado,
 - **Blockers:** lifecycle/tela bloqueada, Wake Lock real, GPS interno/externo, modo avião/quota, Files/Share Sheet, bateria de quatro dias, signing Android, macOS/Xcode/iOS, AAB assinado e distribuição continuam pendentes.
 - **Next Task:** aguardar CI e, com aparelho disponível, executar T-005A/T-007; sem aparelho, escolher somente outro gargalo seguro e verificável.
 - **Status:** IN PROGRESS / BLOCKED nos gates físicos e de distribuição.
+
+## 2026-08-28 — cleanup do timer de atualização PWA
+
+- **Execution:** continuação do prompt Omega após o cleanup da centralização manual.
+- **Date:** 2026-08-28.
+- **Estado inicial:** `main` limpa e alinhada com `origin/main` em `8bb89dc`; CI `33129436543` anterior concluído com sucesso.
+- **Phase:** Mobile foundation + lifecycle observability.
+- **Milestone:** impedir que a verificação remota inicial do update sobreviva ao cleanup do controle global da shell.
+- **Objective:** guardar e cancelar o timer de 2,5 segundos e descartar respostas remotas depois da desmontagem.
+- **Implemented:** `src/core/atualizacao-ui.js` passou a manter `timerVerificacao`, cancelá-lo em `desmontar()` e limpar o estado quando o callback é executado; a resposta de `fetch()`/`json()` é ignorada se o controle já foi removido.
+- **Fixed:** o controle não deixa o timer inicial pendente após desmontagem; a confirmação explícita do Service Worker, a allowlist HTTPS, o comportamento offline e a abertura oficial de download foram preservados.
+- **Tests:** `test/atualizacao-ui.test.js` recebeu timers fake e verificou o atraso de 2,5 segundos, cancelamento, listeners e fluxo waiting/negação/confirmação. `npm test`: 176 aprovados e 0 falhas.
+- **Build gates:** `npm run build`, `node --check public/sw.js`, `git diff --check` e `npm audit --omit=dev --audit-level=high` aprovados; auditoria reportou 0 vulnerabilidades.
+- **Android:** `npm run mobile:android:debug` aprovado com `BUILD SUCCESSFUL`; APK permanece artifact debug/teste e não release.
+- **iOS:** nenhum build Xcode, archive, signing ou IPA; ambiente Linux permanece `ENVIRONMENT BLOCKED`.
+- **PWA:** build e CI `33129751294` concluídos com sucesso; instalação, modo avião, quota, reabertura e update posterior continuam sem validação física.
+- **Artifacts:** somente APK debug local regenerado; nenhum APK release assinado, AAB distribuível ou IPA.
+- **Security/privacy:** sem permissões novas, sem background GPS, sem telemetria, sem transmissão automática, sem instalação silenciosa e sem alteração do legado Arma 3 restrito a videogame/testes.
+- **Documentation:** `docs/adr/ADR-0029-cleanup-atualizacao-pwa.md`, `MOBILE_V2_RELEASE_CANDIDATE.md`, `MOBILE_V2_RELEASE_STATUS.md`, `MOBILE_V2_STATUS.md`, `V2_STATUS.md`, `MOBILE_V2_PROGRESS.md` e este log alinhados.
+- **Commit:** `11767e6 fix(v2): limpar timer da atualizacao pwa`; push para `origin/main` concluído; CI `33129751294` concluído com sucesso.
+- **Blockers:** instalação PWA, modo avião/quota, reabertura, update posterior em aparelho, lifecycle, Android/Xiaomi/iPhone físicos, bateria, signing Android, macOS/Xcode/iOS, AAB/IPA e distribuição continuam pendentes.
+- **Next Task:** executar T-005A/T-007/T-017 quando houver aparelhos; sem hardware, escolher apenas outro gargalo seguro e verificável.
+- **Status:** IN PROGRESS / BLOCKED nos gates físicos e de distribuição.
