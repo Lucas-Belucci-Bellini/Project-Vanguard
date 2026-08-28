@@ -8,6 +8,7 @@
 import { h, empty } from './ui/helpers.js';
 import { estado, CHAVES } from './core/estado.js';
 import { criarControleAtualizacao } from './core/atualizacao-ui.js';
+import { recuperarDatasetNoBoot } from './core/dataset-boot-recovery.js';
 
 const ROTAS = [
   { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
@@ -134,9 +135,19 @@ async function navegar({ abas, main }) {
   }
 }
 
-function boot() {
+async function boot() {
   const shell = montarShell();
   if (!location.hash) location.hash = PADRAO;
+
+  const recovery = await recuperarDatasetNoBoot();
+  if (!recovery.ok) {
+    console.error('[Vanguard] Falha na recuperação do dataset durante o boot.', recovery);
+    shell.status.setAttribute('data-dataset-recovery', 'error');
+    shell.status.title = 'A recuperação do dataset offline falhou; consulte o diagnóstico antes de iniciar uma nova atualização.';
+  } else {
+    shell.status.setAttribute('data-dataset-recovery', recovery.estado ?? 'ok');
+  }
+
   addEventListener('hashchange', () => navegar(shell));
   navegar(shell);
 }
