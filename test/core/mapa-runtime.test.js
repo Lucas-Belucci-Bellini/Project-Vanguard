@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { criarMapaRuntime } from '../../src/core/mapa-runtime.js';
 
 const fakeProvider = {
@@ -14,20 +15,20 @@ describe('MapaRuntime', () => {
     const runtime = criarMapaRuntime({ adaptador: fakeProvider, baseId: 'terreno', overlays: ['labels'] });
     const mapa = runtime.montar({ container: 'mapa', center: [-43.2, -22.9], zoom: 10 });
 
-    expect(mapa).toBeTruthy();
-    expect(runtime.providerAtual().id).toBe('terreno');
-    expect(runtime.providers().length).toBeGreaterThan(0);
-    expect(fakeProvider.opcoes.style.version).toBe(8);
-    expect(fakeProvider.opcoes.style.sources.terreno.tiles).toContain('opentopomap.org');
-    expect(fakeProvider.opcoes.style.layers.find((layer) => layer.id === 'base-terreno').layout.visibility).toBe('visible');
+    assert.ok(mapa);
+    assert.equal(runtime.providerAtual().id, 'terreno');
+    assert.ok(runtime.providers().length > 0);
+    assert.equal(fakeProvider.opcoes.style.version, 8);
+    assert.ok(fakeProvider.opcoes.style.sources.terreno.tiles.some((tile) => tile.includes('opentopomap.org')));
+    assert.equal(fakeProvider.opcoes.style.layers.find((layer) => layer.id === 'base-terreno').layout.visibility, 'visible');
   });
 
   it('usa a primeira camada quando a base solicitada não existe', () => {
     const runtime = criarMapaRuntime({ adaptador: fakeProvider, baseId: 'inexistente' });
-    expect(runtime.providerAtual().id).toBe('carto-voyager');
+    assert.equal(runtime.providerAtual().id, 'carto-voyager');
   });
 
   it('exige um adapter', () => {
-    expect(() => criarMapaRuntime()).toThrow(/adaptador é obrigatório/);
+    assert.throws(() => criarMapaRuntime(), /adaptador é obrigatório/);
   });
 });
