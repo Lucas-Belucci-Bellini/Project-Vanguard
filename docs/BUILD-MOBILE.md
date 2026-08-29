@@ -7,7 +7,7 @@ A base web do Vanguard foi empacotada com Capacitor e os projetos nativos foram 
 | Artefato | Estado |
 |---|---|
 | PWA/web | Build de produção concluído. |
-| Android debug | APK gerado e validado em `android/app/build/outputs/apk/debug/app-debug.apk` após as mudanças de mapas/offline; última recompilação concluída em 2026-08-27. |
+| Android debug | APK gerado em `android/app/build/outputs/apk/debug/app-debug.apk`. Última build: CI `mobile-release.yml` ([run 33271532181](https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/actions/runs/33271532181)) em 2026-08-29, commit `8492121`, artifact `vanguard-android-debug-apk` (5,4 MB). A build compila e empacota; **instalação e uso em aparelho físico não foram verificados nesta build**. |
 | Android release | Ainda requer assinatura própria, keystore e configuração de publicação. |
 | iPhone/iOS | Projeto Xcode gerado em `ios/`; a compilação final exige macOS, Xcode, CocoaPods quando necessário, conta Apple e assinatura. |
 
