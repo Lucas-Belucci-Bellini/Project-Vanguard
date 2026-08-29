@@ -7,7 +7,14 @@ import {
 } from '../src/data/camadas-mapa.js';
 
 test('as bases cartográficas usam fontes HTTPS públicas e sem CARTO/API key', () => {
-  assert.deepEqual(CAMADAS_BASE.map((camada) => camada.id), ['sat', 'terreno', 'dark', 'imagery']);
+  assert.deepEqual(CAMADAS_BASE.map((camada) => camada.id), ['carto-voyager', 'sat', 'terreno', 'dark', 'imagery']);
+  // A base CARTO só é renderizável quando uma chave é fornecida em build/runtime.
+  // Sem chave ela permanece indisponível, e nenhuma base exigida pelo app depende de chave.
+  const carto = CAMADAS_BASE.find((camada) => camada.id === 'carto-voyager');
+  assert.equal(carto.disponivel, false);
+  for (const camada of CAMADAS_BASE.filter((base) => base.disponivel !== false)) {
+    assert.notEqual(camada.id, 'carto-voyager');
+  }
   for (const camada of CAMADAS_BASE) {
     assert.ok(camada.tiles.length > 0);
     for (const tile of camada.tiles) {
