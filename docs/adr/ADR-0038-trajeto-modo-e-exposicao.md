@@ -69,6 +69,19 @@ A vibração acontece em `ALTO` e `CRITICO`, no máximo uma vez a cada quinze
 minutos. `navigator.vibrate` funciona no Android e é ignorado pelo iOS; o aviso
 em texto é o canal que funciona nos dois.
 
+### Vibração: um ritmo por tipo de aviso
+
+Se todo aviso vibrar igual, a pessoa tira o aparelho do bolso para descobrir o
+que era — justamente o que o aviso tátil deveria evitar. `alertas-tateis.js`
+dá a cada tipo um ritmo próprio e reserva a gravidade para a repetição, de modo
+que o tipo continue reconhecível quando aperta. O intervalo entre avisos é por
+tipo: sol não cala tempestade.
+
+Chuva, tempestade e frio já têm ritmo e **não têm gatilho**: não existe sensor
+de chuva no celular, e o barômetro, quando o aparelho tem, não é exposto ao
+aplicativo. Eles ficam marcados com `gatilhoDisponivel: false` até existir uma
+fonte com origem e horário, para a tela nunca prometer um aviso que não chega.
+
 ## Limites
 
 O alerta é um lembrete calculado, **não** um diagnóstico. Ele não mede
