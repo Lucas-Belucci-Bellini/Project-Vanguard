@@ -52,3 +52,16 @@ describe('map-engine', () => {
     await assert.rejects(criarMotorMapa({ providerId: 'terreno' }), /carregarMapLibre é obrigatório/);
   });
 });
+
+describe('map-engine · superfície do motor', () => {
+  it('expõe o MapLibre carregado para a página montar controles', async () => {
+    const lib = mapLibreFake();
+    const motor = await criarMotorMapa({ providerId: 'terreno', carregarMapLibre: async () => lib });
+    assert.equal(motor.MapLibre, lib);
+  });
+
+  it('não deixa a página trocar o motor depois de composto', async () => {
+    const motor = await criarMotorMapa({ providerId: 'terreno', carregarMapLibre: async () => mapLibreFake() });
+    assert.throws(() => { 'use strict'; motor.MapLibre = {}; }, TypeError);
+  });
+});
