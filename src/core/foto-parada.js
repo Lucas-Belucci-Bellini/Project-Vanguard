@@ -20,7 +20,7 @@
  */
 
 import { latLonParaMGRS } from '../engine/mgrs.js';
-import { numeroFinito, coordenadaValida } from './numero-seguro.js';
+import { numeroFinito, coordenadaValida } from '../engine/numero-seguro.js';
 
 export const ESQUEMA_FOTO_PARADA = 'vanguard-foto-parada';
 export const VERSAO_FOTO_PARADA = 1;

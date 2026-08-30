@@ -16,7 +16,7 @@
  */
 
 import { duracaoLabel } from './trilha.js';
-import { coordenadaValida } from './numero-seguro.js';
+import { coordenadaValida } from '../engine/numero-seguro.js';
 
 export const ESQUEMA_TRAJETO = 'vanguard-trajeto';
 export const VERSAO_TRAJETO = 1;

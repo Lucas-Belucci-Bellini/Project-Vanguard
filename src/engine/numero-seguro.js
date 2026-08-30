@@ -6,9 +6,10 @@
  * tipagem: um `lon: null` aceito como 0 coloca a pessoa no golfo da Guiné, a
  * milhares de quilômetros de onde ela está, sem nenhum erro aparecer.
  *
- * Este módulo existe porque a armadilha já apareceu em três lugares diferentes
- * — registro importado, foto de parada e trajeto. Uma única porta de entrada
- * evita que a próxima cópia esqueça a guarda.
+ * Este módulo existe porque a armadilha já apareceu em quatro lugares — registro
+ * importado, foto de parada, trajeto e posição solar. Mora no motor por ser
+ * lógica pura e sem dependência, de onde o motor e o núcleo podem usá-la sem
+ * que exista uma segunda cópia para esquecer a guarda.
  */
 
 /** Só número e string numérica viram número; o resto vira `null`. */

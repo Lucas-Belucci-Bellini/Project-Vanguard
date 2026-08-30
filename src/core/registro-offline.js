@@ -5,7 +5,7 @@
  * contém HTML e não tenta sincronizar dados com qualquer servidor.
  */
 
-import { numeroFinito, numeroNoIntervalo } from './numero-seguro.js';
+import { numeroFinito, numeroNoIntervalo } from '../engine/numero-seguro.js';
 
 export const REGISTRO_SCHEMA = 'vanguard-registro-local';
 export const REGISTRO_VERSION = 1;

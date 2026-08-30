@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { coordenadaValida, numeroFinito, numeroNoIntervalo } from '../src/core/numero-seguro.js';
+import { coordenadaValida, numeroFinito, numeroNoIntervalo } from '../src/engine/numero-seguro.js';
 
 test('os valores que o JavaScript converte para 0 viram null', () => {
   for (const valor of [null, undefined, '', '   ', false, true, [], [5], {}, NaN, Infinity, -Infinity]) {

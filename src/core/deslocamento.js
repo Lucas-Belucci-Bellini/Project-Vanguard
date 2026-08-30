@@ -17,7 +17,7 @@
  */
 
 import { haversine } from '../engine/geo.js';
-import { coordenadaValida, numeroFinito } from './numero-seguro.js';
+import { coordenadaValida, numeroFinito } from '../engine/numero-seguro.js';
 
 export const MODOS_DESLOCAMENTO = Object.freeze({
   A_PE: 'A_PE',

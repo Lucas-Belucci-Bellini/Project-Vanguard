@@ -10,8 +10,11 @@
  * pacote npm: o lugar é `src/ui/`, não aqui.
  */
 
+export * from './numero-seguro.js';
 export * from './angles.js';
 export * from './geo.js';
+/* Posição do Sol: geometria pura, para avaliar exposição solar sem rede. */
+export * from './sol.js';
 export * from './mgrs.js';
 export * from './gridref.js';
 /* Grade REAL dos terrenos do Arma 3 (offset e SINAL do passo por mundo).
