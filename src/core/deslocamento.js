@@ -44,10 +44,17 @@ export const LIMITES_DESLOCAMENTO = Object.freeze({
 
 const MS_POR_HORA = 3_600_000;
 
+function modoConfirmado(ponto) {
+  const modo = ponto?.modo;
+  return modo === MODOS_DESLOCAMENTO.A_PE || modo === MODOS_DESLOCAMENTO.VEICULO ? modo : null;
+}
+
 function pontoUtil(ponto) {
   const coordenada = coordenadaValida(ponto);
   const instante = numeroFinito(ponto?.createdAt ?? ponto?.timestamp);
-  return coordenada && instante != null && instante >= 0 ? { ...coordenada, instante } : null;
+  return coordenada && instante != null && instante >= 0
+    ? { ...coordenada, instante, confirmado: modoConfirmado(ponto) }
+    : null;
 }
 
 function classificarVelocidade(kmh) {
@@ -79,7 +86,9 @@ function trechosEntrePontos(pontos) {
       trechos.push({ inicio: anterior.instante, fim: atual.instante, distanciaM: 0, duracaoMs, kmh: null, descartado: true });
       continue;
     }
-    trechos.push({ inicio: anterior.instante, fim: atual.instante, distanciaM, duracaoMs, kmh, descartado: false });
+    // Quem estava lá sabe mais do que a velocidade sugere: a confirmação da
+    // pessoa vale para o trecho que ela cobre.
+    trechos.push({ inicio: anterior.instante, fim: atual.instante, distanciaM, duracaoMs, kmh, descartado: false, confirmado: atual.confirmado ?? anterior.confirmado ?? null });
   }
   return trechos;
 }
@@ -87,9 +96,9 @@ function trechosEntrePontos(pontos) {
 function agrupar(trechos) {
   const segmentos = [];
   for (const trecho of trechos) {
-    const modo = trecho.descartado ? MODOS_DESLOCAMENTO.INDEFINIDO : classificarVelocidade(trecho.kmh);
+    const modo = trecho.confirmado ?? (trecho.descartado ? MODOS_DESLOCAMENTO.INDEFINIDO : classificarVelocidade(trecho.kmh));
     const ultimo = segmentos[segmentos.length - 1];
-    if (ultimo && ultimo.modo === modo) {
+    if (ultimo && ultimo.modo === modo && ultimo.confirmado === Boolean(trecho.confirmado)) {
       ultimo.fim = trecho.fim;
       ultimo.distanciaM += trecho.distanciaM;
       ultimo.duracaoMs += trecho.duracaoMs;
@@ -98,6 +107,7 @@ function agrupar(trechos) {
     }
     segmentos.push({
       modo,
+      confirmado: Boolean(trecho.confirmado),
       inicio: trecho.inicio,
       fim: trecho.fim,
       distanciaM: trecho.distanciaM,
@@ -111,7 +121,7 @@ function agrupar(trechos) {
 /** Veículo curto demais volta a ser indefinido: evidência fraca não vira afirmação. */
 function rebaixarPicos(segmentos) {
   return segmentos.map((segmento) => (
-    segmento.modo === MODOS_DESLOCAMENTO.VEICULO && segmento.duracaoMs < LIMITES_DESLOCAMENTO.janelaMinimaMs
+    segmento.modo === MODOS_DESLOCAMENTO.VEICULO && !segmento.confirmado && segmento.duracaoMs < LIMITES_DESLOCAMENTO.janelaMinimaMs
       ? { ...segmento, modo: MODOS_DESLOCAMENTO.INDEFINIDO, rebaixado: true }
       : segmento
   ));

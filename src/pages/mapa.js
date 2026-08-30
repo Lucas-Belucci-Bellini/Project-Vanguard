@@ -19,6 +19,9 @@ import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compa
 import { criarMotorMapa } from '../core/map-engine.js';
 import { criarRegistroFotoParada, avaliarPosicaoParada, fotosParadaComoWaypoints, PRECISAO_PARADA_PADRAO_M } from '../core/foto-parada.js';
 import { criarStorageFotos } from '../core/foto-storage.js';
+import { iniciarTrajeto, encerrarTrajeto, iniciarParada, encerrarParada, resumoTrajeto, paradaAberta, TIPOS_PARADA } from '../core/trajeto.js';
+import { classificarDeslocamento, sugerirModoAtual, MODOS_DESLOCAMENTO, CONFIANCA } from '../core/deslocamento.js';
+import { avaliarExposicao, NIVEIS_EXPOSICAO } from '../core/exposicao.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const ROTULOS = CAMADAS_OVERLAY.find((camada) => camada.id === 'labels') ?? null;
@@ -132,6 +135,13 @@ export function mapaPage() {
   const fotoArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'image/*', capture: 'environment', 'aria-label': 'Foto da parada atual' });
   const fotoStatus = h('p', { className: 'mapa__foto-status', role: 'status' }, `A foto é guardada com a coordenada da captura; a parada pede precisão de ${PRECISAO_PARADA_PADRAO_M} m ou melhor.`);
   const fotoLista = h('ul', { className: 'mapa__foto-lista' });
+  const trajetoBotao = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR TRAJETO');
+  const paradaBotao = h('button', { className: 'mapa__quick-button', type: 'button' }, 'REGISTRAR PARADA');
+  const pernoiteBotao = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'PERNOITE');
+  const trajetoResumo = h('div', { className: 'mapa__trajeto-resumo', role: 'status' }, 'Nenhum trajeto iniciado.');
+  const deslocamentoResumo = h('p', { className: 'mapa__trajeto-modos' }, '');
+  const veiculoPergunta = h('div', { className: 'mapa__veiculo-pergunta' });
+  const exposicaoAviso = h('p', { className: 'mapa__exposicao', role: 'status' }, '');
   const selectBase = h('select', { className: 'mapa__select', 'aria-label': 'Base cartográfica' },
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
   );
@@ -190,6 +200,15 @@ export function mapaPage() {
       registroArquivo,
       registroStatus
     ),
+    h('div', { className: 'mapa__trajeto-card' },
+      h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'TRAJETO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
+      trajetoResumo,
+      deslocamentoResumo,
+      trajetoBotao,
+      h('div', { className: 'mapa__trajeto-acoes' }, paradaBotao, pernoiteBotao),
+      veiculoPergunta,
+      exposicaoAviso
+    ),
     h('div', { className: 'mapa__foto-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'PARADAS COM FOTO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
       fotoButton,
@@ -237,6 +256,11 @@ export function mapaPage() {
   let motorMapa = null;
   const storageFotos = criarStorageFotos();
   let paradas = [];
+  let trajeto = estado.get(CHAVES.TRAJETO, null);
+  let modoConfirmado = null;
+  let sugestaoRecusada = null;
+  let ultimoAvisoExposicaoEm = null;
+  let tickTrajeto = null;
   let posicao = estado.get(CHAVES.LOCAL, null);
   let trilha = estado.get(CHAVES.TRILHA, []);
   let waypoints = estado.get(CHAVES.WAYPOINTS, []);
@@ -259,13 +283,18 @@ export function mapaPage() {
     const anterior = posicao;
     posicao = nova;
     if (rotaAtiva && !rotaPausada && (!anterior || haversine(anterior, nova) >= 5)) {
-      trilha = [...trilha, nova].slice(-4000);
+      // O modo confirmado pela pessoa viaja com o ponto: é o que separa
+      // quilômetro andado de quilômetro de ônibus no registro.
+      trilha = [...trilha, modoConfirmado ? { ...nova, modo: modoConfirmado } : nova].slice(-4000);
       estado.set(CHAVES.TRILHA, trilha);
     }
     if (!document.hidden) {
       atualizarHud();
       atualizarSheet();
       atualizarMarcadores();
+      atualizarTrajeto();
+      perguntarSobreVeiculo();
+      avaliarExposicaoAtual();
       if (mapa && primeiraPosicao) {
         primeiraPosicao = false;
         mapa.flyTo({ center: [nova.lon, nova.lat], zoom: 15, duration: 700 });
@@ -616,6 +645,120 @@ export function mapaPage() {
     }
   }
 
+  function textoModos() {
+    const analise = classificarDeslocamento(trilha);
+    if (!analise.segmentos.length) return '';
+    const km = (metros) => `${(metros / 1000).toFixed(1)} km`;
+    const partes = [`${km(analise.distanciaAPeM)} a pé`];
+    if (analise.distanciaVeiculoM > 0) partes.push(`${km(analise.distanciaVeiculoM)} em veículo`);
+    if (analise.distanciaIndefinidaM > 0) partes.push(`${km(analise.distanciaIndefinidaM)} sem classificar`);
+    return `${partes.join(' · ')} — estimado pela velocidade; confirme o que for veículo.`;
+  }
+
+  function atualizarTrajeto() {
+    const resumo = resumoTrajeto(trajeto);
+    trajetoBotao.textContent = resumo.ativo ? 'ENCERRAR TRAJETO' : 'INICIAR TRAJETO';
+    paradaBotao.disabled = !resumo.ativo;
+    pernoiteBotao.disabled = !resumo.ativo || resumo.emParada;
+    paradaBotao.textContent = resumo.emParada ? 'RETOMAR CAMINHADA' : 'REGISTRAR PARADA';
+
+    if (!trajeto) {
+      trajetoResumo.textContent = 'Nenhum trajeto iniciado.';
+      deslocamentoResumo.textContent = '';
+      return;
+    }
+    const inicio = new Date(resumo.iniciadoEm).toLocaleString();
+    const fim = resumo.encerradoEm ? new Date(resumo.encerradoEm).toLocaleString() : null;
+    empty(trajetoResumo).append(
+      h('div', { className: 'mapa__trajeto-linha' }, `TOTAL ${resumo.duracaoTotalLabel}`),
+      h('div', { className: 'mapa__trajeto-linha' }, `EM MARCHA ${resumo.tempoEmMarchaLabel} · DESCANSO ${resumo.tempoDescansandoLabel}`),
+      h('div', { className: 'mapa__trajeto-meta' }, `INÍCIO ${inicio}${fim ? ` · FIM ${fim}` : ''}`),
+      h('div', { className: 'mapa__trajeto-meta' }, `${resumo.paradas} parada(s) · ${resumo.pernoites} pernoite(s)${resumo.emParada ? ` · EM ${resumo.tipoParadaAtual}` : ''}`),
+    );
+    deslocamentoResumo.textContent = textoModos();
+  }
+
+  function aplicarTrajeto(resultado) {
+    if (!resultado.ok) {
+      trajetoResumo.textContent = resultado.motivo;
+      return false;
+    }
+    trajeto = resultado.trajeto;
+    estado.set(CHAVES.TRAJETO, trajeto);
+    atualizarTrajeto();
+    return true;
+  }
+
+  function alternarTrajeto() {
+    if (resumoTrajeto(trajeto).ativo) {
+      if (!window.confirm('Encerrar o trajeto e congelar o tempo total?')) return;
+      aplicarTrajeto(encerrarTrajeto(trajeto));
+      return;
+    }
+    aplicarTrajeto(iniciarTrajeto({ agora: Date.now() }));
+  }
+
+  function alternarParada(tipo = TIPOS_PARADA.DESCANSO) {
+    if (!trajeto) return;
+    if (paradaAberta(trajeto)) {
+      aplicarTrajeto(encerrarParada(trajeto));
+      return;
+    }
+    aplicarTrajeto(iniciarParada(trajeto, { tipo, posicao }));
+  }
+
+  function instanteUltimaParada() {
+    const paradasDoTrajeto = trajeto?.paradas ?? [];
+    const ultima = paradasDoTrajeto[paradasDoTrajeto.length - 1];
+    const referencia = ultima?.encerradaEm ?? ultima?.iniciadaEm ?? trajeto?.iniciadoEm ?? null;
+    const valor = referencia ? Date.parse(referencia) : NaN;
+    return Number.isFinite(valor) ? valor : null;
+  }
+
+  function marcarModo(modo) {
+    modoConfirmado = modo;
+    sugestaoRecusada = modo == null ? Date.now() : null;
+    empty(veiculoPergunta);
+    atualizarTrajeto();
+  }
+
+  function perguntarSobreVeiculo() {
+    if (!resumoTrajeto(trajeto).ativo || modoConfirmado === MODOS_DESLOCAMENTO.VEICULO) return;
+    if (sugestaoRecusada && Date.now() - sugestaoRecusada < 10 * 60_000) return;
+    const sugestao = sugerirModoAtual(trilha, { agora: Date.now() });
+    if (sugestao.modo !== MODOS_DESLOCAMENTO.VEICULO || sugestao.confianca === CONFIANCA.BAIXA) {
+      if (veiculoPergunta.childElementCount) empty(veiculoPergunta);
+      return;
+    }
+    if (veiculoPergunta.childElementCount) return;
+    veiculoPergunta.append(
+      h('p', { className: 'mapa__veiculo-texto' }, `${sugestao.motivo} Você está em veículo?`),
+      h('div', { className: 'mapa__trajeto-acoes' },
+        h('button', { className: 'mapa__quick-button', type: 'button', onclick: () => marcarModo(MODOS_DESLOCAMENTO.VEICULO) }, 'SIM, EM VEÍCULO'),
+        h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button', onclick: () => marcarModo(null) }, 'NÃO, A PÉ'),
+      ),
+    );
+  }
+
+  function avaliarExposicaoAtual() {
+    const avaliacao = avaliarExposicao({
+      posicao,
+      agora: Date.now(),
+      ultimaParadaEm: instanteUltimaParada(),
+      ultimoAvisoEm: ultimoAvisoExposicaoEm,
+    });
+    exposicaoAviso.classList.toggle('is-alerta', avaliacao.nivel === NIVEIS_EXPOSICAO.ALTO || avaliacao.nivel === NIVEIS_EXPOSICAO.CRITICO);
+    exposicaoAviso.textContent = avaliacao.nivel === NIVEIS_EXPOSICAO.NORMAL && !resumoTrajeto(trajeto).ativo
+      ? ''
+      : `${avaliacao.nivel} · ${avaliacao.motivos.join(' ')} ${avaliacao.recomendacao}`;
+    if (avaliacao.vibrar && resumoTrajeto(trajeto).ativo) {
+      ultimoAvisoExposicaoEm = Date.now();
+      // `vibrate` existe no Android; no iOS o navegador ignora, e o aviso em
+      // texto continua sendo o canal que funciona nos dois.
+      try { navigator.vibrate?.(avaliacao.padraoVibracao); } catch { /* sem vibração é só menos um canal */ }
+    }
+  }
+
   const MIME_POR_EXTENSAO = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif' };
 
   function mimeDaFoto(arquivo) {
@@ -784,6 +927,9 @@ export function mapaPage() {
   registroKmlButton.onclick = exportarRegistroKmlLocal;
   registroImportarButton.onclick = () => registroArquivo.click();
   registroArquivo.onchange = () => importarRegistro(registroArquivo.files?.[0]);
+  trajetoBotao.onclick = alternarTrajeto;
+  paradaBotao.onclick = () => alternarParada(TIPOS_PARADA.DESCANSO);
+  pernoiteBotao.onclick = () => alternarParada(TIPOS_PARADA.PERNOITE);
   fotoButton.onclick = abrirCameraDaParada;
   fotoArquivo.onchange = () => registrarFotoDaParada(fotoArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;
@@ -1064,6 +1210,14 @@ export function mapaPage() {
   atualizarHud();
   atualizarDestino();
   atualizarSheet();
+  atualizarTrajeto();
   carregarParadas();
-  return { elemento: raiz, desmontar: () => { desmontado = true; controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
+  // O cronômetro mostra segundos na primeira hora; um tique por segundo só
+  // enquanto há trajeto aberto e a tela está visível.
+  tickTrajeto = window.setInterval(() => {
+    if (document.hidden || !resumoTrajeto(trajeto).ativo) return;
+    atualizarTrajeto();
+    avaliarExposicaoAtual();
+  }, 1000);
+  return { elemento: raiz, desmontar: () => { desmontado = true; window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
 }

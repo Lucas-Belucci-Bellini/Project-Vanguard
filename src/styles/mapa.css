@@ -50,6 +50,16 @@
 .mapa__registro-actions .mapa__quick-button { min-height: 32px; padding-inline: 3px; font-size: 7px; letter-spacing: .01em; }
 .mapa__registro-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .mapa__registro-status { min-height: 15px; margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
+.mapa__trajeto-card { margin-top: 9px; padding: 10px; background: var(--color-surface); border: var(--border-base); }
+.mapa__trajeto-resumo { margin-top: 8px; color: var(--color-text-secondary); font-size: 9px; line-height: 1.5; }
+.mapa__trajeto-linha { color: var(--color-cyan); font-size: 11px; font-weight: var(--font-weight-bold); letter-spacing: .04em; }
+.mapa__trajeto-meta { color: var(--color-text-muted); font-size: 8px; }
+.mapa__trajeto-modos { margin: 6px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
+.mapa__trajeto-acoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 7px; }
+.mapa__veiculo-pergunta:not(:empty) { margin-top: 9px; padding: 9px; background: rgba(255,176,0,.08); border: 1px solid rgba(255,176,0,.38); }
+.mapa__veiculo-texto { margin: 0; color: var(--color-amber); font-size: 8px; line-height: 1.45; }
+.mapa__exposicao { margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
+.mapa__exposicao.is-alerta { color: var(--color-amber); }
 .mapa__foto-card { margin-top: 9px; padding: 10px; background: var(--color-surface); border: var(--border-base); }
 .mapa__foto-button { width: 100%; min-height: 34px; margin-top: 8px; padding: 7px; color: var(--color-cyan); background: transparent; border-color: var(--color-cyan-edge); font-size: 9px; font-weight: var(--font-weight-bold); }
 .mapa__foto-status { min-height: 15px; margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }

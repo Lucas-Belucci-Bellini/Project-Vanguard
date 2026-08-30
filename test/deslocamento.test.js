@@ -147,3 +147,24 @@ test('a classificação não altera a lista recebida', () => {
   classificarDeslocamento(pontos);
   assert.deepEqual(pontos, copia);
 });
+
+test('confirmação da pessoa vence a inferência por velocidade', () => {
+  // Ônibus parado no trânsito parece pedestre; quem estava lá sabe que é ônibus.
+  const pontos = trilha({ kmh: 4, minutos: 10 }).map((ponto) => ({ ...ponto, modo: MODOS_DESLOCAMENTO.VEICULO }));
+  const analise = classificarDeslocamento(pontos);
+  assert.equal(analise.segmentos[0].modo, MODOS_DESLOCAMENTO.VEICULO);
+  assert.equal(analise.segmentos[0].confirmado, true);
+  assert.equal(analise.distanciaAPeM, 0);
+});
+
+test('trecho confirmado curto não é rebaixado como pico', () => {
+  const pontos = trilha({ kmh: 50, minutos: 0.5 }).map((ponto) => ({ ...ponto, modo: MODOS_DESLOCAMENTO.VEICULO }));
+  assert.equal(classificarDeslocamento(pontos).segmentos[0].modo, MODOS_DESLOCAMENTO.VEICULO);
+});
+
+test('modo desconhecido no ponto não confirma nada', () => {
+  const pontos = trilha({ kmh: 5, minutos: 10 }).map((ponto) => ({ ...ponto, modo: 'HELICOPTERO' }));
+  const analise = classificarDeslocamento(pontos);
+  assert.equal(analise.segmentos[0].modo, MODOS_DESLOCAMENTO.A_PE);
+  assert.equal(analise.segmentos[0].confirmado, false);
+});

@@ -170,6 +170,7 @@ export const CHAVES = {
   WAYPOINTS: 'waypoints',
   TRILHA: 'trilha',
   ROTA_ATIVA: 'rotaAtiva',
+  TRAJETO: 'trajeto',
   ROTA_PAUSADA: 'rotaPausada',
   DESTINO: 'destino',
   MODO_USO: 'modoUso',
