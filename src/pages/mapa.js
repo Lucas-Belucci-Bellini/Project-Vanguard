@@ -17,6 +17,8 @@ import { exportarRegistroLocal, exportarRegistroGpx, exportarRegistroKml, import
 import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arquivo.js';
 import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 import { criarMotorMapa } from '../core/map-engine.js';
+import { criarRegistroFotoParada, avaliarPosicaoParada, fotosParadaComoWaypoints, PRECISAO_PARADA_PADRAO_M } from '../core/foto-parada.js';
+import { criarStorageFotos } from '../core/foto-storage.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const ROTULOS = CAMADAS_OVERLAY.find((camada) => camada.id === 'labels') ?? null;
@@ -126,6 +128,10 @@ export function mapaPage() {
   const registroImportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'IMPORTAR JSON/GPX/KML');
   const registroArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'application/json,.json,application/gpx+xml,.gpx,application/vnd.google-earth.kml+xml,.kml', 'aria-label': 'Importar registro local JSON, GPX ou KML' });
   const registroStatus = h('p', { className: 'mapa__registro-status', role: 'status' }, 'Backup local de rota, pontos e destino; sem sincronização.');
+  const fotoButton = h('button', { className: 'mapa__foto-button', type: 'button' }, '⏺ FOTO DA PARADA');
+  const fotoArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'image/*', capture: 'environment', 'aria-label': 'Foto da parada atual' });
+  const fotoStatus = h('p', { className: 'mapa__foto-status', role: 'status' }, `A foto é guardada com a coordenada da captura; a parada pede precisão de ${PRECISAO_PARADA_PADRAO_M} m ou melhor.`);
+  const fotoLista = h('ul', { className: 'mapa__foto-lista' });
   const selectBase = h('select', { className: 'mapa__select', 'aria-label': 'Base cartográfica' },
     ...CAMADAS_BASE.map((base) => h('option', { value: base.id }, base.nome.toUpperCase()))
   );
@@ -184,6 +190,13 @@ export function mapaPage() {
       registroArquivo,
       registroStatus
     ),
+    h('div', { className: 'mapa__foto-card' },
+      h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'PARADAS COM FOTO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
+      fotoButton,
+      fotoArquivo,
+      fotoStatus,
+      fotoLista
+    ),
     h('div', { className: 'mapa__destino-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DESTINO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
       destinoInput,
@@ -222,6 +235,8 @@ export function mapaPage() {
 
   let mapa = null;
   let motorMapa = null;
+  const storageFotos = criarStorageFotos();
+  let paradas = [];
   let posicao = estado.get(CHAVES.LOCAL, null);
   let trilha = estado.get(CHAVES.TRILHA, []);
   let waypoints = estado.get(CHAVES.WAYPOINTS, []);
@@ -424,6 +439,10 @@ export function mapaPage() {
     if (posicao) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [posicao.lon, posicao.lat] }, properties: { tipo: 'voce' } });
     for (const ponto of waypoints) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [ponto.lon, ponto.lat] }, properties: { tipo: 'ponto' } });
     if (destino) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [destino.lon, destino.lat] }, properties: { tipo: 'destino' } });
+    for (const parada of paradas) {
+      if (!Number.isFinite(Number(parada?.lat)) || !Number.isFinite(Number(parada?.lon))) continue;
+      features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [Number(parada.lon), Number(parada.lat)] }, properties: { tipo: 'parada' } });
+    }
     mapa.getSource('vanguard-marcadores').setData({ type: 'FeatureCollection', features });
     mapa.getSource('vanguard-trilha').setData({ type: 'FeatureCollection', features: trilha.length > 1 ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: trilha.map((p) => [p.lon, p.lat]) }, properties: {} }] : [] });
     mapa.getSource('vanguard-destino').setData({ type: 'FeatureCollection', features: posicao && destino ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: [[posicao.lon, posicao.lat], [destino.lon, destino.lat]] }, properties: {} }] : [] });
@@ -554,7 +573,7 @@ export function mapaPage() {
 
   async function exportarRegistro() {
     try {
-      const conteudo = exportarRegistroLocal({ trilha, waypoints, destino });
+      const conteudo = exportarRegistroLocal({ trilha, waypoints: [...waypoints, ...fotosParadaComoWaypoints(paradas)], destino });
       const resultado = await compartilharArquivo({
         blob: new Blob([conteudo], { type: 'application/json;charset=utf-8' }),
         fileName: `vanguard-registro-${new Date().toISOString().slice(0, 10)}.json`,
@@ -569,7 +588,7 @@ export function mapaPage() {
 
   async function exportarRegistroKmlLocal() {
     try {
-      const conteudo = exportarRegistroKml({ trilha, waypoints, destino });
+      const conteudo = exportarRegistroKml({ trilha, waypoints: [...waypoints, ...fotosParadaComoWaypoints(paradas)], destino });
       const resultado = await compartilharArquivo({
         blob: new Blob([conteudo], { type: 'application/vnd.google-earth.kml+xml;charset=utf-8' }),
         fileName: `vanguard-trilha-${new Date().toISOString().slice(0, 10)}.kml`,
@@ -584,7 +603,7 @@ export function mapaPage() {
 
   async function exportarRegistroGpxLocal() {
     try {
-      const conteudo = exportarRegistroGpx({ trilha, waypoints, destino });
+      const conteudo = exportarRegistroGpx({ trilha, waypoints: [...waypoints, ...fotosParadaComoWaypoints(paradas)], destino });
       const resultado = await compartilharArquivo({
         blob: new Blob([conteudo], { type: 'application/gpx+xml;charset=utf-8' }),
         fileName: `vanguard-trilha-${new Date().toISOString().slice(0, 10)}.gpx`,
@@ -594,6 +613,107 @@ export function mapaPage() {
       registroStatus.textContent = textoResultadoCompartilhamento(resultado, 'GPX');
     } catch (erro) {
       registroStatus.textContent = erro?.message ?? 'Não foi possível exportar o GPX local.';
+    }
+  }
+
+  const MIME_POR_EXTENSAO = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif' };
+
+  function mimeDaFoto(arquivo) {
+    if (arquivo?.type) return arquivo.type;
+    // Parte dos Android devolve `type` vazio para o arquivo da câmera; sem esse
+    // resgate a foto seria recusada como "não é imagem".
+    const extensao = String(arquivo?.name ?? '').split('.').pop()?.toLowerCase();
+    return MIME_POR_EXTENSAO[extensao] ?? '';
+  }
+
+  /** Fixo dedicado da parada: alta precisão e sem reaproveitar leitura velha. */
+  function posicaoDaParada() {
+    return new Promise((resolve) => {
+      solicitarPosicao({
+        mode: 'manual',
+        onPosition: (leitura) => resolve(leitura),
+        onError: () => resolve(null),
+      });
+    });
+  }
+
+  function descreverParada(parada) {
+    const precisao = parada.precisaoM == null ? 'precisão não informada' : `±${Math.round(parada.precisaoM)} m`;
+    const horario = Number.isFinite(Date.parse(parada.capturadaEm)) ? new Date(parada.capturadaEm).toLocaleString() : 'horário não registrado';
+    return `${parada.mgrs ?? `${num(parada.lat, 5)}, ${num(parada.lon, 5)}`} · ${precisao}${parada.dentroDoLimite === false ? ' · FORA DO LIMITE' : ''} · ${horario}`;
+  }
+
+  function atualizarParadas() {
+    empty(fotoLista);
+    for (const parada of paradas.slice(-6).reverse()) {
+      fotoLista.append(h('li', { className: parada.dentroDoLimite === false ? 'mapa__foto-item is-alerta' : 'mapa__foto-item' }, descreverParada(parada)));
+    }
+    atualizarMarcadores();
+  }
+
+  async function carregarParadas() {
+    const resultado = await storageFotos.listar();
+    if (desmontado) return;
+    if (!resultado.ok) {
+      fotoStatus.textContent = `As fotos guardadas não puderam ser lidas: ${resultado.motivo}`;
+      return;
+    }
+    paradas = resultado.fotos;
+    if (paradas.length) fotoStatus.textContent = `${paradas.length} parada(s) com foto no aparelho.`;
+    atualizarParadas();
+  }
+
+  async function abrirCameraDaParada() {
+    const avaliacaoAtual = avaliarPosicaoParada({ posicao });
+    if (!avaliacaoAtual.utilizavel) {
+      fotoStatus.textContent = 'Buscando um fixo antes de abrir a câmera; a foto precisa saber onde você está.';
+      const obtida = await posicaoDaParada();
+      if (desmontado) return;
+      if (!obtida) {
+        fotoStatus.textContent = 'Sem fixo de GPS. Ligue a localização, espere o fixo e tente de novo — a foto não é gravada sem coordenada.';
+        return;
+      }
+      posicao = obtida;
+      atualizarHud();
+      atualizarMarcadores();
+    }
+    fotoArquivo.value = '';
+    fotoArquivo.click();
+  }
+
+  async function registrarFotoDaParada(arquivo) {
+    if (!arquivo) return;
+    try {
+      fotoStatus.textContent = 'Lendo a foto e confirmando a posição da parada…';
+      const fresca = await posicaoDaParada();
+      if (desmontado) return;
+      if (fresca) { posicao = fresca; atualizarHud(); }
+      const bytes = new Uint8Array(await arquivo.arrayBuffer());
+      const resultado = criarRegistroFotoParada({
+        id: `parada-${new Date().toISOString().replace(/[:.]/g, '-')}`,
+        posicao,
+        imagem: { mime: mimeDaFoto(arquivo), sizeBytes: bytes.byteLength },
+        capturadaEm: Date.now(),
+      });
+      if (!resultado.ok) {
+        fotoStatus.textContent = resultado.motivo;
+        return;
+      }
+      const gravacao = await storageFotos.salvarFoto(resultado.registro, bytes);
+      if (desmontado) return;
+      if (!gravacao.ok) {
+        fotoStatus.textContent = `A foto não foi guardada: ${gravacao.motivo}`;
+        return;
+      }
+      paradas = [...paradas, { ...resultado.registro, sizeBytes: gravacao.sizeBytes }];
+      fotoStatus.textContent = resultado.registro.dentroDoLimite
+        ? `Parada guardada em ${resultado.registro.mgrs ?? 'coordenada local'} com ${Math.round(resultado.registro.precisaoM)} m de precisão.`
+        : `Parada guardada, mas com ${resultado.registro.precisaoM == null ? 'precisão desconhecida' : `${Math.round(resultado.registro.precisaoM)} m`} — acima dos ${resultado.registro.precisaoMaximaM} m pedidos. A foto não se perde; a ressalva fica no registro.`;
+      atualizarParadas();
+    } catch (erro) {
+      fotoStatus.textContent = erro?.message ?? 'Não foi possível registrar esta foto de parada.';
+    } finally {
+      fotoArquivo.value = '';
     }
   }
 
@@ -664,6 +784,8 @@ export function mapaPage() {
   registroKmlButton.onclick = exportarRegistroKmlLocal;
   registroImportarButton.onclick = () => registroArquivo.click();
   registroArquivo.onchange = () => importarRegistro(registroArquivo.files?.[0]);
+  fotoButton.onclick = abrirCameraDaParada;
+  fotoArquivo.onchange = () => registrarFotoDaParada(fotoArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;
   destinoMapButton.onclick = () => {
     marcandoDestino = !marcandoDestino;
@@ -873,7 +995,7 @@ export function mapaPage() {
       mapa.addLayer({ id: 'vanguard-grade', type: 'line', source: 'vanguard-grade', paint: { 'line-color': '#b6c59b', 'line-opacity': 0.28, 'line-width': ['case', ['get', 'forte'], 1.5, 0.7] } });
       mapa.addLayer({ id: 'vanguard-trilha', type: 'line', source: 'vanguard-trilha', paint: { 'line-color': '#8bff3f', 'line-width': 4, 'line-opacity': 0.85 } });
       mapa.addLayer({ id: 'vanguard-destino', type: 'line', source: 'vanguard-destino', paint: { 'line-color': '#ffb000', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.9 } });
-      mapa.addLayer({ id: 'vanguard-marcadores', type: 'circle', source: 'vanguard-marcadores', paint: { 'circle-radius': ['match', ['get', 'tipo'], 'voce', 8, 'destino', 7, 6], 'circle-color': ['match', ['get', 'tipo'], 'voce', '#80e0ff', 'destino', '#ffb000', '#ffb000'], 'circle-stroke-color': '#11150e', 'circle-stroke-width': 2 } });
+      mapa.addLayer({ id: 'vanguard-marcadores', type: 'circle', source: 'vanguard-marcadores', paint: { 'circle-radius': ['match', ['get', 'tipo'], 'voce', 8, 'destino', 7, 'parada', 7, 6], 'circle-color': ['match', ['get', 'tipo'], 'voce', '#80e0ff', 'destino', '#ffb000', 'parada', '#8bff3f', '#ffb000'], 'circle-stroke-color': '#11150e', 'circle-stroke-width': 2 } });
       redesenharGrade();
       atualizarMarcadores();
     });
@@ -942,5 +1064,6 @@ export function mapaPage() {
   atualizarHud();
   atualizarDestino();
   atualizarSheet();
+  carregarParadas();
   return { elemento: raiz, desmontar: () => { desmontado = true; controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
 }

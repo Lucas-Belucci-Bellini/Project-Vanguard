@@ -137,3 +137,32 @@ test('o nome do arquivo segue o mime e higieniza o identificador', () => {
   assert.equal(nomeArquivoFotoParada({ id: 'parada 007/../etc', imagem: { mime: 'image/png' } }), 'parada-007-etc.png');
   assert.equal(nomeArquivoFotoParada({ id: 'a', imagem: { mime: 'image/webp' } }), 'a.webp');
 });
+
+test('a parada atravessa a exportação GPX/KML/JSON carregando a coordenada', async () => {
+  const { exportarRegistroGpx, exportarRegistroKml, exportarRegistroLocal, importarRegistroGpx } =
+    await import('../src/core/registro-offline.js');
+  const { registro } = criarRegistroFotoParada({
+    id: 'parada-007',
+    posicao: posicao(),
+    imagem: IMAGEM,
+    capturadaEm: AGORA,
+    nota: 'Marco 12',
+    agora: AGORA,
+  });
+  const waypoints = fotosParadaComoWaypoints([registro]);
+
+  const gpx = exportarRegistroGpx({ trilha: [], waypoints });
+  assert.match(gpx, /<wpt lat="-22\.9519" lon="-43\.2105">/);
+  assert.match(gpx, /Parada: Marco 12/);
+
+  // A ida e volta prova que a coordenada da captura sobrevive ao formato.
+  const devolta = importarRegistroGpx(gpx);
+  assert.equal(devolta.waypoints[0].lat, -22.9519);
+  assert.equal(devolta.waypoints[0].lon, -43.2105);
+
+  assert.match(exportarRegistroKml({ trilha: [], waypoints }), /-43\.2105,-22\.9519/);
+
+  const json = JSON.parse(exportarRegistroLocal({ trilha: [], waypoints }));
+  assert.equal(json.waypoints[0].lat, -22.9519);
+  assert.equal(json.waypoints[0].accuracy, 8);
+});

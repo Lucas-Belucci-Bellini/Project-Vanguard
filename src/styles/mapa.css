@@ -50,6 +50,12 @@
 .mapa__registro-actions .mapa__quick-button { min-height: 32px; padding-inline: 3px; font-size: 7px; letter-spacing: .01em; }
 .mapa__registro-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .mapa__registro-status { min-height: 15px; margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
+.mapa__foto-card { margin-top: 9px; padding: 10px; background: var(--color-surface); border: var(--border-base); }
+.mapa__foto-button { width: 100%; min-height: 34px; margin-top: 8px; padding: 7px; color: var(--color-cyan); background: transparent; border-color: var(--color-cyan-edge); font-size: 9px; font-weight: var(--font-weight-bold); }
+.mapa__foto-status { min-height: 15px; margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
+.mapa__foto-lista { margin: 7px 0 0; padding: 0; list-style: none; }
+.mapa__foto-item { padding: 5px 0; border-top: var(--border-base); color: var(--color-text-secondary); font-size: 8px; line-height: 1.45; }
+.mapa__foto-item.is-alerta { color: var(--color-amber); }
 .mapa__quick-button { min-height: 36px; padding: 7px; color: var(--color-text-secondary); background: var(--color-surface); font-size: 9px; }
 .mapa__quick-button--quiet { color: var(--color-text-muted); }
 .mapa__route-card { margin-top: 10px; padding: 12px; background: var(--color-surface); border: var(--border-base); }
