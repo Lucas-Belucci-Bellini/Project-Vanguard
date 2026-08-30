@@ -38,7 +38,8 @@ test('tempo sem parada eleva o nível mesmo com o sol baixo', () => {
 test('sol a pino somado a muito tempo sem parada vira crítico', () => {
   const avaliacao = avaliarExposicao({ posicao: LONDRINA, agora: SOL_ALTO, ultimaParadaEm: SOL_ALTO - 150 * MIN });
   assert.equal(avaliacao.nivel, NIVEIS_EXPOSICAO.CRITICO);
-  assert.equal(avaliacao.padraoVibracao.length, 5);
+  assert.equal(avaliacao.gravidadeAlerta, 'CRITICO');
+  assert.equal(avaliacao.tipoAlerta, 'EXPOSICAO_SOL');
   assert.match(avaliacao.recomendacao, /primeira sombra/);
 });
 
@@ -102,4 +103,13 @@ test('sem posição o módulo diz que não dá para calcular, em vez de supor', 
   const avaliacao = avaliarExposicao({ posicao: { lat: -23.31, lon: null }, agora: SOL_ALTO });
   assert.equal(avaliacao.elevacaoSolarDeg, null);
   assert.match(avaliacao.motivos.join(' '), /Sem posição válida/);
+});
+
+test('o tipo do aviso separa sol de cansaço para o ritmo ser reconhecível', () => {
+  const porSol = avaliarExposicao({ posicao: LONDRINA, agora: SOL_ALTO });
+  assert.equal(porSol.tipoAlerta, 'EXPOSICAO_SOL');
+
+  const porCansaco = avaliarExposicao({ posicao: LONDRINA, agora: NOITE, ultimaParadaEm: NOITE - 130 * MIN });
+  assert.equal(porCansaco.tipoAlerta, 'SEM_PARADA');
+  assert.equal(porCansaco.gravidadeAlerta, 'ALTO');
 });

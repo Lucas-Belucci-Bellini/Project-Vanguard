@@ -28,6 +28,7 @@
 
 import { posicaoSolar } from '../engine/sol.js';
 import { numeroFinito, coordenadaValida } from '../engine/numero-seguro.js';
+import { GRAVIDADES, TIPOS_ALERTA } from './alertas-tateis.js';
 
 export const NIVEIS_EXPOSICAO = Object.freeze({
   NORMAL: 'NORMAL',
@@ -139,6 +140,14 @@ export function avaliarExposicao({
   const desdeAviso = ultimoAvisoEm == null ? null : numeroFinito(agora) - numeroFinito(ultimoAvisoEm);
   const podeAvisar = desdeAviso == null || desdeAviso >= LIMITES_EXPOSICAO.intervaloEntreAvisosMs;
 
+  // O aviso escolhe o ritmo pelo que dominou: sol e cansaço são coisas
+  // diferentes e precisam ser distinguíveis no bolso.
+  const solDominante = elevacaoDeg != null && elevacaoDeg >= LIMITES_EXPOSICAO.elevacaoAtencaoDeg;
+  const tipoAlerta = solDominante ? TIPOS_ALERTA.EXPOSICAO_SOL : TIPOS_ALERTA.SEM_PARADA;
+  const gravidade = nivel === NIVEIS_EXPOSICAO.CRITICO
+    ? GRAVIDADES.CRITICO
+    : nivel === NIVEIS_EXPOSICAO.ALTO ? GRAVIDADES.ALTO : GRAVIDADES.AVISO;
+
   return {
     nivel,
     motivos,
@@ -147,7 +156,8 @@ export function avaliarExposicao({
     temperaturaC: leitura.valorC,
     fonteTemperatura: leitura.fonte ?? null,
     vibrar: alertavel && podeAvisar,
-    padraoVibracao: nivel === NIVEIS_EXPOSICAO.CRITICO ? [400, 200, 400, 200, 400] : [300, 150, 300],
+    tipoAlerta,
+    gravidadeAlerta: gravidade,
     recomendacao: recomendacaoDe(nivel),
   };
 }

@@ -22,6 +22,7 @@ import { criarStorageFotos } from '../core/foto-storage.js';
 import { iniciarTrajeto, encerrarTrajeto, iniciarParada, encerrarParada, resumoTrajeto, paradaAberta, TIPOS_PARADA } from '../core/trajeto.js';
 import { classificarDeslocamento, sugerirModoAtual, MODOS_DESLOCAMENTO, CONFIANCA } from '../core/deslocamento.js';
 import { avaliarExposicao, NIVEIS_EXPOSICAO } from '../core/exposicao.js';
+import { dispararAlerta } from '../core/alertas-tateis.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const ROTULOS = CAMADAS_OVERLAY.find((camada) => camada.id === 'labels') ?? null;
@@ -260,6 +261,7 @@ export function mapaPage() {
   let modoConfirmado = null;
   let sugestaoRecusada = null;
   let ultimoAvisoExposicaoEm = null;
+  let avisosPorTipo = {};
   let tickTrajeto = null;
   let posicao = estado.get(CHAVES.LOCAL, null);
   let trilha = estado.get(CHAVES.TRILHA, []);
@@ -752,10 +754,15 @@ export function mapaPage() {
       ? ''
       : `${avaliacao.nivel} · ${avaliacao.motivos.join(' ')} ${avaliacao.recomendacao}`;
     if (avaliacao.vibrar && resumoTrajeto(trajeto).ativo) {
+      // O ritmo identifica o aviso sem tirar o aparelho do bolso, e o intervalo
+      // é por tipo: um aviso de sol não pode calar outro tipo de aviso.
+      const disparo = dispararAlerta({
+        tipo: avaliacao.tipoAlerta,
+        gravidade: avaliacao.gravidadeAlerta,
+        ultimoAvisoPorTipo: avisosPorTipo,
+      });
+      avisosPorTipo = disparo.ultimoAvisoPorTipo;
       ultimoAvisoExposicaoEm = Date.now();
-      // `vibrate` existe no Android; no iOS o navegador ignora, e o aviso em
-      // texto continua sendo o canal que funciona nos dois.
-      try { navigator.vibrate?.(avaliacao.padraoVibracao); } catch { /* sem vibração é só menos um canal */ }
     }
   }
 
