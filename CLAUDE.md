@@ -34,6 +34,7 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/styles/` — 1 CSS por tela + tokens em `variables.css`
 - `src/ui/helpers.js` — hyperscript `h()`, **API idêntica** à do Baluarte de propósito
 - `src/core/estado.js` — estado persistido (`vanguard:` no localStorage)
+- `src/core/foto-parada.js` + `foto-storage.js` — foto de parada amarrada à coordenada da captura (IndexedDB próprio; ver ADR-0037)
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
 
