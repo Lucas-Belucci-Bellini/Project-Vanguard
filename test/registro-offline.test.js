@@ -136,3 +136,15 @@ test('importarRegistroLocal exige arrays de dados', () => {
   assert.throws(() => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: null, waypoints: [], destino: null }), /inválida/);
   assert.throws(() => importarRegistroLocal('{ quebrado'), /JSON inválido/);
 });
+
+test('importarRegistroLocal recusa coordenada nula em vez de virar 0', () => {
+  // `Number(null)` é 0: sem guarda, este waypoint entraria no golfo da Guiné.
+  const registro = JSON.stringify({
+    schema: 'vanguard-registro-local',
+    version: 1,
+    trilha: [],
+    waypoints: [{ nome: 'x', lat: -23.31, lon: null }],
+    destino: null,
+  });
+  assert.throws(() => importarRegistroLocal(registro), /fora dos limites/);
+});

@@ -20,6 +20,7 @@
  */
 
 import { latLonParaMGRS } from '../engine/mgrs.js';
+import { numeroFinito, coordenadaValida } from './numero-seguro.js';
 
 export const ESQUEMA_FOTO_PARADA = 'vanguard-foto-parada';
 export const VERSAO_FOTO_PARADA = 1;
@@ -40,20 +41,6 @@ export const ESTADOS_FOTO_PARADA = Object.freeze({
 
 const MIMES_ACEITOS = Object.freeze(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
 
-// `Number(null)`, `Number('')` e `Number([])` valem 0. Aceitar essas conversões
-// aqui transformaria `lon: null` na longitude 0 — uma coordenada real no golfo
-// da Guiné —, que é exatamente a invenção de posição que este módulo existe
-// para impedir. Só número e string numérica passam.
-function numeroFinito(valor) {
-  if (typeof valor !== 'number' && typeof valor !== 'string') return null;
-  if (typeof valor === 'string' && valor.trim() === '') return null;
-  const numero = Number(valor);
-  return Number.isFinite(numero) ? numero : null;
-}
-
-function coordenadaValida(lat, lon) {
-  return lat != null && lon != null && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
-}
 
 function textoCurto(valor, limite) {
   return typeof valor === 'string' && valor.trim() ? valor.trim().slice(0, limite) : null;
@@ -78,7 +65,7 @@ export function avaliarPosicaoParada({
   const lon = numeroFinito(posicao?.lon);
   const limite = Number(precisaoMaximaM) > 0 ? Number(precisaoMaximaM) : PRECISAO_PARADA_PADRAO_M;
 
-  if (!coordenadaValida(lat, lon)) {
+  if (!coordenadaValida({ lat, lon })) {
     return {
       estado: ESTADOS_FOTO_PARADA.SEM_POSICAO,
       motivo: 'Não há fixo de GPS válido para dizer onde a foto foi tirada.',
@@ -234,7 +221,7 @@ export function nomeArquivoFotoParada(registro) {
  * viaje junto com a coordenada nos formatos que já existem (JSON, GPX e KML).
  */
 export function fotoParadaComoWaypoint(registro) {
-  if (!registro || !coordenadaValida(numeroFinito(registro.lat), numeroFinito(registro.lon))) {
+  if (!registro || !coordenadaValida(registro)) {
     throw new Error('Registro de foto sem coordenada válida.');
   }
   const precisao = registro.precisaoM == null ? 'precisão não informada' : `precisão ${Math.round(registro.precisaoM)} m`;

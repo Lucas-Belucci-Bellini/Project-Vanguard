@@ -11,7 +11,7 @@ function instanteValido(ponto) {
   return Number.isFinite(instante) && instante >= 0 ? instante : null;
 }
 
-function duracaoLabel(duracaoMs) {
+export function duracaoLabel(duracaoMs) {
   if (!Number.isFinite(duracaoMs) || duracaoMs < 0) return 'tempo indisponível';
   const segundos = Math.round(duracaoMs / 1000);
   const horas = Math.floor(segundos / 3600);

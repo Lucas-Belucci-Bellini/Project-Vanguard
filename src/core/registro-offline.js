@@ -5,18 +5,19 @@
  * contém HTML e não tenta sincronizar dados com qualquer servidor.
  */
 
+import { numeroFinito, numeroNoIntervalo } from './numero-seguro.js';
+
 export const REGISTRO_SCHEMA = 'vanguard-registro-local';
 export const REGISTRO_VERSION = 1;
 export const LIMITE_TRILHA = 4000;
 export const LIMITE_WAYPOINTS = 1000;
 
 function numeroValido(valor, minimo, maximo) {
-  const numero = Number(valor);
-  return Number.isFinite(numero) && numero >= minimo && numero <= maximo;
+  return numeroNoIntervalo(valor, minimo, maximo) !== null;
 }
 
 function clonarNumero(valor) {
-  return Number.isFinite(Number(valor)) ? Number(valor) : undefined;
+  return numeroFinito(valor) ?? undefined;
 }
 
 function normalizarPonto(ponto, indice, { nomePadrao = 'Ponto' } = {}) {
