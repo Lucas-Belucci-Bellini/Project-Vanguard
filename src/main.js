@@ -9,6 +9,7 @@ import { h, empty } from './ui/helpers.js';
 import { estado, CHAVES } from './core/estado.js';
 import { criarControleAtualizacao } from './core/atualizacao-ui.js';
 import { recuperarDatasetNoBoot } from './core/dataset-boot-recovery.js';
+import { criarNavegador } from './core/navegacao.js';
 
 const ROTAS = [
   { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
@@ -25,7 +26,7 @@ const ROTAS = [
 ];
 
 const PADRAO = '#/inicio';
-let desmontarAtual = null;
+let navegador = null;
 
 function montarShell() {
   const abas = ROTAS.filter((rota) => !rota.legada).map((rota) =>
@@ -113,26 +114,13 @@ async function navegar({ abas, main }) {
     else aba.removeAttribute('aria-current');
   }
   document.title = `VANGUARD · ${rota.titulo}`;
-  if (desmontarAtual) {
-    try { desmontarAtual(); } catch { /* tela anterior já pode ter sido removida */ }
-    desmontarAtual = null;
-  }
-  empty(main);
   main.setAttribute('aria-busy', 'true');
-  try {
-    const pagina = await rota.carregar();
-    const resultado = pagina({ query });
-    desmontarAtual = resultado?.desmontar ?? null;
-    main.append(resultado.elemento);
-  } catch (erro) {
-    main.append(h('div', { className: 'vg-pagina vg-erro-pagina' },
-      h('div', { className: 'vg-aviso vg-aviso--perigo', role: 'alert' },
-        `Falha ao carregar a tela “${rota.titulo}”: ${erro.message}`)
-    ));
-  } finally {
-    main.setAttribute('aria-busy', 'false');
-    main.focus({ preventScroll: true });
-  }
+  // A guarda de corrida vive no navegador: duas trocas rápidas de aba não
+  // podem montar duas telas no mesmo contêiner nem deixar a primeira viva
+  // sem desmontagem.
+  await navegador.navegar({ carregar: rota.carregar, props: { query } });
+  main.setAttribute('aria-busy', 'false');
+  main.focus({ preventScroll: true });
 }
 
 async function boot() {
@@ -147,6 +135,17 @@ async function boot() {
   } else {
     shell.status.setAttribute('data-dataset-recovery', recovery.estado ?? 'ok');
   }
+
+  navegador = criarNavegador({
+    container: shell.main,
+    esvaziar: empty,
+    aoErro: (erro) => {
+      shell.main.append(h('div', { className: 'vg-pagina vg-erro-pagina' },
+        h('div', { className: 'vg-aviso vg-aviso--perigo', role: 'alert' },
+          `Falha ao carregar a tela: ${erro.message}`)
+      ));
+    },
+  });
 
   addEventListener('hashchange', () => navegar(shell));
   navegar(shell);
