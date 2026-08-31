@@ -66,12 +66,26 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk "mobile-artifacts/vanguard-$VERSION-debug.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "mobile-artifacts/vanguard-$VERSION-release-unsigned.aab"
           sha256sum mobile-artifacts/* > mobile-artifacts/SHA256SUMS
+          # Impressão do certificado que assinou o APK. É o número que o
+          # Android compara para decidir se a atualização pode substituir o app
+          # instalado: se ele mudar entre duas versões, a instalação falha por
+          # conflito de assinatura. Registrar aqui torna isso conferível sem
+          # precisar do aparelho.
+          APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
+          if [ -n "$APKSIGNER" ]; then
+            CERT=$("$APKSIGNER" verify --print-certs "mobile-artifacts/vanguard-$VERSION-debug.apk" \
+                   | grep -i 'SHA-256 digest' | head -1 | awk '{print $NF}')
+          else
+            CERT="apksigner-indisponivel"
+          fi
+          echo "APK signing certificate SHA-256: $CERT"
           cat > mobile-artifacts/BUILD-MANIFEST.txt <<EOF
           product=Vanguard Field
           version=$VERSION
           commit=$GITHUB_SHA
           ref=$GITHUB_REF
-          signed_android=false
+          signed_android=debug-key-fixa
+          apk_signing_cert_sha256=$CERT
           ios_artifact=false
           physical_device_test=false
           EOF

@@ -82,6 +82,13 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - **Azimute de GRADE, não verdadeiro**, para tiro.
 - **Peça e alvo em fusos UTM diferentes**: `gridVector()` reprojeta no fuso da peça.
 - **`ventoDirecaoDeg` é de ONDE o vento vem** (convenção METAR).
+- **A chave de assinatura do APK é FIXA e versionada** (`android/keystore/`,
+  ver ADR-0042). Sem `signingConfigs` o Gradle inventa uma chave nova em cada
+  runner do CI e o Android recusa a atualização por conflito de assinatura — a
+  build fica verde e o defeito só aparece no aparelho. Não remova esse bloco.
+- **Ícone e splash são GERADOS** por `node android/logo/icone.mjs`. Editar PNG
+  à mão se perde na próxima geração. O ícone adaptativo só garante o círculo
+  central de 66 dp: passar disso é conteúdo cortado em alguns launchers.
 - **A escuta compara com o piso do lugar, nunca com um limiar fixo em dB.** O
   mesmo aparelho lê níveis diferentes no bolso, na mão e no vento. O seguidor de
   piso **desce rápido e sobe devagar** de propósito: um piso simétrico subiria
