@@ -15,6 +15,8 @@
  * | Tempestade | curto-longo alternado | sirene |
  * | Frio | três pulsos muito curtos, espaçados | tremor |
  * | Fora da rota | um pulso longo isolado | toque único, seco |
+ * | Veículo se aproximando | um longo e dois curtos | "vem pesado — sai, sai" |
+ * | Chamado de voz | curto-longo-curto, simétrico | apito de chamada |
  *
  * Um ritmo nunca se repete entre tipos: é isso que torna o vocabulário
  * legível pelo tato, e é o que o teste cobra.
@@ -28,6 +30,12 @@
  * ficam registrados e sem gatilho até existir uma fonte com origem e horário —
  * `gatilhoDisponivel` diz qual é qual, para a tela nunca prometer um aviso que
  * não vai chegar.
+ *
+ * Os dois avisos acústicos têm gatilho porque o microfone é um sensor que o
+ * aparelho realmente tem e que o navegador realmente entrega: quem os dispara
+ * é `src/core/escuta-ambiente.js`, sobre a matemática de `src/engine/escuta.js`.
+ * O intervalo deles é de segundos, não de minutos — um caminhão avisado cinco
+ * minutos depois não é aviso, é registro.
  */
 
 export const TIPOS_ALERTA = Object.freeze({
@@ -37,6 +45,8 @@ export const TIPOS_ALERTA = Object.freeze({
   TEMPESTADE: 'TEMPESTADE',
   FRIO: 'FRIO',
   FORA_DA_ROTA: 'FORA_DA_ROTA',
+  VEICULO_APROXIMANDO: 'VEICULO_APROXIMANDO',
+  CHAMADO_VOZ: 'CHAMADO_VOZ',
 });
 
 export const GRAVIDADES = Object.freeze({
@@ -59,6 +69,8 @@ const RITMOS = Object.freeze({
   [TIPOS_ALERTA.TEMPESTADE]: { pulsos: [90, 420, 90, 420], pausa: 130 },
   [TIPOS_ALERTA.FRIO]: { pulsos: [60, 60, 60], pausa: 300 },
   [TIPOS_ALERTA.FORA_DA_ROTA]: { pulsos: [700], pausa: 250 },
+  [TIPOS_ALERTA.VEICULO_APROXIMANDO]: { pulsos: [450, 120, 120], pausa: 140 },
+  [TIPOS_ALERTA.CHAMADO_VOZ]: { pulsos: [140, 300, 140], pausa: 160 },
 });
 
 /** Gatilho calculável no aparelho, sem rede nem sensor que ele não tem. */
@@ -69,6 +81,8 @@ const GATILHO_DISPONIVEL = Object.freeze({
   [TIPOS_ALERTA.TEMPESTADE]: false,
   [TIPOS_ALERTA.FRIO]: false,
   [TIPOS_ALERTA.FORA_DA_ROTA]: true,
+  [TIPOS_ALERTA.VEICULO_APROXIMANDO]: true,
+  [TIPOS_ALERTA.CHAMADO_VOZ]: true,
 });
 
 const DESCRICOES = Object.freeze({
@@ -78,6 +92,8 @@ const DESCRICOES = Object.freeze({
   [TIPOS_ALERTA.TEMPESTADE]: 'Tempestade — curto e longo alternados.',
   [TIPOS_ALERTA.FRIO]: 'Frio — três toques muito curtos, espaçados.',
   [TIPOS_ALERTA.FORA_DA_ROTA]: 'Fora da rota — um toque longo isolado.',
+  [TIPOS_ALERTA.VEICULO_APROXIMANDO]: 'Veículo se aproximando — um toque longo e dois curtos.',
+  [TIPOS_ALERTA.CHAMADO_VOZ]: 'Alguém chamando — curto, longo e curto.',
 });
 
 /** Intervalo mínimo entre dois avisos **do mesmo tipo**. */
@@ -88,6 +104,10 @@ export const INTERVALO_POR_TIPO_MS = Object.freeze({
   [TIPOS_ALERTA.TEMPESTADE]: 10 * 60_000,
   [TIPOS_ALERTA.FRIO]: 20 * 60_000,
   [TIPOS_ALERTA.FORA_DA_ROTA]: 2 * 60_000,
+  // Segundos, não minutos: um veículo leva de dez a vinte segundos entre ser
+  // ouvido e passar. Um aviso represado por minutos chegaria depois dele.
+  [TIPOS_ALERTA.VEICULO_APROXIMANDO]: 30_000,
+  [TIPOS_ALERTA.CHAMADO_VOZ]: 20_000,
 });
 
 function ritmoDe(tipo) {

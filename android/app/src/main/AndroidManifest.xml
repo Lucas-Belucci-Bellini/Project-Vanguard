@@ -57,4 +57,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" tools:node="remove" />
+
+    <!-- Escuta de ambiente (#/escuta): o microfone é lido para medir energia por
+         faixa de frequência. O áudio não é gravado, guardado nem transmitido —
+         só existe o espectro em memória. Nenhuma permissão de rede a mais é
+         pedida por causa dela. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 </manifest>

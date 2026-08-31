@@ -172,6 +172,7 @@ export const CHAVES = {
   ROTA_ATIVA: 'rotaAtiva',
   TRAJETO: 'trajeto',
   BUSSOLA: 'bussola',
+  ESCUTA: 'escuta',
   ROTA_PAUSADA: 'rotaPausada',
   DESTINO: 'destino',
   MODO_USO: 'modoUso',

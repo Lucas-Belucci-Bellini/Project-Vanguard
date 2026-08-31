@@ -127,6 +127,7 @@ export function inicioPage() {
           caminho('#/mapa', 'Mapa vivo', 'posição, trilha e pontos', '⊕'),
           caminho('#/bussola', 'Bússola', 'azimute e orientação', '◉'),
           caminho('#/socorro', 'Modo socorro', 'coordenadas e instruções', '!', 'inicio__atalho--danger'),
+          caminho('#/escuta', 'Escuta de ambiente', 'veículo se aproximando e chamados', '◎'),
           caminho('#/contexto', 'Modo de contexto', 'cidade, mar, desastre e conflito', '◈'),
           caminho('#/sobrevivencia', 'Sobrevivência', 'manual offline e primeiros passos', '⌁'),
           caminho('#/diagnostico', 'Diagnóstico', 'estado local e bateria', '⌗'),

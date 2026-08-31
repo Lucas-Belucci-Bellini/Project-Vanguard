@@ -16,6 +16,7 @@ const ROTAS = [
   { hash: '#/mapa', titulo: 'Mapa', icone: '⊕', carregar: () => import('./pages/mapa.js').then((m) => m.mapaPage) },
   { hash: '#/bussola', titulo: 'Bússola', icone: '◉', carregar: () => import('./pages/bussola.js').then((m) => m.bussolaPage) },
   { hash: '#/socorro', titulo: 'Socorro', icone: '!', carregar: () => import('./pages/socorro.js').then((m) => m.socorroPage) },
+  { hash: '#/escuta', titulo: 'Escuta', icone: '◎', carregar: () => import('./pages/escuta.js').then((m) => m.escutaPage), secundária: true },
   { hash: '#/doar', titulo: 'Apoiar', icone: '＋', carregar: () => import('./pages/doar.js').then((m) => m.doarPage), secundária: true },
   { hash: '#/contexto', titulo: 'Contexto', icone: '◈', carregar: () => import('./pages/contexto.js').then((m) => m.contextoPage), secundária: true },
   { hash: '#/sobrevivencia', titulo: 'Sobrevivência', icone: '⌁', carregar: () => import('./pages/sobrevivencia.js').then((m) => m.sobrevivenciaPage), secundária: true },

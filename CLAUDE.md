@@ -37,6 +37,7 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/core/foto-parada.js` + `foto-storage.js` — foto de parada amarrada à coordenada da captura (IndexedDB próprio; ver ADR-0037)
 - `src/core/bussola-leitura.js` — os três nortes da bússola; a leitura crua só vira azimute verdadeiro com correção medida (ver ADR-0040)
 - `src/engine/sol.js` — posição do Sol offline, usada pelo alerta de exposição e pela conferência da bússola
+- `src/engine/escuta.js` + `src/core/escuta-ambiente.js` — escuta de ambiente (`#/escuta`): mede energia por banda no microfone e avisa por vibração quando o grave sobe como sobe um veículo se aproximando, ou quando alguém grita. **Só recebe** — não grava, não guarda e não transmite, e há teste estrutural cobrando isso (ver ADR-0041)
 - `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
@@ -81,6 +82,14 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - **Azimute de GRADE, não verdadeiro**, para tiro.
 - **Peça e alvo em fusos UTM diferentes**: `gridVector()` reprojeta no fuso da peça.
 - **`ventoDirecaoDeg` é de ONDE o vento vem** (convenção METAR).
+- **A escuta compara com o piso do lugar, nunca com um limiar fixo em dB.** O
+  mesmo aparelho lê níveis diferentes no bolso, na mão e no vento. O seguidor de
+  piso **desce rápido e sobe devagar** de propósito: um piso simétrico subiria
+  junto com o caminhão que se aproxima e apagaria o próprio alerta.
+- **Nada de `MediaRecorder`, `RTCPeerConnection`, rede ou `destination` na
+  escuta.** O grafo termina no `AnalyserNode`. `test/escuta-ambiente.test.js` lê
+  o código e falha se alguma dessas aparecer — a decisão é do operador e está no
+  código, não só no texto.
 
 ## Aviso que acompanha o produto
 
