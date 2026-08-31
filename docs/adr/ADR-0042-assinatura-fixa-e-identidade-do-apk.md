@@ -12,8 +12,19 @@ certificado de cada um foi extraído do APK Signing Block (esquema v2):
 
 | versão | SHA-256 do certificado |
 |---|---|
-| 1.1.0 | `53:B4:AE:35:2F:BF:F8:A0…` |
-| 1.2.0 | `1E:AE:00:81:F8:26:0A:72…` |
+| 1.1.0 | `38f995fc66976839fefd3116275fdee5…` |
+| 1.2.0 | `2fdcda935587a8086becbe9af216d428…` |
+| 1.3.2 | `d0100bfddf7c3e8594ef8816c9ae379b…` (a chave fixa) |
+
+> ⚠️ **Correção.** A primeira leitura destes certificados, feita durante o
+> diagnóstico, publicou `53:B4:AE:35…` e `1E:AE:00:81…`. Estava errada: o
+> parser descia um nível a menos na estrutura do bloco de assinatura e
+> devolvia o hash do campo de **assinatura**, não o do certificado. Assinatura
+> muda a cada build mesmo com a mesma chave, então dois valores diferentes ali
+> **não provavam** chaves diferentes — a conclusão estava certa pelo motivo
+> errado. Os valores acima são os corretos, e o parser foi validado contra a
+> 1.3.2, onde ele, o `apksigner` do CI e o `keytool` sobre a keystore dão o
+> mesmo número.
 
 A causa: `android/app/build.gradle` **não tinha bloco `signingConfigs`**. Sem
 ele, o Gradle assina o build de debug com `~/.android/debug.keystore` — e como
@@ -92,18 +103,24 @@ PNG, não olhando: o desenho final fica em **32,38 dp**.
 
 ## Como isto foi verificado
 
-- Certificados dos APKs 1.1.0 e 1.2.0 extraídos do APK Signing Block por um
-  parser próprio do formato (o APK moderno não guarda `.RSA` em `META-INF`), o
-  que **confirmou a causa** em vez de supô-la.
+- Certificados dos APKs extraídos do APK Signing Block por um parser próprio do
+  formato (o APK moderno não guarda `.RSA` em `META-INF`). O parser só passou a
+  valer depois de ser conferido contra duas fontes independentes na 1.3.2 — o
+  `apksigner` do SDK, rodado no CI sobre o artefato, e o `keytool` sobre a
+  keystore — que dão exatamente `d0100bfddf7c3e85…`. Ver a correção acima:
+  a primeira versão dele lia o campo errado.
 - Raio máximo do conteúdo do ícone medido pixel a pixel: 32,38 dp contra os 33
   do círculo seguro.
 - Ícone renderizado sob as quatro máscaras que os launchers aplicam — círculo,
   squircle, quadrado arredondado e quadrado — e conferido a 48 px, o tamanho
   real na gaveta de aplicativos.
-- A conferência que **só a build fecha**: o certificado do APK 1.3.2 publicado
-  precisa bater com `D0:10:0B:FD:DF:7C:3E:85…`. Este ambiente não tem SDK
-  Android, então o APK é montado no CI e a conferência é feita sobre o artefato
-  publicado.
+- **Fechada:** o APK 1.3.2 publicado foi baixado e o certificado dele é
+  `d0100bfddf7c3e8594ef8816c9ae379b8b2eb68935711b198d533e88663ca100` — igual ao
+  da keystore versionada, e igual ao que o `BUILD-MANIFEST.txt` da release
+  registra. A chave fixa está de fato em uso.
+- `cap sync` foi executado localmente com os ícones novos no lugar: os hashes
+  dos PNGs não mudaram. Importa porque o CI roda o sync **antes** de montar o
+  APK — se ele mexesse nos ícones, o trabalho sumiria sem aviso.
 
 ## Limites assumidos
 
