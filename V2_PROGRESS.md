@@ -149,3 +149,11 @@ A FASE 14 do prompt foi atendida de forma incremental: `src/core/registro-offlin
 O Mapa integra `EXPORTAR KML`, compartilhamento explícito e importação por `.kml`. O parser trata o XML como dados, não executa scripts/links/NetworkLink, ignora elementos não suportados e rejeita raiz ausente, ausência de pontos, coordenadas inválidas e arquivos acima do limite. A suíte chegou a 159 testes aprovados; build, sync Android/iOS, APK debug e CI `33124173644` passaram.
 
 Interoperabilidade completa com o ecossistema KML, Files/Share Sheet e uso físico em Android/iOS continuam pendentes. O ADR-0021 registra o contrato.
+
+## 2026-08-31 — Foundation da release 1.3.0
+
+A auditoria real foi registrada em `docs/AUDITORIA-V1.3.0.md`. A identidade pública foi alinhada para `1.3.0` em package/configuração, Android, iOS e workflow mobile, sem substituir tags históricas. O provider CARTO foi mantido como opcional do runtime, mas retirado do catálogo público de bases que não pode depender de CARTO/API key. A suíte de testes passou a separar testes Node e Vitest, conforme os imports existentes.
+
+Evidência reproduzida no commit `cb76817`: `npm ci`, `npm test` com 267 testes Node e 17 testes Vitest aprovados, e `npm run build` aprovado. Foram criados `docs/RELEASE-1.3.0.md` e `docs/VALIDACAO-1.3.0.md`. Permanecem pendentes validação física Android/iOS, assinatura/distribuição, dataset regional/mundial aprovado e serviços externos.
+
+Próximo passo: continuar a revisão funcional de mapa/offline/GPS/diagnóstico e manter a separação entre `IMPLEMENTED`, `TESTED`, `PHYSICAL VALIDATION REQUIRED`, `BLOCKED` e `NOT CONFIGURED`.

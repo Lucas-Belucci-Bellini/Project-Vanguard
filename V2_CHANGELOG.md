@@ -63,3 +63,14 @@ O próximo gargalo escolhido é diagnóstico local observável. Ele deve mostrar
 ## Regra de registro
 
 Cada execução futura deve adicionar uma entrada com data, commit, mudança, testes, documentação, blockers e próximo passo. Nenhuma execução deve marcar a V2 como completa apenas por compilar.
+
+## 2026-08-31 — Foundation 1.3.0
+
+- Auditoria real criada em `docs/AUDITORIA-V1.3.0.md`.
+- Versão pública alinhada em `1.3.0` para web, configuração, Android, iOS e workflow mobile.
+- Provider CARTO mantido opcional no runtime e removido do catálogo público sem credencial.
+- Suite de testes corrigida para executar 267 testes Node e 17 testes Vitest com runners compatíveis.
+- `docs/RELEASE-1.3.0.md` e `docs/VALIDACAO-1.3.0.md` adicionados.
+- Gates locais reproduzidos: `npm ci`, `npm test` e `npm run build` aprovados.
+- Limites mantidos: sem validação física, assinatura de produção, dataset regional/mundial aprovado ou publicação de release.
+- Commits: `718c2a5`, `cb76817`.
