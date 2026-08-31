@@ -7,7 +7,7 @@
 .bussola__head h1 { margin-bottom: 10px; }
 .bussola__head p { max-width: 620px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.7; }
 .bussola__instrumento { display: grid; grid-template-columns: minmax(190px, 280px) 1fr; align-items: center; justify-content: center; gap: clamp(20px, 8vw, 80px); width: min(100%, 760px); margin: 0 auto; padding: 18px 0 24px; }
-.bussola__rosa { --heading: 0deg; position: relative; width: min(66vw, 260px); aspect-ratio: 1; margin: auto; border: 1px solid var(--color-cyan-edge); border-radius: 50%; background: radial-gradient(circle, transparent 0 35%, rgba(139,255,63,.04) 35% 36%, transparent 36% 64%, rgba(139,255,63,.07) 64% 65%, transparent 65%), repeating-conic-gradient(from 0deg, rgba(139,255,63,.25) 0deg 1deg, transparent 1deg 15deg); box-shadow: 0 0 0 7px rgba(139,255,63,.03), 0 0 34px rgba(139,255,63,.08); }
+.bussola__rosa { --heading: 0deg; --tamanho: min(66vw, 260px); position: relative; width: var(--tamanho); aspect-ratio: 1; margin: auto; border: 1px solid var(--color-cyan-edge); border-radius: 50%; background: radial-gradient(circle, transparent 0 35%, rgba(139,255,63,.04) 35% 36%, transparent 36% 64%, rgba(139,255,63,.07) 64% 65%, transparent 65%), repeating-conic-gradient(from 0deg, rgba(139,255,63,.25) 0deg 1deg, transparent 1deg 15deg); box-shadow: 0 0 0 7px rgba(139,255,63,.03), 0 0 34px rgba(139,255,63,.08); }
 .bussola__rosa::before, .bussola__rosa::after { content: ''; position: absolute; background: var(--color-cyan-edge); }
 .bussola__rosa::before { top: 12%; bottom: 12%; left: calc(50% - .5px); width: 1px; }
 .bussola__rosa::after { top: calc(50% - .5px); right: 12%; left: 12%; height: 1px; }
@@ -38,6 +38,30 @@
 .bussola__card--amber .bussola__kicker { color: var(--color-magenta); }
 .bussola__card strong { display: block; margin: 7px 0 4px; font-size: 12px; }
 .bussola__card p { color: var(--color-text-muted); font-size: 10px; line-height: 1.6; }
+/* Origem = centro da rosa: o topo do marcador está a 4% do diâmetro,
+   então do topo dele até o centro vão 46% do diâmetro. */
+.bussola__marca-alvo { position: absolute; top: 4%; left: calc(50% - 9px); z-index: 3; width: 18px; font-size: 13px; text-align: center; transform: rotate(var(--marca, 0deg)); transform-origin: 9px calc(var(--tamanho) * .46); transition: transform 180ms ease-out; }
+.bussola__marca-alvo[hidden] { display: none; }
+.bussola__marca-alvo--destino { color: var(--color-cyan); text-shadow: 0 0 8px var(--color-cyan); }
+.bussola__marca-alvo--sol { color: var(--color-amber); text-shadow: 0 0 8px var(--color-amber); }
+.bussola__marca-alvo--travado { color: var(--color-text-primary); }
+.bussola__linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 6px 0; border-top: var(--border-base); }
+.bussola__linha:first-child { border-top: 0; }
+.bussola__linha-rotulo { flex: 1 1 40%; color: var(--color-text-muted); font-size: 8px; letter-spacing: var(--tracking-wide); }
+.bussola__linha-valor { color: var(--color-cyan); font-size: 15px; font-weight: var(--font-weight-bold); letter-spacing: .03em; }
+.bussola__linha-extra { flex: 1 1 100%; color: var(--color-text-muted); font-size: 8px; }
+.bussola__linha-grupo, .bussola__destino-corpo { margin-top: 6px; }
+.bussola__destino-nome { display: block; margin-bottom: 5px; color: var(--color-text-primary); font-size: 12px; }
+.bussola__seta { display: block; margin: 6px 0; color: var(--color-amber); font-size: 30px; line-height: 1; }
+.bussola__seta.is-em-rota { color: var(--color-cyan); text-shadow: 0 0 10px var(--color-cyan); }
+.bussola__vazio, .bussola__nota { margin: 6px 0 0; color: var(--color-text-muted); font-size: 9px; line-height: 1.55; }
+.bussola__aviso { margin: 7px 0 0; color: var(--color-amber); font-size: 9px; line-height: 1.55; }
+.bussola__aviso[hidden] { display: none; }
+.bussola__campo { width: 100%; min-height: 40px; margin-top: 7px; padding: 8px; background: var(--color-bg); border: var(--border-base); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 12px; }
+.bussola__acao { width: 100%; min-height: 40px; margin-top: 7px; background: var(--color-surface); border: var(--border-base); color: var(--color-text-secondary); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-wide); }
+.bussola__acao:disabled { opacity: .5; }
+.bussola__acao--quieta { color: var(--color-text-muted); }
+.bussola__acao[hidden] { display: none; }
 .bussola__mapa { display: block; margin-top: 10px; margin-bottom: 20px; background: transparent; color: var(--color-text-primary); }
 
 @media (max-width: 560px) { .bussola__instrumento { grid-template-columns: 1fr; gap: 17px; } .bussola__readout { align-items: center; text-align: center; } }
