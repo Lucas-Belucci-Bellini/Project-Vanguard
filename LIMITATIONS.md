@@ -21,3 +21,7 @@ O Vanguard Field é uma ferramenta civil de apoio à navegação. Esta declaraç
 ## Regra de uso em campo
 
 Se o aplicativo contradizer a sinalização, a organização, uma fonte oficial, o grupo, o terreno ou a observação direta, interrompa a decisão e confirme por meios independentes. O aparelho é um apoio; planejamento, bateria reserva, comunicação e julgamento continuam necessários.
+
+## Limites adicionais da 1.3.1
+
+A página de navegação avançada calcula coordenadas, rumo e distância localmente. Heading físico, norte magnético automático, declinação, elevação e ETA permanecem indisponíveis quando não há fonte ou sensor comprovado. A ausência de dado é apresentada como indisponibilidade, nunca como valor estimado.

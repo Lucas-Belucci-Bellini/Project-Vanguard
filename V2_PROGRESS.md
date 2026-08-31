@@ -157,3 +157,9 @@ A auditoria real foi registrada em `docs/AUDITORIA-V1.3.0.md`. A identidade púb
 Evidência reproduzida no commit `cb76817`: `npm ci`, `npm test` com 267 testes Node e 17 testes Vitest aprovados, e `npm run build` aprovado. Foram criados `docs/RELEASE-1.3.0.md` e `docs/VALIDACAO-1.3.0.md`. Permanecem pendentes validação física Android/iOS, assinatura/distribuição, dataset regional/mundial aprovado e serviços externos.
 
 Próximo passo: continuar a revisão funcional de mapa/offline/GPS/diagnóstico e manter a separação entre `IMPLEMENTED`, `TESTED`, `PHYSICAL VALIDATION REQUIRED`, `BLOCKED` e `NOT CONFIGURED`.
+
+## 2026-08-31 — Navegação avançada 1.3.1
+
+Implementados `src/core/navegacao-rumo.js`, testes determinísticos e a página `#/navegacao`, integrada ao roteador. A página reutiliza MGRS/UTM e o motor geográfico, mostra indisponibilidade sem inventar heading, declinação ou elevação e calcula rumo/distância/direção relativa para coordenadas informadas.
+
+Evidência final: `npm test` com 273 testes Node e 17 testes Vitest aprovados; `npm run build` aprovado. A versão pública foi atualizada para `1.3.1` em web, Android, iOS e workflow. Documentação em `docs/NAVEGACAO-AVANCADA-1.3.1.md` e `docs/RELEASE-1.3.1.md`. Permanecem `PHYSICAL VALIDATION REQUIRED` para sensores/aparelhos e `BLOCKED` para assinatura, dataset e serviços externos.

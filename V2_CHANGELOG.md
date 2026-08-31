@@ -74,3 +74,7 @@ Cada execução futura deve adicionar uma entrada com data, commit, mudança, te
 - Gates locais reproduzidos: `npm ci`, `npm test` e `npm run build` aprovados.
 - Limites mantidos: sem validação física, assinatura de produção, dataset regional/mundial aprovado ou publicação de release.
 - Commits: `718c2a5`, `cb76817`.
+
+## 2026-08-31 — Navegação avançada 1.3.1
+
+Implementado o núcleo local de rumo e a página `#/navegacao`, com reutilização de MGRS/UTM e geodesia existente. Foram adicionados testes para normalização, diferença angular, cardinais, bearing, back bearing, direção relativa e segmentos. A suíte final registra 273 testes Node e 17 testes Vitest aprovados, e a build web foi aprovada. Heading físico, declinação automática, elevação real, assinatura e dataset permanecem bloqueados ou dependentes de validação.

@@ -12,7 +12,7 @@ const URL_GITHUB = 'https://github.com';
 export const CONFIGURACAO_APLICATIVO = Object.freeze({
   nome: 'Vanguard Field',
   id: 'com.projectvanguard.field',
-  versao: '1.3.0',
+  versao: '1.3.1',
   repositorio: REPOSITORIO,
   urlRepositorio: `${URL_GITHUB}/${REPOSITORIO}`,
 });
