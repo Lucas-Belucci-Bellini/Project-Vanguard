@@ -163,3 +163,7 @@ Próximo passo: continuar a revisão funcional de mapa/offline/GPS/diagnóstico 
 Implementados `src/core/navegacao-rumo.js`, testes determinísticos e a página `#/navegacao`, integrada ao roteador. A página reutiliza MGRS/UTM e o motor geográfico, mostra indisponibilidade sem inventar heading, declinação ou elevação e calcula rumo/distância/direção relativa para coordenadas informadas.
 
 Evidência final: `npm test` com 273 testes Node e 17 testes Vitest aprovados; `npm run build` aprovado. A versão pública foi atualizada para `1.3.1` em web, Android, iOS e workflow. Documentação em `docs/NAVEGACAO-AVANCADA-1.3.1.md` e `docs/RELEASE-1.3.1.md`. Permanecem `PHYSICAL VALIDATION REQUIRED` para sensores/aparelhos e `BLOCKED` para assinatura, dataset e serviços externos.
+
+## 2026-08-31 — Release GitHub v1.3.1
+
+A tag `v1.3.1` e a release `Vanguard Field 1.3.1` foram publicadas no GitHub. Foram anexados `vanguard-1.3.1-debug.apk`, `vanguard-1.3.1-release-unsigned.aab`, `BUILD-MANIFEST.txt` e `SHA256SUMS`. A release é pública e contém artefatos de teste; o APK usa certificado Android Debug e o AAB não é assinado para produção.

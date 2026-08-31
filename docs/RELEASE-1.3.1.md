@@ -24,4 +24,4 @@ Heading, bússola, declinação automática, elevação real, background geoloca
 
 ## Status
 
-A versão está **preparada no código e na documentação**, mas a tag/publicação `v1.3.1` somente deve ser criada após os gates físicos, de assinatura e de distribuição que permanecem explicitamente bloqueados.
+A versão foi publicada no GitHub em https://github.com/Lucas-Belucci-Bellini/Project-Vanguard/releases/tag/v1.3.1. A publicação contém artefatos de teste; os gates físicos e a assinatura de produção continuam explicitamente bloqueados.
