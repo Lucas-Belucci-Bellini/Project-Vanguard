@@ -33,6 +33,7 @@
 
 `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `IMPLEMENTED`, `TESTED`, `VERIFIED` e `COMPLETE`. O uso de `COMPLETE` fica reservado a itens com evidência verificável e sem dependência pendente.
 
+
 ## Marco 1.3.1 — 2026-08-31
 
 - [x] Núcleo local de rumo, bearing, back bearing, cardinais e segmentos implementado e testado.
