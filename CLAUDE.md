@@ -35,6 +35,9 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/ui/helpers.js` — hyperscript `h()`, **API idêntica** à do Baluarte de propósito
 - `src/core/estado.js` — estado persistido (`vanguard:` no localStorage)
 - `src/core/foto-parada.js` + `foto-storage.js` — foto de parada amarrada à coordenada da captura (IndexedDB próprio; ver ADR-0037)
+- `src/core/bussola-leitura.js` — os três nortes da bússola; a leitura crua só vira azimute verdadeiro com correção medida (ver ADR-0040)
+- `src/engine/sol.js` — posição do Sol offline, usada pelo alerta de exposição e pela conferência da bússola
+- `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
 
