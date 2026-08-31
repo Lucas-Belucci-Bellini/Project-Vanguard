@@ -39,3 +39,10 @@ Não há credencial CARTO versionada ou configurada nesta validação. Isso é i
 ## Decisão atual
 
 A base local está reproduzível para continuar o endurecimento da 1.3.0, mas **não deve ser marcada como production-ready nem publicada como release final** sem completar a revisão funcional restante, validar os artefatos adequados e registrar as limitações acima.
+
+## Gates adicionais de release engineering
+
+- `node --check public/sw.js`: `PASS`.
+- `npm audit --omit=dev`: `PASS`, sem vulnerabilidades de produção reportadas nesta execução.
+- `package.json`: `1.3.0`; Android: `versionName 1.3.0`, `versionCode 130`; iOS: `MARKETING_VERSION 1.3.0`, `CURRENT_PROJECT_VERSION 130`.
+- Checksum observado para `dist/index.html`: `646c0777de962fd90aacd4a68205cba75752d8a87d2240b4630702f842bbe46e`.
