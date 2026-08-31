@@ -136,6 +136,19 @@ export function mapaPage() {
   const fotoArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'image/*', capture: 'environment', 'aria-label': 'Foto da parada atual' });
   const fotoStatus = h('p', { className: 'mapa__foto-status', role: 'status' }, `A foto é guardada com a coordenada da captura; a parada pede precisão de ${PRECISAO_PARADA_PADRAO_M} m ou melhor.`);
   const fotoLista = h('ul', { className: 'mapa__foto-lista' });
+  const visorImagem = h('img', { className: 'mapa__visor-imagem', alt: 'Foto da parada' });
+  const visorLegenda = h('p', { className: 'mapa__visor-legenda' });
+  const visorContador = h('span', { className: 'mapa__visor-contador' });
+  const visorAnterior = h('button', { className: 'mapa__quick-button', type: 'button' }, '‹ ANTERIOR');
+  const visorProxima = h('button', { className: 'mapa__quick-button', type: 'button' }, 'PRÓXIMA ›');
+  const visorRemover = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'REMOVER');
+  const visorFechar = h('button', { className: 'mapa__visor-fechar', type: 'button', 'aria-label': 'Fechar a foto' }, '✕');
+  const visor = h('div', { className: 'mapa__visor', hidden: true, role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Foto da parada' },
+    h('div', { className: 'mapa__visor-topo' }, visorContador, visorFechar),
+    visorImagem,
+    visorLegenda,
+    h('div', { className: 'mapa__visor-acoes' }, visorAnterior, visorProxima, visorRemover),
+  );
   const trajetoBotao = h('button', { className: 'mapa__route-button', type: 'button' }, 'INICIAR TRAJETO');
   const paradaBotao = h('button', { className: 'mapa__quick-button', type: 'button' }, 'REGISTRAR PARADA');
   const pernoiteBotao = h('button', { className: 'mapa__quick-button mapa__quick-button--quiet', type: 'button' }, 'PERNOITE');
@@ -251,7 +264,7 @@ export function mapaPage() {
   );
   const markerHint = h('div', { className: 'mapa__hint' }, 'Toque no mapa para marcar um ponto');
   canvas.append(rotulos);
-  raiz.append(canvas, hud, markerHint, sheet);
+  raiz.append(canvas, hud, markerHint, sheet, visor);
 
   let mapa = null;
   let motorMapa = null;
@@ -793,10 +806,76 @@ export function mapaPage() {
     return `${parada.mgrs ?? `${num(parada.lat, 5)}, ${num(parada.lon, 5)}`} · ${precisao}${parada.dentroDoLimite === false ? ' · FORA DO LIMITE' : ''} · ${horario}`;
   }
 
+  let visorIndice = -1;
+  let visorUrl = null;
+
+  function liberarUrlDoVisor() {
+    if (!visorUrl) return;
+    // Sem revogar, cada foto aberta deixa os bytes presos na memória do
+    // navegador até a página morrer.
+    URL.revokeObjectURL(visorUrl);
+    visorUrl = null;
+  }
+
+  function fecharVisor() {
+    liberarUrlDoVisor();
+    visorImagem.removeAttribute('src');
+    visor.hidden = true;
+    visorIndice = -1;
+  }
+
+  async function abrirVisor(indice) {
+    const parada = paradas[indice];
+    if (!parada) return;
+    visorIndice = indice;
+    visor.hidden = false;
+    visorContador.textContent = `${indice + 1} de ${paradas.length}`;
+    visorLegenda.textContent = descreverParada(parada);
+    visorAnterior.disabled = indice <= 0;
+    visorProxima.disabled = indice >= paradas.length - 1;
+
+    liberarUrlDoVisor();
+    visorImagem.removeAttribute('src');
+    // Uma imagem por vez: carregar todas de uma peregrinação inteira encheria
+    // a memória do aparelho sem necessidade.
+    const leitura = await storageFotos.lerImagem(parada.id);
+    if (desmontado || visorIndice !== indice) return;
+    if (!leitura.ok) {
+      visorLegenda.textContent = `${descreverParada(parada)} — a imagem não pôde ser lida: ${leitura.motivo}`;
+      return;
+    }
+    visorUrl = URL.createObjectURL(new Blob([leitura.bytes], { type: parada.imagem?.mime ?? 'image/jpeg' }));
+    visorImagem.src = visorUrl;
+  }
+
+  async function removerParadaAtual() {
+    const parada = paradas[visorIndice];
+    if (!parada) return;
+    if (!window.confirm('Apagar esta foto de parada do aparelho? A ação não pode ser desfeita.')) return;
+    const remocao = await storageFotos.remover(parada.id);
+    if (desmontado) return;
+    if (!remocao.ok) {
+      fotoStatus.textContent = `A foto não pôde ser apagada: ${remocao.motivo}`;
+      return;
+    }
+    paradas = paradas.filter((item) => item.id !== parada.id);
+    fotoStatus.textContent = `Parada apagada. ${paradas.length} parada(s) no aparelho.`;
+    fecharVisor();
+    atualizarParadas();
+  }
+
   function atualizarParadas() {
     empty(fotoLista);
-    for (const parada of paradas.slice(-6).reverse()) {
-      fotoLista.append(h('li', { className: parada.dentroDoLimite === false ? 'mapa__foto-item is-alerta' : 'mapa__foto-item' }, descreverParada(parada)));
+    // A lista mostra as últimas; o visor navega por todas.
+    for (const parada of paradas.slice(-8).reverse()) {
+      const indice = paradas.indexOf(parada);
+      fotoLista.append(h('li', { className: 'mapa__foto-linha' },
+        h('button', {
+          className: parada.dentroDoLimite === false ? 'mapa__foto-item is-alerta' : 'mapa__foto-item',
+          type: 'button',
+          onclick: () => abrirVisor(indice),
+        }, `⛶ ${descreverParada(parada)}`),
+      ));
     }
     atualizarMarcadores();
   }
@@ -860,6 +939,8 @@ export function mapaPage() {
         ? `Parada guardada em ${resultado.registro.mgrs ?? 'coordenada local'} com ${Math.round(resultado.registro.precisaoM)} m de precisão.`
         : `Parada guardada, mas com ${resultado.registro.precisaoM == null ? 'precisão desconhecida' : `${Math.round(resultado.registro.precisaoM)} m`} — acima dos ${resultado.registro.precisaoMaximaM} m pedidos. A foto não se perde; a ressalva fica no registro.`;
       atualizarParadas();
+      // Abre a foto recém-guardada: a pessoa quer ver como ficou antes de seguir.
+      abrirVisor(paradas.length - 1);
     } catch (erro) {
       fotoStatus.textContent = erro?.message ?? 'Não foi possível registrar esta foto de parada.';
     } finally {
@@ -937,6 +1018,10 @@ export function mapaPage() {
   trajetoBotao.onclick = alternarTrajeto;
   paradaBotao.onclick = () => alternarParada(TIPOS_PARADA.DESCANSO);
   pernoiteBotao.onclick = () => alternarParada(TIPOS_PARADA.PERNOITE);
+  visorFechar.onclick = fecharVisor;
+  visorAnterior.onclick = () => abrirVisor(visorIndice - 1);
+  visorProxima.onclick = () => abrirVisor(visorIndice + 1);
+  visorRemover.onclick = removerParadaAtual;
   fotoButton.onclick = abrirCameraDaParada;
   fotoArquivo.onchange = () => registrarFotoDaParada(fotoArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;
@@ -1226,5 +1311,5 @@ export function mapaPage() {
     atualizarTrajeto();
     avaliarExposicaoAtual();
   }, 1000);
-  return { elemento: raiz, desmontar: () => { desmontado = true; window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
 }
