@@ -8,16 +8,17 @@
 import { providerDeCamada } from './map-provider.js';
 import { criarMapProviderRegistry } from './map-provider-registry.js';
 import { criarMapProviderRuntime } from './map-provider-runtime.js';
-import { CAMADAS_BASE, estiloMapLibre } from '../data/camadas-mapa.js';
+import { CAMADA_CARTO_OPCIONAL, CAMADAS_BASE, estiloMapLibre } from '../data/camadas-mapa.js';
 
 export function criarMapaRuntime({ adaptador, baseId = 'sat', overlays = ['labels'], incluirDem = true } = {}) {
   if (!adaptador) throw new TypeError('adaptador é obrigatório');
 
-  const camadaInicial = CAMADAS_BASE.find((camada) => camada.id === baseId) ?? CAMADAS_BASE[0];
+  const catalogoRuntime = [CAMADA_CARTO_OPCIONAL, ...CAMADAS_BASE];
+  const camadaInicial = catalogoRuntime.find((camada) => camada.id === baseId) ?? catalogoRuntime[0];
   if (!camadaInicial) throw new Error('nenhuma camada base cartográfica disponível');
 
   const registry = criarMapProviderRegistry();
-  for (const camada of CAMADAS_BASE) {
+  for (const camada of catalogoRuntime) {
     registry.registrar(providerDeCamada(camada));
   }
 

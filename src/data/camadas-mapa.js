@@ -11,18 +11,19 @@ export function dataGibs(agora = Date.now()) {
   return new Date(agora - 36 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
+export const CAMADA_CARTO_OPCIONAL = {
+  id: 'carto-voyager',
+  nome: 'CARTO Voyager',
+  desc: 'Base cartográfica clara para uso online.',
+  padrao: false,
+  disponivel: cartoBasemapDisponivel(),
+  tileSize: 256,
+  maxzoom: 20,
+  tiles: cartoVoyagerTiles(),
+  creditos: '© CARTO · © OpenStreetMap contributors',
+};
+
 export const CAMADAS_BASE = [
-  {
-    id: 'carto-voyager',
-    nome: 'CARTO Voyager',
-    desc: 'Base cartográfica clara para uso online.',
-    padrao: false,
-    disponivel: cartoBasemapDisponivel(),
-    tileSize: 256,
-    maxzoom: 20,
-    tiles: cartoVoyagerTiles(),
-    creditos: '© CARTO · © OpenStreetMap contributors',
-  },
   {
     id: 'sat',
     nome: 'Satélite',
@@ -85,21 +86,22 @@ export const CAMADA_DEM = {
 };
 
 export function creditosDe(ids = null) {
-  const todas = [...CAMADAS_BASE, ...CAMADAS_OVERLAY, CAMADA_DEM];
+  const todas = [CAMADA_CARTO_OPCIONAL, ...CAMADAS_BASE, ...CAMADAS_OVERLAY, CAMADA_DEM];
   const alvo = ids ? todas.filter((c) => ids.includes(c.id)) : todas;
   return [...new Set(alvo.map((c) => c.creditos).filter(Boolean))];
 }
 
 export function camadaPorId(id) {
-  return [...CAMADAS_BASE, ...CAMADAS_OVERLAY, CAMADA_DEM].find((c) => c.id === id) || null;
+  return [CAMADA_CARTO_OPCIONAL, ...CAMADAS_BASE, ...CAMADAS_OVERLAY, CAMADA_DEM].find((c) => c.id === id) || null;
 }
 
 export function estiloMapLibre({base = 'sat', overlays = ['labels'], glyphs = 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf', incluirDem = true} = {}) {
   const sources = {}; const layers = [];
-  for (const c of CAMADAS_BASE) sources[c.id] = {type: 'raster', tiles: c.tiles, tileSize: c.tileSize, maxzoom: c.maxzoom, attribution: c.creditos};
+  const bases = [CAMADA_CARTO_OPCIONAL, ...CAMADAS_BASE];
+  for (const c of bases) sources[c.id] = {type: 'raster', tiles: c.tiles, tileSize: c.tileSize, maxzoom: c.maxzoom, attribution: c.creditos};
   if (incluirDem) sources[CAMADA_DEM.id] = {type: 'raster-dem', tiles: CAMADA_DEM.tiles, tileSize: CAMADA_DEM.tileSize, maxzoom: CAMADA_DEM.maxzoom, encoding: CAMADA_DEM.encoding, attribution: CAMADA_DEM.creditos};
   for (const c of CAMADAS_OVERLAY) if (c.tipo === 'raster') sources[c.id] = {type: 'raster', tiles: c.tiles, tileSize: c.tileSize, maxzoom: c.maxzoom, attribution: c.creditos};
-  for (const c of CAMADAS_BASE) layers.push({id: `base-${c.id}`, type: 'raster', source: c.id, layout: {visibility: c.id === base && c.disponivel !== false ? 'visible' : 'none'}});
+  for (const c of bases) layers.push({id: `base-${c.id}`, type: 'raster', source: c.id, layout: {visibility: c.id === base && c.disponivel !== false ? 'visible' : 'none'}});
   for (const c of CAMADAS_OVERLAY) {
     const visivel = overlays.includes(c.id);
     if (c.tipo === 'raster') layers.push({id: `${c.id}-layer`, type: 'raster', source: c.id, layout: {visibility: visivel ? 'visible' : 'none'}, paint: c.opacidade ? {'raster-opacity': c.opacidade} : {}});

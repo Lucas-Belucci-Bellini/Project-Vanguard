@@ -16,10 +16,10 @@ test('compararVersoes trata versões inválidas como inferiores', () => {
 });
 
 test('releaseMaisNova recusa rascunhos e releases iguais ou anteriores', () => {
-  assert.equal(releaseMaisNova({ tag_name: 'v1.0.1', draft: false }), true);
-  assert.equal(releaseMaisNova({ tag_name: 'v1.0.0', draft: false }), false);
-  assert.equal(releaseMaisNova({ tag_name: 'v1.0.0-rc.2', draft: false }), false);
-  assert.equal(releaseMaisNova({ tag_name: 'v1.0.1', draft: true }), false);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.1', draft: false }), true);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.0', draft: false }), false);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.0-rc.2', draft: false }), false);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.1', draft: true }), false);
   assert.equal(releaseMaisNova(null), false);
 });
 

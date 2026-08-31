@@ -18,7 +18,7 @@ describe('MapaRuntime', () => {
     expect(runtime.providerAtual().id).toBe('terreno');
     expect(runtime.providers().length).toBeGreaterThan(0);
     expect(fakeProvider.opcoes.style.version).toBe(8);
-    expect(fakeProvider.opcoes.style.sources.terreno.tiles).toContain('opentopomap.org');
+    expect(fakeProvider.opcoes.style.sources.terreno.tiles[0]).toMatch(/opentopomap\.org/);
     expect(fakeProvider.opcoes.style.layers.find((layer) => layer.id === 'base-terreno').layout.visibility).toBe('visible');
   });
 
