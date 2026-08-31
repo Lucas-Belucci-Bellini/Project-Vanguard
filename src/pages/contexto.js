@@ -200,7 +200,7 @@ export function contextoPage() {
 
   const raizConteudo = h('div', { className: 'contexto__wrap' },
     h('div', { className: 'contexto__header' },
-      h('div', null, h('div', { className: 'contexto__eyebrow' }, 'VANGUARD FIELD / PROTEÇÃO CIVIL'), titulo, descricao),
+      h('div', null, h('div', { className: 'contexto__eyebrow' }, 'PROTEÇÃO CIVIL'), titulo, descricao),
       h('div', { className: 'contexto__header-side' }, modoBadge, h('button', { className: 'contexto__back', type: 'button', onclick: () => { location.hash = '#/inicio'; } }, '← INÍCIO'))),
     h('div', { className: 'contexto__grid' },
       h('section', { className: 'contexto__card contexto__card--main' },

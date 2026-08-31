@@ -30,8 +30,7 @@ export function inicioPage() {
     ? `Último fixo salvo no aparelho · ${precisaoLabel(posicao.accuracy)}`
     : 'A posição não sai do dispositivo sem sua confirmação.');
   const statusCard = h('div', { className: 'inicio__status-card' }, statusDot,
-    h('div', { className: 'inicio__status-copy' }, statusTitle, statusDetail),
-    h('span', { className: 'inicio__status-lock', ariaHidden: 'true' }, '⌖ LOCAL')
+    h('div', { className: 'inicio__status-copy' }, statusTitle, statusDetail)
   );
 
   const gpsFeedback = h('p', { className: 'inicio__feedback', role: 'status' }, 'O GPS será usado apenas enquanto você estiver navegando.');
@@ -111,7 +110,7 @@ export function inicioPage() {
   raiz.append(
     h('section', { className: 'inicio__scroll' },
       h('div', { className: 'inicio__hero' },
-        h('div', { className: 'inicio__eyebrow' }, 'VANGUARD FIELD / NAVEGAÇÃO DE EXPEDIÇÃO'),
+        h('div', { className: 'inicio__eyebrow' }, 'NAVEGAÇÃO DE EXPEDIÇÃO'),
         h('h1', null, 'Volte pelo mesmo caminho.'),
         h('p', null, 'Um instrumento de navegação para a cidade e para lugares remotos: escolha um destino, registre sua rota e mantenha sua orientação mesmo quando o sinal de internet desaparece.'),
         statusCard,

@@ -146,7 +146,7 @@ export function diagnosticoPage() {
   wrap.append(
     h('header', { className: 'diagnostico__header' },
       h('div', null,
-        h('div', { className: 'diagnostico__eyebrow' }, 'VANGUARD FIELD / DIAGNÓSTICO LOCAL'),
+        h('div', { className: 'diagnostico__eyebrow' }, 'DIAGNÓSTICO LOCAL'),
         h('h1', null, 'Estado observável'),
         h('p', { className: 'diagnostico__intro' }, 'Conferência local de versão, rede, GPS, frescor, cache, armazenamento, bateria, lifecycle, performance, sensores e capacidades de compartilhamento. Este painel não envia telemetria e não prova cobertura, comunicação ou resgate.')
       ),

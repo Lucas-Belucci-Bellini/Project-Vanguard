@@ -104,7 +104,7 @@ export function doarPage() {
     h('p', { className: 'doar__fiscal' }, 'O relatório ajuda na organização e na auditoria, mas não é uma declaração automática à Receita Federal. A classificação tributária deve ser conferida com um contador.'));
 
   wrap.append(h('div', { className: 'doar__header' },
-    h('span', { className: 'doar__kicker' }, 'VANGUARD FIELD / APOIO'),
+    h('span', { className: 'doar__kicker' }, 'APOIO AO PROJETO'),
     h('button', { className: 'doar__back', type: 'button', onclick: () => { location.hash = '#/inicio'; } }, '← VOLTAR')),
     aviso,
     h('div', { className: 'doar__grid' }, doacao, auditoria, ativacao));

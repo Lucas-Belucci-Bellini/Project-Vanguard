@@ -13,6 +13,14 @@ html, body {
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
+  /* Trava de viewport. O app é usado com a tela travada e no bolso: qualquer
+     estouro horizontal viraria um arrasto que esconde metade da interface.
+     `clip` não cria contexto de rolagem, então `position: fixed` continua
+     preso à viewport; `hidden` fica antes como reserva para WebView antigo. */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body { min-height: 100dvh; display: flex; flex-direction: column; }
@@ -33,13 +41,15 @@ input, select { background: var(--color-bg); border: var(--border-base); border-
 /* Shell */
 .vg-salto-conteudo { position: fixed; z-index: calc(var(--z-sticky) + 2); top: 8px; left: 8px; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .vg-salto-conteudo:focus { width: auto; height: auto; overflow: visible; clip: auto; clip-path: none; padding: 10px 12px; background: var(--color-bg-elevated); border: 2px solid var(--color-cyan); color: var(--color-cyan); }
-.vg-header { position: relative; z-index: var(--z-sticky); flex: 0 0 64px; display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: max(8px, env(safe-area-inset-top)) clamp(14px, 4vw, 32px) 8px; background: color-mix(in srgb, var(--color-bg-elevated) 94%, transparent); border-bottom: var(--border-base); }
-.vg-marca { display: flex; align-items: center; gap: 9px; color: var(--color-cyan); font-size: 14px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-widest); text-shadow: var(--shadow-glow-cyan); white-space: nowrap; }
-.vg-marca__sigla { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid var(--color-cyan); color: var(--color-bg); background: var(--color-cyan); text-shadow: none; font-size: 16px; }
-.vg-marca small { display: block; margin-left: 3px; color: var(--color-text-muted); font-size: 8px; letter-spacing: var(--tracking-wide); text-shadow: none; }
-.vg-header__meta { display: flex; align-items: center; gap: 8px; }
+.vg-header { position: relative; z-index: var(--z-sticky); flex: 0 0 64px; display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: var(--space-md); padding: max(8px, env(safe-area-inset-top)) clamp(14px, 4vw, 32px) 8px; background: color-mix(in srgb, var(--color-bg-elevated) 94%, transparent); border-bottom: var(--border-base); }
+.vg-marca { display: flex; flex: 0 1 auto; min-width: 0; overflow: hidden; align-items: center; gap: 9px; color: var(--color-cyan); font-size: 14px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-widest); text-shadow: var(--shadow-glow-cyan); white-space: nowrap; }
+.vg-marca__sigla { display: grid; flex: 0 0 auto; place-items: center; width: 27px; height: 27px; border: 1px solid var(--color-cyan); color: var(--color-bg); background: var(--color-cyan); text-shadow: none; font-size: 16px; }
+.vg-marca small { display: none; margin-left: 3px; color: var(--color-text-muted); font-size: 8px; letter-spacing: var(--tracking-wide); text-shadow: none; }
+.vg-header__meta { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
 .vg-status { display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 9px; letter-spacing: var(--tracking-wide); white-space: nowrap; }
-.vg-status__dot, .mapa__gps-dot { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: var(--color-text-muted); }
+.vg-status__linhas { display: flex; flex-direction: column; line-height: 1.2; }
+.vg-status__rede { font-weight: var(--font-weight-bold); }
+.vg-status__dot, .mapa__gps-dot { flex: 0 0 auto; width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: var(--color-text-muted); }
 .vg-status__dot { background: var(--color-cyan); box-shadow: 0 0 8px var(--color-cyan); }
 .vg-status.is-offline { color: var(--color-ambar); }
 .vg-status.is-offline .vg-status__dot { background: var(--color-ambar); box-shadow: 0 0 8px var(--color-ambar); }
@@ -47,7 +57,7 @@ input, select { background: var(--color-bg); border: var(--border-base); border-
 .vg-atualizacao { display: inline-flex; align-items: center; min-height: 34px; padding: 7px 8px; border-color: var(--color-ambar); background: var(--color-warning-soft); color: var(--color-ambar); font-size: 8px; letter-spacing: .06em; }
 .vg-atualizacao[hidden] { display: none; }
 .vg-atualizacao:disabled { opacity: .7; }
-.vg-abas { position: fixed; z-index: var(--z-sticky); right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 8px max(7px, env(safe-area-inset-bottom)); gap: 4px; background: color-mix(in srgb, var(--color-bg-elevated) 96%, transparent); border-top: var(--border-base); backdrop-filter: blur(10px); }
+.vg-abas { position: fixed; z-index: var(--z-sticky); right: 0; bottom: 0; left: 0; max-width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 8px max(7px, env(safe-area-inset-bottom)); gap: 4px; background: color-mix(in srgb, var(--color-bg-elevated) 96%, transparent); border-top: var(--border-base); backdrop-filter: blur(10px); }
 .vg-aba { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; padding: 5px 2px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-muted); font-size: 8px; letter-spacing: .08em; }
 .vg-aba__icone { font-size: 18px; line-height: 1; }
 .vg-aba[aria-current='page'] { color: var(--color-cyan); background: var(--color-cyan-soft); border-color: var(--color-cyan-edge); }
@@ -89,6 +99,10 @@ input, select { background: var(--color-bg); border: var(--border-base); border-
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg); }
 ::-webkit-scrollbar-thumb { background: var(--color-surface-3); border-radius: var(--radius-sm); }
+
+@media (min-width: 480px) {
+  .vg-marca small { display: block; }
+}
 
 @media (min-width: 900px) {
   .vg-header { flex-basis: 72px; padding-left: 32px; padding-right: 32px; }

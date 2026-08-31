@@ -58,12 +58,17 @@ function montarShell() {
   seletorModo.value = estado.get(CHAVES.MODO, 'tatico');
   document.documentElement.dataset.modo = seletorModo.value;
 
+  // Duas linhas curtas em vez de uma linha longa: o cabeçalho tem 64 px de
+  // altura e sobra vertical, mas a largura é o recurso escasso num celular de
+  // 360 px. Uma linha só empurrava o seletor de modo para fora da tela.
+  const gpsRede = h('span', { className: 'vg-status__rede' }, 'ONLINE');
   const gpsStatus = h('span', { className: 'vg-status__text' }, 'GPS LOCAL');
   const status = h('div', { className: 'vg-status', title: 'A localização é mantida no dispositivo por padrão', 'aria-label': 'Status de conectividade e localização local', 'aria-live': 'polite' },
-    h('span', { className: 'vg-status__dot', ariaHidden: 'true' }), gpsStatus);
+    h('span', { className: 'vg-status__dot', ariaHidden: 'true' }),
+    h('span', { className: 'vg-status__linhas' }, gpsRede, gpsStatus));
   const atualizarConectividade = () => {
     const online = navigator.onLine !== false;
-    gpsStatus.textContent = online ? 'ONLINE · GPS LOCAL' : 'OFFLINE · GPS LOCAL';
+    gpsRede.textContent = online ? 'ONLINE' : 'OFFLINE';
     status.classList.toggle('is-offline', !online);
     status.title = online
       ? 'Internet disponível; a posição continua local por padrão.'
@@ -92,7 +97,7 @@ function montarShell() {
     main.focus({ preventScroll: false });
   };
   document.body.append(salto, header, main, nav);
-  return { abas, main, gpsStatus, status, desmontarAtualizacao: controleAtualizacao.desmontar };
+  return { abas, main, gpsRede, gpsStatus, status, desmontarAtualizacao: controleAtualizacao.desmontar };
 }
 
 function lerHash(bruto) {

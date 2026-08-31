@@ -28,7 +28,7 @@ export function sobrePage() {
   wrap.append(
     h('header', { className: 'sobre__header' },
       h('div', null,
-        h('div', { className: 'sobre__eyebrow' }, 'VANGUARD FIELD / CONTRATO PÚBLICO'),
+        h('div', { className: 'sobre__eyebrow' }, 'CONTRATO PÚBLICO'),
         h('h1', null, 'Navegação que explica seus limites'),
         h('p', null, 'O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, mar e proteção civil. Ele prioriza dados locais e avisa quando uma função depende de rede, fonte oficial ou equipamento externo.')),
       h('div', { className: 'sobre__version' }, 'PROTÓTIPO', h('small', null, 'OFFLINE-FIRST'))),
