@@ -53,7 +53,13 @@ test('o subtítulo da marca só aparece onde sobra largura', () => {
 });
 
 test('a barra de abas fixa não ultrapassa a viewport', () => {
-  assert.match(declaracoesDe('.vg-abas'), /max-width:\s*100%/, '.vg-abas precisa de max-width: 100%');
+  const abas = declaracoesDe('.vg-abas');
+  assert.match(abas, /max-width:\s*100%/, '.vg-abas precisa de max-width: 100%');
+  // Número cravado de colunas quebra no dia em que alguém acrescenta uma aba —
+  // foi o que aconteceu quando `#/navegacao` chegou a um grid de quatro.
+  assert.doesNotMatch(abas, /grid-template-columns:\s*repeat\(\s*\d/,
+    'as colunas têm de seguir a quantidade de abas, não um número fixo');
+  assert.match(abas, /grid-auto-flow:\s*column/);
 });
 
 test('nenhuma página repete a marca que o cabeçalho já mostra sempre', () => {

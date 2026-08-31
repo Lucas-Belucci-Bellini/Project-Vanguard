@@ -46,3 +46,7 @@ A evolução segura deve continuar por fonte licenciada e backend de storage apr
 [5]: https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance — NASA Earthdata, “Data Use and Citation Guidance”.
 [6]: https://registry.opendata.aws/terrain-tiles/ — Registry of Open Data on AWS, “Terrain Tiles”.
 [7]: https://developers.arcgis.com/terms/ — Esri, “Terms of Use”.
+
+## Atualização 1.3.1
+
+A camada de navegação usa as conversões MGRS/UTM existentes e não altera a política de fontes cartográficas. O catálogo público continua sem depender de CARTO/API key; datasets regionais ou mundiais redistribuíveis seguem não configurados.

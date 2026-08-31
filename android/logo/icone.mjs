@@ -11,7 +11,12 @@
  * qualquer máscara de launcher. Por isso o V e o bezel vivem dentro desse
  * círculo, e só a grade e o brilho ocupam a borda.
  *
- * Uso: node android/logo/icone.mjs
+ * Uso: `npm i -D playwright && node android/logo/icone.mjs`
+ *
+ * O playwright NÃO é dependência do projeto de propósito: o `postinstall` dele
+ * baixa navegadores, e o CI roda `npm ci` a cada release para montar o APK —
+ * centenas de megabytes por build por causa de um gerador usado de vez em
+ * quando. Instale só na hora de regerar os ícones, e desinstale depois.
  */
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';

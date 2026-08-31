@@ -14,6 +14,7 @@ import { criarNavegador } from './core/navegacao.js';
 const ROTAS = [
   { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
   { hash: '#/mapa', titulo: 'Mapa', icone: '⊕', carregar: () => import('./pages/mapa.js').then((m) => m.mapaPage) },
+  { hash: '#/navegacao', titulo: 'Navegação', icone: '⌖', carregar: () => import('./pages/navegacao.js').then((m) => m.navegacaoPage) },
   { hash: '#/bussola', titulo: 'Bússola', icone: '◉', carregar: () => import('./pages/bussola.js').then((m) => m.bussolaPage) },
   { hash: '#/socorro', titulo: 'Socorro', icone: '!', carregar: () => import('./pages/socorro.js').then((m) => m.socorroPage) },
   { hash: '#/escuta', titulo: 'Escuta', icone: '◎', carregar: () => import('./pages/escuta.js').then((m) => m.escutaPage), secundária: true },

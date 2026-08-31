@@ -14,7 +14,7 @@ test('configuração pública concentra identidade e atualização oficial', () 
   assert.deepEqual(CONFIGURACAO_APLICATIVO, {
     nome: 'Vanguard Field',
     id: 'com.projectvanguard.field',
-    versao: '1.0.0',
+    versao: '1.3.1',
     repositorio: 'Lucas-Belucci-Bellini/Project-Vanguard',
     urlRepositorio: 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard',
   });
