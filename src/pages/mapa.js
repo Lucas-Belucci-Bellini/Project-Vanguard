@@ -23,6 +23,7 @@ import { iniciarTrajeto, encerrarTrajeto, iniciarParada, encerrarParada, resumoT
 import { classificarDeslocamento, sugerirModoAtual, MODOS_DESLOCAMENTO, CONFIANCA } from '../core/deslocamento.js';
 import { avaliarExposicao, NIVEIS_EXPOSICAO } from '../core/exposicao.js';
 import { dispararAlerta } from '../core/alertas-tateis.js';
+import { capturarFotoDaParada, cameraNativaDisponivel, RESULTADOS_CAPTURA } from '../platform/camera.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const ROTULOS = CAMADAS_OVERLAY.find((camada) => camada.id === 'labels') ?? null;
@@ -906,6 +907,21 @@ export function mapaPage() {
       atualizarHud();
       atualizarMarcadores();
     }
+    if (cameraNativaDisponivel()) {
+      const captura = await capturarFotoDaParada();
+      if (desmontado) return;
+      if (captura.estado === RESULTADOS_CAPTURA.CAPTURADA) {
+        await guardarFotoDaParada(captura.bytes, captura.mime, { salvouNaGaleria: captura.salvouNaGaleria });
+        return;
+      }
+      if (captura.estado === RESULTADOS_CAPTURA.CANCELADA) {
+        fotoStatus.textContent = 'Captura cancelada; nenhuma parada foi registrada.';
+        return;
+      }
+      // Plugin ausente ou com falha: o `<input capture>` é o caminho provado, e
+      // perder a foto porque um plugin faltou seria inaceitável em campo.
+      fotoStatus.textContent = 'Câmera nativa indisponível; abrindo a câmera do navegador.';
+    }
     fotoArquivo.value = '';
     fotoArquivo.click();
   }
@@ -913,15 +929,25 @@ export function mapaPage() {
   async function registrarFotoDaParada(arquivo) {
     if (!arquivo) return;
     try {
-      fotoStatus.textContent = 'Lendo a foto e confirmando a posição da parada…';
+      const bytes = new Uint8Array(await arquivo.arrayBuffer());
+      await guardarFotoDaParada(bytes, mimeDaFoto(arquivo));
+    } catch (erro) {
+      fotoStatus.textContent = erro?.message ?? 'Não foi possível registrar esta foto de parada.';
+    } finally {
+      fotoArquivo.value = '';
+    }
+  }
+
+  async function guardarFotoDaParada(bytes, mime, { salvouNaGaleria = null } = {}) {
+    try {
+      fotoStatus.textContent = 'Confirmando a posição da parada…';
       const fresca = await posicaoDaParada();
       if (desmontado) return;
       if (fresca) { posicao = fresca; atualizarHud(); }
-      const bytes = new Uint8Array(await arquivo.arrayBuffer());
       const resultado = criarRegistroFotoParada({
         id: `parada-${new Date().toISOString().replace(/[:.]/g, '-')}`,
         posicao,
-        imagem: { mime: mimeDaFoto(arquivo), sizeBytes: bytes.byteLength },
+        imagem: { mime, sizeBytes: bytes.byteLength },
         capturadaEm: Date.now(),
       });
       if (!resultado.ok) {
@@ -935,16 +961,18 @@ export function mapaPage() {
         return;
       }
       paradas = [...paradas, { ...resultado.registro, sizeBytes: gravacao.sizeBytes }];
-      fotoStatus.textContent = resultado.registro.dentroDoLimite
+      // Só afirmamos a galeria quando o sistema confirmou a gravação.
+      const notaGaleria = salvouNaGaleria === true
+        ? ' Também foi salva na galeria do celular.'
+        : salvouNaGaleria === false ? ' Não foi possível salvá-la na galeria; ela está guardada no app.' : '';
+      fotoStatus.textContent = (resultado.registro.dentroDoLimite
         ? `Parada guardada em ${resultado.registro.mgrs ?? 'coordenada local'} com ${Math.round(resultado.registro.precisaoM)} m de precisão.`
-        : `Parada guardada, mas com ${resultado.registro.precisaoM == null ? 'precisão desconhecida' : `${Math.round(resultado.registro.precisaoM)} m`} — acima dos ${resultado.registro.precisaoMaximaM} m pedidos. A foto não se perde; a ressalva fica no registro.`;
+        : `Parada guardada, mas com ${resultado.registro.precisaoM == null ? 'precisão desconhecida' : `${Math.round(resultado.registro.precisaoM)} m`} — acima dos ${resultado.registro.precisaoMaximaM} m pedidos. A foto não se perde; a ressalva fica no registro.`) + notaGaleria;
       atualizarParadas();
       // Abre a foto recém-guardada: a pessoa quer ver como ficou antes de seguir.
       abrirVisor(paradas.length - 1);
     } catch (erro) {
       fotoStatus.textContent = erro?.message ?? 'Não foi possível registrar esta foto de parada.';
-    } finally {
-      fotoArquivo.value = '';
     }
   }
 
