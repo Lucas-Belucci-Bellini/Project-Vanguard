@@ -64,6 +64,7 @@
 .mapa__foto-button { width: 100%; min-height: 34px; margin-top: 8px; padding: 7px; color: var(--color-cyan); background: transparent; border-color: var(--color-cyan-edge); font-size: 9px; font-weight: var(--font-weight-bold); }
 .mapa__foto-status { min-height: 15px; margin: 7px 0 0; color: var(--color-text-muted); font-size: 8px; line-height: 1.45; }
 .mapa__foto-lista { margin: 7px 0 0; padding: 0; list-style: none; }
+.mapa__foto-card .mapa__quick-button { width: 100%; margin-top: 7px; }
 .mapa__foto-linha { border-top: var(--border-base); }
 .mapa__foto-item { display: block; width: 100%; min-height: 30px; padding: 7px 4px; background: transparent; border: 0; color: var(--color-text-secondary); font-size: 8px; line-height: 1.45; text-align: left; }
 .mapa__visor { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; gap: 9px; padding: 12px; background: rgba(6,9,5,.96); }

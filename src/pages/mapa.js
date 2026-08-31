@@ -24,6 +24,7 @@ import { classificarDeslocamento, sugerirModoAtual, MODOS_DESLOCAMENTO, CONFIANC
 import { avaliarExposicao, NIVEIS_EXPOSICAO } from '../core/exposicao.js';
 import { dispararAlerta } from '../core/alertas-tateis.js';
 import { capturarFotoDaParada, cameraNativaDisponivel, RESULTADOS_CAPTURA } from '../platform/camera.js';
+import { montarPacotePeregrinacao } from '../core/pacote-peregrinacao.js';
 
 const BASES = Object.fromEntries(CAMADAS_BASE.map((camada) => [camada.id, camada]));
 const ROTULOS = CAMADAS_OVERLAY.find((camada) => camada.id === 'labels') ?? null;
@@ -137,6 +138,7 @@ export function mapaPage() {
   const fotoArquivo = h('input', { className: 'mapa__registro-file', type: 'file', accept: 'image/*', capture: 'environment', 'aria-label': 'Foto da parada atual' });
   const fotoStatus = h('p', { className: 'mapa__foto-status', role: 'status' }, `A foto é guardada com a coordenada da captura; a parada pede precisão de ${PRECISAO_PARADA_PADRAO_M} m ou melhor.`);
   const fotoLista = h('ul', { className: 'mapa__foto-lista' });
+  const pacoteBotao = h('button', { className: 'mapa__quick-button', type: 'button' }, '⤓ PACOTE DA CAMINHADA');
   const visorImagem = h('img', { className: 'mapa__visor-imagem', alt: 'Foto da parada' });
   const visorLegenda = h('p', { className: 'mapa__visor-legenda' });
   const visorContador = h('span', { className: 'mapa__visor-contador' });
@@ -228,6 +230,7 @@ export function mapaPage() {
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'PARADAS COM FOTO'), h('span', { className: 'mapa__privacy' }, '⌖ NO APARELHO')),
       fotoButton,
       fotoArquivo,
+      pacoteBotao,
       fotoStatus,
       fotoLista
     ),
@@ -780,6 +783,38 @@ export function mapaPage() {
     }
   }
 
+  async function exportarPacoteDaCaminhada() {
+    pacoteBotao.disabled = true;
+    const rotulo = pacoteBotao.textContent;
+    pacoteBotao.textContent = 'MONTANDO O PACOTE…';
+    try {
+      const pacote = await montarPacotePeregrinacao({
+        paradas,
+        trilha,
+        waypoints,
+        destino,
+        lerImagem: (id) => storageFotos.lerImagem(id),
+      });
+      if (desmontado) return;
+      const resultado = await compartilharArquivo({
+        blob: new Blob([pacote.bytes], { type: 'application/zip' }),
+        fileName: pacote.nomeArquivo,
+        title: 'Caminhada Vanguard Field',
+        texto: `${pacote.fotosIncluidas} foto(s) de parada e a trilha, com as coordenadas ao lado.`,
+      });
+      if (desmontado) return;
+      const faltaram = pacote.fotosAusentes.length
+        ? ` ${pacote.fotosAusentes.length} foto(s) não puderam ser lidas e ficaram de fora — estão listadas no LEIA-ME.`
+        : '';
+      fotoStatus.textContent = `${textoResultadoCompartilhamento(resultado, 'pacote')} ${pacote.fotosIncluidas} foto(s) e a trilha, em ${(pacote.tamanhoBytes / 1048576).toFixed(1)} MB.${faltaram}`;
+    } catch (erro) {
+      fotoStatus.textContent = erro?.message ?? 'Não foi possível montar o pacote da caminhada.';
+    } finally {
+      pacoteBotao.disabled = false;
+      pacoteBotao.textContent = rotulo;
+    }
+  }
+
   const MIME_POR_EXTENSAO = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif' };
 
   function mimeDaFoto(arquivo) {
@@ -1051,6 +1086,7 @@ export function mapaPage() {
   visorProxima.onclick = () => abrirVisor(visorIndice + 1);
   visorRemover.onclick = removerParadaAtual;
   fotoButton.onclick = abrirCameraDaParada;
+  pacoteBotao.onclick = exportarPacoteDaCaminhada;
   fotoArquivo.onchange = () => registrarFotoDaParada(fotoArquivo.files?.[0]);
   destinoButton.onclick = definirDestino;
   destinoMapButton.onclick = () => {
