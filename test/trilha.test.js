@@ -34,3 +34,30 @@ test('resumoTrilha ignora pontos geograficamente inválidos e aceita trilha vazi
   assert.equal(resumo.distanciaM, 0);
   assert.equal(resumoTrilha().pontos, 0);
 });
+
+test('a trilha vira segmentos por modo, sem buraco na virada', async () => {
+  const { trilhaGeoJSON } = await import('../src/core/trilha.js');
+  const geo = trilhaGeoJSON([
+    { lat: 0, lon: 0 }, { lat: 0.001, lon: 0 },
+    { lat: 0.002, lon: 0, modo: 'VEICULO' }, { lat: 0.003, lon: 0, modo: 'VEICULO' },
+    { lat: 0.004, lon: 0 }, { lat: 0.005, lon: 0 },
+  ]);
+  assert.equal(geo.features.length, 3);
+  assert.deepEqual(geo.features.map((f) => f.properties.modo), ['A_PE', 'VEICULO', 'A_PE']);
+  // O ponto da virada tem de estar nos DOIS segmentos: se aparecer só num, o
+  // traçado abre um vão bem onde a pessoa entrou no ônibus.
+  const fimDoPrimeiro = geo.features[0].geometry.coordinates.at(-1);
+  const inicioDoSegundo = geo.features[1].geometry.coordinates[0];
+  assert.deepEqual(fimDoPrimeiro, inicioDoSegundo);
+});
+
+test('segmento de um ponto só não vira geometria inválida', async () => {
+  const { trilhaGeoJSON, inicioDaTrilha } = await import('../src/core/trilha.js');
+  assert.deepEqual(trilhaGeoJSON([{ lat: 0, lon: 0 }]).features, []);
+  assert.deepEqual(trilhaGeoJSON([]).features, []);
+  for (const f of trilhaGeoJSON([{ lat: 0, lon: 0 }, { lat: 1, lon: 1 }]).features) {
+    assert.ok(f.geometry.coordinates.length >= 2);
+  }
+  assert.equal(inicioDaTrilha([{ lat: 5, lon: 6 }]).features[0].geometry.coordinates[0], 6);
+  assert.deepEqual(inicioDaTrilha([]).features, []);
+});

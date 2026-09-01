@@ -7,7 +7,7 @@ import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/
 import { CAMADAS_BASE, CAMADAS_OVERLAY } from '../data/camadas-mapa.js';
 import { ROTAS_PEREGRINACAO, rotaPorId, statusRotaLabel } from '../data/rotas-peregrinacao.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
-import { resumoTrilha } from '../core/trilha.js';
+import { resumoTrilha, trilhaGeoJSON, inicioDaTrilha } from '../core/trilha.js';
 import { distancia3D, medirTrilha } from '../engine/odometro.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
@@ -524,7 +524,8 @@ export function mapaPage() {
       features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [Number(parada.lon), Number(parada.lat)] }, properties: { tipo: 'parada' } });
     }
     mapa.getSource('vanguard-marcadores').setData({ type: 'FeatureCollection', features });
-    mapa.getSource('vanguard-trilha').setData({ type: 'FeatureCollection', features: trilha.length > 1 ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: trilha.map((p) => [p.lon, p.lat]) }, properties: {} }] : [] });
+    mapa.getSource('vanguard-trilha').setData(trilhaGeoJSON(trilha));
+    mapa.getSource('vanguard-trilha-inicio')?.setData(inicioDaTrilha(trilha));
     mapa.getSource('vanguard-destino').setData({ type: 'FeatureCollection', features: posicao && destino ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: [[posicao.lon, posicao.lat], [destino.lon, destino.lat]] }, properties: {} }] : [] });
   }
 
@@ -1324,10 +1325,58 @@ export function mapaPage() {
       if (desmontado) return;
       mapa.addSource('vanguard-grade', { type: 'geojson', data: gradeAtual });
       mapa.addSource('vanguard-trilha', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      mapa.addSource('vanguard-trilha-inicio', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       mapa.addSource('vanguard-destino', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       mapa.addSource('vanguard-marcadores', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       mapa.addLayer({ id: 'vanguard-grade', type: 'line', source: 'vanguard-grade', paint: { 'line-color': '#b6c59b', 'line-opacity': 0.28, 'line-width': ['case', ['get', 'forte'], 1.5, 0.7] } });
-      mapa.addLayer({ id: 'vanguard-trilha', type: 'line', source: 'vanguard-trilha', paint: { 'line-color': '#8bff3f', 'line-width': 4, 'line-opacity': 0.85 } });
+      // O traçado antigo era UMA linha verde chapada de 4 px, que sobre imagem
+      // de satélite some e sobre topográfico se confunde com estrada. Agora são
+      // três camadas:
+      //
+      // 1. CONTORNO escuro e largo por baixo — é ele que faz a rota ser lida
+      //    sobre qualquer base, clara ou escura, sem depender da cor da linha.
+      // 2. NÚCLEO colorido POR MODO: verde-fósforo para o que foi caminhado,
+      //    âmbar tracejado para o trecho de veículo. Numa peregrinação essa é
+      //    a diferença que importa — 60 km com 25 de ônibus não são 60 andados.
+      // 3. MARCA DE PARTIDA, para saber de onde o dia começou sem rolar o mapa.
+      //
+      // `round` em junta e ponta evita a farpa que aparecia em cada curva
+      // fechada, que era boa parte da sensação de traçado "quebrado".
+      // `line-dasharray` NÃO aceita expressão orientada a dado no MapLibre —
+      // tentar `['case', ...]` nele quebra o estilo em runtime. Por isso o
+      // trecho de veículo é uma CAMADA separada com `filter`, não uma variação
+      // de pintura da mesma camada.
+      const aPe = ['!=', ['get', 'modo'], 'VEICULO'];
+      const emVeiculo = ['==', ['get', 'modo'], 'VEICULO'];
+      mapa.addLayer({
+        id: 'vanguard-trilha-contorno',
+        type: 'line',
+        source: 'vanguard-trilha',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#0c0f0a', 'line-width': 8, 'line-opacity': 0.55, 'line-blur': 0.5 },
+      });
+      mapa.addLayer({
+        id: 'vanguard-trilha',
+        type: 'line',
+        source: 'vanguard-trilha',
+        filter: aPe,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#8bff3f', 'line-width': 4, 'line-opacity': 0.95 },
+      });
+      mapa.addLayer({
+        id: 'vanguard-trilha-veiculo',
+        type: 'line',
+        source: 'vanguard-trilha',
+        filter: emVeiculo,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#ffb000', 'line-width': 3, 'line-opacity': 0.95, 'line-dasharray': [2, 1.5] },
+      });
+      mapa.addLayer({
+        id: 'vanguard-trilha-inicio',
+        type: 'circle',
+        source: 'vanguard-trilha-inicio',
+        paint: { 'circle-radius': 5, 'circle-color': '#0c0f0a', 'circle-stroke-width': 2, 'circle-stroke-color': '#8bff3f' },
+      });
       mapa.addLayer({ id: 'vanguard-destino', type: 'line', source: 'vanguard-destino', paint: { 'line-color': '#ffb000', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.9 } });
       mapa.addLayer({ id: 'vanguard-marcadores', type: 'circle', source: 'vanguard-marcadores', paint: { 'circle-radius': ['match', ['get', 'tipo'], 'voce', 8, 'destino', 7, 'parada', 7, 6], 'circle-color': ['match', ['get', 'tipo'], 'voce', '#80e0ff', 'destino', '#ffb000', 'parada', '#8bff3f', '#ffb000'], 'circle-stroke-color': '#11150e', 'circle-stroke-width': 2 } });
       redesenharGrade();

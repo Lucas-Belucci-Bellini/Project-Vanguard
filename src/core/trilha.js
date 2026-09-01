@@ -59,3 +59,61 @@ export function resumoTrilha(pontos = []) {
     temTempo: duracaoMs !== null,
   };
 }
+
+/**
+ * Trilha em GeoJSON, quebrada em segmentos por modo de deslocamento.
+ *
+ * Uma `LineString` única obriga a desenhar tudo da mesma cor, e aí o trecho de
+ * ônibus fica idêntico ao trecho caminhado — que é justamente a diferença que
+ * importa numa peregrinação. Aqui cada troca de modo fecha um segmento e abre
+ * o próximo, **repetindo o ponto de junção** para não abrir buraco no traçado.
+ *
+ * Segmento de um ponto só é descartado: `LineString` com um vértice não é
+ * geometria válida e alguns renderizadores engasgam nela.
+ */
+export function trilhaGeoJSON(pontos = []) {
+  const validos = (Array.isArray(pontos) ? pontos : []).filter(coordenadaValida);
+  const features = [];
+  let atual = null;
+
+  for (const ponto of validos) {
+    const modo = ponto?.modo === 'VEICULO' ? 'VEICULO' : 'A_PE';
+    if (!atual) {
+      atual = { modo, coordinates: [[ponto.lon, ponto.lat]] };
+      continue;
+    }
+    if (modo !== atual.modo) {
+      // O ponto da virada entra nos dois segmentos: sem isso o traçado fica
+      // com um vão exatamente onde a pessoa subiu no ônibus.
+      atual.coordinates.push([ponto.lon, ponto.lat]);
+      if (atual.coordinates.length > 1) features.push(atual);
+      atual = { modo, coordinates: [[ponto.lon, ponto.lat]] };
+      continue;
+    }
+    atual.coordinates.push([ponto.lon, ponto.lat]);
+  }
+  if (atual && atual.coordinates.length > 1) features.push(atual);
+
+  return {
+    type: 'FeatureCollection',
+    features: features.map(({ modo, coordinates }) => ({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates },
+      properties: { modo },
+    })),
+  };
+}
+
+/** Ponto de partida da trilha, para o mapa marcar onde o dia começou. */
+export function inicioDaTrilha(pontos = []) {
+  const primeiro = (Array.isArray(pontos) ? pontos : []).find(coordenadaValida);
+  if (!primeiro) return { type: 'FeatureCollection', features: [] };
+  return {
+    type: 'FeatureCollection',
+    features: [{
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [primeiro.lon, primeiro.lat] },
+      properties: {},
+    }],
+  };
+}
