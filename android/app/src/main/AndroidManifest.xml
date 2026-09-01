@@ -62,6 +62,11 @@
          faixa de frequência. O áudio não é gravado, guardado nem transmitido —
          só existe o espectro em memória. Nenhuma permissão de rede a mais é
          pedida por causa dela. -->
+    <!-- Aviso persistente com o quanto se andou hoje, legível na tela
+         bloqueada (ver src/core/notificacao-jornada.js). No Android 13+ a
+         notificação não aparece sem esta permissão. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
 </manifest>

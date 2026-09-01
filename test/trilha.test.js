@@ -61,3 +61,43 @@ test('segmento de um ponto só não vira geometria inválida', async () => {
   assert.equal(inicioDaTrilha([{ lat: 5, lon: 6 }]).features[0].geometry.coordinates[0], 6);
   assert.deepEqual(inicioDaTrilha([]).features, []);
 });
+
+test('o resumo do dia recorta a trilha no dia local, não no total acumulado', async () => {
+  const { resumoDoDia } = await import('../src/core/trilha.js');
+  const agora = new Date('2026-09-01T15:00:00').getTime();
+  const hoje = new Date('2026-09-01T08:00:00').getTime();
+  const ontem = new Date('2026-08-31T08:00:00').getTime();
+  const G = 111195;   // metros por grau de latitude, aproximado
+
+  const pontos = [];
+  // 2 km ontem — não podem aparecer no número de hoje.
+  for (let i = 0; i <= 20; i += 1) pontos.push({ lat: i * 100 / G, lon: 0, accuracy: 5, timestamp: ontem + i * 60_000 });
+  // 1 km hoje, entre 08:00 e 09:00.
+  for (let i = 0; i <= 10; i += 1) pontos.push({ lat: i * 100 / G, lon: 0, accuracy: 5, timestamp: hoje + i * 360_000 });
+
+  const resumo = resumoDoDia(pontos, agora);
+  assert.ok(Math.abs(resumo.distanciaM - 1000) < 30, `hoje deu ${resumo.distanciaM.toFixed(0)} m`);
+  assert.equal(resumo.duracaoMs, 3_600_000);
+  assert.equal(resumo.pontos, 11);
+});
+
+test('o resumo do dia diz quando a caminhada parou, em vez de deixar o número subindo', async () => {
+  const { resumoDoDia } = await import('../src/core/trilha.js');
+  const agora = new Date('2026-09-01T15:00:00').getTime();
+  const G = 111195;
+  const recente = [
+    { lat: 0, lon: 0, accuracy: 5, timestamp: agora - 300_000 },
+    { lat: 200 / G, lon: 0, accuracy: 5, timestamp: agora - 60_000 },
+  ];
+  assert.equal(resumoDoDia(recente, agora).emMovimento, true);
+
+  const velho = recente.map((p) => ({ ...p, timestamp: p.timestamp - 3_600_000 }));
+  assert.equal(resumoDoDia(velho, agora).emMovimento, false);
+});
+
+test('dia sem caminhada devolve zero, não erro', async () => {
+  const { resumoDoDia } = await import('../src/core/trilha.js');
+  assert.equal(resumoDoDia([], Date.now()).distanciaM, 0);
+  assert.equal(resumoDoDia([{ lat: 0, lon: 0, timestamp: Date.now() }], Date.now()).pontos, 1);
+  assert.equal(resumoDoDia(null, Date.now()).emMovimento, false);
+});

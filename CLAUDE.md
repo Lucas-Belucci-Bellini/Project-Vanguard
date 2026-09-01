@@ -38,6 +38,8 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/core/bussola-leitura.js` — os três nortes da bússola; a leitura crua só vira azimute verdadeiro com correção medida (ver ADR-0040)
 - `src/engine/sol.js` — posição do Sol offline, usada pelo alerta de exposição e pela conferência da bússola
 - `src/engine/escuta.js` + `src/core/escuta-ambiente.js` — escuta de ambiente (`#/escuta`): mede energia por banda no microfone e avisa por vibração quando o grave sobe como sobe um veículo se aproximando, ou quando alguém grita. **Só recebe** — não grava, não guarda e não transmite, e há teste estrutural cobrando isso (ver ADR-0041)
+- `src/engine/odometro.js` — distância COM desnível e peneira de ruído; `src/engine/passos.js` + `src/core/passos-sensor.js` contam passos pelo acelerômetro, para onde o GPS não enxerga (ver ADR-0043)
+- `src/core/notificacao-jornada.js` — quanto se andou hoje, na tela bloqueada; notificação própria porque o plugin de fundo não deixa trocar o texto da dele
 - `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
@@ -82,6 +84,14 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - **Azimute de GRADE, não verdadeiro**, para tiro.
 - **Peça e alvo em fusos UTM diferentes**: `gridVector()` reprojeta no fuso da peça.
 - **`ventoDirecaoDeg` é de ONDE o vento vem** (convenção METAR).
+- **Distância de trilha NUNCA é `haversine` puro.** Ela é 2D: subir escada ou
+  ladeira vira "parado", e isso já mordeu em campo. Use `engine/odometro.js`,
+  que soma o desnível e peneira o tremor do GPS pela precisão do fixo. Somar em
+  3D sem essa peneira é trocar um erro por outro — uma hora sentado vira
+  quilômetros (ver ADR-0043).
+- **`line-dasharray` não aceita expressão orientada a dado no MapLibre.** Um
+  `['case', ...]` nele quebra o estilo em runtime. Trecho com traço diferente
+  precisa de CAMADA própria com `filter`.
 - **A chave de assinatura do APK é FIXA e versionada** (`android/keystore/`,
   ver ADR-0042). Sem `signingConfigs` o Gradle inventa uma chave nova em cada
   runner do CI e o Android recusa a atualização por conflito de assinatura — a

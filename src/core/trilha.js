@@ -117,3 +117,48 @@ export function inicioDaTrilha(pontos = []) {
     }],
   };
 }
+
+/** Começo do dia local do instante dado. */
+function inicioDoDia(instante) {
+  const d = new Date(instante);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+/**
+ * Quanto se andou HOJE — o número que vai para a tela bloqueada.
+ *
+ * A trilha atravessa dias: numa peregrinação de três dias, mostrar o total
+ * acumulado responde a pergunta errada. Aqui o recorte é o dia local, e o
+ * tempo é medido do primeiro ao último ponto **de hoje**, não desde o começo
+ * da trilha.
+ *
+ * `emMovimento` distingue "andei 6 h" de "o app está ligado há 6 h": se o
+ * último ponto é velho, a caminhada parou, e o texto tem de dizer isso em vez
+ * de deixar o número subindo sozinho.
+ */
+export function resumoDoDia(pontos = [], agora = Date.now(), { paradoAposMs = 10 * 60_000 } = {}) {
+  const doDia = (Array.isArray(pontos) ? pontos : [])
+    .filter(coordenadaValida)
+    .filter((ponto) => {
+      const instante = instanteValido(ponto);
+      return instante !== null && instante >= inicioDoDia(agora) && instante <= agora;
+    });
+
+  if (doDia.length < 2) {
+    return { distanciaM: 0, duracaoMs: 0, duracaoLabel: duracaoLabel(0), pontos: doDia.length, emMovimento: false, ganhoElevacaoM: 0 };
+  }
+  const medida = medirTrilha(doDia);
+  const primeiro = instanteValido(doDia[0]);
+  const ultimo = instanteValido(doDia[doDia.length - 1]);
+  const duracaoMs = Math.max(0, ultimo - primeiro);
+
+  return {
+    distanciaM: medida.distanciaM,
+    ganhoElevacaoM: medida.ganhoElevacaoM,
+    duracaoMs,
+    duracaoLabel: duracaoLabel(duracaoMs),
+    pontos: doDia.length,
+    emMovimento: agora - ultimo <= paradoAposMs,
+  };
+}

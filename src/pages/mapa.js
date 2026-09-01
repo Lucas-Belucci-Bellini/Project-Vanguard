@@ -9,6 +9,8 @@ import { ROTAS_PEREGRINACAO, rotaPorId, statusRotaLabel } from '../data/rotas-pe
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha, trilhaGeoJSON, inicioDaTrilha } from '../core/trilha.js';
 import { distancia3D, medirTrilha } from '../engine/odometro.js';
+import { criarSensorDePassos } from '../core/passos-sensor.js';
+import { criarAvisoDaJornada } from '../core/notificacao-jornada.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
@@ -298,6 +300,10 @@ export function mapaPage() {
   let wakeLock = null;
   let wakeAtivo = false;
   let backgroundEstado = ESTADOS_BACKGROUND.IDLE;
+  // Passos e aviso da jornada acompanham a rota: ligam com ela e desligam
+  // junto, para não consumir sensor nem bandeja de notificação à toa.
+  const sensorPassos = criarSensorDePassos();
+  const avisoJornada = criarAvisoDaJornada();
   let backgroundMensagem = 'Disponível no APK de teste; não envia localização para servidor.';
 
   /**
@@ -335,6 +341,11 @@ export function mapaPage() {
       trilha = [...trilha, modoConfirmado ? { ...nova, modo: modoConfirmado } : nova].slice(-12000);
       ultimoRegistrado = nova;
       estado.set(CHAVES.TRILHA, trilha);
+      // A passada é aprendida nos trechos em que o GPS está bom; é ela que
+      // sustenta a contagem quando o sinal some dentro de prédio ou em mata.
+      const passos = sensorPassos.resumo();
+      sensorPassos.observarGps(nova, medirTrilha(trilha).distanciaM);
+      void avisoJornada.atualizar(trilha, { passos: passos.passos, passosCalibrados: passos.calibrada });
     }
     if (!document.hidden) {
       atualizarHud();
@@ -602,6 +613,13 @@ export function mapaPage() {
     if (!rotaAtiva || rotaPausada) {
       configurarWakeLock(false);
       void backgroundControle.parar();
+      sensorPassos.parar();
+      void avisoJornada.encerrar();
+    } else {
+      // `iniciar()` do sensor precisa nascer de um gesto por causa do iOS 13+,
+      // e este caminho vem do toque no botão de rota.
+      void sensorPassos.iniciar();
+      void avisoJornada.iniciar().then(() => avisoJornada.atualizar(trilha));
     }
     if (rotaAtiva && !rotaPausada) sheetStatus.textContent = 'Rota iniciada: gravação local ativa.';
     if (rotaAtiva && rotaPausada) sheetStatus.textContent = 'Rota pausada. Os pontos já registrados permanecem no aparelho.';
@@ -1456,5 +1474,5 @@ export function mapaPage() {
     atualizarTrajeto();
     avaliarExposicaoAtual();
   }, 1000);
-  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); sensorPassos.parar(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
 }
