@@ -2,12 +2,13 @@ import '../styles/mapa.css';
 import { h, empty, dist, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel, idadePosicaoLabel, frescorPosicao } from '../core/localizacao.js';
-import { haversine, vincentyInverse, bearingTo } from '../engine/geo.js';
+import { vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE, CAMADAS_OVERLAY } from '../data/camadas-mapa.js';
 import { ROTAS_PEREGRINACAO, rotaPorId, statusRotaLabel } from '../data/rotas-peregrinacao.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha } from '../core/trilha.js';
+import { distancia3D, medirTrilha } from '../engine/odometro.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
@@ -289,6 +290,7 @@ export function mapaPage() {
   let marcando = false;
   let marcandoDestino = false;
   let primeiraPosicao = !posicao;
+  let ultimoRegistrado = trilha.length ? trilha[trilha.length - 1] : null;
   let desmontado = false;
   let gradeAtual = { type: 'FeatureCollection', features: [], passo: 1000 };
   let versaoGrade = 0;
@@ -298,13 +300,40 @@ export function mapaPage() {
   let backgroundEstado = ESTADOS_BACKGROUND.IDLE;
   let backgroundMensagem = 'Disponível no APK de teste; não envia localização para servidor.';
 
+  /**
+   * Decide se o fixo entra na trilha.
+   *
+   * O portão antigo era `haversine(anterior, nova) >= 5`: distância **no
+   * plano**. Subindo escada a pessoa anda dois metros na horizontal e dez na
+   * vertical, então nada entrava — foi assim que uma caminhada real virou
+   * "quase no mesmo lugar". Três mudanças:
+   *
+   * 1. A distância considera o **desnível**.
+   * 2. O limiar cai de 5 m para 2 m: gravar é barato, e trilha esparsa é o que
+   *    faz o traçado sair reto de esquina em esquina.
+   * 3. **O tempo também abre o portão.** Parado num ponto de vista ou subindo
+   *    devagar, um ponto a cada 10 s mantém o registro vivo — sem isso o
+   *    traçado tem buracos exatamente onde o trecho foi mais difícil.
+   *
+   * Gravar generoso e peneirar na hora de somar é de propósito: `odometro.js`
+   * decide o que conta como distância, e a trilha guarda o formato do caminho.
+   */
+  function deveRegistrar(anterior, nova) {
+    if (!anterior) return true;
+    const medida = distancia3D(anterior, nova);
+    if (medida && medida.totalM >= 2) return true;
+    const decorridoMs = Number(nova?.timestamp) - Number(anterior?.timestamp);
+    return Number.isFinite(decorridoMs) && decorridoMs >= 10_000;
+  }
+
   function registrarPosicao(nova) {
     const anterior = posicao;
     posicao = nova;
-    if (rotaAtiva && !rotaPausada && (!anterior || haversine(anterior, nova) >= 5)) {
+    if (rotaAtiva && !rotaPausada && deveRegistrar(ultimoRegistrado, nova)) {
       // O modo confirmado pela pessoa viaja com o ponto: é o que separa
       // quilômetro andado de quilômetro de ônibus no registro.
-      trilha = [...trilha, modoConfirmado ? { ...nova, modo: modoConfirmado } : nova].slice(-4000);
+      trilha = [...trilha, modoConfirmado ? { ...nova, modo: modoConfirmado } : nova].slice(-12000);
+      ultimoRegistrado = nova;
       estado.set(CHAVES.TRILHA, trilha);
     }
     if (!document.hidden) {
@@ -375,10 +404,13 @@ export function mapaPage() {
     pararGps.setPaused(manterPausado);
   }
 
+  /**
+   * Segunda soma 2D que existia aqui: somava `haversine` ponto a ponto, sem
+   * desnível e sem peneira de ruído. Passa pelo mesmo odômetro do resumo, para
+   * a tela não mostrar dois números diferentes para a mesma caminhada.
+   */
   function distanciaTrilha() {
-    let total = 0;
-    for (let i = 1; i < trilha.length; i++) total += haversine(trilha[i - 1], trilha[i]);
-    return total;
+    return medirTrilha(trilha).distanciaM;
   }
 
   function atualizarHud() {

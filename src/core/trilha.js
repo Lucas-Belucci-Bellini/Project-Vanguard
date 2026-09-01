@@ -1,4 +1,13 @@
-import { haversine } from '../engine/geo.js';
+/**
+ * Resumo da trilha para a tela.
+ *
+ * A distância vem de `engine/odometro.js`, não de uma soma de `haversine`. A
+ * conta 2D antiga tratava subida como parado — foi assim que uma escada de
+ * verdade virou "quase no mesmo lugar" no campo. O odômetro conta o desnível
+ * e peneira o tremor do GPS, e devolve também o que descartou, para número
+ * baixo não se confundir com caminhada curta.
+ */
+import { medirTrilha } from '../engine/odometro.js';
 
 function coordenadaValida(ponto) {
   const lat = Number(ponto?.lat);
@@ -24,10 +33,8 @@ export function duracaoLabel(duracaoMs) {
 
 export function resumoTrilha(pontos = []) {
   const validos = Array.isArray(pontos) ? pontos.filter(coordenadaValida) : [];
-  let distanciaM = 0;
-  for (let indice = 1; indice < validos.length; indice += 1) {
-    distanciaM += haversine(validos[indice - 1], validos[indice]);
-  }
+  const medida = medirTrilha(validos);
+  const distanciaM = medida.distanciaM;
 
   const instantes = validos.map(instanteValido);
   const temTodosInstantes = instantes.length >= 2 && instantes.every((instante) => instante !== null);
@@ -39,6 +46,12 @@ export function resumoTrilha(pontos = []) {
   return {
     pontos: validos.length,
     distanciaM,
+    /** Só o plano, para comparar com o que aparelhos 2D mostram. */
+    horizontalM: medida.horizontalM,
+    ganhoElevacaoM: medida.ganhoElevacaoM,
+    perdaElevacaoM: medida.perdaElevacaoM,
+    segmentosContados: medida.segmentosContados,
+    descartados: medida.descartados,
     duracaoMs,
     duracaoLabel: duracaoLabel(duracaoMs),
     velocidadeMediaMps,
