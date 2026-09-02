@@ -1,5 +1,6 @@
 import '../styles/diagnostico.css';
 import { h } from '../ui/helpers.js';
+import { identidadeDoBuild, rotuloDaVersao } from '../core/versao.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { CONFIGURACAO_APLICATIVO } from '../core/configuracao.js';
 import { desempenhoResumo, diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
@@ -94,9 +95,18 @@ export function diagnosticoPage() {
     try {
       const posicao = estado.get(CHAVES.LOCAL, null);
       const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration().catch(() => null) : null;
+      /*
+       * BUILD / RUNTIME — o grupo que responde "o aplicativo instalado é
+       * mesmo o desta versão?".
+       *
+       * Sem isto, descobrir que o aparelho rodava um bundle de quatro
+       * versões atrás exigiu baixar o APK publicado e comparar chunks. Agora
+       * é comparar o que está na tela com o que está na release.
+       */
+      const identidade = identidadeDoBuild();
       bateria = await bateriaAtual();
       const dados = diagnosticoResumo({
-        versao: `${CONFIGURACAO_APLICATIVO.nome} ${CONFIGURACAO_APLICATIVO.versao}`,
+        versao: `${CONFIGURACAO_APLICATIVO.nome} ${rotuloDaVersao(identidade.versao)}`,
         plataforma: plataformaLabel(),
         rede: navigator.onLine !== false,
         posicao,
@@ -125,6 +135,21 @@ export function diagnosticoPage() {
             : 'NÃO TESTADO',
         estado: persistencia.estado === 'PERSISTIDO' ? 'ok' : 'atencao',
       };
+      const swRegistrado = Boolean(reg);
+      const buildItens = [
+        { grupo: 'BUILD / RUNTIME', nome: 'Versão do app', valor: rotuloDaVersao(identidade.versao), estado: identidade.versao ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Bundle web', valor: identidade.build ?? 'INDISPONÍVEL', estado: identidade.build ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Commit', valor: identidade.commit ?? 'INDISPONÍVEL', estado: identidade.commit ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Execução', valor: identidade.nativo ? `APLICATIVO · ${identidade.plataforma}` : 'NAVEGADOR · web', estado: 'ok' },
+        // A origem entra porque foi ela que escondeu o defeito: em
+        // `http://localhost` o registro do service worker exigia `https:` e
+        // nunca acontecia dentro do aplicativo.
+        { grupo: 'BUILD / RUNTIME', nome: 'Origem', valor: identidade.origem ?? 'INDISPONÍVEL', estado: identidade.origem ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Contexto seguro', valor: identidade.contextoSeguro ? 'SIM · service worker permitido' : 'NÃO · sem service worker', estado: identidade.contextoSeguro ? 'ok' : 'atencao' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Service worker', valor: swRegistrado ? `REGISTRADO${navigator.serviceWorker?.controller ? ' · controlando' : ' · sem controlar ainda'}` : 'NÃO REGISTRADO', estado: swRegistrado ? 'ok' : 'atencao' },
+        { grupo: 'BUILD / RUNTIME', nome: 'WebView', valor: identidade.agente ? identidade.agente.slice(0, 96) : 'INDISPONÍVEL', estado: identidade.agente ? 'ok' : 'indisponivel' },
+      ];
+
       const desempenho = desempenhoResumo();
       const gpsItem = dados.find((item) => item.nome === 'GPS/GNSS');
       if (gpsItem) gpsItem.valor = `${gps} · ${statusPosicao(posicao).estado}`;
@@ -136,7 +161,7 @@ export function diagnosticoPage() {
       const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
+      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {

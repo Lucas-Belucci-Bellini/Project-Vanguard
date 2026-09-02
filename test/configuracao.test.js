@@ -2,8 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CONFIGURACAO_APLICATIVO,
-  CONFIGURACAO_ATUALIZACAO,
-} from '../src/core/configuracao.js';
+  CONFIGURACAO_ATUALIZACAO, VERSAO_SEM_BUILD } from '../src/core/configuracao.js';
 import {
   URL_RELEASES,
   URL_RELEASE_MAIS_RECENTE,
@@ -14,7 +13,10 @@ test('configuração pública concentra identidade e atualização oficial', () 
   assert.deepEqual(CONFIGURACAO_APLICATIVO, {
     nome: 'Vanguard Field',
     id: 'com.projectvanguard.field',
-    versao: '1.3.1',
+    // A versão vem do `package.json` pelo build. Em `node --test` não há
+    // build, e o valor honesto é o sentinela — nunca um número inventado que
+    // o verificador de atualização usaria como "versão instalada".
+    versao: VERSAO_SEM_BUILD,
     repositorio: 'Lucas-Belucci-Bellini/Project-Vanguard',
     urlRepositorio: 'https://github.com/Lucas-Belucci-Bellini/Project-Vanguard',
   });
