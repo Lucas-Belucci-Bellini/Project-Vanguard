@@ -6,6 +6,7 @@ import { h, empty, dist, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { iniciarAcompanhamento, precisaoLabel } from '../core/localizacao.js';
 import { lerBussola, calibrarPeloSol, LADOS, REFERENCIAS_RUMO } from '../core/bussola-leitura.js';
+import { criarFiltroDeRumo, QUALIDADES_RUMO } from '../engine/rumo-filtro.js';
 
 function grausTexto(valor) {
   return valor == null ? '—' : `${String(Math.round(valor) % 360).padStart(3, '0')}°`;
@@ -70,6 +71,13 @@ export function bussolaPage() {
   const linhaGrade = h('div', { className: 'bussola__linha' });
   const linhaCorrecao = h('div', { className: 'bussola__linha' });
   const avisoReferencia = h('p', { className: 'bussola__aviso' });
+  // A leitura crua do magnetômetro treme vários graus com o aparelho parado.
+  // O filtro trabalha no vetor unitário (nunca em graus, senão 359° e 1° dão
+  // 180°) e derruba esse tremor três vezes; a linha abaixo é o que ele mede
+  // sobre a própria leitura — inclusive quando ela não merece confiança.
+  const filtroRumo = criarFiltroDeRumo();
+  let leituraFiltrada = null;
+  const avisoEstabilidade = h('p', { className: 'bussola__aviso bussola__aviso--estabilidade', hidden: true });
 
   /* ── destino ── */
   const destinoCorpo = h('div', { className: 'bussola__destino-corpo' });
@@ -194,6 +202,7 @@ export function bussolaPage() {
       correcao == null ? 'leitura crua do aparelho' : 'leitura + correção'));
     avisoReferencia.textContent = leitura.avisos.join(' ');
     avisoReferencia.hidden = leitura.avisos.length === 0;
+    pintarEstabilidade();
 
     empty(destinoCorpo);
     if (!leitura.destino) {
@@ -252,6 +261,32 @@ export function bussolaPage() {
     posicionarMarca(marcaTravado, leitura.rumoTravado?.azimuteDeg ?? null, referenciaMarcas);
   }
 
+  /**
+   * Diz em voz alta quando a agulha não merece confiança. Interferência
+   * magnética (ferro, ímã de capa, alto-falante) entorta a leitura sem avisar,
+   * e um número bonito e errado é pior do que um número com ressalva.
+   */
+  function pintarEstabilidade() {
+    if (!leituraFiltrada || leituraFiltrada.qualidade === QUALIDADES_RUMO.INSUFICIENTE) {
+      avisoEstabilidade.hidden = true;
+      return;
+    }
+    const dispersao = leituraFiltrada.dispersaoDeg == null ? null : Math.round(leituraFiltrada.dispersaoDeg);
+    if (leituraFiltrada.qualidade === QUALIDADES_RUMO.INTERFERENCIA) {
+      avisoEstabilidade.hidden = false;
+      avisoEstabilidade.classList.add('is-alerta');
+      avisoEstabilidade.textContent = `⚠ Leitura espalhando ${dispersao}° com o aparelho parado: há interferência magnética por perto. Afaste-se de metal, do ímã da capa e de alto-falante antes de usar este rumo.`;
+      return;
+    }
+    avisoEstabilidade.classList.remove('is-alerta');
+    if (leituraFiltrada.qualidade === QUALIDADES_RUMO.ESTAVEL) {
+      avisoEstabilidade.hidden = false;
+      avisoEstabilidade.textContent = `Agulha estável — o tremor da leitura está sendo reduzido ${(1 / leituraFiltrada.fatorRuido).toFixed(1)}× (${Math.round(leituraFiltrada.amostrasEquivalentes)} leituras somadas).`;
+      return;
+    }
+    avisoEstabilidade.hidden = true;
+  }
+
   function handleOrientation(event) {
     const heading = Number.isFinite(event.webkitCompassHeading)
       ? event.webkitCompassHeading
@@ -259,7 +294,10 @@ export function bussolaPage() {
         ? 360 - event.alpha
         : null;
     if (heading == null) return;
-    rumoSensor = heading;
+    leituraFiltrada = filtroRumo.adicionar({ rumoDeg: heading, emMs: Date.now() });
+    // O que a agulha mostra é o rumo filtrado; a leitura crua fica registrada
+    // no estado do filtro para a linha de estabilidade poder compará-los.
+    rumoSensor = leituraFiltrada.rumoDeg ?? heading;
     origemLeitura = 'SENSOR DO APARELHO';
     if (!sensorAtivo) {
       sensorAtivo = true;
@@ -323,7 +361,7 @@ export function bussolaPage() {
         ),
         h('article', { className: 'bussola__card' },
           h('span', { className: 'bussola__kicker' }, 'OS TRÊS NORTES'),
-          linhaVerdadeiro, linhaGrade, linhaCorrecao, avisoReferencia
+          linhaVerdadeiro, linhaGrade, linhaCorrecao, avisoReferencia, avisoEstabilidade
         ),
         h('article', { className: 'bussola__card bussola__card--amber' },
           h('span', { className: 'bussola__kicker' }, 'CONFERIR PELO SOL'),

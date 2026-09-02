@@ -47,9 +47,9 @@
 .bussola__marca-alvo--travado { color: var(--color-text-primary); }
 .bussola__linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 6px 0; border-top: var(--border-base); }
 .bussola__linha:first-child { border-top: 0; }
-.bussola__linha-rotulo { flex: 1 1 40%; color: var(--color-text-muted); font-size: 8px; letter-spacing: var(--tracking-wide); }
+.bussola__linha-rotulo { flex: 1 1 40%; color: var(--color-text-muted); font-size: 8px; letter-spacing: var(--tracking-wide); min-width: 0; }
 .bussola__linha-valor { color: var(--color-cyan); font-size: 15px; font-weight: var(--font-weight-bold); letter-spacing: .03em; }
-.bussola__linha-extra { flex: 1 1 100%; color: var(--color-text-muted); font-size: 8px; }
+.bussola__linha-extra { flex: 1 1 100%; color: var(--color-text-muted); font-size: 8px; min-width: 0; }
 .bussola__linha-grupo, .bussola__destino-corpo { margin-top: 6px; }
 .bussola__destino-nome { display: block; margin-bottom: 5px; color: var(--color-text-primary); font-size: 12px; }
 .bussola__seta { display: block; margin: 6px 0; color: var(--color-amber); font-size: 30px; line-height: 1; }
@@ -57,6 +57,10 @@
 .bussola__vazio, .bussola__nota { margin: 6px 0 0; color: var(--color-text-muted); font-size: 9px; line-height: 1.55; }
 .bussola__aviso { margin: 7px 0 0; color: var(--color-amber); font-size: 9px; line-height: 1.55; }
 .bussola__aviso[hidden] { display: none; }
+/* A estabilidade fala baixo quando está tudo bem e alto quando não está: só a
+ * interferência merece a cor de alerta. */
+.bussola__aviso--estabilidade { color: var(--color-text-muted); }
+.bussola__aviso--estabilidade.is-alerta { color: var(--color-danger); }
 .bussola__campo { width: 100%; min-height: 40px; margin-top: 7px; padding: 8px; background: var(--color-bg); border: var(--border-base); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 12px; }
 .bussola__acao { width: 100%; min-height: 40px; margin-top: 7px; background: var(--color-surface); border: var(--border-base); color: var(--color-text-secondary); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-wide); }
 .bussola__acao:disabled { opacity: .5; }
