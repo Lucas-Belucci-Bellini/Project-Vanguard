@@ -118,6 +118,20 @@ jobs:
           cat > "$NOTES" <<'EOF'
           ## Vanguard Field mobile
           Artifacts Android para teste interno. O APK é debug e o AAB é não assinado. A build não comprova teste físico nem substitui assinatura de produção.
+
+          ### ⚠️ Vindo da 1.1.0, 1.2.0 ou 1.3.1: DESINSTALE antes
+
+          A chave de assinatura passou a ser fixa e versionada na 1.3.2 (ADR-0042).
+          O Android **recusa** substituir um app instalado por outro assinado com
+          certificado diferente: a instalação falha, e o aparelho **continua na
+          versão antiga** — sem página nova, sem correção nenhuma, e sem erro que
+          explique o motivo. É assim que "o site tem telas que o app não tem"
+          acontece sem nenhum defeito de build.
+
+          Confira em **Diagnóstico → BUILD / RUNTIME** qual versão o aparelho está
+          realmente rodando. Se não for a desta release, desinstale e instale de novo.
+          O `apk_signing_cert_sha256` no `BUILD-MANIFEST.txt` é o número que o
+          Android compara.
           EOF
           PRERELEASE=''
           if [[ "$RELEASE_TAG" == *-rc* || "$RELEASE_TAG" == *-beta* || "$RELEASE_TAG" == *-alpha* ]]; then PRERELEASE='--prerelease'; fi
