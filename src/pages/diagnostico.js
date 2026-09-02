@@ -8,6 +8,8 @@ import { fonteLocalizacao } from '../core/localizacao.js';
 import { detectarCapacidades } from '../core/capacidades.js';
 import { lerPermissaoGps } from '../platform/permissoes.js';
 import { estadoCicloVidaAtual, observarCicloVida } from '../core/ciclo-vida.js';
+import { falhasDeTela } from '../core/falhas-tela-app.js';
+import { TIPOS_FALHA } from '../core/falhas-tela.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -62,6 +64,49 @@ async function bateriaAtual() {
  * recurso não existe neste ambiente, e não há nada a consertar.
  */
 const ROTULO_ESTADO = Object.freeze({ ok: 'OK', atencao: 'ATENÇÃO', indisponivel: 'INDISPONÍVEL' });
+
+/*
+ * TELAS — o grupo que responde "essa página não abre no aplicativo".
+ *
+ * Sem ele, uma falha de carregamento aparecia por um instante na tela e sumia
+ * na navegação seguinte: nada sobrava para diagnosticar à distância. Aqui a
+ * falha fica, com a rota, a causa classificada e o build em que aconteceu.
+ *
+ * `CHUNK_NAO_CARREGOU` é o achado importante: significa que o módulo daquela
+ * rota não chegou — pacote incompleto ou desatualizado — e é exatamente o que
+ * "funciona no site e não no app" parece por dentro.
+ */
+function itensDeFalhaDeTela() {
+  const falhas = falhasDeTela.listar();
+  if (!falhas.length) {
+    return [{
+      grupo: 'TELAS',
+      nome: 'Falhas de carregamento',
+      valor: 'NENHUMA registrada neste aparelho',
+      estado: 'ok',
+    }];
+  }
+
+  const semChunk = falhasDeTela.rotasComChunkFaltando();
+  const cabecalho = {
+    grupo: 'TELAS',
+    nome: 'Falhas de carregamento',
+    valor: semChunk.length
+      ? `${falhas.length} registrada(s) · ${semChunk.length} rota(s) sem o módulo no pacote`
+      : `${falhas.length} registrada(s)`,
+    estado: 'atencao',
+  };
+
+  const itens = falhas.slice(0, 8).map((falha) => ({
+    grupo: 'TELAS',
+    nome: `${falha.rota}${falha.vezes > 1 ? ` (${falha.vezes}×)` : ''}`,
+    valor: `${falha.tipo === TIPOS_FALHA.CHUNK_NAO_CARREGOU ? 'MÓDULO NÃO CHEGOU' : falha.tipo} · ${falha.mensagem.slice(0, 80)}`,
+    // Módulo que não chegou é defeito de pacote, não de tela: pesa mais.
+    estado: falha.tipo === TIPOS_FALHA.CHUNK_NAO_CARREGOU ? 'indisponivel' : 'atencao',
+  }));
+
+  return [cabecalho, ...itens];
+}
 
 export function diagnosticoPage() {
   const raiz = h('div', { className: 'vg-pagina diagnostico' });
@@ -161,7 +206,7 @@ export function diagnosticoPage() {
       const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
+      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDeFalhaDeTela()]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {

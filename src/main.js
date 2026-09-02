@@ -11,6 +11,7 @@ import { criarControleAtualizacao } from './core/atualizacao-ui.js';
 import { recuperarDatasetNoBoot } from './core/dataset-boot-recovery.js';
 import { criarNavegador } from './core/navegacao.js';
 import { registrarServiceWorker } from './core/service-worker.js';
+import { falhasDeTela } from './core/falhas-tela-app.js';
 
 const ROTAS = [
   { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
@@ -149,9 +150,21 @@ async function boot() {
     container: shell.main,
     esvaziar: empty,
     aoErro: (erro) => {
+      // A falha é registrada ANTES de ser pintada: o aviso na tela some na
+      // próxima navegação, e era só isso que existia. O registro é o que
+      // permite ao Diagnóstico dizer depois qual tela falhou e por quê — a
+      // diferença entre "não abre no app" e "o chunk da rota X não chegou ao
+      // pacote".
+      const { tipo } = falhasDeTela.registrar(lerHash(location.hash).caminho, erro);
+      console.error('[Vanguard] Falha ao carregar tela.', { tipo, erro });
+      const explicacao = tipo === 'CHUNK_NAO_CARREGOU'
+        ? 'O módulo desta tela não chegou a carregar — o pacote pode estar incompleto ou desatualizado. Abra Diagnóstico → TELAS.'
+        : 'Abra Diagnóstico → TELAS para o registro completo.';
       shell.main.append(h('div', { className: 'vg-pagina vg-erro-pagina' },
         h('div', { className: 'vg-aviso vg-aviso--perigo', role: 'alert' },
-          `Falha ao carregar a tela: ${erro.message}`)
+          h('strong', null, `Falha ao carregar a tela: ${erro.message}`),
+          h('br'),
+          h('span', null, explicacao))
       ));
     },
   });
