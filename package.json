@@ -1,7 +1,7 @@
 {
   "name": "project-vanguard",
   "private": true,
-  "version": "1.4.2",
+  "version": "1.4.3",
   "type": "module",
   "description": "Vanguard Field — navegação de expedição com GPS, bússola, trilha local e protocolo de posição para socorro.",
   "scripts": {
@@ -9,9 +9,9 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "test": "node --test \"test/**/*.test.js\"",
-    "mobile:sync": "npm run build && cap sync",
+    "mobile:sync": "npm run build && cap sync && npm run verificar:paridade",
     "mobile:sync:android": "npm run build && cap sync android && npm run verificar:paridade",
-    "mobile:sync:ios": "npm run build && cap sync ios",
+    "mobile:sync:ios": "npm run build && cap sync ios && npm run verificar:paridade -- ios",
     "mobile:android:debug": "npm run mobile:sync:android && cd android && ./gradlew assembleDebug --no-daemon",
     "mobile:ios:open": "npm run mobile:sync:ios && cap open ios",
     "verificar:rotas": "node scripts/verificar-rotas.mjs",
