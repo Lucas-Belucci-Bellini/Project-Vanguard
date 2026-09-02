@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.4.1 — 2026-09-02
+
+Auditoria completa das 13 rotas, com uma regra só: **uma rota só existe se
+houver funcionalidade real atrás dela**. Nada foi concluído por leitura de
+código — cada rota foi aberta num Chromium e cada botão foi apertado.
+
+Três defeitos graves, todos da mesma família (fingir dado que não existe):
+
+- **Navegação**: com os campos do waypoint **vazios**, a tela mostrava
+  distância e rumo para a coordenada (0, 0). `Number('')` é 0, e 0 passa em
+  `isFinite` e cabe na faixa de latitude. Rumo para um destino que ninguém
+  informou, num app cuja função é dizer para onde andar.
+- **Bússola**: campo de declinação vazio aplicava 0° como correção medida, e a
+  agulha passava a exibir CORRIGIDO — o oposto do ADR-0040.
+- **Contexto**: zona vencida sumia da tela com a mensagem "nenhuma zona
+  cadastrada" (falsa) e era **apagada em definitivo** na gravação seguinte.
+  Agora fica guardada e visível, marcada VENCIDA.
+
+Mais sete correções:
+
+- Dois **botões inalcançáveis** por baixo da barra de abas (ABRIR NO MAPA e
+  ABRIR MODOS DE CONTEXTO) e o texto final de três telas. A folga era apagada
+  por um `padding` de media query, justo na largura de celular.
+- A **tela legada `#/tiro`** passa a se declarar legada na própria tela:
+  simulação do videogame Arma 3, não tabela de tiro nem orientação real.
+- **Sobre** mostra a versão real do app, vinda do `package.json`, no lugar da
+  palavra "PROTÓTIPO".
+- **Diagnóstico** ganha um terceiro estado: INDISPONÍVEL deixa de ser pintado
+  como ATENÇÃO.
+- **Apoiar** responde CHECKOUT NÃO CONFIGURADO em linguagem de quem usa, sem
+  citar variável de ambiente.
+- **Navegação** volta para a convenção do resto do app: `vg-pagina`, sem
+  `<main>` aninhado, e com tokens que existem de verdade.
+
+Novo: `test/rotas.test.js` (módulo existe, exportação existe, sem página órfã,
+sem link fantasma, rota legada marcada, contrato escrito por rota),
+`npm run verificar:rotas` e `npm run verificar:fluxos`, e a documentação em
+`docs/ROUTE-AUDIT.md`, `docs/ROUTE-MATRIX.md` e `docs/ROUTES/`.
+
+605 testes verdes.
+
 ## 1.4.0 — 2026-09-02
 
 - **Visão noturna** (`#/noturno`): intensificação de luz por empilhamento de quadros.

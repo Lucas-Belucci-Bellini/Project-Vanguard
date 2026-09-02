@@ -130,6 +130,27 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   MENOR que o ruído do sensor. Meça o estrago (a estrutura que o acumulado
   perde), não o movimento — e meça numa escala grossa, onde o ruído já foi
   diluído pela média.
+- **`Number('')` é 0, e 0 passa em `isFinite` e em qualquer faixa de
+  coordenada.** Campo de formulário vazio virou coordenada (0, 0) na tela de
+  navegação — distância e rumo para um destino que ninguém informou — e virou
+  "declinação medida de 0°" na bússola. Use `numeroFinito`/`coordenadaValida` de
+  `engine/numero-seguro.js` em **toda** leitura de `input.value`, nunca
+  `Number()` cru.
+- **Filtro de exibição não pode alimentar o armazenamento.** A tela de contexto
+  carregava `zonasAtivas(...)` e regravava a lista filtrada: uma zona que
+  vencia era apagada em definitivo, sem aviso, e a tela ainda dizia "nenhuma
+  zona cadastrada". Filtre onde a decisão acontece, guarde tudo.
+- **A barra de abas fixa tem ~86 px e come o fim de qualquer página.** Todo
+  contêiner que rola precisa de `padding-bottom: calc(86px + env(safe-area-inset-bottom))`
+  — **inclusive dentro das media queries**, onde um `padding: 16px` shorthand
+  apagava a folga exatamente na largura de celular. Dois botões já ficaram
+  inalcançáveis assim. `scripts/verificar-fluxos.mjs` e a medição de rodapé
+  cobrem isso.
+- **`npm test` não diz que a interface funciona.** Ele cobre motor e contrato.
+  Renderização de rota é `npm run verificar:rotas`; botão que faz o que promete
+  é `npm run verificar:fluxos`. Os dois precisam de Playwright + Chromium, que
+  **não** são dependências do repositório (o postinstall baixaria navegador em
+  todo `npm ci`).
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na
