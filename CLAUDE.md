@@ -47,6 +47,11 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   (versão, commit, `BUILD_ID`) injetada pelo Vite, e o registro do service
   worker que ela versiona. O grupo **BUILD / RUNTIME** de `#/diagnostico` mostra
   tudo isso na tela (ver ADR-0045)
+- `src/core/falhas-tela.js` (+ `falhas-tela-app.js`) — registro das falhas de
+  carregamento de tela, mostrado em **Diagnóstico → TELAS**. A classificação é
+  o valor: `CHUNK_NAO_CARREGOU` manda investigar o **pacote**, `TELA_FALHOU`
+  manda investigar a **página**, e o resto vira `DESCONHECIDO` em vez de
+  palpite (ver `docs/MOBILE_WEB_PARITY.md`)
 - `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
@@ -182,7 +187,28 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   em `http://localhost`. Os três precisam de Playwright + Chromium, que **não**
   são dependências do repositório (o postinstall baixaria navegador em todo
   `npm ci`). A guarda `npm run verificar:paridade` compara `dist/` com os
-  assets do Android por SHA-256 e roda dentro de `mobile:sync:android`.
+  assets do **Android e do iOS** por SHA-256 e roda dentro dos `mobile:sync:*`.
+- **Montar a tela fora do `try` é branco silencioso.** No `navegacao.js`, o
+  `container.append(resultado.elemento)` estava solto: página com `return`
+  esquecido, ou export com nome trocado, lançava TypeError que ninguém pegava —
+  e como `navegar` roda sem `await` no `hashchange`, virava rejeição não
+  tratada. Tela em branco, **sem** o aviso de erro, que é exatamente o que "não
+  funciona no aplicativo" parece. Confira o contrato (`resultado.elemento`) e
+  monte dentro do `try`.
+- **Erro que só é pintado é erro perdido.** O aviso de falha some na navegação
+  seguinte e nunca chega a quem precisa. Registre em `falhas-tela.js` antes de
+  mostrar: rota, build e causa classificada é o que separa "não abre" de "o
+  chunk da rota X não chegou ao pacote".
+- **Assets de plataforma são GERADOS e ignorados pelo git** (`ios/.gitignore:4`,
+  `android/.gitignore:96`). Clone limpo nasce sem eles e isso **não** é defeito
+  — `cap sync` preenche. O que era defeito: `mobile:sync:ios` não rodava guarda
+  nenhuma, então a cópia do iOS não era conferida por ninguém. Hoje
+  `verificar:paridade` cobre as duas plataformas.
+- **Lista de rotas copiada para um teste envelhece em silêncio.**
+  `test/rotas-empacotadas.test.js` lê o `ROTAS` do próprio `src/main.js` e
+  cobra três coisas: a página existe, ela exporta o que a rota consome, e o
+  build produz o chunk dela. Sem isso, "adicionei a página e esqueci metade da
+  cadeia" só aparece no aparelho.
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na

@@ -1,5 +1,50 @@
 # Changelog
 
+## 1.4.3 — 2026-09-02
+
+**Quando uma tela falha, o aparelho passa a saber dizer qual e por quê.**
+A 1.4.2 provou que a cadeia de build estava intacta e que o sintoma vinha do
+certificado de assinatura. Esta versão fecha o que faltava: o caminho que
+transforma "essa página não abre no app" em evidência.
+
+**O branco silencioso acabou.** `container.append(resultado.elemento)` estava
+fora do `try` no navegador de telas. Uma página com `return` esquecido, ou um
+export com nome trocado, lançava um TypeError que ninguém pegava — e como
+`navegar` roda sem `await` no `hashchange`, virava rejeição não tratada:
+**tela em branco, sem o aviso de erro**. Era o modo de falha mais caro de
+diagnosticar à distância, porque é exatamente o que "não funciona no
+aplicativo" parece. Agora a montagem confere o contrato e nada escapa.
+
+**Diagnóstico → TELAS.** Falha de carregamento era pintada e esquecida: sumia
+na navegação seguinte e nunca chegava ao diagnóstico. Agora fica registrada com
+rota, build e causa **classificada** — e a classificação é o ponto:
+`MÓDULO NÃO CHEGOU` manda investigar o pacote, `TELA_FALHOU` manda investigar
+a página, e o que não dá para separar vira `DESCONHECIDO` em vez de um palpite.
+Verificado de ponta a ponta bloqueando o chunk do `#/noturno`: o app mostrou o
+aviso certo e registrou "1 rota(s) sem o módulo no pacote" sozinho.
+
+**A guarda de paridade passou a valer para o iOS.** `mobile:sync:ios` não
+chamava guarda nenhuma — a cópia do iOS não era conferida por ninguém. Agora
+as duas plataformas são comparadas por SHA-256 contra o `dist`.
+
+**Teste que tranca a cadeia rota → módulo → chunk.** Falha se alguém adicionar
+rota sem página, página sem o export que a rota consome, ou página que o build
+não empacota. A lista de rotas é lida do `src/main.js`, nunca copiada — lista
+copiada envelhece em silêncio, que é a própria classe de defeito perseguida
+aqui. Os três modos de falha foram verificados quebrando o código de propósito.
+
+**Não é defeito:** os diretórios de assets do Android e do iOS nascerem vazios
+num clone limpo. Os dois são gerados e ignorados pelo git; `cap sync` os
+preenche.
+
+**625 testes** (eram 609). Evidência por rota, causa raiz e como diagnosticar
+em [`docs/MOBILE_WEB_PARITY.md`](docs/MOBILE_WEB_PARITY.md).
+
+**iOS continua sem prova de motor real:** este ambiente não tem WebKit nem
+macOS. Os bytes chegam idênticos e renderizam, mas WKWebView não foi testado —
+e a matriz diz isso em vez de marcar ✅.
+
+
 ## 1.4.2 — 2026-09-02
 
 **Paridade web ↔ mobile.** A investigação começou por "as páginas novas não
