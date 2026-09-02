@@ -79,6 +79,43 @@ instalação falha e o aparelho continua na versão antiga.
 O caminho é desinstalar e instalar de novo. Da 1.3.2 em diante toda build
 assina igual, e a atualização normal volta a funcionar.
 
+## Evidência no artefato publicado — 1.4.2
+
+A matriz acima mede o `dist` e os assets do Android **da máquina que
+compilou**. Isso ainda não é o arquivo que a pessoa baixa. Depois de publicar
+a `mobile-v1.4.2`, o APK foi baixado da release e conferido:
+
+| conferência | resultado |
+| --- | --- |
+| SHA-256 do APK baixado × `SHA256SUMS` publicado | `dc6eaac2b1e3…` — **iguais** |
+| conteúdo empacotado | **44 arquivos** (34 `.js` + 10 `.css`), com as páginas novas presentes |
+| identidade do build dentro do bundle | `1.4.2+f66fa0739b12.202609021504` — versão, commit e horário do build |
+| commit no `BUILD-MANIFEST.txt` | `f66fa073…`, o mesmo do bundle |
+| certificado de assinatura | `d0100bfddf7c3e8594ef8816c9ae379b8b2eb68935711b198d533e88663ca100` |
+| `sw.js` presente e registrado por `sw.js?v=` | sim |
+| gate antigo `protocol === 'https:'` | ausente do código (sobra só o comentário que explica a remoção) |
+
+E as rotas foram abertas **nos bytes desse APK**, servidos em
+`http://localhost` com user agent de Android:
+
+```
+origem http://localhost · contexto seguro: true · service worker: REGISTRADO
+caches: vanguard-field-shell-1.4.2+f66fa0739b12.202609021504
+abas no menu: 12
+… 13 rotas abrem, saem e voltam sem erro
+```
+
+**`service worker: REGISTRADO` é a linha que não existia.** Em nenhuma versão
+publicada antes desta ele chegou a registrar dentro do aplicativo, e o nome do
+cache agora carrega o build — as duas correções chegaram ao artefato, não só
+ao repositório.
+
+O certificado é o mesmo desde a 1.3.2: **a 1.4.2 instala por cima de
+1.3.2/1.3.5/1.4.0/1.4.1**. Por cima de 1.1.0 ou 1.2.0 ela continua não
+instalando, e isso é do Android, não do build — desinstale antes.
+
+**O que continua não provado:** aparelho físico.
+
 ## Regra
 
 Não marque uma página como concluída porque ela existe em `src/pages/`, aparece

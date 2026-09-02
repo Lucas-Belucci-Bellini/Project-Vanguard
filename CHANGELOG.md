@@ -50,6 +50,15 @@ de cada evidência, e seis armadilhas novas no CLAUDE.md.
 
 609 testes verdes.
 
+**Publicada e conferida no artefato.** O APK da `mobile-v1.4.2` foi baixado da
+release: SHA-256 igual ao `SHA256SUMS` publicado, 44 arquivos empacotados,
+identidade `1.4.2+f66fa0739b12.202609021504` dentro do bundle e certificado
+`d0100bfd…` — o mesmo desde a 1.3.2, então ela instala por cima de 1.3.2 em
+diante. As 13 rotas foram abertas **nos bytes desse APK** em
+`http://localhost`, com `service worker: REGISTRADO` e cache
+`vanguard-field-shell-1.4.2+f66fa0739b12.202609021504`. Evidência em
+[`docs/PARIDADE-WEB-MOBILE.md`](docs/PARIDADE-WEB-MOBILE.md).
+
 ## 1.4.1 — 2026-09-02
 
 Auditoria completa das 13 rotas, com uma regra só: **uma rota só existe se
