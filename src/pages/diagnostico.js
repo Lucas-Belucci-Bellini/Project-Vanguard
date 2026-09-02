@@ -51,6 +51,17 @@ async function bateriaAtual() {
   }
 }
 
+/**
+ * Três estados, não dois.
+ *
+ * A versão anterior era binária: tudo que não fosse `ok` virava ATENÇÃO. Com
+ * isso "o navegador não expõe o nível de bateria" aparecia com a mesma cara de
+ * "algo está errado" — e um diagnóstico que trata desconhecido como problema
+ * treina quem lê a ignorá-lo. `INDISPONÍVEL` é uma resposta legítima: o
+ * recurso não existe neste ambiente, e não há nada a consertar.
+ */
+const ROTULO_ESTADO = Object.freeze({ ok: 'OK', atencao: 'ATENÇÃO', indisponivel: 'INDISPONÍVEL' });
+
 export function diagnosticoPage() {
   const raiz = h('div', { className: 'vg-pagina diagnostico' });
   const wrap = h('div', { className: 'diagnostico__wrap' });
@@ -71,7 +82,7 @@ export function diagnosticoPage() {
       h('div', { className: 'diagnostico__lista' }, ...valores.map((item) => h('div', { className: 'diagnostico__linha' },
         h('strong', { className: 'diagnostico__nome' }, item.nome),
         h('span', { className: 'diagnostico__valor' }, item.valor),
-        h('span', { className: `diagnostico__estado is-${item.estado}` }, item.estado === 'ok' ? 'OK' : 'ATENÇÃO'))))
+        h('span', { className: `diagnostico__estado is-${item.estado}` }, ROTULO_ESTADO[item.estado] ?? item.estado.toUpperCase()))))
     )));
   }
 
@@ -117,13 +128,13 @@ export function diagnosticoPage() {
       const desempenho = desempenhoResumo();
       const gpsItem = dados.find((item) => item.nome === 'GPS/GNSS');
       if (gpsItem) gpsItem.valor = `${gps} · ${statusPosicao(posicao).estado}`;
-      const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'atencao' : 'ok' };
-      const localizacaoItem = { grupo: 'LOCALIZAÇÃO', nome: 'Fonte GPS', valor: fonteLocalizacao(), estado: fonteLocalizacao() === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'indisponivel' : 'ok' };
+      const localizacaoItem = { grupo: 'LOCALIZAÇÃO', nome: 'Fonte GPS', valor: fonteLocalizacao(), estado: fonteLocalizacao() === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const backgroundItem = { grupo: 'MOBILE', nome: 'GPS em background', valor: 'DEVICE DEPENDENT · sem garantia contínua', estado: 'atencao' };
       const ciclo = estadoCicloVidaAtual();
-      const cicloItem = { grupo: 'MOBILE', nome: 'Ciclo do app', valor: ciclo.rotulo, estado: ciclo.estado === 'UNAVAILABLE' ? 'atencao' : 'ok' };
-      const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const cicloItem = { grupo: 'MOBILE', nome: 'Ciclo do app', valor: ciclo.rotulo, estado: ciclo.estado === 'UNAVAILABLE' ? 'indisponivel' : 'ok' };
+      const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
+      const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
       render([...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
       status.className = 'diagnostico__status';

@@ -40,7 +40,13 @@ export function doarPage() {
     ariaLabel: 'Valor da doação em reais'
   });
   const valorResumo = h('span', { className: 'doar__valor-resumo' }, moeda(valorInput.value));
-  const status = h('p', { className: 'doar__status', role: 'status' }, 'Pronto para configurar o checkout hospedado do Asaas.');
+  /*
+   * O botão já dizia a verdade — não promete pagamento — mas a mensagem era
+   * escrita para quem mantém o app, não para quem tenta doar: citava nome de
+   * variável de ambiente e webhook. Quem está com o dedo no botão precisa
+   * saber o que aconteceu com o dinheiro dele, não o que falta no servidor.
+   */
+  const status = h('p', { className: 'doar__status', role: 'status' }, 'CHECKOUT NÃO CONFIGURADO — nenhum pagamento é processado por este aplicativo hoje.');
   const checkoutButton = h('button', { className: 'doar__checkout', type: 'button' }, 'PAGAMENTOS AINDA NÃO ATIVADOS');
 
   const sugestoes = h('div', { className: 'doar__sugestoes', role: 'group', ariaLabel: 'Sugestões de valor' },
@@ -61,7 +67,10 @@ export function doarPage() {
   };
 
   checkoutButton.onclick = () => {
-    status.textContent = 'Checkout bloqueado com segurança: configure ASAAS_API_KEY, Webhook e domínio público antes de cobrar.';
+    // Sem serviço de pagamento conectado, o único caminho honesto é dizer que
+    // não há caminho. Abrir um formulário que não cobra, ou uma tela de
+    // "obrigado" sem cobrança, seria pior do que não ter o botão.
+    status.textContent = 'CHECKOUT NÃO CONFIGURADO. O aplicativo ainda não tem um serviço de pagamento ligado, então nada é cobrado e nenhum dado seu é enviado. Quando houver, este botão abrirá o checkout oficial e mais nada.';
     status.className = 'doar__status doar__status--alerta';
   };
 

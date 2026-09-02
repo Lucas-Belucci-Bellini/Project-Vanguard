@@ -1,4 +1,10 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
+
+/* A versão exibida na tela sai daqui, do mesmo `package.json` que o
+ * `versionName` do Android e o gate de versão do workflow conferem. Digitar o
+ * número numa terceira folha seria criar mais uma coisa para esquecer. */
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 /* Mesmo formato do Projeto Baluarte: JS puro, Vite só empacota.
  * Code-splitting por rota acontece sozinho — cada página é `import()`
@@ -9,6 +15,7 @@ import { defineConfig } from 'vite';
  * o bundle inicial pequeno e o motor (`src/engine/`) 100% sem dependências. */
 export default defineConfig({
   root: '.',
+  define: { __APP_VERSION__: JSON.stringify(version) },
   publicDir: 'public',
   server: { port: 5174, host: true, open: false, strictPort: false, allowedHosts: ['localhost', '.manus.computer'] },
   build: {

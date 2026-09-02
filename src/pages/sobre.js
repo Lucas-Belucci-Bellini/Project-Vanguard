@@ -6,6 +6,7 @@
  */
 
 import { h } from '../ui/helpers.js';
+import { rotuloDaVersao } from '../core/versao.js';
 import '../styles/sobre.css';
 
 function painel(titulo, ...corpo) {
@@ -31,7 +32,7 @@ export function sobrePage() {
         h('div', { className: 'sobre__eyebrow' }, 'CONTRATO PÚBLICO'),
         h('h1', null, 'Navegação que explica seus limites'),
         h('p', null, 'O Vanguard Field é um navegador multiuso para cidade, caminhada, expedição, mar e proteção civil. Ele prioriza dados locais e avisa quando uma função depende de rede, fonte oficial ou equipamento externo.')),
-      h('div', { className: 'sobre__version' }, 'PROTÓTIPO', h('small', null, 'OFFLINE-FIRST'))),
+      h('div', { className: 'sobre__version' }, rotuloDaVersao(), h('small', null, 'OFFLINE-FIRST'))),
 
     painel('◤ O QUE O PRODUTO FAZ',
       linha('feito', 'Cidade e dia a dia', 'Define destinos por coordenadas ou toque no mapa, mostra distância e rumo e guarda pontos localmente.'),
