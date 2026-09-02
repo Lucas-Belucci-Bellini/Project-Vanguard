@@ -19,7 +19,13 @@
  *   CHROMIUM=<caminho do chrome> node scripts/verificar-fluxos.mjs
  */
 
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
+
+/* A versão esperada vem do `package.json`, nunca de um literal aqui: um número
+ * cravado num teste envelhece exatamente como envelheceu o `'1.3.1'` que a
+ * configuração do app carregava — e aí o teste passa a mentir junto. */
+const { version: VERSAO } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 const BASE = process.env.BASE ?? 'http://localhost:4319';
 const b = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ['--no-sandbox'] });
@@ -91,7 +97,7 @@ conferir('tela legada mostra o aviso', /LEGADA/.test(legado) && /Arma 3/.test(le
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);
 const versao = await p.locator('.sobre__version').textContent();
-conferir('sobre mostra a versão real do app', /v1\.4\.0/.test(versao), versao.trim().slice(0, 40));
+conferir('sobre mostra a versão real do app', versao.includes(`v${VERSAO}`), versao.trim().slice(0, 40));
 
 await b.close();
 console.log(falhas ? `\n${falhas} fluxo(s) com falha` : '\ntodos os fluxos passaram');
