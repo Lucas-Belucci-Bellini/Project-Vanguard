@@ -43,6 +43,10 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/engine/escuta.js` + `src/core/escuta-ambiente.js` — escuta de ambiente (`#/escuta`): mede energia por banda no microfone e avisa por vibração quando o grave sobe como sobe um veículo se aproximando, ou quando alguém grita. **Só recebe** — não grava, não guarda e não transmite, e há teste estrutural cobrando isso (ver ADR-0041)
 - `src/engine/odometro.js` — distância COM desnível e peneira de ruído; `src/engine/passos.js` + `src/core/passos-sensor.js` contam passos pelo acelerômetro, para onde o GPS não enxerga (ver ADR-0043)
 - `src/core/notificacao-jornada.js` — quanto se andou hoje, na tela bloqueada; notificação própria porque o plugin de fundo não deixa trocar o texto da dele
+- `src/core/versao.js` + `src/core/service-worker.js` — identidade do build
+  (versão, commit, `BUILD_ID`) injetada pelo Vite, e o registro do service
+  worker que ela versiona. O grupo **BUILD / RUNTIME** de `#/diagnostico` mostra
+  tudo isso na tela (ver ADR-0045)
 - `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
@@ -146,11 +150,39 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   apagava a folga exatamente na largura de celular. Dois botões já ficaram
   inalcançáveis assim. `scripts/verificar-fluxos.mjs` e a medição de rodapé
   cobrem isso.
+- **A WebView do Capacitor serve em `http://localhost`, não em `https:`.** O
+  registro do service worker exigia `location.protocol === 'https:'` e por isso
+  **nunca aconteceu dentro do aplicativo** — em nenhuma versão publicada. Com
+  isso o preparo de mapa offline, que espera `navigator.serviceWorker.ready`,
+  **travava para sempre sem erro**: `ready` não resolve quando não há registro.
+  Use `isSecureContext`, que a especificação define como verdadeiro para
+  `localhost`, e pergunte por `getRegistration()` antes de esperar por `ready`.
+- **Nome de cache escrito à mão nunca é invalidado.** `vanguard-field-shell-v9`
+  atravessou quatro releases idêntico. Com `fetch` cache-first no `index.html`,
+  isso prende o app numa versão anterior para sempre — o HTML cacheado aponta
+  para chunks antigos, também cacheados, e o botão de atualizar não alcança.
+  O nome do cache vem do identificador de build (`/sw.js?v=<build>`), e **HTML
+  nunca é cache-first**: só arquivo com hash no nome pode ser.
+- **O `fetch` do service worker também passa pelo cache HTTP.** Rede primeiro
+  não basta para o documento de entrada: use `cache: 'no-store'` nele, ou o
+  `index.html` antigo continua chegando com o novo já no disco (medido).
+- **Versão de app escrita à mão vira mentira operacional.** `CONFIGURACAO_APLICATIVO.versao`
+  ficou congelada em `'1.3.1'` por quatro releases, e `atualizacao.js` usa esse
+  valor como "versão instalada": o app anunciava atualização para uma versão que
+  ele já era. A versão vem do `package.json` pelo build, sempre.
+- **APK novo NÃO instala por cima de APK com certificado diferente.** A chave
+  fixa entrou na 1.3.2; 1.1.0 assina com `38f995fc…` e 1.4.x com `d0100bfd…`.
+  O Android recusa a atualização, ela falha, e o aparelho segue na versão
+  antiga — que é como "o site tem páginas que o app não tem" acontece sem
+  nenhum defeito de build. Diagnóstico → BUILD / RUNTIME responde isso na hora.
 - **`npm test` não diz que a interface funciona.** Ele cobre motor e contrato.
   Renderização de rota é `npm run verificar:rotas`; botão que faz o que promete
-  é `npm run verificar:fluxos`. Os dois precisam de Playwright + Chromium, que
-  **não** são dependências do repositório (o postinstall baixaria navegador em
-  todo `npm ci`).
+  é `npm run verificar:fluxos`; **e nenhum dos dois prova que funciona no
+  aplicativo** — isso é `npm run verificar:webview`, que serve os assets do APK
+  em `http://localhost`. Os três precisam de Playwright + Chromium, que **não**
+  são dependências do repositório (o postinstall baixaria navegador em todo
+  `npm ci`). A guarda `npm run verificar:paridade` compara `dist/` com os
+  assets do Android por SHA-256 e roda dentro de `mobile:sync:android`.
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na

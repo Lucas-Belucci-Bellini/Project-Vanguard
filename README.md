@@ -46,6 +46,7 @@ abrir, tiver dado real, e os botões fizerem o que dizem.
 
 ### Documentação (não é funcionalidade)
 
+[`docs/PARIDADE-WEB-MOBILE.md`](docs/PARIDADE-WEB-MOBILE.md) — matriz web/dist/Capacitor/Android e como cada ✅ foi medido ·
 [`docs/MAPA-DE-FUNCIONALIDADES.md`](docs/MAPA-DE-FUNCIONALIDADES.md) ·
 [`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md) ·
 [`docs/BALISTICA.md`](docs/BALISTICA.md) ·

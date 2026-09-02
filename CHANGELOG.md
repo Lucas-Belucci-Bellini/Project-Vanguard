@@ -1,5 +1,55 @@
 # Changelog
 
+## 1.4.2 — 2026-09-02
+
+**Paridade web ↔ mobile.** A investigação começou por "as páginas novas não
+aparecem no aplicativo" e terminou em quatro defeitos reais — nenhum deles onde
+a suspeita apontava.
+
+**A cadeia de build não estava quebrada.** O APK publicado da 1.4.1 foi baixado
+e aberto: tem os 44 chunks, incluindo Navegação, Escuta e Noturno, com as
+correções da própria 1.4.1. Servido na origem da WebView, mostra as 12 abas.
+Uma instalação limpa da 1.4.1 já tinha paridade.
+
+**A causa do sintoma é a assinatura.** Os certificados foram extraídos dos APKs:
+1.1.0 assina com `38f995fc…` e 1.4.x com `d0100bfd…`. O Android **recusa**
+instalar por cima de um certificado diferente — a instalação falha e o aparelho
+continua na versão antiga, cujo bundle tem exatamente as 9 abas relatadas.
+Da 1.3.2 em diante toda build assina igual; o caminho é desinstalar uma vez.
+
+Os quatro defeitos encontrados e corrigidos:
+
+- **O service worker nunca registrou dentro do aplicativo.** O registro exigia
+  `location.protocol === 'https:'` e a WebView serve em `http://localhost`.
+  Consequência medida: "Preparar área offline" **travava para sempre**, sem
+  erro — `serviceWorker.ready` não resolve sem registro. Agora o registro usa
+  `isSecureContext`, e sem registro a tela **diz** que o preparo está
+  indisponível.
+- **O cache do service worker nunca era invalidado**: o nome era a constante
+  `vanguard-field-shell-v9`, idêntica da 1.1.0 à 1.4.1, com `fetch` cache-first
+  até no `index.html`. Agora o cache vem do identificador de build, o HTML nunca
+  é cache-first, e o `activate` apaga os caches de builds anteriores. O cache de
+  **tiles** continua fora disso, de propósito: é o mapa que a pessoa preparou.
+- **A versão do app estava congelada em `1.3.1`** — e `atualizacao.js` usa esse
+  valor como "versão instalada". O app anunciava atualização para uma versão
+  que ele já era. Agora vem do `package.json` pelo build.
+- **Não havia como perguntar ao aparelho que bundle ele roda.** `#/diagnostico`
+  ganhou o grupo **BUILD / RUNTIME**: versão, bundle, commit, execução, origem,
+  contexto seguro, service worker e WebView.
+
+Guardas novas, que falham no CI em vez de no bolso:
+
+- `npm run verificar:paridade` — compara `dist/` com os assets do Android por
+  SHA-256, exige a versão dentro do bundle empacotado, e roda dentro de
+  `mobile:sync:android`. Testada: sai com código 1 quando um arquivo diverge.
+- `npm run verificar:webview` — abre as 13 rotas nos **bytes do APK**, em
+  `http://localhost`, com ida e volta e erros classificados.
+
+Documentação: ADR-0045, `docs/PARIDADE-WEB-MOBILE.md` com a matriz e a origem
+de cada evidência, e seis armadilhas novas no CLAUDE.md.
+
+609 testes verdes.
+
 ## 1.4.1 — 2026-09-02
 
 Auditoria completa das 13 rotas, com uma regra só: **uma rota só existe se

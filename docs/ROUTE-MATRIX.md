@@ -8,6 +8,11 @@ Esta tabela é a resposta curta; o contrato de cada uma está em
 `test/rotas.test.js` falha se uma rota existir sem linha aqui, se esta tabela
 citar rota que não existe, ou se faltar o contrato em `docs/ROUTES/`.
 
+**Paridade com o aplicativo:** as 13 rotas foram medidas também nos bytes que o
+APK empacota, servidos na origem da WebView — ver
+[`PARIDADE-WEB-MOBILE.md`](PARIDADE-WEB-MOBILE.md). Uma rota que funcione só no
+navegador é `WEB_ONLY`, não `IMPLEMENTED`.
+
 | Rota | Função | Estado | Dados | Dependências | Teste |
 | --- | --- | --- | --- | --- | --- |
 | `#/inicio` | Prontidão para sair andando | `IMPLEMENTED` | `estado` local (posição, trilha, waypoints, mapas), service worker | `prontidao-offline`, `localizacao` | `prontidao-offline.test.js` · varredura |
