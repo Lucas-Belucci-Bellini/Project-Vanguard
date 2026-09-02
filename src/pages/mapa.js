@@ -1252,8 +1252,14 @@ export function mapaPage() {
 
     async function mensagemOffline(type, dados = {}) {
       if (!navigator.serviceWorker) return null;
-      const registro = await navigator.serviceWorker.ready;
-      const alvo = navigator.serviceWorker.controller || registro.active;
+      // `serviceWorker.ready` NUNCA resolve quando não há registro — e no
+      // aplicativo não havia, porque o registro exigia `https:` e a WebView
+      // serve em `http://localhost`. O botão de preparar área offline ficava
+      // girando para sempre, sem erro. Perguntar primeiro se existe registro
+      // transforma "trava" em "diz que não dá".
+      const registro = await navigator.serviceWorker.getRegistration();
+      if (!registro) return null;
+      const alvo = navigator.serviceWorker.controller || registro.active || registro.waiting;
       if (!alvo) return null;
       const canal = new MessageChannel();
       return new Promise((resolve, reject) => {
@@ -1297,6 +1303,13 @@ export function mapaPage() {
     offlineButton.onclick = async () => {
       if (!navigator.serviceWorker) {
         offlineStatus.textContent = 'Service worker indisponível neste navegador; a rota local continua disponível.';
+        return;
+      }
+      // Ter a API não é ter um registro: é a diferença entre "o navegador
+      // suporta" e "está ligado aqui". Sem registro, o preparo não acontece —
+      // e a tela precisa dizer isso em vez de fingir que está trabalhando.
+      if (!(await navigator.serviceWorker.getRegistration())) {
+        offlineStatus.textContent = 'PREPARO OFFLINE INDISPONÍVEL: o service worker não está registrado neste ambiente. A posição, a trilha e os waypoints continuam funcionando sem rede; os tiles do mapa é que não podem ser guardados agora.';
         return;
       }
       const baseAtual = BASES[selectBase.value];

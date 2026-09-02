@@ -10,6 +10,7 @@ import { estado, CHAVES } from './core/estado.js';
 import { criarControleAtualizacao } from './core/atualizacao-ui.js';
 import { recuperarDatasetNoBoot } from './core/dataset-boot-recovery.js';
 import { criarNavegador } from './core/navegacao.js';
+import { registrarServiceWorker } from './core/service-worker.js';
 
 const ROTAS = [
   { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
@@ -161,3 +162,8 @@ async function boot() {
 
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true });
 else boot();
+
+/* O service worker é registrado aqui, e não no `index.html`, para poder usar o
+ * identificador de build injetado no bundle. Falhar no registro nunca derruba o
+ * aplicativo: sem ele o app perde o cache offline, não a navegação. */
+void registrarServiceWorker();

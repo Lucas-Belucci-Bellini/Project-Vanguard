@@ -23,14 +23,10 @@
   <body>
     <noscript>O Vanguard Field precisa de JavaScript e da permissão de localização para oferecer navegação ao vivo.</noscript>
     <script type="module" src="/src/main.js"></script>
-    <script>
-      if ('serviceWorker' in navigator && location.protocol === 'https:') {
-        navigator.serviceWorker.register('/sw.js').then((registration) => {
-          window.__vanguardServiceWorkerRegistration = registration;
-          window.dispatchEvent(new CustomEvent('vanguard:sw-ready', { detail: { registration } }));
-          registration.update().catch(() => {});
-        }).catch(() => {});
-      }
-    </script>
+    <!-- O registro do service worker mora em `src/core/service-worker.js`.
+         Aqui ele exigia `location.protocol === 'https:'`, e a WebView do
+         Capacitor serve em `http://localhost`: o resultado é que o service
+         worker NUNCA registrou dentro do aplicativo, e com ele o preparo de
+         mapa offline ficou travado em silêncio por quatro versões. -->
   </body>
 </html>
