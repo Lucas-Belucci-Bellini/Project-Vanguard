@@ -37,6 +37,9 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/core/foto-parada.js` + `foto-storage.js` — foto de parada amarrada à coordenada da captura (IndexedDB próprio; ver ADR-0037)
 - `src/core/bussola-leitura.js` — os três nortes da bússola; a leitura crua só vira azimute verdadeiro com correção medida (ver ADR-0040)
 - `src/engine/sol.js` — posição do Sol offline, usada pelo alerta de exposição e pela conferência da bússola
+- `src/engine/visao-noturna.js` + `src/core/camera-noturna.js` — visão noturna (`#/noturno`): **intensificação de luz, não infravermelho**. Empilha quadros (α = 0,2 → 3× menos ruído), estica o histograma só até onde o ruído removido autoriza, e desmancha a pilha medindo a estrutura que ela perde. **Só vê** — não grava, não guarda e não transmite, e há teste estrutural cobrando isso (ver ADR-0044)
+- `src/engine/rumo-filtro.js` — filtro circular da bússola: suaviza no vetor unitário (nunca em graus), 3,01× menos tremor parado, e acusa interferência magnética pela retidão da leitura (ver ADR-0044)
+- `src/engine/fixo-medio.js` — média de fixos parado para a foto de parada; a melhora **anunciada** é menor que a medida, de propósito (ver ADR-0044)
 - `src/engine/escuta.js` + `src/core/escuta-ambiente.js` — escuta de ambiente (`#/escuta`): mede energia por banda no microfone e avisa por vibração quando o grave sobe como sobe um veículo se aproximando, ou quando alguém grita. **Só recebe** — não grava, não guarda e não transmite, e há teste estrutural cobrando isso (ver ADR-0041)
 - `src/engine/odometro.js` — distância COM desnível e peneira de ruído; `src/engine/passos.js` + `src/core/passos-sensor.js` contam passos pelo acelerômetro, para onde o GPS não enxerga (ver ADR-0043)
 - `src/core/notificacao-jornada.js` — quanto se andou hoje, na tela bloqueada; notificação própria porque o plugin de fundo não deixa trocar o texto da dele
@@ -106,7 +109,31 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - **Nada de `MediaRecorder`, `RTCPeerConnection`, rede ou `destination` na
   escuta.** O grafo termina no `AnalyserNode`. `test/escuta-ambiente.test.js` lê
   o código e falha se alguma dessas aparecer — a decisão é do operador e está no
-  código, não só no texto.
+  código, não só no texto. **A visão noturna segue a mesma lista** (mais
+  `captureStream` e `toDataURL`), cobrada por `test/camera-noturna.test.js`.
+- **Média de rumo em graus quebra no norte.** A média de 359° e 1° é 180°, o sul
+  exato. Rumo se filtra no vetor unitário `(cos, sen)` e só volta a ser ângulo no
+  fim — é o que `rumo-filtro.js` faz, e há teste cobrando o cruzamento.
+- **Velocidade de giro medida entre dois quadros é ruído, não giro.** A 16 Hz,
+  3° de tremor viram 48°/s de "giro" que não existe; o filtro abre sozinho e
+  devolve justo o tremor que tirou. Meça no sinal **já filtrado** e sobre uma
+  base de tempo longa, com zona morta.
+- **`accuracy` do GPS é raio de 95%, não desvio padrão** (é 2,45·σ). Confundir os
+  dois estraga o detector de parado nos dois sentidos: ruído normal vira
+  "deslocamento" e destrói a média, ou a pessoa anda sem ninguém perceber.
+- **Nunca anuncie precisão melhor que a medida.** A média de fixos calcula
+  σ/√N, mas erro de GNSS é correlacionado no tempo: o teto anunciado é 2,5×
+  enquanto o medido em laboratório é 2,73×. Há teste comparando anunciado com
+  erro real.
+- **Detectar movimento de câmera pela diferença média entre quadros falha no
+  escuro.** Em cena de pouco contraste, varrer a 12 px/quadro produz diferença
+  MENOR que o ruído do sensor. Meça o estrago (a estrutura que o acumulado
+  perde), não o movimento — e meça numa escala grossa, onde o ruído já foi
+  diluído pela média.
+- **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
+  `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
+  empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na
+  legenda da tela noturna. Há lint em `test/viewport-travado.test.js`.
 
 ## Aviso que acompanha o produto
 
