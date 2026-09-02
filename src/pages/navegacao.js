@@ -19,6 +19,7 @@ import { estado, CHAVES } from '../core/estado.js';
 import { latLonParaMGRS, latLonParaUTM, mgrsParaLatLon } from '../engine/mgrs.js';
 import { rumoGeodesico, distanciaGeodesica, cardinalDeGraus } from '../core/navegacao-rumo.js';
 import { iniciarAcompanhamento, precisaoLabel } from '../core/localizacao.js';
+import { coordenadaValida } from '../engine/numero-seguro.js';
 
 function normalizar(local) {
   const lat = Number(local?.lat ?? local?.latitude);
@@ -40,7 +41,14 @@ function bloco(titulo, ...filhos) { return h('section', { className: 'navegacao_
 function linha(rotulo, valor) { return h('div', { className: 'navegacao__linha' }, h('span', null, rotulo), h('strong', null, valor ?? 'INDISPONÍVEL')); }
 
 export function navegacaoPage() {
-  const raiz = h('main', { className: 'pagina navegacao', id: 'conteudo-principal' });
+  // `vg-pagina` como todas as outras telas: é ela que carrega o contrato de
+  // layout do shell. A versão anterior usava `.pagina`, que não existe em
+  // folha de estilo nenhuma, dentro de um `<main>` aninhado no `<main>` do
+  // shell — dois landmarks `main` na mesma página, com um id que nenhum link
+  // aponta. O rolamento é do contêiner interno, porque `.vg-pagina` é
+  // `overflow: hidden`.
+  const raiz = h('div', { className: 'vg-pagina navegacao' });
+  const rolagem = h('div', { className: 'navegacao__scroll' });
   let pos = posicaoAtual();
   let pararGps = null;
   let desmontado = false;
@@ -63,18 +71,35 @@ export function navegacaoPage() {
   const alvoLon = h('input', { type: 'number', step: 'any', placeholder: 'Longitude', ariaLabel: 'Longitude do waypoint' });
   const alvoEstado = h('p', { className: 'navegacao__estado', role: 'status', ariaLive: 'polite' }, 'Informe um waypoint para calcular distância e rumo.');
 
+  /**
+   * O waypoint só existe quando a pessoa digitou os dois números.
+   *
+   * `Number('')` é **0**, e 0 é finito e cabe em [-90, 90]: a versão anterior
+   * aceitava dois campos VAZIOS como a coordenada (0, 0) e mostrava distância
+   * e rumo para o golfo da Guiné — um destino que ninguém informou, num
+   * aplicativo cuja função é dizer para onde andar. `coordenadaValida` recusa
+   * string vazia, é a mesma guarda do resto do app, e existe exatamente
+   * porque esta armadilha já mordeu quatro vezes.
+   */
   function alvoValido() {
-    const alvo = { lat: Number(alvoLat.value), lon: Number(alvoLon.value) };
-    if (!Number.isFinite(alvo.lat) || !Number.isFinite(alvo.lon)) return null;
-    if (alvo.lat < -90 || alvo.lat > 90 || alvo.lon < -180 || alvo.lon > 180) return null;
-    return alvo;
+    return coordenadaValida({ lat: alvoLat.value, lon: alvoLon.value });
+  }
+
+  /** Separa "não preenchido" de "preenchido errado": a mensagem muda. */
+  function faltaPreencher() {
+    return alvoLat.value.trim() === '' || alvoLon.value.trim() === '';
   }
 
   /** Recalcula rumo e distância — chamado no botão E a cada fixo novo. */
   function recalcularAlvo({ silencioso = false } = {}) {
     const alvo = alvoValido();
     if (!alvo) {
-      if (!silencioso) alvoEstado.textContent = 'Waypoint inválido.';
+      // Silencioso é o recálculo automático a cada fixo: sem waypoint ele não
+      // tem o que dizer, e apagar o texto evita deixar na tela um rumo velho
+      // para um destino que não está mais definido.
+      alvoEstado.textContent = faltaPreencher()
+        ? 'Informe latitude e longitude do waypoint para calcular distância e rumo.'
+        : 'Waypoint inválido: latitude entre -90 e 90, longitude entre -180 e 180.';
       return;
     }
     if (!pos) { alvoEstado.textContent = 'POSIÇÃO ATUAL INDISPONÍVEL'; return; }
@@ -111,7 +136,8 @@ export function navegacaoPage() {
   const converter = () => { try { const p = mgrsParaLatLon(conversorEntrada.value); conversorSaida.textContent = `LAT/LON ${num(p.lat, 6)}, ${num(p.lon, 6)}`; } catch { conversorSaida.textContent = 'MGRS inválido.'; } };
   const ferramentas = bloco('FERRAMENTAS DE NAVEGAÇÃO', h('div', { className: 'navegacao__form' }, conversorEntrada, h('button', { type: 'button', className: 'vg-botao', onclick: converter }, 'CONVERTER MGRS')), conversorSaida, h('p', { className: 'u-mudo' }, 'Waypoints, trilhas, grade, medição e exportação permanecem locais.'));
 
-  raiz.append(h('header', null, h('h1', null, 'NAVEGAÇÃO'), estadoTela), posicao, rumo, navegacaoAtiva, ferramentas, h('button', { type: 'button', className: 'vg-botao', onclick: () => { location.hash = '#/mapa'; } }, 'ABRIR NO MAPA'));
+  rolagem.append(h('header', null, h('h1', null, 'NAVEGAÇÃO'), estadoTela), posicao, rumo, navegacaoAtiva, ferramentas, h('button', { type: 'button', className: 'vg-botao navegacao__abrir-mapa', onclick: () => { location.hash = '#/mapa'; } }, 'ABRIR NO MAPA'));
+  raiz.append(rolagem);
 
   pintar();
   pararGps = iniciarAcompanhamento({
