@@ -7,6 +7,7 @@ import { estado, CHAVES } from '../core/estado.js';
 import { iniciarAcompanhamento, precisaoLabel } from '../core/localizacao.js';
 import { lerBussola, calibrarPeloSol, LADOS, REFERENCIAS_RUMO } from '../core/bussola-leitura.js';
 import { criarFiltroDeRumo, QUALIDADES_RUMO } from '../engine/rumo-filtro.js';
+import { numeroFinito } from '../engine/numero-seguro.js';
 
 function grausTexto(valor) {
   return valor == null ? '—' : `${String(Math.round(valor) % 360).padStart(3, '0')}°`;
@@ -132,8 +133,13 @@ export function bussolaPage() {
   }
 
   function aplicarDeclinacao() {
-    const valor = Number(campoDeclinacao.value);
-    if (!Number.isFinite(valor) || Math.abs(valor) > 180) {
+    // `Number('')` é 0, e 0 passa em `isFinite` e em |0| <= 180: o campo vazio
+    // aplicava uma "correção medida" de zero grau e a agulha passava a exibir
+    // CORRIGIDO sem ninguém ter medido nada. É o oposto do que o ADR-0040
+    // decidiu — a leitura crua só vira azimute verdadeiro DEPOIS de existir
+    // uma correção de verdade.
+    const valor = numeroFinito(campoDeclinacao.value);
+    if (valor == null || Math.abs(valor) > 180) {
       status.querySelector('.bussola__status-texto').textContent = 'Informe a declinação em graus, com leste positivo (ex.: -20.5).';
       return;
     }
