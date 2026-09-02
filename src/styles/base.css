@@ -65,8 +65,8 @@ input, select { background: var(--color-bg); border: var(--border-base); border-
 .vg-aba--secundaria { display: none; }
 
 /* Viewport content */
-.vg-main { position: relative; display: flex; flex: 1 1 auto; min-height: 0; overflow: hidden; }
-.vg-pagina { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.vg-main { position: relative; display: flex; flex: 1 1 auto; min-height: 0; overflow: hidden; min-width: 0; }
+.vg-pagina { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; min-width: 0; }
 .vg-erro-pagina { display: grid; place-items: center; padding: var(--space-lg); }
 
 /* Shared building blocks used by legacy screens too. */

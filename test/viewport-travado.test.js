@@ -70,3 +70,36 @@ test('nenhuma página repete a marca que o cabeçalho já mostra sempre', () => 
   });
   assert.deepEqual(repetem, [], 'o cabeçalho já carrega a marca em todas as telas');
 });
+
+test('todo texto dentro de linha flex pode encolher', () => {
+  // `min-width: auto` é o padrão de um item de flex: ele se recusa a ficar
+  // menor que o próprio conteúdo e empurra o resto para fora da tela num
+  // aparelho estreito. Foi o que aconteceu com a marca do cabeçalho, e
+  // aconteceu de novo com a legenda da opção de empilhar, na tela noturna.
+  const folhas = fs.readdirSync(new URL('../src/styles/', import.meta.url)).filter((n) => n.endsWith('.css'));
+  const semTrava = [];
+  for (const folha of folhas) {
+    const fonte = fs.readFileSync(new URL(`../src/styles/${folha}`, import.meta.url), 'utf8');
+    const regex = /([^{}]+)\{([^{}]*)\}/g;
+    let achado;
+    while ((achado = regex.exec(fonte))) {
+      const seletor = achado[1].trim();
+      const corpo = achado[2];
+      // Só interessa quem cresce dentro de uma linha flex: `flex: 1 1` sem
+      // `min-width` é a combinação que estoura.
+      if (!/flex:\s*1\s+1/.test(corpo)) continue;
+      if (/min-width:\s*0/.test(corpo)) continue;
+      // Elemento substituído (canvas, img, vídeo) não tem texto para quebrar:
+      // ele é dimensionado por `object-fit` e encolhe sem ajuda. A regra aqui
+      // é sobre conteúdo que se recusa a ficar menor que a própria linha.
+      if (/object-fit:/.test(corpo) || /\b(canvas|img|video|iframe)\b/.test(seletor)) continue;
+      // `width: 100%` já resolve por outro caminho: um elemento mandado a ter
+      // exatamente a largura do pai não tem como passar dela. É o caso de
+      // `.mapa__canvas`, que além disso é o seletor com a armadilha do
+      // maplibre — mexer nele sem necessidade é procurar problema.
+      if (/width:\s*100%/.test(corpo)) continue;
+      semTrava.push(`${folha} → ${seletor}`);
+    }
+  }
+  assert.deepEqual(semTrava, [], 'item de flex que cresce precisa de min-width: 0');
+});
