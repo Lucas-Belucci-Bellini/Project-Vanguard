@@ -1,4 +1,7 @@
-.sobre { display: block; overflow-y: auto; padding: 24px; }
+/* A barra de abas é fixa e tem ~86 px: com 24 px de folga o último parágrafo
+ * — e, nesta tela, um BOTÃO — ficam presos embaixo dela, inalcançáveis por
+ * rolagem. Medido no Chromium a 390 px, não deduzido. */
+.sobre { display: block; overflow-y: auto; overflow-x: hidden; padding: 24px 24px calc(86px + env(safe-area-inset-bottom)); }
 .sobre__wrap { width: min(980px, 100%); margin: 0 auto; }
 .sobre__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
 .sobre__eyebrow { color: var(--color-cyan); font-size: 9px; letter-spacing: var(--tracking-widest); font-weight: var(--font-weight-bold); }
@@ -27,7 +30,10 @@
 .sobre__footer p { margin-top: 8px; }
 
 @media (max-width: 760px) {
-  .sobre { padding: 16px; }
+  /* A folga da barra de abas precisa sobreviver à media query: o
+   * shorthand `padding: 16px` apagava o rodapé e o defeito voltava só
+   * na largura de celular. */
+  .sobre { padding: 16px 16px calc(86px + env(safe-area-inset-bottom)); }
   .sobre__header { display: block; }
   .sobre__version { display: inline-block; margin-top: 13px; }
   .sobre__linha { display: block; }
