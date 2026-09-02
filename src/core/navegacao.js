@@ -72,8 +72,26 @@ export function criarNavegador({ container, esvaziar, aoErro = () => {} } = {}) 
         return { estado: RESULTADOS_NAVEGACAO.FALHOU, erro };
       }
 
-      desmontarAtual = typeof resultado?.desmontar === 'function' ? resultado.desmontar : null;
-      container.append(resultado.elemento);
+      // A montagem também vai dentro do try, e o contrato é conferido antes.
+      //
+      // A versão anterior fazia `container.append(resultado.elemento)` solto:
+      // uma tela que devolvesse `undefined` (um `return` esquecido, um módulo
+      // com export errado) lançava um TypeError que ninguém pegava. Como
+      // `navegar` é chamado sem `await` no `hashchange`, isso virava uma
+      // rejeição não tratada — **tela em branco, sem o aviso de erro**, que é
+      // exatamente o sintoma de "a página não funciona no aplicativo" e o mais
+      // difícil de diagnosticar à distância. Erro nenhum pode escapar por aqui.
+      try {
+        if (!resultado || !resultado.elemento) {
+          throw new TypeError('a tela não devolveu `elemento` — confira o `return` da página e o nome do export.');
+        }
+        desmontarAtual = typeof resultado.desmontar === 'function' ? resultado.desmontar : null;
+        container.append(resultado.elemento);
+      } catch (erro) {
+        desmontarAtual = null;
+        aoErro(erro);
+        return { estado: RESULTADOS_NAVEGACAO.FALHOU, erro };
+      }
       return { estado: RESULTADOS_NAVEGACAO.MONTADA };
     },
 

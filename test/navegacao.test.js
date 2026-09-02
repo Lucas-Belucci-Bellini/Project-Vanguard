@@ -162,3 +162,45 @@ test('container ou esvaziar ausentes são recusados na criação', () => {
   assert.throws(() => criarNavegador({ esvaziar }), /container/);
   assert.throws(() => criarNavegador({ container: criarContainer() }), /esvazia o container/);
 });
+
+test('tela que não devolve `elemento` vira erro visível, não branco silencioso', async () => {
+  // O defeito que este teste tranca: `container.append(resultado.elemento)`
+  // estava fora do try. Uma página com `return` esquecido, ou um export com
+  // nome errado, lançava um TypeError que ninguém pegava — e como `navegar` é
+  // chamado sem `await` no `hashchange`, virava rejeição não tratada: tela em
+  // branco, SEM o aviso de erro. É o sintoma mais caro de diagnosticar à
+  // distância, porque parece "a página não funciona no aplicativo".
+  const container = criarContainer();
+  const erros = [];
+  const navegador = criarNavegador({ container, esvaziar, aoErro: (e) => erros.push(e) });
+
+  const resultado = await navegador.navegar({ carregar: async () => () => undefined });
+
+  assert.equal(resultado.estado, RESULTADOS_NAVEGACAO.FALHOU);
+  assert.equal(erros.length, 1, 'a falha precisa chegar ao aoErro');
+  assert.match(erros[0].message, /elemento/);
+  assert.equal(navegador.temTelaMontada(), false, 'nada pode ficar registrado para desmontagem');
+});
+
+test('tela que devolve objeto sem elemento também é recusada', async () => {
+  const container = criarContainer();
+  const erros = [];
+  const navegador = criarNavegador({ container, esvaziar, aoErro: (e) => erros.push(e) });
+
+  const resultado = await navegador.navegar({ carregar: async () => () => ({ desmontar() {} }) });
+
+  assert.equal(resultado.estado, RESULTADOS_NAVEGACAO.FALHOU);
+  assert.equal(erros.length, 1);
+});
+
+test('falha ao montar não deixa a tela anterior registrada para desmontagem', async () => {
+  const container = criarContainer();
+  const navegador = criarNavegador({ container, esvaziar, aoErro: () => {} });
+  await navegador.navegar({ carregar: async () => () => ({ elemento: { nome: 'boa' }, desmontar() {} }) });
+  assert.equal(navegador.temTelaMontada(), true);
+
+  await navegador.navegar({ carregar: async () => () => undefined });
+  // A anterior já foi desmontada no início da navegação; a nova falhou. Ficar
+  // com o `desmontar` da antiga apontado seria chamá-lo duas vezes.
+  assert.equal(navegador.temTelaMontada(), false);
+});
