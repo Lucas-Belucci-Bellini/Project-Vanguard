@@ -21,6 +21,7 @@ import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arq
 import { compartilharArquivo, ESTADOS_COMPARTILHAMENTO } from '../platform/compartilhamento.js';
 import { criarMotorMapa } from '../core/map-engine.js';
 import { criarRegistroFotoParada, avaliarPosicaoParada, fotosParadaComoWaypoints, PRECISAO_PARADA_PADRAO_M } from '../core/foto-parada.js';
+import { criarMediaDeFixos } from '../engine/fixo-medio.js';
 import { criarStorageFotos } from '../core/foto-storage.js';
 import { iniciarTrajeto, encerrarTrajeto, iniciarParada, encerrarParada, resumoTrajeto, paradaAberta, TIPOS_PARADA } from '../core/trajeto.js';
 import { classificarDeslocamento, sugerirModoAtual, MODOS_DESLOCAMENTO, CONFIANCA } from '../core/deslocamento.js';
@@ -276,6 +277,7 @@ export function mapaPage() {
   let mapa = null;
   let motorMapa = null;
   const storageFotos = criarStorageFotos();
+  const mediaFixos = criarMediaDeFixos();
   let paradas = [];
   let trajeto = estado.get(CHAVES.TRAJETO, null);
   let modoConfirmado = null;
@@ -335,6 +337,11 @@ export function mapaPage() {
   function registrarPosicao(nova) {
     const anterior = posicao;
     posicao = nova;
+    // Todo fixo alimenta a média. Ela só é consultada quando a coordenada
+    // precisa ser boa (a foto da parada); aqui o custo é uma soma por fixo, e
+    // o benefício é a média já estar pronta quando a pessoa parar para
+    // fotografar, em vez de começar do zero naquele instante.
+    mediaFixos.adicionar(nova);
     if (rotaAtiva && !rotaPausada && deveRegistrar(ultimoRegistrado, nova)) {
       // O modo confirmado pela pessoa viaja com o ponto: é o que separa
       // quilômetro andado de quilômetro de ônibus no registro.
@@ -876,12 +883,26 @@ export function mapaPage() {
     return MIME_POR_EXTENSAO[extensao] ?? '';
   }
 
-  /** Fixo dedicado da parada: alta precisão e sem reaproveitar leitura velha. */
+  /**
+   * Fixo dedicado da parada: alta precisão e sem reaproveitar leitura velha.
+   *
+   * Parado, a média dos fixos recentes descreve o lugar melhor que qualquer
+   * fixo isolado — é o mesmo motivo pelo qual topógrafo deixa o receptor
+   * parado em cima do ponto. Mas a média só substitui o fixo novo quando ela
+   * é de fato melhor: andando, ela é encerrada pelo próprio deslocamento e o
+   * fixo cru volta a ser quem descreve o agora.
+   */
   function posicaoDaParada() {
     return new Promise((resolve) => {
       solicitarPosicao({
         mode: 'manual',
-        onPosition: (leitura) => resolve(leitura),
+        onPosition: (leitura) => {
+          const media = mediaFixos.adicionar(leitura).posicao;
+          const melhor = media && media.accuracy < (leitura.accuracy ?? Infinity)
+            ? { ...leitura, ...media }
+            : leitura;
+          resolve(melhor);
+        },
         onError: () => resolve(null),
       });
     });
@@ -1051,8 +1072,11 @@ export function mapaPage() {
       const notaGaleria = salvouNaGaleria === true
         ? ' Também foi salva na galeria do celular.'
         : salvouNaGaleria === false ? ' Não foi possível salvá-la na galeria; ela está guardada no app.' : '';
+      // Dizer que a coordenada veio de média não é detalhe: é a diferença
+      // entre "o aparelho afirmou 24 m" e "somamos 9 leituras paradas".
+      const notaMedia = posicao?.mediada ? ` Coordenada obtida pela média de ${posicao.amostras} fixos parados.` : '';
       fotoStatus.textContent = (resultado.registro.dentroDoLimite
-        ? `Parada guardada em ${resultado.registro.mgrs ?? 'coordenada local'} com ${Math.round(resultado.registro.precisaoM)} m de precisão.`
+        ? `Parada guardada em ${resultado.registro.mgrs ?? 'coordenada local'} com ${Math.round(resultado.registro.precisaoM)} m de precisão.${notaMedia}`
         : `Parada guardada, mas com ${resultado.registro.precisaoM == null ? 'precisão desconhecida' : `${Math.round(resultado.registro.precisaoM)} m`} — acima dos ${resultado.registro.precisaoMaximaM} m pedidos. A foto não se perde; a ressalva fica no registro.`) + notaGaleria;
       atualizarParadas();
       // Abre a foto recém-guardada: a pessoa quer ver como ficou antes de seguir.
