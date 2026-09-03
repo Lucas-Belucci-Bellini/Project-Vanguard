@@ -10,6 +10,9 @@ import { lerPermissaoGps } from '../platform/permissoes.js';
 import { estadoCicloVidaAtual, observarCicloVida } from '../core/ciclo-vida.js';
 import { falhasDeTela } from '../core/falhas-tela-app.js';
 import { TIPOS_FALHA } from '../core/falhas-tela.js';
+import { ROTAS } from '../core/rotas.js';
+import { testarRotas, resumirAutoteste, RESULTADO_ROTA } from '../core/autoteste-rotas.js';
+import { montarRelatorio } from '../core/relatorio-diagnostico.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -76,6 +79,41 @@ const ROTULO_ESTADO = Object.freeze({ ok: 'OK', atencao: 'ATENÇÃO', indisponiv
  * rota não chegou — pacote incompleto ou desatualizado — e é exatamente o que
  * "funciona no site e não no app" parece por dentro.
  */
+/*
+ * AUTOTESTE — carrega cada rota no aparelho e diz qual falha.
+ *
+ * É a única medição que alcança a WebView do sistema do operador. Tudo que
+ * roda na máquina de quem desenvolve mede outra coisa parecida, não esta.
+ */
+function itensDoAutoteste(linhas) {
+  if (!linhas) {
+    return [{
+      grupo: 'AUTOTESTE',
+      nome: 'Rotas',
+      valor: 'não executado — toque em TESTAR TODAS AS ROTAS',
+      estado: 'atencao',
+    }];
+  }
+  const resumo = resumirAutoteste(linhas);
+  const cabecalho = {
+    grupo: 'AUTOTESTE',
+    nome: 'Rotas',
+    valor: resumo.tudoOk
+      ? `${resumo.total} rota(s) carregam neste aparelho`
+      : `${resumo.falhas} de ${resumo.total} FALHARAM: ${resumo.rotasComFalha.join(', ')}`,
+    estado: resumo.tudoOk ? 'ok' : 'indisponivel',
+  };
+  // Só as que falharam viram linha própria: treze linhas verdes empurrariam o
+  // que importa para fora da tela.
+  const falhas = linhas.filter((l) => l.resultado === RESULTADO_ROTA.FALHOU).map((l) => ({
+    grupo: 'AUTOTESTE',
+    nome: l.hash,
+    valor: `${l.tipo} · ${l.mensagem}`,
+    estado: 'indisponivel',
+  }));
+  return [cabecalho, ...falhas];
+}
+
 function itensDeFalhaDeTela() {
   const falhas = falhasDeTela.listar();
   if (!falhas.length) {
@@ -114,8 +152,18 @@ export function diagnosticoPage() {
   const status = h('p', { className: 'diagnostico__status is-loading', role: 'status' }, 'LENDO ESTADOS LOCAIS…');
   const lista = h('div', { className: 'diagnostico__conteudo' });
   const recarregar = h('button', { className: 'diagnostico__atualizar', type: 'button' }, 'ATUALIZAR DIAGNÓSTICO');
+  /*
+   * Os dois botões que respondem "essa página não abre no aplicativo" a partir
+   * do próprio aparelho: um carrega cada rota e mostra qual falha; o outro põe
+   * tudo em texto para o operador colar. Sem eles, o relato depende de memória
+   * e perde justo o que decide — o BUILD_ID e a mensagem exata.
+   */
+  const autotestar = h('button', { className: 'diagnostico__atualizar', type: 'button' }, 'TESTAR TODAS AS ROTAS');
+  const copiar = h('button', { className: 'diagnostico__atualizar', type: 'button' }, 'COPIAR RELATÓRIO');
+  const acoes = h('div', { className: 'diagnostico__acoes' }, recarregar, autotestar, copiar);
   let removido = false;
   let bateria = null;
+  let autoteste = null;
 
   function render(itens) {
     const grupos = new Map();
@@ -206,7 +254,7 @@ export function diagnosticoPage() {
       const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDeFalhaDeTela()]);
+      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDoAutoteste(autoteste), ...itensDeFalhaDeTela()]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {
@@ -218,6 +266,81 @@ export function diagnosticoPage() {
   }
 
   recarregar.onclick = atualizar;
+
+  /*
+   * O autoteste carrega cada rota de verdade. Pode demorar alguns segundos num
+   * aparelho lento, então o botão informa o progresso em vez de ficar mudo —
+   * um botão que não responde é indistinguível de um que travou.
+   */
+  autotestar.onclick = async () => {
+    autotestar.disabled = true;
+    const rotulo = autotestar.textContent;
+    try {
+      autoteste = await testarRotas(ROTAS, {
+        aoProgresso: (feitas, total) => {
+          if (!removido) autotestar.textContent = `TESTANDO ${feitas}/${total}…`;
+        },
+      });
+      if (removido) return;
+      // `atualizar()` reescreve o status ao terminar, então o resultado do
+      // autoteste vem DEPOIS — na ordem inversa a mensagem aparecia e sumia no
+      // mesmo instante, e o operador não via o que o teste achou.
+      await atualizar();
+      if (removido) return;
+      const resumo = resumirAutoteste(autoteste);
+      status.className = 'diagnostico__status';
+      status.textContent = resumo.tudoOk
+        ? `Autoteste: as ${resumo.total} rotas carregam neste aparelho.`
+        : `Autoteste: ${resumo.falhas} rota(s) FALHARAM — ${resumo.rotasComFalha.join(', ')}. Toque em COPIAR RELATÓRIO e envie o texto.`;
+    } finally {
+      if (!removido) {
+        autotestar.textContent = rotulo;
+        autotestar.disabled = false;
+      }
+    }
+  };
+
+  copiar.onclick = async () => {
+    const identidade = identidadeDoBuild();
+    let sw = 'NÃO REGISTRADO';
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (reg) sw = navigator.serviceWorker?.controller ? 'REGISTRADO · controlando' : 'REGISTRADO · sem controlar ainda';
+    } catch { sw = 'INDISPONÍVEL'; }
+
+    const texto = montarRelatorio({
+      identidade,
+      serviceWorker: sw,
+      falhas: falhasDeTela.listar(),
+      autoteste,
+    });
+
+    // `navigator.clipboard` exige contexto seguro e pode ser negado; o textarea
+    // é a saída que sempre existe. Falhar em silêncio aqui deixaria o operador
+    // achando que copiou.
+    let copiado = false;
+    try {
+      await navigator.clipboard.writeText(texto);
+      copiado = true;
+    } catch { copiado = false; }
+
+    status.className = 'diagnostico__status';
+    if (copiado) {
+      status.textContent = 'Relatório copiado. Cole na conversa — ele não contém coordenada, trilha, foto nem contato.';
+    } else {
+      status.textContent = 'Não foi possível copiar automaticamente. O texto está abaixo: selecione e copie.';
+      const saida = h('textarea', {
+        className: 'diagnostico__relatorio',
+        readOnly: true,
+        rows: 18,
+        'aria-label': 'Relatório de diagnóstico para copiar',
+      });
+      saida.value = texto;
+      lista.prepend(saida);
+      saida.focus();
+      saida.select();
+    }
+  };
   const removeLocal = estado.on(CHAVES.LOCAL, atualizar);
   const removeCiclo = observarCicloVida({ onState: () => atualizar() });
   const aoConectar = () => atualizar();
@@ -231,7 +354,7 @@ export function diagnosticoPage() {
         h('h1', null, 'Estado observável'),
         h('p', { className: 'diagnostico__intro' }, 'Conferência local de versão, rede, GPS, frescor, cache, armazenamento, bateria, lifecycle, performance, sensores e capacidades de compartilhamento. Este painel não envia telemetria e não prova cobertura, comunicação ou resgate.')
       ),
-      recarregar
+      acoes
     ),
     status,
     lista,

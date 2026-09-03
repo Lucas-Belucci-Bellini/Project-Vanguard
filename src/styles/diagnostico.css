@@ -9,16 +9,23 @@
 .diagnostico__intro { max-width: 720px; color: var(--color-text-secondary); font-size: 12px; line-height: 1.65; }
 .diagnostico__atualizar { width: fit-content; white-space: nowrap; }
 .diagnostico__status { margin-bottom: 14px; padding: 10px 12px; color: var(--color-text-secondary); border: var(--border-base); background: var(--color-surface); font-size: 10px; line-height: 1.5; }
-.diagnostico__status.is-loading { color: var(--color-ambar); }
+/* `--color-ambar` nunca existiu: o token real é `--color-warning`, definido
+   nos três temas. Sem ele estas duas regras eram descartadas, e o rótulo
+   ATENÇÃO ficava com a mesma cor do texto normal — um estado de alerta que
+   não se distinguia de nada. */
+.diagnostico__status.is-loading { color: var(--color-warning); }
 .diagnostico__grupo { margin-bottom: 14px; }
 .diagnostico__grupo-titulo { margin-bottom: 6px; color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-widest); }
-.diagnostico__lista { display: grid; gap: 1px; border: var(--border-base); background: var(--color-border); }
+/* `--color-border` nunca foi definido: a declaração era descartada e as
+   divisórias de 1px do grid ficavam transparentes. `--grid-line` é o token
+   real da divisória, e existe nos três temas. */
+.diagnostico__lista { display: grid; gap: 1px; border: var(--border-base); background: var(--grid-line); }
 .diagnostico__linha { display: grid; grid-template-columns: minmax(125px, .7fr) minmax(0, 1.8fr) 52px; gap: 10px; align-items: center; min-height: 42px; padding: 8px 10px; background: var(--color-bg); }
 .diagnostico__nome { color: var(--color-text-primary); font-size: 10px; }
 .diagnostico__valor { min-width: 0; overflow-wrap: anywhere; color: var(--color-text-secondary); font-size: 10px; }
 .diagnostico__estado { justify-self: end; color: var(--color-text-muted); font-size: 8px; letter-spacing: .04em; }
 .diagnostico__estado.is-ok { color: var(--color-cyan); }
-.diagnostico__estado.is-atencao { color: var(--color-ambar); }
+.diagnostico__estado.is-atencao { color: var(--color-warning); }
 .diagnostico__rodape { margin-top: 18px; color: var(--color-text-muted); font-size: 10px; line-height: 1.6; }
 
 @media (max-width: 620px) {
@@ -37,3 +44,40 @@
  * recurso que este ambiente não oferece. Pintá-lo de alerta ensinaria a
  * ignorar os alertas de verdade. */
 .diagnostico__estado.is-indisponivel { border-color: var(--color-text-muted); background: transparent; color: var(--color-text-muted); }
+
+/*
+ * Os botões de ação do diagnóstico. Embrulham em telas estreitas em vez de
+ * empurrar o cabeçalho para fora — `min-width: 0` porque item de flex que
+ * cresce se recusa a encolher abaixo do próprio conteúdo (armadilha já paga).
+ */
+.diagnostico__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.diagnostico__acoes .diagnostico__atualizar {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+/*
+ * A saída de texto só aparece quando a área de transferência falha — em
+ * contexto não seguro, ou com a permissão negada. Selecionável e rolável, para
+ * o operador conseguir copiar à mão.
+ */
+.diagnostico__relatorio {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm);
+  border: var(--border-base);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  resize: vertical;
+}
