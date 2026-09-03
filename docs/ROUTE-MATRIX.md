@@ -25,6 +25,7 @@ navegador é `WEB_ONLY`, não `IMPLEMENTED`.
 | `#/contexto` | Modo de uso e zonas locais de risco | `IMPLEMENTED` | `estado` (`CONTEXTO`, `ZONAS`), arquivo importado | `core/contexto`, `equipamentos` | `contexto` · `equipamentos` |
 | `#/sobrevivencia` | Sete guias offline com fonte e data | `IMPLEMENTED` | `data/sobrevivencia.js` (catálogo v1) | nenhuma | catálogo versionado · varredura |
 | `#/sobre` | Identidade, versão real, limites e privacidade | `IMPLEMENTED` | `core/versao.js` (do `package.json`) | nenhuma | fluxo 9 |
+| `#/atualizacoes` | Versão do app, histórico de releases e download verificado | `IMPLEMENTED` | API de releases do GitHub (nunca HTML) + `SHA256SUMS` | `core/updater/*` | `updater-semver` · `updater` · `updater-preferencias` |
 | `#/diagnostico` | Estado observável do ambiente | `IMPLEMENTED` | Sondas do navegador e do service worker | `core/diagnostico`, `ciclo-vida` | `diagnostico` · `ciclo-vida` |
 | `#/doar` | Como o projeto se sustenta | `UNAVAILABLE` | nenhum — não há serviço de pagamento ligado | nenhuma | fluxo 7 |
 | `#/tiro` | Calculadora do ambiente de testes de Arma 3 | `LEGACY` | `data/arma3-terrenos.js` (gerado) | `ballistics`, `charges`, `fire-mission` | `ballistics` · `arma3-grid` · `rotas` |

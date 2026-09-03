@@ -13,6 +13,7 @@ import { TIPOS_FALHA } from '../core/falhas-tela.js';
 import { ROTAS } from '../core/rotas.js';
 import { testarRotas, resumirAutoteste, RESULTADO_ROTA } from '../core/autoteste-rotas.js';
 import { montarRelatorio } from '../core/relatorio-diagnostico.js';
+import { preferenciasUpdater, tipoDeConexao, updaterApp } from '../core/updater/app.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -85,6 +86,38 @@ const ROTULO_ESTADO = Object.freeze({ ok: 'OK', atencao: 'ATENÇÃO', indisponiv
  * É a única medição que alcança a WebView do sistema do operador. Tudo que
  * roda na máquina de quem desenvolve mede outra coisa parecida, não esta.
  */
+/*
+ * ATUALIZAÇÃO — o estado do updater, para depurar "por que o app não me avisou".
+ *
+ * Mostra o que decide: qual versão ele acha que está instalada, qual foi a
+ * última vista, em que canal, quando checou pela última vez, e o que a
+ * plataforma consegue fazer. Sem isso, "não apareceu atualização" é
+ * indistinguível de "não há atualização".
+ */
+function itensDoUpdater() {
+  const s = updaterApp.getState();
+  const prefs = preferenciasUpdater.ler();
+  const plataforma = updaterApp.getPlatform();
+  const conexao = tipoDeConexao();
+  const quando = s.verificadoEm ? new Date(s.verificadoEm).toLocaleString('pt-BR') : 'NUNCA';
+
+  return [
+    { grupo: 'ATUALIZAÇÃO', nome: 'Versão instalada', valor: s.versaoInstalada, estado: 'ok' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Última vista', valor: s.release?.versao ?? '—', estado: s.release ? 'atencao' : 'ok' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Estado', valor: s.estado, estado: s.estado === 'ERRO' ? 'indisponivel' : (s.estado === 'DISPONIVEL' ? 'atencao' : 'ok') },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Canal', valor: prefs.canal.toUpperCase(), estado: 'ok' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Última verificação', valor: quando, estado: s.verificadoEm ? 'ok' : 'atencao' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Baixar automaticamente', valor: prefs.baixarAutomaticamente.toUpperCase(), estado: 'ok' },
+    // Meio de conexão desconhecido é resposta honesta: `effectiveType` mede
+    // VELOCIDADE, não meio, e usá-lo aqui mandaria baixar em dados móveis.
+    { grupo: 'ATUALIZAÇÃO', nome: 'Conexão', valor: conexao ? conexao.toUpperCase() : 'DESCONHECIDA · sem meio informado', estado: conexao ? 'ok' : 'atencao' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Pode baixar', valor: plataforma.podeBaixar ? 'SIM' : 'NÃO', estado: plataforma.podeBaixar ? 'ok' : 'indisponivel' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Verifica checksum', valor: plataforma.podeVerificarChecksum ? 'SIM · SHA-256' : 'NÃO', estado: plataforma.podeVerificarChecksum ? 'ok' : 'indisponivel' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Pode instalar', valor: plataforma.podeInstalar ? 'SIM' : `NÃO · ${plataforma.limitacoes.length} limitação(ões) — ver #/atualizacoes`, estado: plataforma.podeInstalar ? 'ok' : 'indisponivel' },
+    ...(s.erro ? [{ grupo: 'ATUALIZAÇÃO', nome: 'Erro da consulta', valor: s.erro, estado: 'indisponivel' }] : []),
+  ];
+}
+
 function itensDoAutoteste(linhas) {
   if (!linhas) {
     return [{
@@ -254,7 +287,7 @@ export function diagnosticoPage() {
       const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDoAutoteste(autoteste), ...itensDeFalhaDeTela()]);
+      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDoAutoteste(autoteste), ...itensDeFalhaDeTela(), ...itensDoUpdater()]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {
