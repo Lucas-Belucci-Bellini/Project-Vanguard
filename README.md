@@ -22,7 +22,7 @@ abrir, tiver dado real, e os botões fizerem o que dizem.
 | `#/inicio` | Ver se o aparelho está pronto para sair andando: posição, mapa preparado, trilha em curso, dados locais. | `IMPLEMENTED` |
 | `#/mapa` | Ver onde está, gravar a trilha (com desnível), marcar waypoints e destino, fotografar a parada com a coordenada da captura, exportar JSON/GPX/KML e montar o pacote da caminhada. | `IMPLEMENTED` |
 | `#/navegacao` | Ler a posição em latitude/longitude, MGRS e UTM; calcular distância e rumo até um waypoint; converter MGRS localmente. | `IMPLEMENTED` |
-| `#/bussola` | Rumo do sensor com filtro circular, azimute verdadeiro e de grade **somente com correção medida**, calibração pelo Sol, rumo travado e aviso de interferência magnética. | `IMPLEMENTED` |
+| `#/bussola` | Rumo do sensor com filtro circular, azimute verdadeiro e de grade **somente com correção medida ou prevista**, calibração pelo Sol, declinação pelo modelo WMM oficial (offline, rotulada `PREVISTO`), rumo travado e aviso de interferência magnética. | `IMPLEMENTED` |
 | `#/socorro` | Preparar um registro da própria posição para entregar por um canal externo — o app **não chama resgate**. | `IMPLEMENTED` |
 | `#/escuta` | Ser avisado por vibração quando o grave sobe como sobe um veículo se aproximando, ou quando alguém grita. Só recebe. | `IMPLEMENTED` |
 | `#/noturno` | Enxergar em cena escura por intensificação de luz, e capturar a imagem com a coordenada. **Não é infravermelho.** | `IMPLEMENTED` |
@@ -183,6 +183,10 @@ A versão corrente é a mostrada na tela `#/sobre`, e ela vem do `package.json`
 no momento do build — a mesma fonte que o `versionName` do Android e o gate de
 versão do workflow conferem.
 
+- **1.6.0** — declinação magnética pelo World Magnetic Model oficial, offline;
+  previsão e medida se distinguem na tela (ADR-0046).
+- **1.5.0** — o aplicativo avisa quando há versão nova; o comparador de versões
+  nunca tinha funcionado com as tags reais deste projeto.
 - **1.4.0** — visão noturna por intensificação de luz; bússola 3,01× mais
   estável; coordenada da parada 2,73× mais precisa (ADR-0044).
 - **1.3.5** — odômetro em 3D, contagem de passos, resumo do dia na tela
