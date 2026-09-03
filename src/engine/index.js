@@ -15,6 +15,10 @@ export * from './angles.js';
 export * from './geo.js';
 /* Posição do Sol: geometria pura, para avaliar exposição solar sem rede. */
 export * from './sol.js';
+/* Declinação magnética pelo WMM oficial: o terceiro caminho entre a leitura da
+ * bússola e o norte do mapa, ao lado da calibração pelo Sol e da entrada manual.
+ * Previsão do campo da Terra — não sabe nada sobre o aparelho. */
+export * from './wmm.js';
 export * from './mgrs.js';
 export * from './gridref.js';
 /* Grade REAL dos terrenos do Arma 3 (offset e SINAL do passo por mundo).
