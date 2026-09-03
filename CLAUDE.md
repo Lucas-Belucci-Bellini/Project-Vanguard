@@ -52,6 +52,11 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   o valor: `CHUNK_NAO_CARREGOU` manda investigar o **pacote**, `TELA_FALHOU`
   manda investigar a **página**, e o resto vira `DESCONHECIDO` em vez de
   palpite (ver `docs/MOBILE_WEB_PARITY.md`)
+- `src/core/rotas.js` — **a tabela de rotas, fonte única**. Saiu do `main.js`
+  quando o autoteste passou a precisar dela. `src/core/autoteste-rotas.js`
+  carrega cada uma no aparelho (**Diagnóstico → TESTAR TODAS AS ROTAS**) e
+  `src/core/relatorio-diagnostico.js` põe tudo em texto para o operador colar
+  (**COPIAR RELATÓRIO**) — sem coordenada, trilha, foto nem contato
 - `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
@@ -205,10 +210,21 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   nenhuma, então a cópia do iOS não era conferida por ninguém. Hoje
   `verificar:paridade` cobre as duas plataformas.
 - **Lista de rotas copiada para um teste envelhece em silêncio.**
-  `test/rotas-empacotadas.test.js` lê o `ROTAS` do próprio `src/main.js` e
+  `test/rotas-empacotadas.test.js` lê o `ROTAS` do próprio `src/core/rotas.js` e
   cobra três coisas: a página existe, ela exporta o que a rota consome, e o
   build produz o chunk dela. Sem isso, "adicionei a página e esqueci metade da
   cadeia" só aparece no aparelho.
+- **`var(--token-que-nao-existe)` é descartado em SILÊNCIO.** Sem fallback, a
+  declaração inteira vira inválida e some — sem erro, sem aviso. Foi assim que
+  `--color-ambar` (que nunca existiu; o real é `--color-warning`) deixou o
+  rótulo ATENÇÃO do diagnóstico com a cor do texto normal. O repositório tinha
+  **34 referências órfãs em 10 folhas**, com `--color-ambar` e `--color-amber`
+  convivendo. `test/tokens-definidos.test.js` cobra isso e tranca o teto.
+- **Nenhum teste desta máquina alcança a WebView do aparelho do operador.**
+  `verificar:webview` roda os bytes do APK, mas num Chromium desta máquina e
+  sem o runtime do Capacitor. Para o ramo NATIVO e para o aparelho real, quem
+  responde é o autoteste dentro do app (**Diagnóstico → TESTAR TODAS AS
+  ROTAS**) e o relatório copiável.
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na

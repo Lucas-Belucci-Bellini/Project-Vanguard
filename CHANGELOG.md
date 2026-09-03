@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.4.4 — 2026-09-03
+
+**O aparelho passa a se testar sozinho.** Três rodadas mediram a mesma coisa
+por fora — build web, bytes do APK, e bytes do APK com o runtime nativo — e as
+três disseram que as 13 rotas carregam. O que faltava não era mais medição
+aqui: era medição **lá**. Nenhum teste desta máquina alcança a WebView do
+sistema do operador.
+
+**Diagnóstico → TESTAR TODAS AS ROTAS** carrega cada rota no aparelho, usando o
+mesmo `import()` que a navegação usa, e diz qual falha. Não monta a tela, de
+propósito: montar dispararia câmera, GPS e microfone, e uma permissão negada
+apareceria como falha do app.
+
+**Diagnóstico → COPIAR RELATÓRIO** põe versão, build, commit, origem, service
+worker, autoteste e falhas registradas em texto para colar. Sem coordenada,
+trilha, foto nem contato — há teste estrutural cobrando isso, porque o
+relatório existe para ser colado num chat.
+
+Verificado nos bytes empacotados, em dois casos: aparelho saudável (13 rotas
+carregam) e um chunk que não chega ao pacote — o app apontou `#/noturno` e
+classificou `CHUNK_NAO_CARREGOU` sozinho.
+
+**Dois defeitos de estilo que ninguém via.** `--color-ambar` nunca existiu (o
+token real é `--color-warning`): o rótulo **ATENÇÃO** do diagnóstico ficava com
+a mesma cor do texto normal — um estado de alerta indistinguível de tudo o
+mais. E `--color-border` também não existe, deixando as divisórias do grid
+transparentes. `var()` sem fallback para token inexistente **descarta a
+declaração em silêncio**, sem erro nenhum.
+
+`test/tokens-definidos.test.js` passa a cobrar isso. Ele revelou **34
+referências órfãs em 10 folhas**, com as duas grafias `--color-ambar` e
+`--color-amber` convivendo. As de `diagnostico.css` foram consertadas; as
+outras ficam trancadas por um teto que impede a dívida crescer — consertá-las
+é decisão de design (`--color-blue` não tem equivalente em `variables.css`, e
+escolher um seria inventar cor no lugar de quem desenha).
+
+**`ROTAS` saiu do `main.js` para `src/core/rotas.js`**, fonte única: o autoteste
+precisa da mesma lista, e duas cópias divergiriam justamente em "a rota existe
+no menu e o autoteste não sabe dela".
+
+**636 testes** (eram 625).
+
+
 ## 1.4.3 — 2026-09-02
 
 **Quando uma tela falha, o aparelho passa a saber dizer qual e por quê.**

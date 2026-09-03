@@ -104,7 +104,26 @@ vazios num clone limpo. Os dois são **gerados** e ignorados pelo git
 **Versão menor que a da release ⇒ o APK instalado é antigo.** Causa mais comum:
 conflito de certificado (veja acima). Desinstale e instale de novo.
 
-### 2. A tela falhou? O aparelho guarda a evidência.
+### 2. O aparelho testa a si mesmo (1.4.4)
+
+**Diagnóstico → TESTAR TODAS AS ROTAS** carrega cada rota ali mesmo, com o
+mesmo `import()` dinâmico que a navegação usa, e mostra quais falharam.
+
+**É a única medição que alcança a WebView do aparelho.** Tudo que roda na
+máquina de quem desenvolve — inclusive `verificar:webview` — mede um Chromium
+daqui, sem o runtime do Capacitor. O autoteste mede lá.
+
+Ele **não monta** a tela, de propósito: montar dispararia câmera, GPS e
+microfone, e uma permissão negada apareceria como falha do aplicativo. A
+pergunta que ele responde é a de paridade: *o módulo desta rota chega e é
+utilizável?*
+
+**Diagnóstico → COPIAR RELATÓRIO** põe tudo em texto para colar: versão, build,
+commit, origem, service worker, o autoteste e as falhas registradas. **Sem
+coordenada, trilha, foto nem contato** — há teste estrutural cobrando isso,
+porque o relatório existe para ser colado num chat.
+
+### 3. A tela falhou? O aparelho guarda a evidência.
 
 **Diagnóstico → TELAS** lista as falhas de carregamento registradas, com rota,
 causa classificada e build:
