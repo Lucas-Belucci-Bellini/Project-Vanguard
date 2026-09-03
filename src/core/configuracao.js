@@ -38,4 +38,7 @@ export const CONFIGURACAO_APLICATIVO = Object.freeze({
 export const CONFIGURACAO_ATUALIZACAO = Object.freeze({
   urlReleases: `${CONFIGURACAO_APLICATIVO.urlRepositorio}/releases`,
   urlReleaseMaisRecente: `https://api.github.com/repos/${REPOSITORIO}/releases/latest`,
+  /* A LISTA, não só a mais recente: o histórico de versões é a tela de
+   * Atualizações, e `latest` sozinho não traz as anteriores. */
+  urlListaReleases: `https://api.github.com/repos/${REPOSITORIO}/releases?per_page=20`,
 });

@@ -31,7 +31,10 @@ test('configuração pública é imutável e não expõe campos de segredo', () 
   assert.deepEqual(Object.keys(CONFIGURACAO_APLICATIVO).sort(), [
     'id', 'nome', 'repositorio', 'urlRepositorio', 'versao',
   ]);
+  // `urlListaReleases` entrou com o updater: o histórico de versões precisa da
+  // LISTA, e `latest` sozinho não traz as anteriores. O conjunto continua
+  // fixado — é o que impede um campo com segredo entrar por descuido.
   assert.deepEqual(Object.keys(CONFIGURACAO_ATUALIZACAO).sort(), [
-    'urlReleaseMaisRecente', 'urlReleases',
+    'urlListaReleases', 'urlReleaseMaisRecente', 'urlReleases',
   ]);
 });
