@@ -59,13 +59,14 @@ jobs:
         working-directory: android
         run: ./gradlew bundleRelease --no-daemon
       - name: Gerar manifesto e checksums
+        env:
+          RELEASE_TAG_META: ${{ inputs.publish_tag || github.ref_name }}
         run: |
           set -euo pipefail
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p mobile-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk "mobile-artifacts/vanguard-$VERSION-debug.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "mobile-artifacts/vanguard-$VERSION-release-unsigned.aab"
-          sha256sum mobile-artifacts/* > mobile-artifacts/SHA256SUMS
           # Impressão do certificado que assinou o APK. É o número que o
           # Android compara para decidir se a atualização pode substituir o app
           # instalado: se ele mudar entre duas versões, a instalação falha por
@@ -89,6 +90,50 @@ jobs:
           ios_artifact=false
           physical_device_test=false
           EOF
+          # `release-metadata.json` é o que o updater do aplicativo consome.
+          # O manifesto de texto continua existindo para leitura humana; este é
+          # estruturado de propósito — parsear texto livre é como um raspador
+          # quebra em silêncio.
+          #
+          # `channel` sai do pré-lançamento da versão, a mesma regra do
+          # `updater/semver.js`: uma versão `-beta.1` é beta por construção, e
+          # marcar estável no metadata a ofereceria a quem assina estável.
+          CHANNEL=stable
+          case "$VERSION" in
+            *-beta*|*-rc*) CHANNEL=beta ;;
+            *-*)           CHANNEL=alpha ;;
+          esac
+          APK_NAME="vanguard-$VERSION-debug.apk"
+          APK_SHA=$(sha256sum "mobile-artifacts/$APK_NAME" | awk '{print $1}')
+          APK_SIZE=$(stat -c%s "mobile-artifacts/$APK_NAME")
+          TAG="${RELEASE_TAG_META:-mobile-v$VERSION}"
+          cat > mobile-artifacts/release-metadata.json <<EOF
+          {
+            "product": "Vanguard Field",
+            "version": "$VERSION",
+            "tag": "$TAG",
+            "channel": "$CHANNEL",
+            "commit": "$GITHUB_SHA",
+            "ref": "$GITHUB_REF",
+            "published_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "android": {
+                "artifact": "$APK_NAME",
+                "sha256": "$APK_SHA",
+                "bytes": $APK_SIZE,
+                "signing_cert_sha256": "$CERT",
+                "build_type": "debug",
+                "production_signed": false
+              },
+              "ios": { "artifact": null, "reason": "distribuicao por App Store/TestFlight; sem artefato neste repositorio" }
+            }
+          }
+          EOF
+          echo "release-metadata.json:"; cat mobile-artifacts/release-metadata.json
+          # O SHA256SUMS é gerado por ÚLTIMO, para cobrir todos os artefatos —
+          # inclusive o manifesto e a metadata. Gerá-lo antes deixaria de fora
+          # justamente os arquivos que descrevem os outros.
+          (cd mobile-artifacts && sha256sum vanguard-*.apk vanguard-*.aab BUILD-MANIFEST.txt release-metadata.json > SHA256SUMS)
       - name: Upload pacote de evidência da build
         uses: actions/upload-artifact@v4
         with:
@@ -135,4 +180,4 @@ jobs:
           EOF
           PRERELEASE=''
           if [[ "$RELEASE_TAG" == *-rc* || "$RELEASE_TAG" == *-beta* || "$RELEASE_TAG" == *-alpha* ]]; then PRERELEASE='--prerelease'; fi
-          gh release create "$RELEASE_TAG" --target "$GITHUB_SHA" --title "Vanguard Field $RELEASE_TAG" $PRERELEASE --notes-file "$NOTES" mobile-artifacts/vanguard-*-debug.apk mobile-artifacts/vanguard-*-release-unsigned.aab mobile-artifacts/BUILD-MANIFEST.txt mobile-artifacts/SHA256SUMS
+          gh release create "$RELEASE_TAG" --target "$GITHUB_SHA" --title "Vanguard Field $RELEASE_TAG" $PRERELEASE --notes-file "$NOTES" mobile-artifacts/vanguard-*-debug.apk mobile-artifacts/vanguard-*-release-unsigned.aab mobile-artifacts/BUILD-MANIFEST.txt mobile-artifacts/release-metadata.json mobile-artifacts/SHA256SUMS
