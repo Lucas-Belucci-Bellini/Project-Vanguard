@@ -14,6 +14,7 @@ import { ROTAS } from '../core/rotas.js';
 import { testarRotas, resumirAutoteste, RESULTADO_ROTA } from '../core/autoteste-rotas.js';
 import { montarRelatorio } from '../core/relatorio-diagnostico.js';
 import { preferenciasUpdater, tipoDeConexao, updaterApp } from '../core/updater/app.js';
+import { MODELO_WMM, anoDecimal } from '../engine/wmm.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -94,6 +95,38 @@ const ROTULO_ESTADO = Object.freeze({ ok: 'OK', atencao: 'ATENÇÃO', indisponiv
  * plataforma consegue fazer. Sem isso, "não apareceu atualização" é
  * indistinguível de "não há atualização".
  */
+/**
+ * O modelo magnético embarcado tem prazo. Quando ele vencer, a bússola perde o
+ * terceiro caminho até o norte verdadeiro — e perderia em silêncio, porque o
+ * motor apenas passa a recusar. Aqui isso vira aviso ANTES de acontecer.
+ */
+function itensDoModeloMagnetico(agora = Date.now()) {
+  const ano = anoDecimal(agora);
+  const { validade, nome, epoca } = MODELO_WMM;
+  const anosRestantes = ano == null ? null : validade.fim - ano;
+
+  let valor;
+  let estadoItem;
+  if (anosRestantes == null) {
+    valor = 'RELÓGIO INDISPONÍVEL';
+    estadoItem = 'indisponivel';
+  } else if (anosRestantes <= 0) {
+    valor = `${nome} VENCIDO desde ${validade.fim} · a bússola não calcula mais declinação por modelo`;
+    estadoItem = 'atencao';
+  } else if (anosRestantes < 1) {
+    valor = `${nome} vence em ${validade.fim} (menos de um ano) · atualize os coeficientes`;
+    estadoItem = 'atencao';
+  } else {
+    valor = `${nome} · época ${epoca} · válido até ${validade.fim}`;
+    estadoItem = 'ok';
+  }
+
+  return [
+    { grupo: 'MODELO MAGNÉTICO', nome: 'Declinação (WMM)', valor, estado: estadoItem },
+    { grupo: 'MODELO MAGNÉTICO', nome: 'Grau da expansão', valor: `${MODELO_WMM.grauMaximo} · emitido em ${MODELO_WMM.emitidoEm}`, estado: 'ok' },
+  ];
+}
+
 function itensDoUpdater() {
   const s = updaterApp.getState();
   const prefs = preferenciasUpdater.ler();
@@ -287,7 +320,7 @@ export function diagnosticoPage() {
       const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDoAutoteste(autoteste), ...itensDeFalhaDeTela(), ...itensDoUpdater()]);
+      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDoAutoteste(autoteste), ...itensDeFalhaDeTela(), ...itensDoModeloMagnetico(), ...itensDoUpdater()]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {

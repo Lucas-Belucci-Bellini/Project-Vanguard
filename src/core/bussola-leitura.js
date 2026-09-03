@@ -26,6 +26,27 @@
  *
  * Quem já sabe a declinação da região pode informá-la direto, sem o Sol.
  *
+ * ## E quando não há Sol nem quem saiba
+ *
+ * O terceiro caminho é o modelo: `engine/wmm.js` calcula a declinação do lugar
+ * e da data pelos coeficientes oficiais do World Magnetic Model, offline. É o
+ * que resolve a noite, o dia nublado e o operador que não faz ideia de qual é a
+ * declinação da região onde está.
+ *
+ * Só que **previsão não é medida**, e a diferença fica no nome. O WMM prevê o
+ * campo da TERRA: ele não vê o ímã do alto-falante, a lataria do carro, o erro
+ * de fábrica do magnetômetro, nem o fato de alguns aparelhos já entregarem
+ * norte verdadeiro em vez de magnético. Por isso:
+ *
+ * - a correção do modelo só entra quando **não existe** uma medida;
+ * - quando entra, a referência é `PREVISTA`, nunca `CORRIGIDA`;
+ * - e `usarModeloMagnetico` é opt-in, para que ninguém receba um azimute
+ *   previsto sem ter pedido.
+ *
+ * O modelo é consultado de qualquer forma quando há posição, e vai no campo
+ * `modeloMagnetico`: saber a declinação do lugar é informação de campo por si
+ * só, e é ela que permite desconfiar de uma calibração que saiu torta.
+ *
  * Módulo puro: sem DOM, sem sensor, sem relógio próprio.
  */
 
@@ -33,11 +54,25 @@ import { normDeg, deltaDeg } from '../engine/angles.js';
 import { convergenciaMeridianos } from '../engine/mgrs.js';
 import { haversine, bearingTo } from '../engine/geo.js';
 import { posicaoSolar } from '../engine/sol.js';
+import { anoDecimal, campoGeomagnetico } from '../engine/wmm.js';
 import { numeroFinito, coordenadaValida } from '../engine/numero-seguro.js';
 
 export const REFERENCIAS_RUMO = Object.freeze({
   DESCONHECIDA: 'DESCONHECIDA',
+  /** A correção foi MEDIDA (Sol) ou informada por quem sabe. Vale mais. */
   CORRIGIDA: 'CORRIGIDA',
+  /** A correção veio do MODELO, sob a hipótese de que o sensor lê magnético. */
+  PREVISTA: 'PREVISTA',
+});
+
+/**
+ * De onde saiu a correção aplicada. A ordem importa: medida ganha de prevista,
+ * sempre — o modelo prevê o campo da Terra e não sabe nada sobre este aparelho.
+ */
+export const FONTES_CORRECAO = Object.freeze({
+  SOL: 'SOL',
+  MANUAL: 'MANUAL',
+  MODELO: 'MODELO',
 });
 
 export const LADOS = Object.freeze({
@@ -127,23 +162,59 @@ function leituraDoDestino({ posicao, destino, azimuteVerdadeiroAtual, convergenc
 export function lerBussola({
   rumoSensorDeg = null,
   correcaoSensorDeg = null,
+  correcaoFonte = null,
   posicao = null,
   destino = null,
   rumoTravadoDeg = null,
+  usarModeloMagnetico = false,
   agora = Date.now(),
 } = {}) {
   const avisos = [];
   const rumoCru = numeroFinito(rumoSensorDeg) == null ? null : normDeg(numeroFinito(rumoSensorDeg));
-  const correcao = numeroFinito(correcaoSensorDeg);
+  const correcaoMedida = numeroFinito(correcaoSensorDeg);
   const coordenada = coordenadaValida(posicao);
 
   const convergenciaDeg = coordenada ? convergenciaMeridianos(coordenada.lat, coordenada.lon) : null;
   if (!coordenada) avisos.push('Sem posição não dá para calcular o norte de grade nem a direção do Sol.');
 
+  // O modelo é consultado sempre que houver posição, mesmo quando não vai ser
+  // usado como correção: saber a declinação do lugar é informação de campo por
+  // si só, e é ela que permite conferir uma calibração suspeita.
+  const modeloMagnetico = coordenada
+    ? campoGeomagnetico({ lat: coordenada.lat, lon: coordenada.lon, ano: anoDecimal(agora) })
+    : null;
+
+  // Medida ganha de prevista. O modelo prevê o campo da TERRA: ele não vê o ímã
+  // do alto-falante, a lataria do carro, o erro de fábrica do magnetômetro, nem
+  // o fato de alguns aparelhos já entregarem norte verdadeiro. Por isso a
+  // correção do modelo entra apenas quando não há uma medida, e quando entra a
+  // leitura passa a ser PREVISTA, nunca CORRIGIDA.
+  const podeUsarModelo = correcaoMedida == null
+    && usarModeloMagnetico === true
+    && modeloMagnetico?.ok === true;
+  const correcao = correcaoMedida ?? (podeUsarModelo ? modeloMagnetico.declinacaoDeg : null);
+  const fonteCorrecao = correcao == null
+    ? null
+    : (correcaoMedida != null
+      ? (correcaoFonte ?? FONTES_CORRECAO.MANUAL)
+      : FONTES_CORRECAO.MODELO);
+
   const azimuteVerdadeiroDeg = rumoCru == null || correcao == null ? null : normDeg(rumoCru + correcao);
-  const referencia = azimuteVerdadeiroDeg == null ? REFERENCIAS_RUMO.DESCONHECIDA : REFERENCIAS_RUMO.CORRIGIDA;
+  let referencia = REFERENCIAS_RUMO.DESCONHECIDA;
+  if (azimuteVerdadeiroDeg != null) {
+    referencia = fonteCorrecao === FONTES_CORRECAO.MODELO
+      ? REFERENCIAS_RUMO.PREVISTA
+      : REFERENCIAS_RUMO.CORRIGIDA;
+  }
+
   if (rumoCru != null && correcao == null) {
     avisos.push('A leitura do aparelho ainda não foi corrigida: a referência dela (magnética ou verdadeira) depende do modelo. Calibre pelo Sol ou informe a declinação para obter azimute verdadeiro e de grade.');
+  }
+  if (referencia === REFERENCIAS_RUMO.PREVISTA) {
+    avisos.push(`Azimute PREVISTO: a correção de ${modeloMagnetico.declinacaoDeg >= 0 ? '+' : ''}${modeloMagnetico.declinacaoDeg.toFixed(1)}° veio do ${modeloMagnetico.modelo.nome}, supondo que este aparelho entrega norte magnético. O modelo não enxerga ímã por perto nem erro do próprio sensor — calibre pelo Sol quando puder.`);
+  }
+  if (usarModeloMagnetico === true && modeloMagnetico && modeloMagnetico.ok === false) {
+    avisos.push(`Modelo magnético indisponível aqui: ${modeloMagnetico.explicacao}`);
   }
 
   const azimuteGradeDeg = azimuteVerdadeiroDeg == null || convergenciaDeg == null
@@ -186,7 +257,10 @@ export function lerBussola({
     rumoCruDeg: rumoCru,
     cardealCru: cardeal(rumoCru),
     correcaoSensorDeg: correcao,
+    fonteCorrecao,
     referencia,
+    /** O que o WMM diz aqui e agora — mesmo quando não é ele quem corrige. */
+    modeloMagnetico,
     azimuteVerdadeiroDeg,
     cardealVerdadeiro: cardeal(azimuteVerdadeiroDeg),
     azimuteGradeDeg,

@@ -79,7 +79,51 @@ await p.waitForTimeout(300);
 const status2 = await p.locator('.bussola__status-texto').textContent();
 conferir('declinação informada é aplicada', /-20\.5/.test(status2), status2.trim().slice(0, 70));
 
-// ── FLUXO 7: doar não promete pagamento ──────────────────────────────────────
+// ── FLUXO 7: o modelo magnético dá a declinação e diz que é PREVISÃO ─────────
+// Precisa de posição: o modelo calcula para um lugar, e sem lugar não há o que
+// calcular. Semear aqui é o que permite conferir o cartão sem GPS no runner.
+await p.evaluate(() => {
+  localStorage.setItem('vanguard:local', JSON.stringify({ lat: -23.3103, lon: -51.1628, accuracy: 12, heading: 90, ts: Date.now() }));
+  localStorage.removeItem('vanguard:bussola');
+});
+// `goto` para a MESMA URL não recarrega o documento, e o `estado` mantém cópia
+// em memória: sem o reload, a correção de -20,5° do fluxo 6 continuaria viva e
+// o botão do modelo apareceria (corretamente) desabilitado.
+await p.reload({ waitUntil: 'networkidle' });
+await p.waitForTimeout(900);
+const cartaoModelo = () => p.locator('.bussola__card', { hasText: 'MODELO MAGNÉTICO' });
+const textoModelo = await cartaoModelo().innerText();
+conferir(
+  'modelo magnético mostra a declinação do lugar',
+  /DECLINAÇÃO AQUI/.test(textoModelo) && /-\d+[.,]\d°/.test(textoModelo) && /WMM-\d{4}/.test(textoModelo),
+  textoModelo.replace(/\n+/g, ' · ').slice(0, 70)
+);
+
+await cartaoModelo().getByRole('button').click();
+await p.waitForTimeout(300);
+const origemPrevista = await p.locator('.bussola__origem').textContent();
+const correcaoPrevista = await p.locator('.bussola__linha', { hasText: 'CORREÇÃO APLICADA' }).first().innerText();
+conferir(
+  'ligar o modelo dá azimute PREVISTO, não CORRIGIDO',
+  /PREVISTO/.test(origemPrevista) && !/CORRIGIDO/.test(origemPrevista) && /prevista pelo WMM/.test(correcaoPrevista),
+  `${origemPrevista.trim()} · ${correcaoPrevista.replace(/\n+/g, ' ').slice(0, 40)}`
+);
+
+// ── FLUXO 8: medida ganha de prevista ────────────────────────────────────────
+// Com o modelo LIGADO, informar uma declinação tem de tomar a frente: o modelo
+// prevê o campo da Terra e não sabe nada sobre este aparelho.
+await p.getByLabel(/Declina/i).fill('-18.2');
+await p.getByRole('button', { name: /USAR ESTA DECLINA/i }).click();
+await p.waitForTimeout(300);
+const origemMedida = await p.locator('.bussola__origem').textContent();
+const correcaoMedida = await p.locator('.bussola__linha', { hasText: 'CORREÇÃO APLICADA' }).first().innerText();
+conferir(
+  'medida ganha de prevista mesmo com o modelo ligado',
+  /CORRIGIDO/.test(origemMedida) && /-18[.,]2/.test(correcaoMedida) && /informada por você/.test(correcaoMedida),
+  `${origemMedida.trim()} · ${correcaoMedida.replace(/\n+/g, ' ').slice(0, 45)}`
+);
+
+// ── FLUXO 9: doar não promete pagamento ──────────────────────────────────────
 await p.goto(`${BASE}/#/doar`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);
 await p.locator('.doar__checkout').click();
@@ -87,13 +131,13 @@ await p.waitForTimeout(200);
 const doar = await p.locator('.doar__status').textContent();
 conferir('checkout diz que não está configurado', /CHECKOUT N[ÃA]O CONFIGURADO/i.test(doar) && !/ASAAS_API_KEY/.test(doar), doar.trim().slice(0, 60));
 
-// ── FLUXO 8: tela legada se declara legada ───────────────────────────────────
+// ── FLUXO 10: tela legada se declara legada ───────────────────────────────────
 await p.goto(`${BASE}/#/tiro`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(900);
 const legado = await p.locator('.tiro__legado').textContent().catch(() => '');
 conferir('tela legada mostra o aviso', /LEGADA/.test(legado) && /Arma 3/.test(legado), legado.trim().slice(0, 60));
 
-// ── FLUXO 9: sobre mostra a versão real ──────────────────────────────────────
+// ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);
 const versao = await p.locator('.sobre__version').textContent();

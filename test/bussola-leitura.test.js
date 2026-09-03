@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { convergenciaMeridianos } from '../src/engine/mgrs.js';
+import { normDeg } from '../src/engine/angles.js';
 import { posicaoSolar } from '../src/engine/sol.js';
 import {
   LADOS,
   REFERENCIAS_RUMO,
+  FONTES_CORRECAO,
   TOLERANCIA_EM_ROTA_DEG,
   calibrarPeloSol,
   cardeal,
@@ -151,4 +153,61 @@ test('os cardeais acompanham o azimute e dão a volta no 360', () => {
   assert.equal(cardeal(270), 'O');
   assert.equal(cardeal(359), 'N');
   assert.equal(cardeal(null), null);
+});
+
+test('sem correção medida e sem pedir o modelo, a referência continua DESCONHECIDA', () => {
+  // O opt-in existe para que ninguém receba azimute previsto sem ter pedido.
+  const leitura = lerBussola({ rumoSensorDeg: 90, posicao: LONDRINA, agora: MANHA });
+  assert.equal(leitura.referencia, REFERENCIAS_RUMO.DESCONHECIDA);
+  assert.equal(leitura.azimuteVerdadeiroDeg, null);
+  assert.equal(leitura.fonteCorrecao, null);
+  // Mas o modelo é consultado assim mesmo: a declinação do lugar é informação.
+  assert.equal(leitura.modeloMagnetico.ok, true);
+  assert.ok(Number.isFinite(leitura.modeloMagnetico.declinacaoDeg));
+});
+
+test('com o modelo ligado o azimute sai PREVISTO, e o aviso diz sob que hipótese', () => {
+  const leitura = lerBussola({
+    rumoSensorDeg: 90, posicao: LONDRINA, usarModeloMagnetico: true, agora: MANHA,
+  });
+  assert.equal(leitura.referencia, REFERENCIAS_RUMO.PREVISTA);
+  assert.equal(leitura.fonteCorrecao, FONTES_CORRECAO.MODELO);
+  assert.equal(leitura.correcaoSensorDeg, leitura.modeloMagnetico.declinacaoDeg);
+  assert.equal(leitura.azimuteVerdadeiroDeg, normDeg(90 + leitura.modeloMagnetico.declinacaoDeg));
+  // O azimute de grade também passa a existir, porque depende do verdadeiro.
+  assert.ok(Number.isFinite(leitura.azimuteGradeDeg));
+  assert.ok(
+    leitura.avisos.some((a) => a.includes('PREVISTO') && a.includes('norte magnético')),
+    leitura.avisos.join(' | ')
+  );
+});
+
+test('medida ganha de prevista: com o Sol calibrado o modelo não entra', () => {
+  const leitura = lerBussola({
+    rumoSensorDeg: 100,
+    correcaoSensorDeg: -20,
+    correcaoFonte: FONTES_CORRECAO.SOL,
+    posicao: LONDRINA,
+    usarModeloMagnetico: true,
+    agora: MANHA,
+  });
+  assert.equal(leitura.referencia, REFERENCIAS_RUMO.CORRIGIDA);
+  assert.equal(leitura.fonteCorrecao, FONTES_CORRECAO.SOL);
+  assert.equal(leitura.correcaoSensorDeg, -20);
+  // O modelo continua visível para conferência, mas não corrigiu nada.
+  assert.notEqual(leitura.correcaoSensorDeg, leitura.modeloMagnetico.declinacaoDeg);
+  assert.ok(!leitura.avisos.some((a) => a.includes('PREVISTO')));
+});
+
+test('correção medida sem fonte declarada conta como informada à mão', () => {
+  const leitura = lerBussola({ rumoSensorDeg: 10, correcaoSensorDeg: -21, posicao: LONDRINA, agora: MANHA });
+  assert.equal(leitura.fonteCorrecao, FONTES_CORRECAO.MANUAL);
+  assert.equal(leitura.referencia, REFERENCIAS_RUMO.CORRIGIDA);
+});
+
+test('sem posição o modelo não inventa: fica DESCONHECIDA mesmo pedido', () => {
+  const leitura = lerBussola({ rumoSensorDeg: 45, usarModeloMagnetico: true, agora: MANHA });
+  assert.equal(leitura.modeloMagnetico, null);
+  assert.equal(leitura.referencia, REFERENCIAS_RUMO.DESCONHECIDA);
+  assert.equal(leitura.azimuteVerdadeiroDeg, null);
 });

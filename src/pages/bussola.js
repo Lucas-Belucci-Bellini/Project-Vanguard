@@ -5,7 +5,7 @@ import '../styles/bussola.css';
 import { h, empty, dist, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { iniciarAcompanhamento, precisaoLabel } from '../core/localizacao.js';
-import { lerBussola, calibrarPeloSol, LADOS, REFERENCIAS_RUMO } from '../core/bussola-leitura.js';
+import { lerBussola, calibrarPeloSol, LADOS, REFERENCIAS_RUMO, FONTES_CORRECAO } from '../core/bussola-leitura.js';
 import { criarFiltroDeRumo, QUALIDADES_RUMO } from '../engine/rumo-filtro.js';
 import { numeroFinito } from '../engine/numero-seguro.js';
 
@@ -26,6 +26,11 @@ export function bussolaPage() {
   let destino = estado.get(CHAVES.DESTINO, null);
   let rumoSensor = Number.isFinite(posicao?.heading) ? posicao.heading : null;
   let correcao = Number.isFinite(guardado?.correcaoSensorDeg) ? guardado.correcaoSensorDeg : null;
+  let fonteCorrecao = typeof guardado?.fonteCorrecao === 'string' ? guardado.fonteCorrecao : null;
+  // Guardado como escolha, não como número: a declinação muda com o lugar e com
+  // a data. Congelar o valor faria a correção envelhecer em silêncio enquanto o
+  // operador caminha — é a mesma armadilha da versão escrita à mão.
+  let usarModelo = guardado?.usarModeloMagnetico === true;
   let rumoTravado = Number.isFinite(guardado?.rumoTravadoDeg) ? guardado.rumoTravadoDeg : null;
   let origemLeitura = 'AGUARDANDO SENSOR';
   let sensorAtivo = false;
@@ -88,6 +93,10 @@ export function bussolaPage() {
   const solCorpo = h('div', { className: 'bussola__linha-grupo' });
   const botaoSol = h('button', { className: 'bussola__acao', type: 'button', onclick: () => calibrar() }, 'APONTAR PARA O SOL E CALIBRAR');
 
+  /* ── modelo magnético (WMM) ── */
+  const modeloCorpo = h('div', { className: 'bussola__linha-grupo' });
+  const botaoModelo = h('button', { className: 'bussola__acao', type: 'button', onclick: () => alternarModelo() });
+
   /* ── correção manual ── */
   const campoDeclinacao = h('input', {
     className: 'bussola__campo', type: 'number', step: '0.1', inputMode: 'decimal',
@@ -104,13 +113,16 @@ export function bussolaPage() {
   function guardar() {
     estado.set(CHAVES.BUSSOLA, {
       correcaoSensorDeg: correcao,
+      fonteCorrecao,
+      usarModeloMagnetico: usarModelo,
       rumoTravadoDeg: rumoTravado,
       atualizadoEm: new Date().toISOString(),
     });
   }
 
-  function definirCorrecao(valor, mensagem) {
+  function definirCorrecao(valor, mensagem, fonte = FONTES_CORRECAO.MANUAL) {
     correcao = Number.isFinite(valor) ? valor : null;
+    fonteCorrecao = correcao == null ? null : fonte;
     guardar();
     if (mensagem) status.querySelector('.bussola__status-texto').textContent = mensagem;
     renderizar();
@@ -148,22 +160,34 @@ export function bussolaPage() {
     definirCorrecao(valor, `Declinação de ${valor}° aplicada como correção da leitura.`);
   }
 
+  function alternarModelo() {
+    usarModelo = !usarModelo;
+    guardar();
+    const texto = usarModelo
+      ? 'Declinação do modelo em uso. O azimute passa a ser PREVISTO — calibre pelo Sol quando puder.'
+      : 'Modelo desligado. A leitura volta a ser só do aparelho.';
+    status.querySelector('.bussola__status-texto').textContent = texto;
+    renderizar();
+  }
+
   function calibrar() {
     const resultado = calibrarPeloSol({ rumoSensorDeg: rumoSensor, posicao });
     if (!resultado.ok) {
       status.querySelector('.bussola__status-texto').textContent = resultado.motivo;
       return;
     }
-    definirCorrecao(resultado.correcaoDeg, resultado.motivo);
+    definirCorrecao(resultado.correcaoDeg, resultado.motivo, FONTES_CORRECAO.SOL);
   }
 
   function leituraAtual() {
     return lerBussola({
       rumoSensorDeg: rumoSensor,
       correcaoSensorDeg: correcao,
+      correcaoFonte: fonteCorrecao,
       posicao,
       destino,
       rumoTravadoDeg: rumoTravado,
+      usarModeloMagnetico: usarModelo,
     });
   }
 
@@ -196,16 +220,25 @@ export function bussolaPage() {
     const mostrado = leitura.azimuteVerdadeiroDeg ?? leitura.rumoCruDeg;
     grau.textContent = grausTexto(mostrado);
     cardinal.textContent = leitura.cardealVerdadeiro ?? leitura.cardealCru ?? '—';
-    origem.textContent = leitura.referencia === REFERENCIAS_RUMO.CORRIGIDA
-      ? `${origemLeitura} · CORRIGIDO`
-      : `${origemLeitura} · SEM CORREÇÃO`;
+    // Três estados, três palavras. "PREVISTO" existe justamente para não se
+    // confundir com "CORRIGIDO": um saiu de medida, o outro de modelo.
+    const sufixo = leitura.referencia === REFERENCIAS_RUMO.CORRIGIDA ? 'CORRIGIDO'
+      : leitura.referencia === REFERENCIAS_RUMO.PREVISTA ? 'PREVISTO'
+        : 'SEM CORREÇÃO';
+    origem.textContent = `${origemLeitura} · ${sufixo}`;
     if (mostrado != null) rosa.style.setProperty('--heading', `${mostrado}deg`);
 
     empty(linhaVerdadeiro).append(linha('AZIMUTE VERDADEIRO', grausTexto(leitura.azimuteVerdadeiroDeg), leitura.cardealVerdadeiro ?? ''));
     empty(linhaGrade).append(linha('AZIMUTE DE GRADE', grausTexto(leitura.azimuteGradeDeg),
       leitura.convergenciaDeg == null ? 'sem posição' : `convergência ${num(leitura.convergenciaDeg, 2)}°`));
-    empty(linhaCorrecao).append(linha('CORREÇÃO APLICADA', correcao == null ? '—' : `${correcao >= 0 ? '+' : ''}${num(correcao, 1)}°`,
-      correcao == null ? 'leitura crua do aparelho' : 'leitura + correção'));
+    const aplicada = leitura.correcaoSensorDeg;
+    const ORIGEM_CORRECAO = {
+      [FONTES_CORRECAO.SOL]: 'medida contra o Sol',
+      [FONTES_CORRECAO.MANUAL]: 'informada por você',
+      [FONTES_CORRECAO.MODELO]: `prevista pelo ${leitura.modeloMagnetico?.modelo?.nome ?? 'modelo'}`,
+    };
+    empty(linhaCorrecao).append(linha('CORREÇÃO APLICADA', aplicada == null ? '—' : `${aplicada >= 0 ? '+' : ''}${num(aplicada, 1)}°`,
+      aplicada == null ? 'leitura crua do aparelho' : (ORIGEM_CORRECAO[leitura.fonteCorrecao] ?? 'leitura + correção')));
     avisoReferencia.textContent = leitura.avisos.join(' ');
     avisoReferencia.hidden = leitura.avisos.length === 0;
     pintarEstabilidade();
@@ -228,6 +261,8 @@ export function bussolaPage() {
         linha('VOLTA', grausTexto(alvo.azimuteRetornoDeg), 'rumo de retorno'),
       );
     }
+
+    pintarModelo(leitura);
 
     empty(solCorpo);
     if (!leitura.sol) {
@@ -265,6 +300,49 @@ export function bussolaPage() {
     posicionarMarca(marcaDestino, leitura.destino?.azimuteVerdadeiroDeg ?? null, referenciaMarcas);
     posicionarMarca(marcaSol, leitura.sol?.acimaDoHorizonte ? leitura.sol.azimuteDeg : null, referenciaMarcas);
     posicionarMarca(marcaTravado, leitura.rumoTravado?.azimuteDeg ?? null, referenciaMarcas);
+  }
+
+  /**
+   * O que o modelo diz aqui e agora — e por que ele não substitui uma medida.
+   * O cartão aparece mesmo com o modelo desligado: saber a declinação do lugar
+   * é informação de campo, e é ela que denuncia uma calibração que saiu torta.
+   */
+  function pintarModelo(leitura) {
+    empty(modeloCorpo);
+    const modelo = leitura.modeloMagnetico;
+
+    if (!modelo) {
+      modeloCorpo.append(h('p', { className: 'bussola__vazio' }, 'Sem posição não dá para calcular a declinação do lugar.'));
+      botaoModelo.disabled = true;
+      botaoModelo.textContent = 'USAR A DECLINAÇÃO DO MODELO';
+      return;
+    }
+    if (!modelo.ok) {
+      modeloCorpo.append(h('p', { className: 'bussola__vazio' }, modelo.explicacao));
+      botaoModelo.disabled = true;
+      botaoModelo.textContent = 'MODELO INDISPONÍVEL';
+      return;
+    }
+
+    const variacao = modelo.variacaoAnual.declinacaoDeg;
+    anexar(modeloCorpo,
+      linha('DECLINAÇÃO AQUI', `${modelo.declinacaoDeg >= 0 ? '+' : ''}${num(modelo.declinacaoDeg, 1)}°`,
+        modelo.declinacaoDeg >= 0 ? 'norte magnético a leste' : 'norte magnético a oeste'),
+      linha('MUDANÇA POR ANO', `${variacao >= 0 ? '+' : ''}${num(variacao, 2)}°`, 'variação secular do modelo'),
+      linha('INCLINAÇÃO', `${num(modelo.inclinacaoDeg, 1)}°`, 'mergulho do campo'),
+      linha('MODELO', modelo.modelo.nome, `válido até ${modelo.modelo.validade.fim}`),
+    );
+
+    // Com uma medida em vigor o botão não some — ele explica por que não age.
+    const temMedida = correcao != null;
+    botaoModelo.disabled = temMedida;
+    botaoModelo.textContent = temMedida
+      ? 'HÁ UMA CORREÇÃO MEDIDA EM USO'
+      : usarModelo ? 'DESLIGAR O MODELO' : 'USAR A DECLINAÇÃO DO MODELO';
+    if (temMedida && usarModelo) {
+      modeloCorpo.append(h('p', { className: 'bussola__nota' },
+        'O modelo está ligado, mas quem corrige agora é a medida: medida sempre ganha de previsão. Apague a correção para voltar ao modelo.'));
+    }
   }
 
   /**
@@ -374,6 +452,12 @@ export function bussolaPage() {
           solCorpo,
           botaoSol,
           h('p', { className: 'bussola__nota' }, 'A direção do Sol é calculada no aparelho, sem rede e sem depender do fabricante. Aponte o topo do aparelho para o Sol e toque acima: a diferença medida corrige a declinação do lugar e o erro do sensor de uma vez. Não olhe diretamente para o Sol.')
+        ),
+        h('article', { className: 'bussola__card' },
+          h('span', { className: 'bussola__kicker' }, 'MODELO MAGNÉTICO'),
+          modeloCorpo,
+          botaoModelo,
+          h('p', { className: 'bussola__nota' }, 'A declinação do lugar calculada no aparelho pelo World Magnetic Model oficial, sem rede. Serve para a noite e para o dia nublado, quando o Sol não está disponível. É PREVISÃO: o modelo conhece o campo da Terra, mas não vê o ímã da capa, a lataria do carro nem o erro do seu magnetômetro — por isso uma medida contra o Sol sempre vale mais.')
         ),
         h('article', { className: 'bussola__card' },
           h('span', { className: 'bussola__kicker' }, 'DECLINAÇÃO CONHECIDA'),
