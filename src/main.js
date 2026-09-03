@@ -12,23 +12,7 @@ import { recuperarDatasetNoBoot } from './core/dataset-boot-recovery.js';
 import { criarNavegador } from './core/navegacao.js';
 import { registrarServiceWorker } from './core/service-worker.js';
 import { falhasDeTela } from './core/falhas-tela-app.js';
-
-const ROTAS = [
-  { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
-  { hash: '#/mapa', titulo: 'Mapa', icone: '⊕', carregar: () => import('./pages/mapa.js').then((m) => m.mapaPage) },
-  { hash: '#/navegacao', titulo: 'Navegação', icone: '⌖', carregar: () => import('./pages/navegacao.js').then((m) => m.navegacaoPage) },
-  { hash: '#/bussola', titulo: 'Bússola', icone: '◉', carregar: () => import('./pages/bussola.js').then((m) => m.bussolaPage) },
-  { hash: '#/socorro', titulo: 'Socorro', icone: '!', carregar: () => import('./pages/socorro.js').then((m) => m.socorroPage) },
-  { hash: '#/escuta', titulo: 'Escuta', icone: '◎', carregar: () => import('./pages/escuta.js').then((m) => m.escutaPage), secundária: true },
-  { hash: '#/noturno', titulo: 'Noturno', icone: '◐', carregar: () => import('./pages/noturno.js').then((m) => m.noturnoPage), secundária: true },
-  { hash: '#/doar', titulo: 'Apoiar', icone: '＋', carregar: () => import('./pages/doar.js').then((m) => m.doarPage), secundária: true },
-  { hash: '#/contexto', titulo: 'Contexto', icone: '◈', carregar: () => import('./pages/contexto.js').then((m) => m.contextoPage), secundária: true },
-  { hash: '#/sobrevivencia', titulo: 'Sobrevivência', icone: '⌁', carregar: () => import('./pages/sobrevivencia.js').then((m) => m.sobrevivenciaPage), secundária: true },
-  { hash: '#/sobre', titulo: 'Sobre', icone: 'i', carregar: () => import('./pages/sobre.js').then((m) => m.sobrePage), secundária: true },
-  { hash: '#/diagnostico', titulo: 'Diagnóstico', icone: '⌁', carregar: () => import('./pages/diagnostico.js').then((m) => m.diagnosticoPage), secundária: true },
-  /* A tela legada continua acessível por link direto enquanto o app migra. */
-  { hash: '#/tiro', titulo: 'Cálculo legado', carregar: () => import('./pages/tiro.js').then((m) => m.tiroPage), legada: true }
-];
+import { ROTAS } from './core/rotas.js';
 
 const PADRAO = '#/inicio';
 let navegador = null;

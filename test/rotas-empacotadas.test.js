@@ -17,14 +17,16 @@ import test from 'node:test';
  */
 
 const RAIZ = new URL('..', import.meta.url).pathname;
-const MAIN = fs.readFileSync(path.join(RAIZ, 'src/main.js'), 'utf8');
+/* A lista saiu do `main.js` para `core/rotas.js` quando o autoteste passou a
+ * precisar dela. O teste segue lendo a FONTE, nunca uma cópia. */
+const MAIN = fs.readFileSync(path.join(RAIZ, 'src/core/rotas.js'), 'utf8');
 
 /** Extrai `{ hash, modulo }` de cada entrada do array ROTAS do main.js. */
 function rotasDeclaradas() {
-  const bloco = MAIN.slice(MAIN.indexOf('const ROTAS = ['), MAIN.indexOf('const PADRAO'));
-  assert.ok(bloco.length > 0, 'não achei o array ROTAS em src/main.js');
+  const bloco = MAIN.slice(MAIN.indexOf('const ROTAS = ['), MAIN.length);
+  assert.ok(bloco.length > 0, 'não achei o array ROTAS em src/core/rotas.js');
   const rotas = [];
-  const re = /hash:\s*'([^']+)'[\s\S]*?import\('\.\/pages\/([^']+)'\)/g;
+  const re = /hash:\s*'([^']+)'[\s\S]*?import\('\.\.\/pages\/([^']+)'\)/g;
   let m;
   while ((m = re.exec(bloco)) !== null) rotas.push({ hash: m[1], modulo: m[2] });
   return rotas;
@@ -41,7 +43,7 @@ test('o main.js declara as rotas oficiais e nenhuma se perdeu na leitura', () =>
     '#/escuta', '#/noturno', '#/doar', '#/contexto', '#/sobrevivencia',
     '#/sobre', '#/diagnostico', '#/tiro'];
   for (const hash of oficiais) {
-    assert.ok(ROTAS.some((r) => r.hash === hash), `a rota ${hash} sumiu do main.js`);
+    assert.ok(ROTAS.some((r) => r.hash === hash), `a rota ${hash} sumiu de core/rotas.js`);
   }
 });
 
@@ -53,8 +55,8 @@ test('toda rota aponta para um módulo de página que existe', () => {
 });
 
 test('todo módulo de página exporta a função que a rota consome', () => {
-  const bloco = MAIN.slice(MAIN.indexOf('const ROTAS = ['), MAIN.indexOf('const PADRAO'));
-  const re = /import\('\.\/pages\/([^']+)'\)\.then\(\(m\) => m\.(\w+)\)/g;
+  const bloco = MAIN.slice(MAIN.indexOf('const ROTAS = ['), MAIN.length);
+  const re = /import\('\.\.\/pages\/([^']+)'\)\.then\(\(m\) => m\.(\w+)\)/g;
   let m;
   let conferidos = 0;
   while ((m = re.exec(bloco)) !== null) {

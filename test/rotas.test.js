@@ -9,7 +9,7 @@ import path from 'node:path';
  * Uma rota que aponta para um arquivo renomeado, ou um botão que leva a um
  * hash que não existe mais, é um defeito que só aparece quando alguém toca
  * nele em campo — e aí a tela some no meio de uma caminhada. Estes testes
- * leem `src/main.js` e o resto do código para cobrar quatro coisas que não
+ * leem `src/core/rotas.js` e o resto do código para cobrar quatro coisas que não
  * dependem de navegador: a rota existe, o módulo existe, a exportação existe,
  * e ninguém aponta para lugar nenhum.
  *
@@ -19,11 +19,18 @@ import path from 'node:path';
  */
 
 const raizSrc = new URL('../src/', import.meta.url);
+/*
+ * Dois arquivos, duas responsabilidades. A tabela saiu de `main.js` para
+ * `core/rotas.js` quando o autoteste passou a precisar dela — mas o SHELL, que
+ * monta o menu e filtra a rota legada, continua em `main.js`. Ler os dois
+ * mantém cada asserção sobre o arquivo que de fato decide aquilo.
+ */
+const rotasJs = fs.readFileSync(new URL('core/rotas.js', raizSrc), 'utf8');
 const mainJs = fs.readFileSync(new URL('main.js', raizSrc), 'utf8');
 
-/** Lê a tabela ROTAS do próprio `main.js`, sem uma segunda cópia para esquecer. */
+/** Lê a tabela ROTAS do próprio `core/rotas.js`, sem uma segunda cópia para esquecer. */
 function rotasDeclaradas() {
-  const bloco = mainJs.slice(mainJs.indexOf('const ROTAS = ['), mainJs.indexOf('const PADRAO'));
+  const bloco = rotasJs.slice(rotasJs.indexOf('const ROTAS = ['));
   const linhas = [...bloco.matchAll(/\{\s*hash:\s*'([^']+)'[\s\S]*?carregar:[^}]*?import\('([^']+)'\)[\s\S]*?m\.(\w+)[\s\S]*?\}/g)];
   return linhas.map(([bruto, hash, modulo, exportacao]) => ({
     hash,
@@ -37,13 +44,14 @@ function rotasDeclaradas() {
 const ROTAS = rotasDeclaradas();
 
 test('a tabela de rotas foi lida e não está vazia', () => {
-  assert.ok(ROTAS.length >= 12, `só ${ROTAS.length} rotas lidas de main.js — o parser ou a tabela mudou`);
+  assert.ok(ROTAS.length >= 12, `só ${ROTAS.length} rotas lidas de core/rotas.js — o parser ou a tabela mudou`);
   assert.ok(ROTAS.every((r) => r.hash.startsWith('#/')), 'toda rota é um hash');
 });
 
 test('cada rota aponta para um módulo que existe', () => {
   for (const rota of ROTAS) {
-    const arquivo = new URL(rota.modulo.replace('./', ''), raizSrc);
+    // `carregar` mora em `src/core/`, então `../pages/x.js` resolve a `src/pages/x.js`.
+    const arquivo = new URL(rota.modulo.replace('../', ''), raizSrc);
     assert.ok(fs.existsSync(arquivo), `${rota.hash} aponta para ${rota.modulo}, que não existe`);
   }
 });
@@ -52,7 +60,7 @@ test('cada rota importa uma função que o módulo realmente exporta', () => {
   // Renomear a fábrica sem atualizar a rota dá tela em branco, não erro de
   // build: o `import()` resolve e `m.nomeAntigo` vem `undefined`.
   for (const rota of ROTAS) {
-    const fonte = fs.readFileSync(new URL(rota.modulo.replace('./', ''), raizSrc), 'utf8');
+    const fonte = fs.readFileSync(new URL(rota.modulo.replace('../', ''), raizSrc), 'utf8');
     const exporta = new RegExp(`export\\s+(async\\s+)?function\\s+${rota.exportacao}\\b`).test(fonte)
       || new RegExp(`export\\s*\\{[^}]*\\b${rota.exportacao}\\b`).test(fonte);
     assert.ok(exporta, `${rota.modulo} não exporta ${rota.exportacao}`);
