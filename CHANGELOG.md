@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.5.0 — 2026-09-03
+
+**O Vanguard passa a avisar quando há versão nova.** Até aqui, descobrir uma
+atualização exigia abrir o GitHub à mão — e havia um motivo concreto para isso.
+
+**O updater existia e NUNCA funcionou.** `compararVersoes` fazia
+`replace(/^v/i,'')` e depois `split('-', 2)`. Com as tags reais deste projeto —
+`mobile-v1.4.4` — o replace não casava (a string começa com `m`) e o split
+cortava no primeiro hífen: a base virava `"mobile"`. Não são três números, a
+versão era classificada como **inválida**, e inválida fica abaixo de tudo.
+Medido: `releaseMaisNova({tag_name:'mobile-v1.4.4'}, '1.0.0')` devolvia `false`.
+Em nenhuma versão publicada o aplicativo detectou uma atualização.
+
+**`src/core/updater/`** — semver conforme a especificação (incluindo os casos
+que ordem de string erra: `alpha.2 < alpha.10`, `alpha.beta > alpha.1`), canais
+derivados do pré-lançamento, consulta pela **API** e nunca por HTML, e toda URL
+conferida contra o repositório oficial — uma release apontando para outro host
+tem o APK recusado, com teste cobrando.
+
+**Download com verificação.** Download completo não é download confiável: o
+SHA-256 é comparado com o `SHA256SUMS` publicado, e quando não bate **os bytes
+não são devolvidos** — quem chama não tem como instalar por engano o que
+reprovou. Release sem checksum vira `SEM_CHECKSUM`, que não é sucesso.
+
+**A plataforma declara o que faz, e o que não faz.** O Android baixa e confere,
+mas **não instala**: falta `REQUEST_INSTALL_PACKAGES`, falta `FileProvider` e
+plugin, e a pipeline publica APK debug e AAB não assinado. Fingir que instala e
+falhar no aparelho seria pior que não oferecer. iOS e Web não tentam o fluxo de
+APK. Tudo isso aparece escrito na tela e no Diagnóstico.
+
+**`#/atualizacoes`** com estado, histórico, notas, canal e preferências —
+padrão conservador: **nada baixa sozinho**, e `somente wi-fi` só libera quando
+a plataforma afirma o meio (o `effectiveType` mede velocidade, não meio, e
+usá-lo mandaria baixar em dados móveis).
+
+**Diagnóstico → ATUALIZAÇÃO** responde "por que o app não me avisou".
+
+**A pipeline publica `release-metadata.json`**, estruturado para o updater
+consumir, com o canal derivado da mesma regra do semver. As tags `mobile-v*`
+foram preservadas; o `SHA256SUMS` agora é gerado por último e cobre também o
+manifesto e a metadata.
+
+**675 testes** (eram 636). Arquitetura, limites e o que ainda não é possível em
+[`docs/UPDATER.md`](docs/UPDATER.md).
+
+
 ## 1.4.4 — 2026-09-03
 
 **O aparelho passa a se testar sozinho.** Três rodadas mediram a mesma coisa

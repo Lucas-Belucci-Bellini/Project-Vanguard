@@ -57,6 +57,9 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   carrega cada uma no aparelho (**Diagnóstico → TESTAR TODAS AS ROTAS**) e
   `src/core/relatorio-diagnostico.js` põe tudo em texto para o operador colar
   (**COPIAR RELATÓRIO**) — sem coordenada, trilha, foto nem contato
+- `src/core/updater/` — **o sistema de atualização** (`#/atualizacoes`).
+  Semver da especificação, canais, consulta pela API, download com checksum e
+  capacidade por plataforma. Ver [`docs/UPDATER.md`](docs/UPDATER.md)
 - `src/engine/numero-seguro.js` — **use sempre**: `Number(null)` é 0, e `lon: null` virando longitude 0 já mordeu três vezes
 - `test/` — `node --test`, testes determinísticos
 - `.claude/skills/vanguard-field-release-ops/` — skill reutilizável para o Claude Code
@@ -225,6 +228,16 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   sem o runtime do Capacitor. Para o ramo NATIVO e para o aparelho real, quem
   responde é o autoteste dentro do app (**Diagnóstico → TESTAR TODAS AS
   ROTAS**) e o relatório copiável.
+- **A tag deste projeto é `mobile-v1.4.4`, não `v1.4.4`.** O comparador antigo
+  fazia `replace(/^v/i,'')` e depois `split('-')`: a base virava `"mobile"`,
+  a versão era classificada como inválida, e `releaseMaisNova` devolvia `false`
+  para TODA release real. O app nunca detectou atualização nenhuma. Extraia a
+  versão de dentro da tag (`updater/semver.js`), nunca assuma onde ela começa.
+- **Capacidade de plataforma se DECLARA, não se finge.** O Android não instala
+  APK aqui: falta `REQUEST_INSTALL_PACKAGES`, falta `FileProvider` e plugin, e
+  a pipeline publica debug/não assinado. `updater/plataformas.js` reporta isso
+  e a interface mostra — oferecer um botão que falharia no aparelho é pior que
+  não oferecer.
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na
