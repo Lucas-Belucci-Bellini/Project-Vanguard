@@ -236,7 +236,7 @@ A camada de produto atual está descrita em [`MAPA-DE-FUNCIONALIDADES.md`](MAPA-
 
 **Sprint 2.1 — Instrumentos**
 - Bússola sobreposta (`DeviceOrientationEvent`) com norte de grade × magnético × verdadeiro.
-- Declinação magnética por modelo WMM embarcado (hoje é entrada manual).
+- ✅ **Declinação magnética por modelo WMM embarcado** — entregue na 1.6.0 (`src/engine/wmm.js`, ADR-0046). Era entrada manual; hoje é calculada offline, rotulada como previsão, e a medida contra o Sol continua ganhando dela.
 - Rosa de rumos e "vire X mils para o waypoint".
 - Odômetro e trilha percorrida (portar `geo-tracker.js` do Baluarte).
 

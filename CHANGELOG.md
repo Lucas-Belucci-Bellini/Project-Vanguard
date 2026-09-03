@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.6.0 — 2026-09-03
+
+**A bússola passa a saber a declinação do lugar sozinha.** Até aqui a leitura
+crua do magnetômetro só virava azimute verdadeiro de dois jeitos: calibrando
+contra o Sol, ou com o operador digitando a declinação da região. Os dois têm o
+mesmo buraco — à noite e sob nuvem não há Sol, e quem não sabe a declinação não
+tem o que digitar.
+
+**`src/engine/wmm.js`** — o World Magnetic Model 2025 embarcado, offline: dado
+onde e quando, devolve declinação, inclinação, intensidade e a variação anual de
+cada uma. É o item que o roadmap listava na Fase 2 desde o começo
+(*"declinação magnética por modelo WMM embarcado (hoje é entrada manual)"*).
+
+**Nenhum coeficiente foi digitado.** São 90 linhas de quatro números, e um
+dígito trocado não quebra nada visível — só move o norte magnético alguns graus
+no lugar errado do planeta. O `WMM.COF` oficial está em `vendor/wmm/` com
+SHA-256 e proveniência, `scripts/gerar-wmm.mjs` é a única ponte até
+`src/data/wmm2025.js`, e o teste confere a tabela gerada contra o arquivo
+coeficiente por coeficiente — incluindo o zero **negativo**, que `String(-0)`
+achatava.
+
+**A prova são os valores publicados, lidos do arquivo.** `test/wmm.test.js` não
+tem número de referência escrito dentro dele: lê o `WMM2025_TEST_VALUES.txt` que
+veio no mesmo pacote e confere **os 12 pontos oficiais nos 19 campos**. Pior
+desvio medido: **0,050 nT** e **0,0050°** — dentro do arredondamento do próprio
+arquivo oficial.
+
+**Previsão não se passa por medida.** O WMM prevê o campo da Terra; ele não vê o
+ímã da capa, a lataria do carro nem o erro de fábrica do magnetômetro. Então a
+correção do modelo entra só quando não há uma medida, a referência vira
+`PREVISTA` (a tela escreve **PREVISTO**, nunca CORRIGIDO), a linha de correção
+diz "prevista pelo WMM-2025", e o aviso declara a hipótese. É opt-in: sem pedir,
+o comportamento é o de antes.
+
+**Fora de 2025,0–2030,0 o modelo recusa** em vez de extrapolar — e como uma
+recusa futura seria silenciosa, o Diagnóstico ganha o grupo **MODELO MAGNÉTICO**,
+que mostra a validade e passa a ATENÇÃO quando falta menos de um ano.
+
+**A versão do iOS estava em 1.3.1 há seis releases.** `MARKETING_VERSION` e
+`CURRENT_PROJECT_VERSION` atravessaram da 1.4.0 à 1.5.0 sem mudar, enquanto o
+Android era atualizado à mão. `test/versao-plataformas.test.js` passa a cobrar
+que os quatro lugares concordem com o `package.json`, que o código numérico
+corresponda à versão (1.6.0 → 160) e que a regra seja monotônica.
+
+**689 → 693 testes**, `verificar:rotas` (14 rotas × 2 larguras) e
+`verificar:fluxos` (12 fluxos, três novos) verdes. Ver
+[ADR-0046](docs/adr/ADR-0046-declinacao-por-modelo-wmm.md).
+
 ## 1.5.0 — 2026-09-03
 
 **O Vanguard passa a avisar quando há versão nova.** Até aqui, descobrir uma

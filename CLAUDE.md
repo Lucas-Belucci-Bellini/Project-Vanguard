@@ -35,8 +35,14 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
 - `src/ui/helpers.js` — hyperscript `h()`, **API idêntica** à do Baluarte de propósito
 - `src/core/estado.js` — estado persistido (`vanguard:` no localStorage)
 - `src/core/foto-parada.js` + `foto-storage.js` — foto de parada amarrada à coordenada da captura (IndexedDB próprio; ver ADR-0037)
-- `src/core/bussola-leitura.js` — os três nortes da bússola; a leitura crua só vira azimute verdadeiro com correção medida (ver ADR-0040)
+- `src/core/bussola-leitura.js` — os três nortes da bússola; a leitura crua só vira azimute verdadeiro com correção **medida** (Sol ou informada) ou **prevista** (WMM, opt-in e rotulada PREVISTA) — medida ganha sempre (ver ADR-0040 e ADR-0046)
 - `src/engine/sol.js` — posição do Sol offline, usada pelo alerta de exposição e pela conferência da bússola
+- `src/engine/wmm.js` + `src/data/wmm2025.js` — **declinação magnética pelo World
+  Magnetic Model oficial**, offline: o terceiro caminho até o norte verdadeiro,
+  para a noite e o dia nublado. Coeficientes **gerados** de `vendor/wmm/WMM.COF`
+  por `scripts/gerar-wmm.mjs`, conferidos contra os 12 valores de teste
+  publicados. É **previsão**, não medida: entra só quando não há correção medida
+  e a leitura vira `PREVISTA`, nunca `CORRIGIDA` (ver ADR-0046)
 - `src/engine/visao-noturna.js` + `src/core/camera-noturna.js` — visão noturna (`#/noturno`): **intensificação de luz, não infravermelho**. Empilha quadros (α = 0,2 → 3× menos ruído), estica o histograma só até onde o ruído removido autoriza, e desmancha a pilha medindo a estrutura que ela perde. **Só vê** — não grava, não guarda e não transmite, e há teste estrutural cobrando isso (ver ADR-0044)
 - `src/engine/rumo-filtro.js` — filtro circular da bússola: suaviza no vetor unitário (nunca em graus), 3,01× menos tremor parado, e acusa interferência magnética pela retidão da leitura (ver ADR-0044)
 - `src/engine/fixo-medio.js` — média de fixos parado para a foto de parada; a melhora **anunciada** é menor que a medida, de propósito (ver ADR-0044)
@@ -238,6 +244,30 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   a pipeline publica debug/não assinado. `updater/plataformas.js` reporta isso
   e a interface mostra — oferecer um botão que falharia no aparelho é pior que
   não oferecer.
+- **Coeficiente de modelo científico não se digita, e teste não guarda cópia
+  dos valores de referência.** O WMM são 90 linhas de quatro números: um dígito
+  trocado não quebra nada visível, só move o norte magnético alguns graus no
+  lugar errado do planeta. O arquivo oficial mora em `vendor/wmm/` com SHA-256,
+  `scripts/gerar-wmm.mjs` é a única ponte, e `test/wmm.test.js` **lê** o
+  `WMM2025_TEST_VALUES.txt` oficial em vez de trazer os números para dentro —
+  copiar 12 linhas de 19 números para o teste é o jeito de ele passar a
+  concordar com o erro. Atenção ao `-0`: `String(-0)` é `"0"`, e sem cuidado o
+  gerado deixa de ser transcrição fiel.
+- **Previsão de modelo não é medida, e o nome tem de dizer isso.** O WMM prevê o
+  campo da TERRA — não vê o ímã da capa, a lataria do carro nem o erro do
+  magnetômetro deste aparelho. Correção do Sol mede a declinação do lugar **e** o
+  erro do aparelho; a do modelo supõe a segunda metade. Por isso `PREVISTA` ≠
+  `CORRIGIDA`, o modelo é opt-in, e medida ganha sempre.
+- **Polo GEOGRÁFICO não é polo MAGNÉTICO.** No polo Sul geográfico a inclinação
+  do campo fica perto de −72°, não vertical. Teste de polo cobra **continuidade
+  e finitude** (o termo leste divide por cos da latitude geocêntrica), nunca um
+  valor "óbvio" de dip.
+- **A versão do app mora em QUATRO lugares e só um é fonte.** `package.json`,
+  `android/app/build.gradle` (`versionName` + `versionCode`) e as duas
+  configurações do Xcode. O iOS ficou em **1.3.1 por seis releases** porque
+  ninguém cobrava. `test/versao-plataformas.test.js` cobra — inclusive que o
+  `versionCode` suba, já que o Android recusa instalar um código menor ou igual
+  ao instalado e a build fica verde do mesmo jeito.
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na
