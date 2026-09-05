@@ -183,6 +183,8 @@ A versão corrente é a mostrada na tela `#/sobre`, e ela vem do `package.json`
 no momento do build — a mesma fonte que o `versionName` do Android e o gate de
 versão do workflow conferem.
 
+- **1.7.0** — trocar de tela deixou de encerrar a gravação da trilha, e o corte
+  da trilha deixou de ser silencioso (ADR-0047).
 - **1.6.0** — declinação magnética pelo World Magnetic Model oficial, offline;
   previsão e medida se distinguem na tela (ADR-0046).
 - **1.5.0** — o aplicativo avisa quando há versão nova; o comparador de versões
