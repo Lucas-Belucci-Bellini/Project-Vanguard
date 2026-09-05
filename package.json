@@ -18,7 +18,8 @@
     "verificar:fluxos": "node scripts/verificar-fluxos.mjs",
     "verificar:paridade": "node scripts/verificar-paridade.mjs",
     "verificar:webview": "node scripts/verificar-webview.mjs",
-    "verificar:trilha": "node scripts/verificar-trilha-indexeddb.mjs"
+    "verificar:trilha": "node scripts/verificar-trilha-indexeddb.mjs",
+    "benchmark:navegacao": "node scripts/benchmark-navegacao.mjs"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
