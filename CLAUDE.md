@@ -71,6 +71,11 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   a sessão gravada por checkpoint a cada 25 pontos; `migrar-trilha.js` **copia**
   a trilha v1 e deixa `vanguard:trilha` intacta, conferindo contagem e checksum.
   `rastreamento.js` tira o gravador da página: **página observa, não possui**.
+- `src/core/rastreamento-app.js` + `src/core/trilha-gravador.js` — **o dono do
+  GPS no aplicativo inteiro**, e a trilha que saiu de dentro de `mapa.js`. Um
+  watcher só, escrita dupla (`vanguard:trilha` para a tela, Track Store da V3
+  para o registro completo) e corte de janela **contado**, nunca silencioso
+  (ver ADR-0047).
 - `src/core/updater/` — **o sistema de atualização** (`#/atualizacoes`).
   Semver da especificação, canais, consulta pela API, download com checksum e
   capacidade por plataforma. Ver [`docs/UPDATER.md`](docs/UPDATER.md)
@@ -296,8 +301,17 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   observado ao lado (`src/engine/distancia.js`).
 - **Gravador dentro da página morre com a página.** O `desmontar()` do
   `mapa.js` derrubava watcher e background: trocar de `#/mapa` para `#/bussola`
-  encerrava o rastreamento sem aviso. Serviço de rastreamento fica FORA das
-  páginas; deixar de observar nunca para nada.
+  encerrava o rastreamento sem aviso — medido no navegador, **5 pontos, sair do
+  mapa, andar três trechos, 5 pontos**. Hoje o dono é `core/rastreamento-app.js`
+  e a página só **observa**: `inscricao.parar()` tira a plateia e não desliga
+  nada. O watcher fica ligado enquanto houver plateia OU rota ativa, e a pausa
+  por "aba oculta" só vale enquanto existe tela viva para estar oculta — senão
+  uma página que morre escondida deixa a pausa presa para sempre (ver ADR-0047).
+- **`.slice(-12000)` numa trilha é perda silenciosa.** Descartava os pontos mais
+  ANTIGOS a partir de ≈24 km, sem contagem e sem aviso. O teto do espelho em
+  `localStorage` continua (a cota é ~5 MB e é real), mas agora o que sai é
+  contado em `saidosDaJanela()` e o registro **completo** vai para o Track Store
+  da V3, append-only e sem teto. Teto pode existir; silêncio não.
 - **Teste de referência que tira a verdade do próprio motor não prova nada.**
   Ele registra o defeito do dia e passa a concordar com ele. Em
   `test/dados/trilhas-douradas.js` a distância verdadeira vem da GEOMETRIA que

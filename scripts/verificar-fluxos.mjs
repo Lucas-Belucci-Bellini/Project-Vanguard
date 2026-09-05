@@ -137,6 +137,62 @@ await p.waitForTimeout(900);
 const legado = await p.locator('.tiro__legado').textContent().catch(() => '');
 conferir('tela legada mostra o aviso', /LEGADA/.test(legado) && /Arma 3/.test(legado), legado.trim().slice(0, 60));
 
+// ── FLUXO 12: trocar de tela NÃO encerra a gravação ───────────────────────────
+// Este é o fluxo do defeito medido na 1.6.0: o `desmontar()` de `mapa.js`
+// chamava `pararGps()`, então conferir a bússola no meio de uma caminhada
+// parava a trilha em silêncio. Aqui a pessoa anda, sai do mapa, continua
+// andando, e a contagem tem de continuar subindo.
+// `.mapa__route-button` veste dois botões (TRAJETO e ROTA); mirar pelo nome.
+const botaoRota = p.getByRole('button', { name: /^(INICIAR|PAUSAR|RETOMAR) ROTA$/ });
+const pontosGravados = () => p.evaluate(() => {
+  // `estado.js` grava envelopado: { schema, version, value }.
+  try {
+    const bruto = localStorage.getItem('vanguard:trilha');
+    if (!bruto) return 0;
+    const lido = JSON.parse(bruto);
+    const lista = Array.isArray(lido) ? lido : lido?.value;
+    return Array.isArray(lista) ? lista.length : -1;
+  } catch { return -1; }
+});
+/** Anda `passos` vezes ~40 m para o norte, esperando o watcher a cada passo. */
+const caminhar = async (passos, partida = 0) => {
+  for (let i = 1; i <= passos; i += 1) {
+    await ctx.setGeolocation({ latitude: -23.5505 + (partida + i) * 0.00036, longitude: -46.6333, accuracy: 8 });
+    await p.waitForTimeout(400);
+  }
+};
+
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.evaluate(() => { localStorage.removeItem('vanguard:trilha'); });
+await p.reload({ waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(1200);
+await botaoRota.click();
+await p.waitForTimeout(400);
+await caminhar(3);
+const noMapa = await pontosGravados();
+conferir('gravar no mapa acumula pontos', noMapa >= 2, `${noMapa} pontos`);
+
+// A pessoa vai conferir a bússola. A página do mapa é desmontada aqui.
+await p.goto(`${BASE}/#/bussola`, { waitUntil: 'domcontentloaded' });
+await p.waitForTimeout(1200);
+const mapaMontado = await botaoRota.count();
+await caminhar(3, 3);
+const foraDoMapa = await pontosGravados();
+conferir(
+  'sair do mapa NÃO encerra a gravação',
+  mapaMontado === 0 && foraDoMapa > noMapa,
+  `mapa desmontado · ${noMapa} → ${foraDoMapa} pontos`
+);
+
+// E o registro continua inteiro ao voltar: nada foi reiniciado.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(800);
+const aoVoltar = await pontosGravados();
+conferir('voltar ao mapa reencontra a mesma trilha', aoVoltar >= foraDoMapa, `${aoVoltar} pontos`);
+
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);

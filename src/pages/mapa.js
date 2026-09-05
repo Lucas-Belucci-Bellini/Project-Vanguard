@@ -1,20 +1,21 @@
 import '../styles/mapa.css';
 import { h, empty, dist, num } from '../ui/helpers.js';
 import { estado, CHAVES } from '../core/estado.js';
-import { iniciarAcompanhamento, solicitarPosicao, precisaoLabel, velocidadeLabel, idadePosicaoLabel, frescorPosicao } from '../core/localizacao.js';
+import { solicitarPosicao, precisaoLabel, velocidadeLabel, idadePosicaoLabel, frescorPosicao } from '../core/localizacao.js';
 import { vincentyInverse, bearingTo } from '../engine/geo.js';
 import { latLonParaMGRS, latLonParaUTM, utmParaLatLon, fusoDe } from '../engine/mgrs.js';
 import { CAMADAS_BASE, CAMADAS_OVERLAY } from '../data/camadas-mapa.js';
 import { ROTAS_PEREGRINACAO, rotaPorId, statusRotaLabel } from '../data/rotas-peregrinacao.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha, trilhaGeoJSON, inicioDaTrilha } from '../core/trilha.js';
-import { distancia3D, medirTrilha } from '../engine/odometro.js';
+import { medirTrilha } from '../engine/odometro.js';
 import { criarSensorDePassos } from '../core/passos-sensor.js';
 import { criarAvisoDaJornada } from '../core/notificacao-jornada.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
-import { criarControleBackground, ESTADOS_BACKGROUND } from '../core/background-localizacao.js';
+import { ESTADOS_BACKGROUND } from '../core/background-localizacao.js';
+import { rastreamentoDoAplicativo } from '../core/rastreamento-app.js';
 import { chaveDesenhoGrade } from '../core/chave-renderizacao.js';
 import { exportarRegistroLocal, exportarRegistroGpx, exportarRegistroKml, importarRegistroGpx, importarRegistroKml, importarRegistroLocal } from '../core/registro-offline.js';
 import { detectarFormatoRegistro, FORMATOS_REGISTRO } from '../core/registro-arquivo.js';
@@ -285,16 +286,32 @@ export function mapaPage() {
   let ultimoAvisoExposicaoEm = null;
   let avisosPorTipo = {};
   let tickTrajeto = null;
+  // O rastreamento é do APLICATIVO, não desta tela. A página observa; não
+  // possui. Era o contrário até a 1.6.0, e por isso ir de `#/mapa` para
+  // `#/bussola` encerrava a gravação em silêncio (ver ADR-0047).
+  const rastreio = rastreamentoDoAplicativo();
+  const gravador = rastreio.gravador;
+
   let posicao = estado.get(CHAVES.LOCAL, null);
-  let trilha = estado.get(CHAVES.TRILHA, []);
+  // Espelhos de LEITURA do que o gravador guarda: a tela lê `trilha`,
+  // `rotaAtiva` e `rotaPausada` em dezenas de lugares e não escreve em
+  // nenhum deles. Quem escreve é o gravador; `sincronizarDoGravador()` traz
+  // o resultado de volta para estas três variáveis.
+  let trilha = gravador.trilha();
+  let rotaAtiva = gravador.rota().rotaAtiva;
+  let rotaPausada = gravador.rota().rotaPausada;
   let waypoints = estado.get(CHAVES.WAYPOINTS, []);
   let destino = estado.get(CHAVES.DESTINO, null);
-  let rotaAtiva = Boolean(estado.get(CHAVES.ROTA_ATIVA, false));
-  let rotaPausada = Boolean(estado.get(CHAVES.ROTA_PAUSADA, false)) && rotaAtiva;
   let marcando = false;
   let marcandoDestino = false;
   let primeiraPosicao = !posicao;
-  let ultimoRegistrado = trilha.length ? trilha[trilha.length - 1] : null;
+
+  function sincronizarDoGravador() {
+    trilha = gravador.trilha();
+    const rota = gravador.rota();
+    rotaAtiva = rota.rotaAtiva;
+    rotaPausada = rota.rotaPausada;
+  }
   let desmontado = false;
   let gradeAtual = { type: 'FeatureCollection', features: [], passo: 1000 };
   let versaoGrade = 0;
@@ -308,46 +325,17 @@ export function mapaPage() {
   const avisoJornada = criarAvisoDaJornada();
   let backgroundMensagem = 'Disponível no APK de teste; não envia localização para servidor.';
 
-  /**
-   * Decide se o fixo entra na trilha.
-   *
-   * O portão antigo era `haversine(anterior, nova) >= 5`: distância **no
-   * plano**. Subindo escada a pessoa anda dois metros na horizontal e dez na
-   * vertical, então nada entrava — foi assim que uma caminhada real virou
-   * "quase no mesmo lugar". Três mudanças:
-   *
-   * 1. A distância considera o **desnível**.
-   * 2. O limiar cai de 5 m para 2 m: gravar é barato, e trilha esparsa é o que
-   *    faz o traçado sair reto de esquina em esquina.
-   * 3. **O tempo também abre o portão.** Parado num ponto de vista ou subindo
-   *    devagar, um ponto a cada 10 s mantém o registro vivo — sem isso o
-   *    traçado tem buracos exatamente onde o trecho foi mais difícil.
-   *
-   * Gravar generoso e peneirar na hora de somar é de propósito: `odometro.js`
-   * decide o que conta como distância, e a trilha guarda o formato do caminho.
-   */
-  function deveRegistrar(anterior, nova) {
-    if (!anterior) return true;
-    const medida = distancia3D(anterior, nova);
-    if (medida && medida.totalM >= 2) return true;
-    const decorridoMs = Number(nova?.timestamp) - Number(anterior?.timestamp);
-    return Number.isFinite(decorridoMs) && decorridoMs >= 10_000;
-  }
-
-  function registrarPosicao(nova) {
-    const anterior = posicao;
+  function registrarPosicao(nova, gravou = false) {
     posicao = nova;
     // Todo fixo alimenta a média. Ela só é consultada quando a coordenada
     // precisa ser boa (a foto da parada); aqui o custo é uma soma por fixo, e
     // o benefício é a média já estar pronta quando a pessoa parar para
     // fotografar, em vez de começar do zero naquele instante.
     mediaFixos.adicionar(nova);
-    if (rotaAtiva && !rotaPausada && deveRegistrar(ultimoRegistrado, nova)) {
-      // O modo confirmado pela pessoa viaja com o ponto: é o que separa
-      // quilômetro andado de quilômetro de ônibus no registro.
-      trilha = [...trilha, modoConfirmado ? { ...nova, modo: modoConfirmado } : nova].slice(-12000);
-      ultimoRegistrado = nova;
-      estado.set(CHAVES.TRILHA, trilha);
+    // O registro é do gravador do aplicativo — o portão, o modo confirmado e
+    // a persistência moram lá. Aqui só se lê o que aconteceu com o ponto.
+    sincronizarDoGravador();
+    if (gravou) {
       // A passada é aprendida nos trechos em que o GPS está bom; é ela que
       // sustenta a contagem quando o sinal some dentro de prédio ou em mata.
       const passos = sensorPassos.resumo();
@@ -396,30 +384,30 @@ export function mapaPage() {
     },
   });
 
-  const backgroundControle = criarControleBackground({
-    onPosition: registrarPosicao,
-    onState: ({ status, erro } = {}) => {
-      backgroundEstado = status ?? backgroundEstado;
-      if (status === ESTADOS_BACKGROUND.STARTING) backgroundMensagem = 'Solicitando permissões e iniciando serviço nativo; mantenha a sessão ativa.';
-      if (status === ESTADOS_BACKGROUND.ACTIVE) backgroundMensagem = 'GPS em segundo plano ativo. O sistema exibirá uma notificação; pontos continuam locais.';
-      if (status === ESTADOS_BACKGROUND.STOPPED) backgroundMensagem = 'GPS em segundo plano encerrado; o registro continua no aparelho.';
-      if (status === ESTADOS_BACKGROUND.UNAVAILABLE) backgroundMensagem = 'Background tracking disponível somente no APK nativo de teste.';
-      if (status === ESTADOS_BACKGROUND.ERROR) backgroundMensagem = `Background tracking com erro${erro ? `: ${erro}` : '.'}`;
-      if (status === ESTADOS_BACKGROUND.ACTIVE || status === ESTADOS_BACKGROUND.STARTING) atualizarWatcherForeground();
-      if ([ESTADOS_BACKGROUND.ERROR, ESTADOS_BACKGROUND.UNAVAILABLE, ESTADOS_BACKGROUND.STOPPED].includes(status) && !document.hidden) atualizarWatcherForeground();
-      if (!desmontado) atualizarSheet();
-    },
-    onError: (erro) => {
+  const observarBackground = rastreio.observarBackground(({ tipo, status, erro } = {}) => {
+    if (tipo === 'ERRO') {
       if (desmontado) return;
       backgroundMensagem = `Não foi possível iniciar o background tracking${erro?.message ? `: ${erro.message}` : '.'}`;
       atualizarSheet();
-    },
+      return;
+    }
+    backgroundEstado = status ?? backgroundEstado;
+    if (status === ESTADOS_BACKGROUND.STARTING) backgroundMensagem = 'Solicitando permissões e iniciando serviço nativo; mantenha a sessão ativa.';
+    if (status === ESTADOS_BACKGROUND.ACTIVE) backgroundMensagem = 'GPS em segundo plano ativo. O sistema exibirá uma notificação; pontos continuam locais.';
+    if (status === ESTADOS_BACKGROUND.STOPPED) backgroundMensagem = 'GPS em segundo plano encerrado; o registro continua no aparelho.';
+    if (status === ESTADOS_BACKGROUND.UNAVAILABLE) backgroundMensagem = 'Background tracking disponível somente no APK nativo de teste.';
+    if (status === ESTADOS_BACKGROUND.ERROR) backgroundMensagem = `Background tracking com erro${erro ? `: ${erro}` : '.'}`;
+    if (!desmontado) atualizarSheet();
   });
 
+  /**
+   * A pausa do primeiro plano é regra do serviço, não da página: ele pausa
+   * enquanto o segundo plano cobre OU enquanto toda tela viva está oculta.
+   * Aqui só se informa a visibilidade desta tela — e quando ela morre, a
+   * informação morre junto, em vez de deixar uma pausa presa para sempre.
+   */
   function atualizarWatcherForeground() {
-    if (!pararGps?.setPaused) return;
-    const manterPausado = document.hidden || backgroundEstado === ESTADOS_BACKGROUND.STARTING || backgroundEstado === ESTADOS_BACKGROUND.ACTIVE;
-    pararGps.setPaused(manterPausado);
+    inscricao?.visibilidade(document.hidden);
   }
 
   /**
@@ -501,7 +489,7 @@ export function mapaPage() {
       ? 'TELA ATIVA INDISPONÍVEL NESTE APARELHO'
       : `MANTER TELA ATIVA: ${wakeAtivo ? 'LIGADO' : 'DESLIGADO'}`;
     wakeButton.setAttribute('aria-pressed', String(wakeAtivo));
-    const backgroundDisponivel = backgroundControle.podeIniciar();
+    const backgroundDisponivel = rastreio.background.podeIniciar();
     const backgroundAtivo = backgroundEstado === ESTADOS_BACKGROUND.STARTING || backgroundEstado === ESTADOS_BACKGROUND.ACTIVE;
     backgroundButton.disabled = !rotaAtiva || rotaPausada || !backgroundDisponivel || backgroundEstado === ESTADOS_BACKGROUND.STARTING;
     backgroundButton.textContent = backgroundAtivo
@@ -560,19 +548,14 @@ export function mapaPage() {
     }
     const ativo = backgroundEstado === ESTADOS_BACKGROUND.ACTIVE || backgroundEstado === ESTADOS_BACKGROUND.STARTING;
     if (ativo) {
-      await backgroundControle.parar();
-      atualizarWatcherForeground();
+      await rastreio.background.parar();
       return;
     }
     if (!window.confirm('Ativar GPS/trilha em segundo plano? O aparelho exibirá uma notificação, consumirá mais bateria e o sistema pode interromper o serviço. Nenhuma posição será enviada para servidor.')) return;
     backgroundMensagem = 'Preparando o serviço nativo; aceite as permissões exibidas pelo aparelho.';
-    pararGps.setPaused?.(true);
     atualizarSheet();
-    const iniciou = await backgroundControle.iniciar();
-    if (!iniciou) {
-      atualizarWatcherForeground();
-      return;
-    }
+    const iniciou = await rastreio.background.iniciar();
+    if (!iniciou) return;
     atualizarSheet();
   }
 
@@ -608,18 +591,15 @@ export function mapaPage() {
     const atual = estadoTrilha({ ativa: rotaAtiva, pausada: rotaPausada });
     const proximoEvento = atual === ESTADOS_TRILHA.PARADA ? 'START' : atual === ESTADOS_TRILHA.GRAVANDO ? 'PAUSE' : 'RESUME';
     const proximo = transicionarTrilha(atual, proximoEvento);
-    rotaAtiva = proximo.ativa;
-    rotaPausada = proximo.pausada;
-    estado.set(CHAVES.ROTA_ATIVA, rotaAtiva);
-    estado.set(CHAVES.ROTA_PAUSADA, rotaPausada);
-    pararGps?.setMode(rotaAtiva ? 'trilha' : 'cidade');
-    if (rotaAtiva && trilha.length === 0) {
-      trilha = [posicao];
-      estado.set(CHAVES.TRILHA, trilha);
-    }
+    rastreio.definirRota({ ativa: proximo.ativa, pausada: proximo.pausada });
+    sincronizarDoGravador();
+    // Rota que começa do zero planta o fixo atual como primeiro ponto. O
+    // gravador recusa a semeadura se já houver trilha — registro existente
+    // nunca é sobrescrito por um começo.
+    if (rotaAtiva && gravador.semear(posicao)) sincronizarDoGravador();
     if (!rotaAtiva || rotaPausada) {
       configurarWakeLock(false);
-      void backgroundControle.parar();
+      void rastreio.background.parar();
       sensorPassos.parar();
       void avisoJornada.encerrar();
     } else {
@@ -636,32 +616,25 @@ export function mapaPage() {
 
   async function pararRota() {
     if (!rotaAtiva) return;
-    await backgroundControle.parar();
+    await rastreio.background.parar();
     const proximo = transicionarTrilha(estadoTrilha({ ativa: rotaAtiva, pausada: rotaPausada }), 'STOP');
-    rotaAtiva = proximo.ativa;
-    rotaPausada = proximo.pausada;
-    estado.set(CHAVES.ROTA_ATIVA, rotaAtiva);
-    estado.set(CHAVES.ROTA_PAUSADA, rotaPausada);
-    pararGps?.setMode('cidade');
+    rastreio.definirRota({ ativa: proximo.ativa, pausada: proximo.pausada });
+    sincronizarDoGravador();
     configurarWakeLock(false);
-    atualizarWatcherForeground();
     sheetStatus.textContent = `${trilha.length} pontos guardados localmente. Rota parada sem apagar o registro.`;
     atualizarSheet();
   }
 
   function limparTrilha() {
     if (!trilha.length && !waypoints.length && !rotaAtiva && backgroundEstado === ESTADOS_BACKGROUND.IDLE) return;
-    trilha = [];
+    // Apagar é a ÚNICA coisa que apaga, e é sempre um toque explícito —
+    // nunca efeito colateral de trocar de tela ou de parar a rota.
+    gravador.limpar();
+    sincronizarDoGravador();
     waypoints = [];
-    rotaAtiva = false;
-    rotaPausada = false;
-    estado.set(CHAVES.TRILHA, trilha);
     estado.set(CHAVES.WAYPOINTS, waypoints);
-    estado.set(CHAVES.ROTA_ATIVA, false);
-    estado.set(CHAVES.ROTA_PAUSADA, false);
     configurarWakeLock(false);
-    void backgroundControle.parar();
-    pararGps?.setMode('cidade');
+    void rastreio.background.parar();
     sheetStatus.textContent = 'Trilha e pontos removidos deste aparelho.';
     atualizarSheet();
     atualizarMarcadores();
@@ -1097,18 +1070,14 @@ export function mapaPage() {
           ? importarRegistroKml(texto)
           : importarRegistroLocal(texto);
       if (!window.confirm('Substituir a rota, os waypoints e o destino atuais pelo registro importado?')) return;
-      trilha = registro.trilha;
+      await rastreio.background.parar();
+      gravador.substituir(registro.trilha);
+      rastreio.definirRota({ ativa: false, pausada: false });
+      sincronizarDoGravador();
       waypoints = registro.waypoints;
       destino = registro.destino;
-      rotaAtiva = false;
-      rotaPausada = false;
-      await backgroundControle.parar();
-      estado.set(CHAVES.TRILHA, trilha);
       estado.set(CHAVES.WAYPOINTS, waypoints);
       estado.set(CHAVES.DESTINO, destino);
-      estado.set(CHAVES.ROTA_ATIVA, false);
-      estado.set(CHAVES.ROTA_PAUSADA, false);
-      pararGps?.setMode('cidade');
       await configurarWakeLock(false);
       registroStatus.textContent = `${trilha.length} pontos de trilha e ${waypoints.length} waypoints importados localmente. A rota foi deixada pausada por segurança.`;
       atualizarSheet();
@@ -1174,7 +1143,7 @@ export function mapaPage() {
   destinoInput.onkeydown = (event) => { if (event.key === 'Enter') definirDestino(); };
   selectUso.onchange = () => {
     estado.set(CHAVES.MODO_USO, selectUso.value);
-    pararGps?.setMode(rotaAtiva ? 'trilha' : 'cidade');
+    rastreio.definirModo(rotaAtiva ? 'trilha' : 'cidade');
     sheetStatus.textContent = selectUso.value === 'cidade'
       ? 'Modo cidade: defina um destino para ver rumo e distância.'
       : selectUso.value === 'mar'
@@ -1189,17 +1158,24 @@ export function mapaPage() {
     atualizarSheet();
   };
 
-  const pararGps = iniciarAcompanhamento({
-    mode: 'cidade',
-    onPosition: registrarPosicao,
-    onError: (erro) => {
+  // A página se INSCREVE no rastreamento do aplicativo. `inscricao.parar()`
+  // tira a plateia e não encerra gravação nenhuma — é a diferença entre
+  // observar e possuir, e é o conserto do defeito descrito no ADR-0047.
+  const inscricao = rastreio.observar((evento) => {
+    if (desmontado) return;
+    if (evento.tipo === 'POSICAO') { registrarPosicao(evento.posicao, evento.resultado.gravado); return; }
+    if (evento.tipo === 'ESTADO_GPS') { exibirEstadoGps(evento); return; }
+    if (evento.tipo === 'ERRO') {
+      const erro = evento.erro;
       estadoGps.textContent = erro?.code === 1 ? 'PERMISSÃO NEGADA' : 'GPS INDISPONÍVEL';
       sheetStatus.textContent = erro?.code === 1 ? 'Ative a permissão de localização para usar o mapa ao vivo.' : 'Não foi possível obter um fixo agora.';
-    },
-    onState: exibirEstadoGps,
-  });
+    }
+  }, { oculto: document.hidden });
 
-  if (rotaAtiva) pararGps.setMode('trilha');
+  rastreio.definirModo(rotaAtiva ? 'trilha' : 'cidade');
+  // O espelho completo da V3 acompanha a rota que já estava ativa: quem
+  // reabriu o aplicativo no meio de uma caminhada continua a mesma sessão.
+  if (rotaAtiva) void rastreio.iniciarEspelhoV3({ nome: null, modo: 'trilha' });
 
   const aoMudarVisibilidade = () => {
     if (document.hidden) {
@@ -1511,5 +1487,5 @@ export function mapaPage() {
     atualizarTrajeto();
     avaliarExposicaoAtual();
   }, 1000);
-  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); sensorPassos.parar(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); backgroundControle.desmontar(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); pararGps(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); sensorPassos.parar(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); observarBackground(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); inscricao.parar(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
 }

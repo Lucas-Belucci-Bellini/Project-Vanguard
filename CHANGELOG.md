@@ -1,5 +1,42 @@
 # Changelog
 
+## Não lançado
+
+**Trocar de tela deixou de encerrar a gravação.** Até a 1.6.0 o rastreamento
+inteiro morava dentro de `src/pages/mapa.js` — watcher, controle de segundo
+plano, o array da trilha e a escrita no armazenamento eram variáveis de uma
+função de página. O `desmontar()` dela chamava `pararGps()`.
+
+Medido no navegador, contra o código anterior: **5 pontos gravados, sair do
+mapa para a bússola, andar mais três trechos, 5 pontos.** A trilha parava e
+ninguém era avisado. Conferir a bússola no meio de uma caminhada é exatamente o
+que se faz numa caminhada.
+
+Com a correção, o mesmo roteiro dá **4 → 7**, e voltar ao mapa reencontra a
+mesma trilha.
+
+**A regra agora é «página observa, não possui».** `src/core/rastreamento-app.js`
+é o dono único do GPS no aplicativo, e `src/core/trilha-gravador.js` guarda a
+trilha e o portão que decide se o fixo entra. `inscricao.parar()` tira a
+plateia e não desliga nada — quem encerra é parar a rota, quem apaga é limpar,
+e as duas são um toque explícito.
+
+**O corte da trilha deixou de ser silencioso.** `trilha.slice(-12000)`
+descartava os pontos mais **antigos** — o começo da caminhada — a partir de
+≈24 km, sem contagem e sem aviso. O teto do espelho em `localStorage` continua
+(a cota de ~5 MB é real), mas agora o que sai é contado, e o registro completo
+vai para o Track Store da V3: IndexedDB, append-only, sem teto. Escrita dupla e
+aditiva — `vanguard:trilha` continua intacta e continua sendo a fonte da tela.
+
+Nenhuma funcionalidade do mapa saiu: rota, pausa, retomada, parada, limpeza,
+importação, exportação, segundo plano, wake lock, passos, jornada, foto de
+parada e trajeto continuam onde estavam. A página encolheu 111 linhas e ganhou
+87.
+
+40 testes novos e três fluxos novos em navegador de verdade — os três rodados
+**contra o código anterior** para confirmar que enxergam o defeito.
+Ver [ADR-0047](docs/adr/ADR-0047-rastreamento-fora-da-pagina.md).
+
 ## 1.6.0 — 2026-09-03
 
 **A bússola passa a saber a declinação do lugar sozinha.** Até aqui a leitura
