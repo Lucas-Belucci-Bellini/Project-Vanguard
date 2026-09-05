@@ -9,8 +9,44 @@ import { numeroFinito, numeroNoIntervalo } from '../engine/numero-seguro.js';
 
 export const REGISTRO_SCHEMA = 'vanguard-registro-local';
 export const REGISTRO_VERSION = 1;
-export const LIMITE_TRILHA = 4000;
-export const LIMITE_WAYPOINTS = 1000;
+
+/**
+ * Limites de **IMPORTAÇÃO**, não de exportação.
+ *
+ * Eles existem para conter arquivo de fora: um JSON hostil de milhões de
+ * pontos travaria o aparelho antes de qualquer validação adiantar. Isso é
+ * legítimo — a entrada não é confiável.
+ *
+ * O que não era legítimo: aplicar o mesmo limite na **saída**. Medido na
+ * 1.6.0: uma trilha de 4 001 pontos era gravada normalmente (o armazenamento
+ * corta em 12 000) e a exportação **recusava inteira**, com "acima do limite
+ * local". Ou seja, entre 4 001 e 12 000 pontos o registro existia no aparelho
+ * e não tinha como sair dele — nem por JSON, nem por GPX, nem por KML.
+ *
+ * A trilha é do operador. A exportação dela não tem teto: ver
+ * `validarParaExportacao` abaixo.
+ *
+ * O teto de importação subiu de 4 000 para 100 000 porque backup que não volta
+ * não é backup: com a exportação liberada, 4 000 na entrada deixaria o operador
+ * exportar um arquivo que o próprio aplicativo recusaria a restaurar.
+ *
+ * 100 000 é medido, não escolhido por gosto. Custo da validação ponto a ponto,
+ * neste runner:
+ *
+ * |  pontos | tempo   | arquivo |
+ * |--------:|--------:|--------:|
+ * |   4 000 |   13 ms |  0,4 MB |
+ * |  12 000 |   34 ms |  1,2 MB |
+ * | 100 000 |  325 ms | 10,3 MB |
+ * | 250 000 | 1 514 ms| 25,9 MB |
+ *
+ * 100 000 pontos são mais de 8 dias de gravação contínua na regra de ≥2 m entre
+ * pontos — acima de qualquer trilha real, e ainda abaixo do ponto em que a
+ * validação trava a interface. 250 000 já passa de um segundo e meio aqui, o
+ * que num celular vira vários.
+ */
+export const LIMITE_TRILHA = 100_000;
+export const LIMITE_WAYPOINTS = 10_000;
 
 function numeroValido(valor, minimo, maximo) {
   return numeroNoIntervalo(valor, minimo, maximo) !== null;
@@ -42,8 +78,26 @@ function normalizarPonto(ponto, indice, { nomePadrao = 'Ponto' } = {}) {
   return normalizado;
 }
 
+/** Entrada de fora: bounded, porque não é confiável. */
 function validarArray(valor, nome, limite, nomePadrao) {
-  if (!Array.isArray(valor) || valor.length > limite) throw new Error(`${nome} inválida ou acima do limite local.`);
+  if (!Array.isArray(valor)) throw new Error(`${nome} inválida ou acima do limite local.`);
+  if (valor.length > limite) {
+    throw new Error(`${nome} inválida ou acima do limite local (${valor.length} de no máximo ${limite} na importação).`);
+  }
+  return valor.map((ponto, indice) => normalizarPonto(ponto, indice, { nomePadrao }));
+}
+
+/**
+ * Saída do dado do próprio operador: **sem teto**.
+ *
+ * Cada ponto continua sendo validado um a um — coordenada fora de faixa
+ * segue recusada, e nada é inventado. O que não acontece mais é a recusa por
+ * quantidade: negar a saída de um registro que já está no aparelho não protege
+ * ninguém, só prende o dado. Um arquivo grande é problema de disco; um dado
+ * que não sai é perda.
+ */
+function validarParaExportacao(valor, nome, nomePadrao) {
+  if (!Array.isArray(valor)) throw new Error(`${nome} inválida.`);
   return valor.map((ponto, indice) => normalizarPonto(ponto, indice, { nomePadrao }));
 }
 
@@ -55,8 +109,8 @@ export function exportarRegistroLocal({ trilha = [], waypoints = [], destino = n
     schema: REGISTRO_SCHEMA,
     version: REGISTRO_VERSION,
     exportadoEm: typeof exportadoEm === 'string' ? exportadoEm : new Date().toISOString(),
-    trilha: validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha'),
-    waypoints: validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint'),
+    trilha: validarParaExportacao(trilha, 'Trilha', 'Ponto da trilha'),
+    waypoints: validarParaExportacao(waypoints, 'Waypoints', 'Waypoint'),
     destino: destino == null ? null : normalizarPonto(destino, 0, { nomePadrao: 'Destino' }),
   };
   return JSON.stringify(dados, null, 2);
@@ -77,8 +131,8 @@ function escaparXml(valor) {
  * automática ou comunicação externa.
  */
 export function exportarRegistroGpx({ trilha = [], waypoints = [], destino = null, nome = 'Vanguard Field' } = {}) {
-  const pontosTrilha = validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha');
-  const pontosWaypoint = validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint');
+  const pontosTrilha = validarParaExportacao(trilha, 'Trilha', 'Ponto da trilha');
+  const pontosWaypoint = validarParaExportacao(waypoints, 'Waypoints', 'Waypoint');
   const todosWaypoints = destino == null
     ? pontosWaypoint
     : [...pontosWaypoint, normalizarPonto(destino, pontosWaypoint.length, { nomePadrao: 'Destino' })];
@@ -101,8 +155,8 @@ ${wpts}${wpts && track ? '\n' : ''}${track}
  * Placemark de ponto; nenhum dado é enviado para fora do aparelho.
  */
 export function exportarRegistroKml({ trilha = [], waypoints = [], destino = null, nome = 'Vanguard Field' } = {}) {
-  const pontosTrilha = validarArray(trilha, 'Trilha', LIMITE_TRILHA, 'Ponto da trilha');
-  const pontosWaypoint = validarArray(waypoints, 'Waypoints', LIMITE_WAYPOINTS, 'Waypoint');
+  const pontosTrilha = validarParaExportacao(trilha, 'Trilha', 'Ponto da trilha');
+  const pontosWaypoint = validarParaExportacao(waypoints, 'Waypoints', 'Waypoint');
   const todosWaypoints = destino == null
     ? pontosWaypoint
     : [...pontosWaypoint, normalizarPonto(destino, pontosWaypoint.length, { nomePadrao: 'Destino' })];
