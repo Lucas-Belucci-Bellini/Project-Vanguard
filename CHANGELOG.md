@@ -1,6 +1,6 @@
 # Changelog
 
-## Não lançado
+## 1.8.0 — 2026-09-05
 
 ### `#/clima` — tempestade, e a metade que funciona sem internet
 
