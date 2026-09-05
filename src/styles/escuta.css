@@ -1,0 +1,48 @@
+.escuta { background: var(--color-bg); }
+.escuta__scroll { height: 100%; overflow-y: auto; padding: 0 14px calc(86px + env(safe-area-inset-bottom)); }
+.escuta__head, .escuta__contrato, .escuta__painel, .escuta__botao, .escuta__status, .escuta__concedido, .escuta__campo, .escuta__bloco, .escuta__evento { width: min(100%, 760px); margin-right: auto; margin-left: auto; }
+
+.escuta__head { padding: 28px 0 16px; }
+.escuta__eyebrow, .escuta__kicker { display: block; color: var(--color-cyan); font-size: 9px; font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-widest); }
+.escuta__eyebrow { margin-bottom: 13px; }
+.escuta__head h1 { margin-bottom: 10px; }
+.escuta__head p { max-width: 620px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.7; }
+
+.escuta__contrato { margin-bottom: 14px; border-left-color: var(--color-cyan); background: var(--color-cyan-soft); color: var(--color-text-secondary); }
+.escuta__contrato strong { color: var(--color-cyan); }
+
+.escuta__painel { padding: 12px; border: var(--border-base); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-inset); }
+.escuta__canvas { display: block; width: 100%; height: 150px; border: var(--border-thin); border-radius: var(--radius-sm); background: var(--color-bg); }
+.escuta__medidores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.escuta__medidor { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: var(--border-thin); border-left: 3px solid var(--color-cyan-edge); border-radius: var(--radius-sm); background: var(--color-bg); }
+.escuta__medidor span { color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.escuta__medidor strong { color: var(--color-cyan); font-size: 15px; line-height: 1.1; }
+
+.escuta__evento { display: flex; flex-direction: column; gap: 3px; margin-bottom: 12px; padding: 12px 14px; border: 1px solid var(--color-danger); border-radius: var(--radius-md); background: var(--color-danger-soft); }
+.escuta__evento strong { color: var(--color-danger); font-size: 13px; letter-spacing: var(--tracking-wide); }
+.escuta__evento--voz { border-color: var(--color-cyan-edge); background: var(--color-cyan-soft); }
+.escuta__evento--voz strong { color: var(--color-cyan); }
+.escuta__evento-detalhe { color: var(--color-text-secondary); font-size: 10px; }
+
+.escuta__botao { display: block; margin-top: 14px; }
+.escuta__status { margin-top: 8px; color: var(--color-text-secondary); font-size: 11px; }
+.escuta__concedido:empty { display: none; }
+.escuta__concedido { margin-top: 6px; color: var(--color-ambar); font-size: 10px; line-height: 1.6; }
+
+.escuta__campo { display: flex; flex-direction: column; gap: 4px; margin-top: 18px; }
+.escuta__campo > label { color: var(--color-text-secondary); font-size: 10px; letter-spacing: var(--tracking-wide); }
+.escuta__dica { color: var(--color-text-muted); font-size: 10px; line-height: 1.6; }
+
+.escuta__bloco { margin-top: 20px; padding: 14px; border: var(--border-base); border-radius: var(--radius-md); background: var(--color-surface); }
+.escuta__bloco ul { margin: 8px 0 0; padding-left: 16px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.7; }
+.escuta__bloco--limites ul { color: var(--color-text-muted); }
+
+.escuta__vocabulario { list-style: none; margin: 8px 0 0; padding: 0; }
+.escuta__vocabulario li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: var(--border-thin); }
+.escuta__vocabulario li:last-child { border-bottom: 0; }
+.escuta__vocabulario strong { color: var(--color-text-secondary); font-size: 11px; font-weight: var(--font-weight-regular); line-height: 1.5; }
+.escuta__provar { flex: 0 0 auto; min-height: 36px; padding: 8px 12px; font-size: 9px; }
+
+@media (min-width: 620px) {
+  .escuta__medidores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

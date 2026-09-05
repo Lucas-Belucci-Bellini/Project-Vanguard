@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { criarMapProviderRuntime } from '../../src/core/map-provider-runtime.js';
 
 const provider = {
@@ -22,11 +23,11 @@ describe('MapProviderRuntime', () => {
     };
 
     const runtime = criarMapProviderRuntime(provider, adapter);
-    expect(runtime.montar({ container: 'map' })).toBe(mapa);
-    expect(recebido.tiles).toEqual(provider.tiles);
-    expect(recebido.tileSize).toBe(256);
-    expect(recebido.maxzoom).toBe(14);
-    expect(recebido.creditos).toBe('Vanguard');
+    assert.equal(runtime.montar({ container: 'map' }), mapa);
+    assert.deepEqual(recebido.tiles, provider.tiles);
+    assert.equal(recebido.tileSize, 256);
+    assert.equal(recebido.maxzoom, 14);
+    assert.equal(recebido.creditos, 'Vanguard');
   });
 
   it('desmonta através do adapter', () => {
@@ -40,15 +41,15 @@ describe('MapProviderRuntime', () => {
     runtime.montar({ container: 'map' });
     runtime.desmontar();
 
-    expect(destruido).toBe(true);
-    expect(runtime.obterMapa()).toBe(null);
+    assert.equal(destruido, true);
+    assert.equal(runtime.obterMapa(), null);
   });
 
   it('rejeita provider inválido', () => {
-    expect(() => criarMapProviderRuntime({}, { renderizar() {} })).toThrow(/MapProvider inválido/);
+    assert.throws(() => criarMapProviderRuntime({}, { renderizar() {} }), /MapProvider inválido/);
   });
 
   it('rejeita adapter sem renderizar', () => {
-    expect(() => criarMapProviderRuntime(provider, {})).toThrow(/renderizar é obrigatório/);
+    assert.throws(() => criarMapProviderRuntime(provider, {}), /renderizar é obrigatório/);
   });
 });

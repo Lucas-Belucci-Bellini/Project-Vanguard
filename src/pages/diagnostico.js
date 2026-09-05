@@ -1,5 +1,6 @@
 import '../styles/diagnostico.css';
 import { h } from '../ui/helpers.js';
+import { identidadeDoBuild, rotuloDaVersao } from '../core/versao.js';
 import { estado, CHAVES } from '../core/estado.js';
 import { CONFIGURACAO_APLICATIVO } from '../core/configuracao.js';
 import { desempenhoResumo, diagnosticoResumo, formatarBytes, statusPosicao } from '../core/diagnostico.js';
@@ -7,6 +8,13 @@ import { fonteLocalizacao } from '../core/localizacao.js';
 import { detectarCapacidades } from '../core/capacidades.js';
 import { lerPermissaoGps } from '../platform/permissoes.js';
 import { estadoCicloVidaAtual, observarCicloVida } from '../core/ciclo-vida.js';
+import { falhasDeTela } from '../core/falhas-tela-app.js';
+import { TIPOS_FALHA } from '../core/falhas-tela.js';
+import { ROTAS } from '../core/rotas.js';
+import { testarRotas, resumirAutoteste, RESULTADO_ROTA } from '../core/autoteste-rotas.js';
+import { montarRelatorio } from '../core/relatorio-diagnostico.js';
+import { preferenciasUpdater, tipoDeConexao, updaterApp } from '../core/updater/app.js';
+import { MODELO_WMM, anoDecimal } from '../engine/wmm.js';
 
 function plataformaLabel() {
   return navigator.userAgentData?.platform || navigator.platform || 'INDISPONÍVEL';
@@ -51,14 +59,177 @@ async function bateriaAtual() {
   }
 }
 
+/**
+ * Três estados, não dois.
+ *
+ * A versão anterior era binária: tudo que não fosse `ok` virava ATENÇÃO. Com
+ * isso "o navegador não expõe o nível de bateria" aparecia com a mesma cara de
+ * "algo está errado" — e um diagnóstico que trata desconhecido como problema
+ * treina quem lê a ignorá-lo. `INDISPONÍVEL` é uma resposta legítima: o
+ * recurso não existe neste ambiente, e não há nada a consertar.
+ */
+const ROTULO_ESTADO = Object.freeze({ ok: 'OK', atencao: 'ATENÇÃO', indisponivel: 'INDISPONÍVEL' });
+
+/*
+ * TELAS — o grupo que responde "essa página não abre no aplicativo".
+ *
+ * Sem ele, uma falha de carregamento aparecia por um instante na tela e sumia
+ * na navegação seguinte: nada sobrava para diagnosticar à distância. Aqui a
+ * falha fica, com a rota, a causa classificada e o build em que aconteceu.
+ *
+ * `CHUNK_NAO_CARREGOU` é o achado importante: significa que o módulo daquela
+ * rota não chegou — pacote incompleto ou desatualizado — e é exatamente o que
+ * "funciona no site e não no app" parece por dentro.
+ */
+/*
+ * AUTOTESTE — carrega cada rota no aparelho e diz qual falha.
+ *
+ * É a única medição que alcança a WebView do sistema do operador. Tudo que
+ * roda na máquina de quem desenvolve mede outra coisa parecida, não esta.
+ */
+/*
+ * ATUALIZAÇÃO — o estado do updater, para depurar "por que o app não me avisou".
+ *
+ * Mostra o que decide: qual versão ele acha que está instalada, qual foi a
+ * última vista, em que canal, quando checou pela última vez, e o que a
+ * plataforma consegue fazer. Sem isso, "não apareceu atualização" é
+ * indistinguível de "não há atualização".
+ */
+/**
+ * O modelo magnético embarcado tem prazo. Quando ele vencer, a bússola perde o
+ * terceiro caminho até o norte verdadeiro — e perderia em silêncio, porque o
+ * motor apenas passa a recusar. Aqui isso vira aviso ANTES de acontecer.
+ */
+function itensDoModeloMagnetico(agora = Date.now()) {
+  const ano = anoDecimal(agora);
+  const { validade, nome, epoca } = MODELO_WMM;
+  const anosRestantes = ano == null ? null : validade.fim - ano;
+
+  let valor;
+  let estadoItem;
+  if (anosRestantes == null) {
+    valor = 'RELÓGIO INDISPONÍVEL';
+    estadoItem = 'indisponivel';
+  } else if (anosRestantes <= 0) {
+    valor = `${nome} VENCIDO desde ${validade.fim} · a bússola não calcula mais declinação por modelo`;
+    estadoItem = 'atencao';
+  } else if (anosRestantes < 1) {
+    valor = `${nome} vence em ${validade.fim} (menos de um ano) · atualize os coeficientes`;
+    estadoItem = 'atencao';
+  } else {
+    valor = `${nome} · época ${epoca} · válido até ${validade.fim}`;
+    estadoItem = 'ok';
+  }
+
+  return [
+    { grupo: 'MODELO MAGNÉTICO', nome: 'Declinação (WMM)', valor, estado: estadoItem },
+    { grupo: 'MODELO MAGNÉTICO', nome: 'Grau da expansão', valor: `${MODELO_WMM.grauMaximo} · emitido em ${MODELO_WMM.emitidoEm}`, estado: 'ok' },
+  ];
+}
+
+function itensDoUpdater() {
+  const s = updaterApp.getState();
+  const prefs = preferenciasUpdater.ler();
+  const plataforma = updaterApp.getPlatform();
+  const conexao = tipoDeConexao();
+  const quando = s.verificadoEm ? new Date(s.verificadoEm).toLocaleString('pt-BR') : 'NUNCA';
+
+  return [
+    { grupo: 'ATUALIZAÇÃO', nome: 'Versão instalada', valor: s.versaoInstalada, estado: 'ok' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Última vista', valor: s.release?.versao ?? '—', estado: s.release ? 'atencao' : 'ok' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Estado', valor: s.estado, estado: s.estado === 'ERRO' ? 'indisponivel' : (s.estado === 'DISPONIVEL' ? 'atencao' : 'ok') },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Canal', valor: prefs.canal.toUpperCase(), estado: 'ok' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Última verificação', valor: quando, estado: s.verificadoEm ? 'ok' : 'atencao' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Baixar automaticamente', valor: prefs.baixarAutomaticamente.toUpperCase(), estado: 'ok' },
+    // Meio de conexão desconhecido é resposta honesta: `effectiveType` mede
+    // VELOCIDADE, não meio, e usá-lo aqui mandaria baixar em dados móveis.
+    { grupo: 'ATUALIZAÇÃO', nome: 'Conexão', valor: conexao ? conexao.toUpperCase() : 'DESCONHECIDA · sem meio informado', estado: conexao ? 'ok' : 'atencao' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Pode baixar', valor: plataforma.podeBaixar ? 'SIM' : 'NÃO', estado: plataforma.podeBaixar ? 'ok' : 'indisponivel' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Verifica checksum', valor: plataforma.podeVerificarChecksum ? 'SIM · SHA-256' : 'NÃO', estado: plataforma.podeVerificarChecksum ? 'ok' : 'indisponivel' },
+    { grupo: 'ATUALIZAÇÃO', nome: 'Pode instalar', valor: plataforma.podeInstalar ? 'SIM' : `NÃO · ${plataforma.limitacoes.length} limitação(ões) — ver #/atualizacoes`, estado: plataforma.podeInstalar ? 'ok' : 'indisponivel' },
+    ...(s.erro ? [{ grupo: 'ATUALIZAÇÃO', nome: 'Erro da consulta', valor: s.erro, estado: 'indisponivel' }] : []),
+  ];
+}
+
+function itensDoAutoteste(linhas) {
+  if (!linhas) {
+    return [{
+      grupo: 'AUTOTESTE',
+      nome: 'Rotas',
+      valor: 'não executado — toque em TESTAR TODAS AS ROTAS',
+      estado: 'atencao',
+    }];
+  }
+  const resumo = resumirAutoteste(linhas);
+  const cabecalho = {
+    grupo: 'AUTOTESTE',
+    nome: 'Rotas',
+    valor: resumo.tudoOk
+      ? `${resumo.total} rota(s) carregam neste aparelho`
+      : `${resumo.falhas} de ${resumo.total} FALHARAM: ${resumo.rotasComFalha.join(', ')}`,
+    estado: resumo.tudoOk ? 'ok' : 'indisponivel',
+  };
+  // Só as que falharam viram linha própria: treze linhas verdes empurrariam o
+  // que importa para fora da tela.
+  const falhas = linhas.filter((l) => l.resultado === RESULTADO_ROTA.FALHOU).map((l) => ({
+    grupo: 'AUTOTESTE',
+    nome: l.hash,
+    valor: `${l.tipo} · ${l.mensagem}`,
+    estado: 'indisponivel',
+  }));
+  return [cabecalho, ...falhas];
+}
+
+function itensDeFalhaDeTela() {
+  const falhas = falhasDeTela.listar();
+  if (!falhas.length) {
+    return [{
+      grupo: 'TELAS',
+      nome: 'Falhas de carregamento',
+      valor: 'NENHUMA registrada neste aparelho',
+      estado: 'ok',
+    }];
+  }
+
+  const semChunk = falhasDeTela.rotasComChunkFaltando();
+  const cabecalho = {
+    grupo: 'TELAS',
+    nome: 'Falhas de carregamento',
+    valor: semChunk.length
+      ? `${falhas.length} registrada(s) · ${semChunk.length} rota(s) sem o módulo no pacote`
+      : `${falhas.length} registrada(s)`,
+    estado: 'atencao',
+  };
+
+  const itens = falhas.slice(0, 8).map((falha) => ({
+    grupo: 'TELAS',
+    nome: `${falha.rota}${falha.vezes > 1 ? ` (${falha.vezes}×)` : ''}`,
+    valor: `${falha.tipo === TIPOS_FALHA.CHUNK_NAO_CARREGOU ? 'MÓDULO NÃO CHEGOU' : falha.tipo} · ${falha.mensagem.slice(0, 80)}`,
+    // Módulo que não chegou é defeito de pacote, não de tela: pesa mais.
+    estado: falha.tipo === TIPOS_FALHA.CHUNK_NAO_CARREGOU ? 'indisponivel' : 'atencao',
+  }));
+
+  return [cabecalho, ...itens];
+}
+
 export function diagnosticoPage() {
   const raiz = h('div', { className: 'vg-pagina diagnostico' });
   const wrap = h('div', { className: 'diagnostico__wrap' });
   const status = h('p', { className: 'diagnostico__status is-loading', role: 'status' }, 'LENDO ESTADOS LOCAIS…');
   const lista = h('div', { className: 'diagnostico__conteudo' });
   const recarregar = h('button', { className: 'diagnostico__atualizar', type: 'button' }, 'ATUALIZAR DIAGNÓSTICO');
+  /*
+   * Os dois botões que respondem "essa página não abre no aplicativo" a partir
+   * do próprio aparelho: um carrega cada rota e mostra qual falha; o outro põe
+   * tudo em texto para o operador colar. Sem eles, o relato depende de memória
+   * e perde justo o que decide — o BUILD_ID e a mensagem exata.
+   */
+  const autotestar = h('button', { className: 'diagnostico__atualizar', type: 'button' }, 'TESTAR TODAS AS ROTAS');
+  const copiar = h('button', { className: 'diagnostico__atualizar', type: 'button' }, 'COPIAR RELATÓRIO');
+  const acoes = h('div', { className: 'diagnostico__acoes' }, recarregar, autotestar, copiar);
   let removido = false;
   let bateria = null;
+  let autoteste = null;
 
   function render(itens) {
     const grupos = new Map();
@@ -71,7 +242,7 @@ export function diagnosticoPage() {
       h('div', { className: 'diagnostico__lista' }, ...valores.map((item) => h('div', { className: 'diagnostico__linha' },
         h('strong', { className: 'diagnostico__nome' }, item.nome),
         h('span', { className: 'diagnostico__valor' }, item.valor),
-        h('span', { className: `diagnostico__estado is-${item.estado}` }, item.estado === 'ok' ? 'OK' : 'ATENÇÃO'))))
+        h('span', { className: `diagnostico__estado is-${item.estado}` }, ROTULO_ESTADO[item.estado] ?? item.estado.toUpperCase()))))
     )));
   }
 
@@ -83,9 +254,18 @@ export function diagnosticoPage() {
     try {
       const posicao = estado.get(CHAVES.LOCAL, null);
       const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration().catch(() => null) : null;
+      /*
+       * BUILD / RUNTIME — o grupo que responde "o aplicativo instalado é
+       * mesmo o desta versão?".
+       *
+       * Sem isto, descobrir que o aparelho rodava um bundle de quatro
+       * versões atrás exigiu baixar o APK publicado e comparar chunks. Agora
+       * é comparar o que está na tela com o que está na release.
+       */
+      const identidade = identidadeDoBuild();
       bateria = await bateriaAtual();
       const dados = diagnosticoResumo({
-        versao: `${CONFIGURACAO_APLICATIVO.nome} ${CONFIGURACAO_APLICATIVO.versao}`,
+        versao: `${CONFIGURACAO_APLICATIVO.nome} ${rotuloDaVersao(identidade.versao)}`,
         plataforma: plataformaLabel(),
         rede: navigator.onLine !== false,
         posicao,
@@ -114,18 +294,33 @@ export function diagnosticoPage() {
             : 'NÃO TESTADO',
         estado: persistencia.estado === 'PERSISTIDO' ? 'ok' : 'atencao',
       };
+      const swRegistrado = Boolean(reg);
+      const buildItens = [
+        { grupo: 'BUILD / RUNTIME', nome: 'Versão do app', valor: rotuloDaVersao(identidade.versao), estado: identidade.versao ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Bundle web', valor: identidade.build ?? 'INDISPONÍVEL', estado: identidade.build ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Commit', valor: identidade.commit ?? 'INDISPONÍVEL', estado: identidade.commit ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Execução', valor: identidade.nativo ? `APLICATIVO · ${identidade.plataforma}` : 'NAVEGADOR · web', estado: 'ok' },
+        // A origem entra porque foi ela que escondeu o defeito: em
+        // `http://localhost` o registro do service worker exigia `https:` e
+        // nunca acontecia dentro do aplicativo.
+        { grupo: 'BUILD / RUNTIME', nome: 'Origem', valor: identidade.origem ?? 'INDISPONÍVEL', estado: identidade.origem ? 'ok' : 'indisponivel' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Contexto seguro', valor: identidade.contextoSeguro ? 'SIM · service worker permitido' : 'NÃO · sem service worker', estado: identidade.contextoSeguro ? 'ok' : 'atencao' },
+        { grupo: 'BUILD / RUNTIME', nome: 'Service worker', valor: swRegistrado ? `REGISTRADO${navigator.serviceWorker?.controller ? ' · controlando' : ' · sem controlar ainda'}` : 'NÃO REGISTRADO', estado: swRegistrado ? 'ok' : 'atencao' },
+        { grupo: 'BUILD / RUNTIME', nome: 'WebView', valor: identidade.agente ? identidade.agente.slice(0, 96) : 'INDISPONÍVEL', estado: identidade.agente ? 'ok' : 'indisponivel' },
+      ];
+
       const desempenho = desempenhoResumo();
       const gpsItem = dados.find((item) => item.nome === 'GPS/GNSS');
       if (gpsItem) gpsItem.valor = `${gps} · ${statusPosicao(posicao).estado}`;
-      const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'atencao' : 'ok' };
-      const localizacaoItem = { grupo: 'LOCALIZAÇÃO', nome: 'Fonte GPS', valor: fonteLocalizacao(), estado: fonteLocalizacao() === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const cacheItem = { grupo: 'OFFLINE', nome: 'Tiles em cache', valor: cache, estado: cache.startsWith('INDISPONÍVEL') ? 'indisponivel' : 'ok' };
+      const localizacaoItem = { grupo: 'LOCALIZAÇÃO', nome: 'Fonte GPS', valor: fonteLocalizacao(), estado: fonteLocalizacao() === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const backgroundItem = { grupo: 'MOBILE', nome: 'GPS em background', valor: 'DEVICE DEPENDENT · sem garantia contínua', estado: 'atencao' };
       const ciclo = estadoCicloVidaAtual();
-      const cicloItem = { grupo: 'MOBILE', nome: 'Ciclo do app', valor: ciclo.rotulo, estado: ciclo.estado === 'UNAVAILABLE' ? 'atencao' : 'ok' };
-      const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
+      const cicloItem = { grupo: 'MOBILE', nome: 'Ciclo do app', valor: ciclo.rotulo, estado: ciclo.estado === 'UNAVAILABLE' ? 'indisponivel' : 'ok' };
+      const desempenhoItem = { grupo: 'DESEMPENHO', nome: 'Startup DOM', valor: `${desempenho.navegacao} · ${desempenho.fonte}`, estado: desempenho.navegacao === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
+      const cargaItem = { grupo: 'DESEMPENHO', nome: 'Carga completa', valor: desempenho.carga, estado: desempenho.carga === 'INDISPONÍVEL' ? 'indisponivel' : 'ok' };
       const memoriaItem = { grupo: 'DESEMPENHO', nome: 'Memória JS', valor: desempenho.memoria, estado: desempenho.memoria === 'INDISPONÍVEL' ? 'atencao' : 'ok' };
-      render([...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem]);
+      render([...buildItens, ...dados, localizacaoItem, ...capacidadeItens, persistenciaItem, backgroundItem, cicloItem, desempenhoItem, cargaItem, memoriaItem, cacheItem, ...itensDoAutoteste(autoteste), ...itensDeFalhaDeTela(), ...itensDoModeloMagnetico(), ...itensDoUpdater()]);
       status.className = 'diagnostico__status';
       status.textContent = 'Diagnóstico local atualizado. Nenhum dado foi enviado para um servidor.';
     } catch {
@@ -137,6 +332,81 @@ export function diagnosticoPage() {
   }
 
   recarregar.onclick = atualizar;
+
+  /*
+   * O autoteste carrega cada rota de verdade. Pode demorar alguns segundos num
+   * aparelho lento, então o botão informa o progresso em vez de ficar mudo —
+   * um botão que não responde é indistinguível de um que travou.
+   */
+  autotestar.onclick = async () => {
+    autotestar.disabled = true;
+    const rotulo = autotestar.textContent;
+    try {
+      autoteste = await testarRotas(ROTAS, {
+        aoProgresso: (feitas, total) => {
+          if (!removido) autotestar.textContent = `TESTANDO ${feitas}/${total}…`;
+        },
+      });
+      if (removido) return;
+      // `atualizar()` reescreve o status ao terminar, então o resultado do
+      // autoteste vem DEPOIS — na ordem inversa a mensagem aparecia e sumia no
+      // mesmo instante, e o operador não via o que o teste achou.
+      await atualizar();
+      if (removido) return;
+      const resumo = resumirAutoteste(autoteste);
+      status.className = 'diagnostico__status';
+      status.textContent = resumo.tudoOk
+        ? `Autoteste: as ${resumo.total} rotas carregam neste aparelho.`
+        : `Autoteste: ${resumo.falhas} rota(s) FALHARAM — ${resumo.rotasComFalha.join(', ')}. Toque em COPIAR RELATÓRIO e envie o texto.`;
+    } finally {
+      if (!removido) {
+        autotestar.textContent = rotulo;
+        autotestar.disabled = false;
+      }
+    }
+  };
+
+  copiar.onclick = async () => {
+    const identidade = identidadeDoBuild();
+    let sw = 'NÃO REGISTRADO';
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (reg) sw = navigator.serviceWorker?.controller ? 'REGISTRADO · controlando' : 'REGISTRADO · sem controlar ainda';
+    } catch { sw = 'INDISPONÍVEL'; }
+
+    const texto = montarRelatorio({
+      identidade,
+      serviceWorker: sw,
+      falhas: falhasDeTela.listar(),
+      autoteste,
+    });
+
+    // `navigator.clipboard` exige contexto seguro e pode ser negado; o textarea
+    // é a saída que sempre existe. Falhar em silêncio aqui deixaria o operador
+    // achando que copiou.
+    let copiado = false;
+    try {
+      await navigator.clipboard.writeText(texto);
+      copiado = true;
+    } catch { copiado = false; }
+
+    status.className = 'diagnostico__status';
+    if (copiado) {
+      status.textContent = 'Relatório copiado. Cole na conversa — ele não contém coordenada, trilha, foto nem contato.';
+    } else {
+      status.textContent = 'Não foi possível copiar automaticamente. O texto está abaixo: selecione e copie.';
+      const saida = h('textarea', {
+        className: 'diagnostico__relatorio',
+        readOnly: true,
+        rows: 18,
+        'aria-label': 'Relatório de diagnóstico para copiar',
+      });
+      saida.value = texto;
+      lista.prepend(saida);
+      saida.focus();
+      saida.select();
+    }
+  };
   const removeLocal = estado.on(CHAVES.LOCAL, atualizar);
   const removeCiclo = observarCicloVida({ onState: () => atualizar() });
   const aoConectar = () => atualizar();
@@ -146,11 +416,11 @@ export function diagnosticoPage() {
   wrap.append(
     h('header', { className: 'diagnostico__header' },
       h('div', null,
-        h('div', { className: 'diagnostico__eyebrow' }, 'VANGUARD FIELD / DIAGNÓSTICO LOCAL'),
+        h('div', { className: 'diagnostico__eyebrow' }, 'DIAGNÓSTICO LOCAL'),
         h('h1', null, 'Estado observável'),
         h('p', { className: 'diagnostico__intro' }, 'Conferência local de versão, rede, GPS, frescor, cache, armazenamento, bateria, lifecycle, performance, sensores e capacidades de compartilhamento. Este painel não envia telemetria e não prova cobertura, comunicação ou resgate.')
       ),
-      recarregar
+      acoes
     ),
     status,
     lista,

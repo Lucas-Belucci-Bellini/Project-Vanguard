@@ -20,6 +20,8 @@ maplibre-gl
 
 O `MapProviderRegistry` continua disponível para seleção e registro de providers, enquanto `map-engine.js` fornece a composição de alto nível usada pela aplicação.
 
+O caminho offline é descrito em [`OFFLINE-MAP-SYSTEM.md`](OFFLINE-MAP-SYSTEM.md): `dataset-registry.js` responde qual dataset instalado é utilizável, e um provider offline só pode ser construído sobre essa resposta.
+
 ## Responsabilidades
 
 - `MapProvider`: contrato dos dados e capacidades do provider.

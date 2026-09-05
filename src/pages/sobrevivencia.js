@@ -57,7 +57,7 @@ export function sobrevivenciaPage() {
   wrap.append(
     h('header', { className: 'sobrevivencia__header' },
       h('div', null,
-        h('div', { className: 'sobrevivencia__eyebrow' }, 'VANGUARD FIELD / SOBREVIVÊNCIA'),
+        h('div', { className: 'sobrevivencia__eyebrow' }, 'SOBREVIVÊNCIA'),
         h('h1', null, 'Conhecimento quando a rede some'),
         h('p', null, 'Um manual local de preparação e primeiros passos para cidade, caminhada, expedição, mar e emergências. Abra os cartões antes de sair e mantenha uma cópia física para situações críticas.')),
       h('button', { className: 'sobrevivencia__back', type: 'button', onclick: () => { location.hash = '#/inicio'; } }, '← INÍCIO')),

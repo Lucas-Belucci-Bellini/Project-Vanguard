@@ -1,24 +1,29 @@
 {
   "name": "project-vanguard",
   "private": true,
-  "version": "1.3.1",
+  "version": "1.6.0",
   "type": "module",
   "description": "Vanguard Field — navegação de expedição com GPS, bússola, trilha local e protocolo de posição para socorro.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --host",
-    "test": "node --test $(find test -name \"*.test.js\" ! -path \"test/core/*\" -print) && vitest run test/core/map-engine.test.js test/core/map-provider-runtime.test.js test/core/mapa-runtime.test.js test/core/maplibre-adapter.integration.test.js test/core/maplibre-adapter.test.js",
-    "mobile:sync": "npm run build && cap sync",
-    "mobile:sync:android": "npm run build && cap sync android",
-    "mobile:sync:ios": "npm run build && cap sync ios",
+    "test": "node --test \"test/**/*.test.js\"",
+    "mobile:sync": "npm run build && cap sync && npm run verificar:paridade",
+    "mobile:sync:android": "npm run build && cap sync android && npm run verificar:paridade",
+    "mobile:sync:ios": "npm run build && cap sync ios && npm run verificar:paridade -- ios",
     "mobile:android:debug": "npm run mobile:sync:android && cd android && ./gradlew assembleDebug --no-daemon",
-    "mobile:ios:open": "npm run mobile:sync:ios && cap open ios"
+    "mobile:ios:open": "npm run mobile:sync:ios && cap open ios",
+    "verificar:rotas": "node scripts/verificar-rotas.mjs",
+    "verificar:fluxos": "node scripts/verificar-fluxos.mjs",
+    "verificar:paridade": "node scripts/verificar-paridade.mjs",
+    "verificar:webview": "node scripts/verificar-webview.mjs",
+    "verificar:trilha": "node scripts/verificar-trilha-indexeddb.mjs",
+    "benchmark:navegacao": "node scripts/benchmark-navegacao.mjs"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
-    "vite": "^5.4.10",
-    "vitest": "^2.1.9"
+    "vite": "^5.4.10"
   },
   "engines": {
     "node": ">=22"
@@ -26,9 +31,11 @@
   "dependencies": {
     "@capacitor/android": "^8.5.0",
     "@capacitor/app": "^8.1.1",
+    "@capacitor/camera": "^8.2.3",
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.2",
     "@capacitor/ios": "^8.5.0",
+    "@capacitor/local-notifications": "^8.3.1",
     "@capgo/background-geolocation": "^8.4.3",
     "maplibre-gl": "^4.7.1"
   }

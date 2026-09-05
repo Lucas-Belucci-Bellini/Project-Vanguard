@@ -5,6 +5,7 @@
  */
 
 import { CONFIGURACAO_APLICATIVO, CONFIGURACAO_ATUALIZACAO } from './configuracao.js';
+import { compararVersoes } from './updater/semver.js';
 
 export const VERSAO_ATUAL = CONFIGURACAO_APLICATIVO.versao;
 export const URL_RELEASES = CONFIGURACAO_ATUALIZACAO.urlReleases;
@@ -23,31 +24,24 @@ function urlOficial(url) {
   }
 }
 
-function partesVersao(valor) {
-  const texto = String(valor ?? '').trim().replace(/^v/i, '');
-  const [base, pre = ''] = texto.split('-', 2);
-  const numeros = base.split('.').map((parte) => Number.parseInt(parte, 10));
-  if (numeros.length !== 3 || numeros.some((numero) => !Number.isInteger(numero) || numero < 0)) return null;
-  return { numeros, pre };
-}
-
-/** Retorna 1 se a > b, -1 se a < b e 0 se iguais; inválidos ficam abaixo. */
-export function compararVersoes(a, b) {
-  const esquerda = partesVersao(a);
-  const direita = partesVersao(b);
-  if (!esquerda && !direita) return 0;
-  if (!esquerda) return -1;
-  if (!direita) return 1;
-  for (let indice = 0; indice < 3; indice += 1) {
-    if (esquerda.numeros[indice] !== direita.numeros[indice]) {
-      return esquerda.numeros[indice] > direita.numeros[indice] ? 1 : -1;
-    }
-  }
-  if (esquerda.pre === direita.pre) return 0;
-  if (!esquerda.pre) return 1;
-  if (!direita.pre) return -1;
-  return esquerda.pre.localeCompare(direita.pre, 'en', { numeric: true });
-}
+/*
+ * A comparação de versões mora em `updater/semver.js`.
+ *
+ * A versão anterior vivia aqui e tinha um defeito total: fazia
+ * `replace(/^v/i, '')` e depois `split('-', 2)`. Com as tags reais deste
+ * projeto — `mobile-v1.4.4` — o replace não casava e o split cortava no
+ * primeiro hífen, então a base virava `"mobile"`. Não são três números, a
+ * versão era classificada como INVÁLIDA, e inválida fica abaixo de tudo.
+ *
+ * Medido: `releaseMaisNova({tag_name:'mobile-v1.4.4'}, '1.0.0')` devolvia
+ * `false`. O aplicativo nunca detectou uma atualização, em nenhuma versão
+ * publicada — era por isso que descobrir versão nova exigia abrir o GitHub.
+ *
+ * Delegar em vez de manter duas implementações é o ponto: duas regras de
+ * comparação divergem em silêncio, e a divergência aqui significa o botão do
+ * cabeçalho e a tela de Atualizações discordarem sobre haver versão nova.
+ */
+export { compararVersoes };
 
 export function releaseMaisNova(release, versaoAtual = VERSAO_ATUAL) {
   if (!release || typeof release !== 'object' || release.draft || !release.tag_name) return false;

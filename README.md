@@ -8,27 +8,52 @@ A interface foi desenhada para uso em celular, com botões grandes, alto contras
 
 ## O que já está implementado
 
-| Área | Comportamento |
-|---|---|
-| **Início** | Painel de campo, ativação explícita do GPS, atalhos, tutorial de primeiro uso e cartão local de prontidão offline. |
-| **Mapa** | Mapa MapLibre para o mundo físico do Vanguard Field, com bases topográfica/satélite/tática, leitura MGRS, centralização no fixo atual e pontos de referência. Essas camadas reais não são mapas/terrenos do simulador de Arma 3, que permanece separado. Inclui os modos **Trilha / Expedição**, **Cidade / Dia a dia** e **Mar / Referência**, com destino por coordenadas ou toque no mapa. O mapa mostra o contexto civil e a zona local ativa, quando houver, com fonte e validade. O HUD exibe a idade do último fixo e marca posições antigas como atenção; isso não melhora a precisão nem confirma que o aparelho ainda está naquele ponto. O preparo informa estimativa/limite de tiles, consulta o cache e oferece limpeza confirmada. O status detalhado mostra o total agregado no aparelho e, quando disponível, a última base, área, zoom e relação de tiles solicitados/salvos. |
-| **Trilha** | Registro local do caminho com distância acumulada, pausa, retomada, limpeza manual e resumo de pontos, tempo registrado e velocidade média quando os horários existem. Os pontos ficam no aparelho. O registro de rota, waypoints e destino pode ser exportado/importado como JSON versionado e a trilha pode ser exportada em GPX 1.1, sempre sem sincronização automática. A persistência local usa envelopes versionados e fallback seguro para versões futuras. |
-| **Bússola** | Sensor de orientação do dispositivo com fallback para rumo fornecido pelo GPS e instruções de calibração. |
-| **Socorro** | Captura da posição, criação de pacote externo validado, preparação local do alerta e compartilhamento manual via recursos do aparelho ou área de transferência, com estados explícitos e sem confirmação de entrega. |
-| **Privacidade** | A posição não é enviada automaticamente. O compartilhamento só começa depois de uma ação explícita da pessoa. |
-| **Offline parcial** | A shell do app e os dados locais podem ser reabertos sem internet depois do primeiro carregamento. Tiles cartográficos precisam ser preparados para uso offline em uma etapa própria. O modo Mar é apenas referência: não fornece profundidade segura nem substitui carta oficial. |
-| **Apoiar projeto** | Tela pública em modo preparado para futuras doações via checkout hospedado do Asaas com PIX e cartão, sem cobrança real enquanto as credenciais não forem configuradas. |
-| **Contexto** | Modos Cidade, Expedição, Mar, Zona de Desastre, Área Contaminada e Área de Conflito, com zonas locais por fonte, validade opcional, importação/exportação JSON versionada e descarte automático de zonas expiradas. |
-| **Sobrevivência** | Manual offline versionado com fonte/data de revisão, busca, filtros por tema, abrigo, água, primeiros socorros, sinalização, alimentação e conduta em áreas com possíveis explosivos. |
-| **Mapa de funcionalidades** | Inventário completo da visão do produto, com status, dependências, limites e próximos passos em [`docs/MAPA-DE-FUNCIONALIDADES.md`](docs/MAPA-DE-FUNCIONALIDADES.md). |
-| **Notas de lançamento** | Resumo da futura `v1.0.0`, mudanças desde a `v1.0.0-rc.2`, validações reproduzidas e gates restantes em [`docs/NOTAS-DE-LANCAMENTO-V1.0.0.md`](docs/NOTAS-DE-LANCAMENTO-V1.0.0.md). |
-| **Roteiro e validação** | Roteiro falado, checklist mobile e simulação segura de Socorro em [`docs/ROTEIRO-APRESENTACAO-V1.0.0.md`](docs/ROTEIRO-APRESENTACAO-V1.0.0.md), [`docs/CHECKLIST-MOBILE-V1.0.0.md`](docs/CHECKLIST-MOBILE-V1.0.0.md) e [`docs/SIMULACAO-MODO-SOCORRO.md`](docs/SIMULACAO-MODO-SOCORRO.md). |
-| **Teste de campo** | Procedimento de backup GPX/JSON, teste offline, bateria e preparação para a peregrinação em [`docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md`](docs/PLANO-TESTE-PEREGRINACAO-CAMINHOS-DOS-ANJOS-2026-09.md). |
-| **Atualização** | Quando houver uma versão nova, o botão **ATUALIZAÇÃO PRONTA** pede confirmação. No PWA, ativa o service worker aguardando; no APK, abre a página oficial e deixa a instalação para a confirmação do sistema. O fluxo completo está em [`docs/ATUALIZACAO-CONFIRMADA.md`](docs/ATUALIZACAO-CONFIRMADA.md). |
-| **Bateria e GPS** | Operação de quatro dias, perfis de localização, medição em campo e limitações de background em [`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](docs/OPERACAO-BATERIA-GPS-4-DIAS.md). |
-| **Tag final** | Comandos seguros para revisar, assinar, verificar e publicar a futura `v1.0.0` em [`docs/COMANDOS-TAG-V1.0.0.md`](docs/COMANDOS-TAG-V1.0.0.md). |
-| **Performance futura** | Direção para linguagens leves, profiling e camadas nativas somente quando justificadas em [`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md#7-direção-futura-de-performance-e-linguagens-leves). |
-| **Diagnóstico** | Estado local de versão, rede, GPS, frescor, cache, armazenamento, bateria e sensores em `#/diagnostico`; a validação de aparelhos permanece pendente. |
+Uma linha por **rota do aplicativo**, com o estado que a auditoria de
+2026-09-02 mediu. Estado, dados, dependências e teste de cada uma estão em
+[`docs/ROUTE-MATRIX.md`](docs/ROUTE-MATRIX.md); o contrato completo, em
+[`docs/ROUTES/`](docs/ROUTES/); e o que foi encontrado e corrigido, em
+[`docs/ROUTE-AUDIT.md`](docs/ROUTE-AUDIT.md).
+
+Esta tabela lista funcionalidade, não arquivo: uma rota só aparece aqui se
+abrir, tiver dado real, e os botões fizerem o que dizem.
+
+| Rota | O que a pessoa consegue fazer | Estado |
+| --- | --- | --- |
+| `#/inicio` | Ver se o aparelho está pronto para sair andando: posição, mapa preparado, trilha em curso, dados locais. | `IMPLEMENTED` |
+| `#/mapa` | Ver onde está, gravar a trilha (com desnível), marcar waypoints e destino, fotografar a parada com a coordenada da captura, exportar JSON/GPX/KML e montar o pacote da caminhada. | `IMPLEMENTED` |
+| `#/navegacao` | Ler a posição em latitude/longitude, MGRS e UTM; calcular distância e rumo até um waypoint; converter MGRS localmente. | `IMPLEMENTED` |
+| `#/bussola` | Rumo do sensor com filtro circular, azimute verdadeiro e de grade **somente com correção medida ou prevista**, calibração pelo Sol, declinação pelo modelo WMM oficial (offline, rotulada `PREVISTO`), rumo travado e aviso de interferência magnética. | `IMPLEMENTED` |
+| `#/socorro` | Preparar um registro da própria posição para entregar por um canal externo — o app **não chama resgate**. | `IMPLEMENTED` |
+| `#/escuta` | Ser avisado por vibração quando o grave sobe como sobe um veículo se aproximando, ou quando alguém grita. Só recebe. | `IMPLEMENTED` |
+| `#/noturno` | Enxergar em cena escura por intensificação de luz, e capturar a imagem com a coordenada. **Não é infravermelho.** | `IMPLEMENTED` |
+| `#/contexto` | Escolher o modo de uso e manter zonas locais de risco com fonte e validade, importadas ou cadastradas à mão. | `IMPLEMENTED` |
+| `#/sobrevivencia` | Ler sete guias offline, cada um com fonte citada e data de revisão. | `IMPLEMENTED` |
+| `#/sobre` | Ver a versão real do aplicativo, os limites e o que ele faz com os dados. | `IMPLEMENTED` |
+| `#/diagnostico` | Ver o estado observável do ambiente, com `INDISPONÍVEL` onde o aparelho não informa. | `IMPLEMENTED` |
+| `#/doar` | Entender como o projeto se sustenta. **Nenhum pagamento é processado**: `CHECKOUT NÃO CONFIGURADO`. | `UNAVAILABLE` |
+| `#/tiro` | Calculadora do ambiente de testes de **Arma 3**. Fora do menu, marcada na própria tela, sem funcionalidade nova. | `LEGACY` |
+
+### Fora das telas
+
+- **Privacidade** — a posição não sai do aparelho automaticamente; todo envio
+  começa por uma ação explícita. Escuta e visão noturna não gravam, não guardam
+  e não transmitem, e há teste estrutural lendo o código para cobrar isso.
+- **Offline** — a shell, as telas, a posição, a bússola, as trilhas, os pontos,
+  as zonas e o manual funcionam sem rede depois do primeiro carregamento. Tiles
+  precisam ser preparados numa etapa própria, com conexão.
+- **Atualização confirmada** — nunca automática; ver
+  [`docs/ATUALIZACAO-CONFIRMADA.md`](docs/ATUALIZACAO-CONFIRMADA.md).
+
+### Documentação (não é funcionalidade)
+
+[`docs/PARIDADE-WEB-MOBILE.md`](docs/PARIDADE-WEB-MOBILE.md) — matriz web/dist/Capacitor/Android e como cada ✅ foi medido ·
+[`docs/MAPA-DE-FUNCIONALIDADES.md`](docs/MAPA-DE-FUNCIONALIDADES.md) ·
+[`docs/MEGA-PLANO.md`](docs/MEGA-PLANO.md) ·
+[`docs/BALISTICA.md`](docs/BALISTICA.md) ·
+[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) ·
+[`docs/OPERACAO-BATERIA-GPS-4-DIAS.md`](docs/OPERACAO-BATERIA-GPS-4-DIAS.md) ·
+[`docs/CHECKLIST-MOBILE-V1.0.0.md`](docs/CHECKLIST-MOBILE-V1.0.0.md) ·
+[`docs/adr/`](docs/adr/)
 
 ## Estado da construção V2
 
@@ -152,6 +177,20 @@ O repositório original continha uma wiki/ambiente de testes de Arma 3, incluind
 
 Registro histórico: quando os mapas/terrenos do Arma 3 ainda não estavam disponíveis, o fluxo de construção do Claude Code inseriu provisoriamente uma API de imagens de satélite do mundo real na camada cartográfica. Isso foi uma contingência técnica tomada pelo processo de construção, não uma solicitação do usuário. Essa imagem mostrava o mundo real e nunca deve ser confundida com mapa ou terreno do Arma 3. O mapa real pertence, quando configurado, ao Vanguard Field civil; o simulador/wiki deve usar somente sua base virtual própria. A distinção está detalhada em [`docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md`](docs/ESCOPO-WIKI-ARMA3-E-MAPAS.md). A interface principal do Vanguard Field prioriza orientação, retorno pela trilha e preparação responsável de coordenadas para socorro.
 
-## Estado da release 1.3.1
+## Estado da release
 
-A 1.3.1 adiciona a página local `#/navegacao` para posição, MGRS/UTM, conversão local, rumo, bearing, distância e direção relativa. A documentação detalhada está em `docs/NAVEGACAO-AVANCADA-1.3.1.md` e a evidência em `docs/RELEASE-1.3.1.md` e `docs/VALIDACAO-1.3.0.md`.
+A versão corrente é a mostrada na tela `#/sobre`, e ela vem do `package.json`
+no momento do build — a mesma fonte que o `versionName` do Android e o gate de
+versão do workflow conferem.
+
+- **1.6.0** — declinação magnética pelo World Magnetic Model oficial, offline;
+  previsão e medida se distinguem na tela (ADR-0046).
+- **1.5.0** — o aplicativo avisa quando há versão nova; o comparador de versões
+  nunca tinha funcionado com as tags reais deste projeto.
+- **1.4.0** — visão noturna por intensificação de luz; bússola 3,01× mais
+  estável; coordenada da parada 2,73× mais precisa (ADR-0044).
+- **1.3.5** — odômetro em 3D, contagem de passos, resumo do dia na tela
+  bloqueada (ADR-0043).
+- **1.3.2** — assinatura fixa do APK e identidade visual própria (ADR-0042).
+
+O histórico completo está em [`CHANGELOG.md`](CHANGELOG.md).
