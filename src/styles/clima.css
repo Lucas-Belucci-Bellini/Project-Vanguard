@@ -1,0 +1,78 @@
+/*
+ * Tempestade.
+ *
+ * Esta tela é lida no escuro, com chuva, com o aparelho na mão e pressa. Três
+ * decisões saem daí: o cronômetro é o maior elemento, o veredito muda de cor
+ * conforme o risco, e os botões têm alvo grande — dedo molhado erra alvo
+ * pequeno, e errar aqui custa uma medida perdida no meio de um temporal.
+ */
+
+.clima { background: var(--color-bg); }
+.clima__scroll { height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 14px calc(86px + env(safe-area-inset-bottom)); }
+.clima__scroll > * { width: min(100%, 760px); margin-right: auto; margin-left: auto; }
+
+.clima__topo { padding: 24px 0 8px; }
+.clima__topo h1 { margin-bottom: 6px; }
+.clima__subtitulo { color: var(--color-text-muted); font-size: 11px; }
+
+.clima__cartao { margin-top: 12px; padding: 14px; border: var(--border-base); border-radius: var(--radius-md); background: var(--color-surface); }
+.clima__cartao h2 { margin-bottom: 10px; color: var(--color-cyan); font-size: 10px; letter-spacing: var(--tracking-widest); }
+
+/* ── Cronômetro ─────────────────────────────────────────────────────────── */
+.clima__cronometro-linha { text-align: center; }
+.clima__cronometro { color: var(--color-cyan); font-family: var(--font-mono); font-size: clamp(44px, 16vw, 76px); font-variant-numeric: tabular-nums; line-height: 1; }
+/* Contando: fica âmbar, para dar de relance a diferença entre "estou
+ * cronometrando" e "este é o resultado". */
+.clima.is-contando .clima__cronometro { color: var(--color-warning); }
+
+.clima__acoes { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: 14px; }
+/* 64 px de altura: dedo molhado, no escuro, com pressa. O mínimo de 44 px das
+ * diretrizes de acessibilidade é para uso normal, não para temporal. */
+.clima__botao { flex: 1 1 140px; min-width: 0; min-height: 48px; padding: var(--space-sm) var(--space-md); border: var(--border-base); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--tracking-wide); cursor: pointer; }
+.clima__botao--medir { min-height: 64px; border-color: var(--color-cyan-edge); background: var(--color-cyan-soft); color: var(--color-cyan); font-size: 15px; }
+.clima__botao:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.clima__leitura { margin-top: 12px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.55; }
+
+/* ── Veredito ───────────────────────────────────────────────────────────── */
+.clima__veredito-caixa { margin-top: 12px; padding: 12px; border: 1px solid var(--color-text-muted); border-radius: var(--radius-sm); }
+.clima__veredito { display: block; color: var(--color-text-primary); font-family: var(--font-mono); font-size: 15px; letter-spacing: var(--tracking-wide); }
+.clima__veredito-corpo { margin-top: 8px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.55; }
+
+/* A cor segue o risco. Ela reforça o texto, nunca o substitui: quem não
+ * distingue cor lê exatamente a mesma frase. */
+.clima[data-risco='ABRIGO_AGORA'] .clima__veredito-caixa { border-color: var(--color-danger); background: var(--color-warning-soft); }
+.clima[data-risco='ABRIGO_AGORA'] .clima__veredito { color: var(--color-warning); }
+.clima[data-risco='APROXIMANDO'] .clima__veredito-caixa { border-color: var(--color-warning); }
+.clima[data-risco='APROXIMANDO'] .clima__veredito { color: var(--color-warning); }
+.clima[data-risco='DISTANTE'] .clima__veredito-caixa { border-color: var(--color-cyan-edge); }
+
+.clima__tendencia { margin-top: 10px; color: var(--color-text-secondary); font-family: var(--font-mono); font-size: 11px; }
+.clima__espera { margin-top: 8px; padding: 8px 10px; border-left: 2px solid var(--color-warning); color: var(--color-warning); font-size: 11px; line-height: 1.5; }
+
+/* ── Alerta de trovoada prevista ────────────────────────────────────────── */
+.clima__alerta { margin-top: 12px; padding: 12px; border: 1px solid var(--color-warning); border-radius: var(--radius-sm); background: var(--color-warning-soft); color: var(--color-warning); font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
+
+/* ── Condições ──────────────────────────────────────────────────────────── */
+.clima__grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: var(--space-sm); }
+/* `min-width: 0` porque o padrão do item de grid é `auto`: sem isso ele não
+ * encolhe abaixo do conteúdo e empurra a linha para fora da tela. */
+.clima__campo { min-width: 0; padding: 10px; border: var(--border-thin); border-radius: var(--radius-sm); }
+.clima__campo-rotulo { display: block; color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-widest); }
+.clima__campo-valor { display: block; margin-top: 4px; color: var(--color-text-primary); font-family: var(--font-mono); font-size: 14px; overflow-wrap: anywhere; }
+
+.clima__status { margin-top: 12px; color: var(--color-text-muted); font-size: 10px; line-height: 1.5; }
+.clima__cartao > .clima__botao { margin-top: 10px; width: 100%; }
+
+/* ── Próximas horas ─────────────────────────────────────────────────────── */
+.clima__horas { display: flex; flex-direction: column; gap: 2px; }
+.clima__hora { display: grid; grid-template-columns: 48px 1fr 48px 68px; gap: var(--space-sm); align-items: center; padding: 8px 6px; border-bottom: var(--border-thin); font-family: var(--font-mono); font-size: 11px; }
+.clima__hora:last-child { border-bottom: 0; }
+.clima__hora-hora { color: var(--color-text-primary); }
+.clima__hora-cond { min-width: 0; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.clima__hora-chuva, .clima__hora-rajada { color: var(--color-text-muted); text-align: right; }
+.clima__hora.is-trovoada { background: var(--color-warning-soft); }
+.clima__hora.is-trovoada .clima__hora-cond, .clima__hora.is-trovoada .clima__hora-hora { color: var(--color-warning); }
+
+.clima__cartao--nota p { margin-bottom: 8px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.6; }
+.clima__cartao--nota p:last-child { margin-bottom: 0; }

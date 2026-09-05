@@ -20,6 +20,7 @@ navegador é `WEB_ONLY`, não `IMPLEMENTED`.
 | `#/odometro` | Metros e quilômetros andados, sem carregar mapa | `IMPLEMENTED` | GPS contínuo | `rastreamento-app`, `trilha-gravador`, `distancia`, `odometro` | `odometro-corrente` · `formato-trajeto` · `trilha-gravador` |
 | `#/navegacao` | Posição em MGRS/UTM, rumo e distância a um waypoint | `IMPLEMENTED` | GPS contínuo | `navegacao-rumo`, `mgrs`, `numero-seguro` | `navegacao-rumo` · fluxos 1–4 |
 | `#/bussola` | Três nortes, calibração pelo Sol, estabilidade | `IMPLEMENTED` | Sensor de orientação, posição | `bussola-leitura`, `rumo-filtro`, `sol` | `bussola-leitura` · `rumo-filtro` · fluxos 5–6 |
+| `#/clima` | Distância do raio pelo trovão (sem rede) e previsão (com rede) | `IMPLEMENTED` | Nenhum offline; posição + internet para previsão | `tempestade`, `clima`, `rastreamento-app` | `tempestade` · `clima` |
 | `#/socorro` | Preparar registro de posição para um canal externo | `IMPLEMENTED` | GPS de alta precisão | `localizacao`, `compartilhamento` | `compartilhamento` · `localizacao` |
 | `#/escuta` | Aviso tátil de veículo se aproximando ou chamado | `IMPLEMENTED` | Microfone cru | `engine/escuta`, `escuta-ambiente`, `alertas-tateis` | `escuta` (20) · `escuta-ambiente` (8) |
 | `#/noturno` | Intensificação de luz, com captura georreferenciada | `IMPLEMENTED` | Câmera traseira, GPS na captura | `visao-noturna`, `camera-noturna`, `foto-*` | `visao-noturna` (21) · `camera-noturna` (12) |

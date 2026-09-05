@@ -71,6 +71,13 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   a sessão gravada por checkpoint a cada 25 pontos; `migrar-trilha.js` **copia**
   a trilha v1 e deixa `vanguard:trilha` intacta, conferindo contagem e checksum.
   `rastreamento.js` tira o gravador da página: **página observa, não possui**.
+- `src/engine/tempestade.js` + `src/core/clima.js` + `src/pages/clima.js`
+  (`#/clima`) — **tempestade**. A metade de cima da tela é o cronômetro do
+  trovão e funciona **sem rede**: `c = 331,3 + 0,606·T`, regra 30/30, incerteza
+  declarada e a tendência (vindo ou indo). A de baixo é previsão pela
+  Open-Meteo, **sem chave de API**, com a IDADE da leitura sempre ao lado do
+  número. Falha de rede **preserva** a leitura guardada — apagar seria tirar a
+  última informação boa justo quando o sinal caiu.
 - `src/pages/odometro.js` (`#/odometro`) + `src/ui/formato-trajeto.js` — **o
   contador de trajeto**: metros e km sem carregar mapa, sem tile e sem rede
   (6,1 kB de chunk contra 802 kB do MapLibre). Observa o MESMO gravador do
@@ -320,6 +327,20 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   `localStorage` continua (a cota é ~5 MB e é real), mas agora o que sai é
   contado em `saidosDaJanela()` e o registro **completo** vai para o Track Store
   da V3, append-only e sem teto. Teto pode existir; silêncio não.
+- **Tela de segurança não pode depender de outra tela ter conseguido fixo.**
+  `#/clima` respondia "abra o mapa primeiro" quando aberta direto — numa tela
+  cuja razão de existir é ser aberta com pressa, no meio de um temporal. Toda
+  tela que precisa de posição observa o serviço de rastreamento (é o que acende
+  o watcher), em vez de esperar que outra já tenha resolvido.
+- **Constante escrita à mão ao lado da fórmula que a calcula sempre diverge.**
+  `VELOCIDADE_SOM_20C` valia 343,2 enquanto `velocidadeDoSom(20)` devolvia
+  343,42 — dois números para a mesma grandeza. Hoje a constante SAI da fórmula.
+  O teste pegou porque comparava os dois; se comparasse só um, a divergência
+  teria ido para o campo.
+- **Numa medida de segurança, não existe rótulo de "seguro".** A escala de
+  `RISCO` vai até `DISTANTE` e para ali, e há teste cobrando que nenhum valor
+  contenha "SEGUR". Raio cai a 10–15 km da chuva, sob céu que parece limpo —
+  "não está chovendo aqui" não é informação de segurança.
 - **Remedir a trilha inteira a cada fixo é O(n²), e o custo POR PONTO cresce.**
   `mapa.js` chamava `medirTrilha(trilha)` a cada ponto gravado: 1 000 pontos
   custavam 0,134 ms/ponto, 12 000 custavam **1,311 ms/ponto** — 15,7 s de CPU

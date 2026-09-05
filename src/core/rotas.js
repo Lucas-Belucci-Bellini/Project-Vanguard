@@ -17,6 +17,7 @@ export const ROTAS = [
   { hash: '#/odometro', titulo: 'Trajeto', icone: '↔', carregar: () => import('../pages/odometro.js').then((m) => m.odometroPage) },
   { hash: '#/navegacao', titulo: 'Navegação', icone: '⌖', carregar: () => import('../pages/navegacao.js').then((m) => m.navegacaoPage) },
   { hash: '#/bussola', titulo: 'Bússola', icone: '◉', carregar: () => import('../pages/bussola.js').then((m) => m.bussolaPage) },
+  { hash: '#/clima', titulo: 'Tempestade', icone: '⚡', carregar: () => import('../pages/clima.js').then((m) => m.climaPage) },
   { hash: '#/socorro', titulo: 'Socorro', icone: '!', carregar: () => import('../pages/socorro.js').then((m) => m.socorroPage) },
   { hash: '#/escuta', titulo: 'Escuta', icone: '◎', carregar: () => import('../pages/escuta.js').then((m) => m.escutaPage), secundária: true },
   { hash: '#/noturno', titulo: 'Noturno', icone: '◐', carregar: () => import('../pages/noturno.js').then((m) => m.noturnoPage), secundária: true },

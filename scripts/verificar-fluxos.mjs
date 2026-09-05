@@ -302,6 +302,50 @@ conferir(
   nota.trim().slice(0, 78)
 );
 
+// ── FLUXO 15: o cronômetro do trovão mede, e mede SEM REDE ───────────────────
+// A metade que decide procurar abrigo não pode depender de internet: numa
+// tempestade a rede é a primeira coisa a sumir. Aqui a rede é BLOQUEADA de
+// propósito antes de abrir a tela.
+await ctx.route('**://api.open-meteo.com/**', (rota) => rota.abort());
+await p.goto(`${BASE}/#/clima`, { waitUntil: 'domcontentloaded' });
+const botaoClarao = p.getByRole('button', { name: /VI O CLAR/i });
+await botaoClarao.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(400);
+
+const semMedida = await p.locator('.clima__veredito').innerText();
+conferir(
+  'sem medida a tela diz SEM MEDIDA — e não "sem risco"',
+  /SEM MEDIDA/i.test(semMedida) && !/segur/i.test(await p.locator('.clima__veredito-corpo').innerText()),
+  semMedida.trim()
+);
+
+// Clarão, três segundos, trovão: ~1 km. É a conta que a regra de bolso faz.
+await botaoClarao.click();
+await p.waitForTimeout(3000);
+await p.getByRole('button', { name: /OUVI O TROV/i }).click();
+await p.waitForTimeout(300);
+
+const distancia = await p.locator('.clima__cronometro').innerText();
+const km = Number(distancia.replace(/[^\d.,]/g, '').replace(',', '.'));
+conferir('3 segundos viram ~1 km, sem internet nenhuma', km > 0.8 && km < 1.3, `${distancia.trim()}`);
+
+const leitura = await p.locator('.clima__leitura').innerText();
+conferir('a distância vem com a incerteza junto, nunca sozinha', /±/.test(leitura) && /m\/s/.test(leitura), leitura.trim().slice(0, 76));
+
+const vered = await p.locator('.clima__veredito').innerText();
+conferir('a 1 km o veredito manda procurar abrigo', /ABRIGO AGORA/i.test(vered), vered.trim());
+
+const espera = await p.locator('.clima__espera').innerText();
+conferir('e começa a contar os 30 minutos depois do trovão', /30 minutos/.test(espera) && /Faltam/.test(espera), espera.trim().slice(0, 64));
+
+const statusClima = await p.locator('.clima__status').innerText();
+conferir(
+  'sem rede a tela DIZ que está sem rede, em vez de mentir ou ficar vazia',
+  /sem rede|Nenhuma leitura/i.test(statusClima),
+  statusClima.trim().slice(0, 70)
+);
+await ctx.unroute('**://api.open-meteo.com/**');
+
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);

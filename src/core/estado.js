@@ -183,6 +183,7 @@ export const CHAVES = {
   ALERTA: 'alerta',
   MAPAS_OFFLINE: 'mapasOffline',
   CONTATOS: 'contatos',
+  CLIMA: 'clima',
   /* Chaves legadas: mantidas para não quebrar os módulos de cálculo existentes. */
   PECA: 'peca',
   ALVO: 'alvo',

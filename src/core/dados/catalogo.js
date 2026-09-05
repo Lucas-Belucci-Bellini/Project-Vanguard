@@ -147,6 +147,7 @@ export const CHAVES_LOCAIS = Object.freeze([
   { chave: 'escuta', titulo: 'Preferências da escuta', classe: CLASSES_DADO.IMPORTANTE, formato: 'objeto', escritoPor: 'src/pages/escuta.js', versaoEsquema: null, contavel: false },
   { chave: 'noturno', titulo: 'Preferências da visão noturna', classe: CLASSES_DADO.IMPORTANTE, formato: 'objeto', escritoPor: 'src/pages/noturno.js', versaoEsquema: null, contavel: false },
   { chave: 'mapasOffline', titulo: 'Metadados de mapa offline', classe: CLASSES_DADO.DERIVADO, formato: 'objeto', escritoPor: 'src/core/mapa-offline.js', versaoEsquema: null, contavel: false, observacao: 'Descreve o cache de tiles; os tiles em si são CACHE.' },
+  { chave: 'clima', titulo: 'Última leitura de clima', classe: CLASSES_DADO.CACHE, formato: 'objeto', escritoPor: 'src/core/clima.js', versaoEsquema: 1, contavel: false, observacao: 'Vem da rede e envelhece; se perder, refaz-se com internet. A IDADE dela aparece na tela junto com o número.' },
   /* Legado da wiki de Arma 3 — fora do fluxo do Vanguard Field, e preservado
    * justamente por isso: é dado do operador numa ferramenta que ele ainda usa. */
   { chave: 'peca', titulo: 'Legado: peça', classe: CLASSES_DADO.IMPORTANTE, formato: 'objeto', escritoPor: 'src/pages/tiro.js', versaoEsquema: null, contavel: false, legado: true },

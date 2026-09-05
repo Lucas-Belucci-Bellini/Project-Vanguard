@@ -2,6 +2,55 @@
 
 ## Não lançado
 
+### `#/clima` — tempestade, e a metade que funciona sem internet
+
+A tela tem duas metades, e a ordem delas é deliberada. Em cima o **cronômetro
+do trovão**, que não precisa de rede. Embaixo as condições e a previsão, que
+precisam.
+
+Numa estrada à noite a rede é a primeira coisa a sumir — e a medida que decide
+procurar abrigo é justamente a que não depende dela.
+
+**O cronômetro.** Um toque no clarão, outro no trovão. A conta usa a
+velocidade do som corrigida pela temperatura (`c = 331,3 + 0,606·T`): a regra
+de bolso "divide por 3" assume 343 m/s, que é a de 20 °C, e numa noite de
+serra a 5 °C isso erra 2 %. Quando a temperatura foi medida, ela entra — e a
+tela **diz** se foi medida ou suposta.
+
+A distância nunca aparece sozinha: vem com a incerteza (±0,1 km, do erro
+humano de cronometragem) e com o aviso de que se mede até o ponto **mais
+próximo** do canal do raio, que tem quilômetros de comprimento.
+
+**A regra 30/30**, que é a orientação consolidada: clarão a trovão de 30 s ou
+menos (≈10 km) significa que já se está no alcance — abrigo agora; e esperar
+30 minutos depois do último trovão antes de sair. A segunda metade é a que as
+pessoas ignoram, e é depois do pico que a maior parte dos acidentes acontece.
+O app conta os 30 minutos sozinho.
+
+Com duas ou mais medidas ele responde a pergunta que decide seguir ou parar:
+**está vindo ou está indo embora**. Por média de metades, para um raio isolado
+mais perto não inverter a leitura.
+
+**Não existe rótulo de "seguro".** A escala vai até DISTANTE e para ali, e há
+teste cobrando que nenhum valor de risco contenha a palavra. Descargas atingem
+o solo a 10–15 km da chuva, sob céu que parece limpo.
+
+**A previsão** vem da Open-Meteo, **sem chave de API** — token dentro de um
+APK é extraível, e este repositório já pagou essa lição. Falha de rede
+**preserva** a leitura guardada e diz a idade dela: apagar seria tirar a última
+informação boa exatamente quando o sinal caiu. Uma previsão de três horas atrás
+não descreve o céu de uma noite de temporal, e por isso a idade fica ao lado do
+número.
+
+Conferido com a **rede bloqueada** no navegador: 3 s → 1,0 km ± 0,1 km, som a
+343 m/s, veredito PROCURE ABRIGO AGORA, contagem dos 30 minutos iniciada, e a
+tela dizendo que está sem rede em vez de ficar vazia. E ponta a ponta contra a
+API real, com dados do dia.
+
+Isto **não substitui alerta oficial**: Defesa Civil (199) e avisos do INMET vêm
+antes, sempre. E o aplicativo **não detecta raio** — celular não tem sensor
+para isso; quem vê e ouve é a pessoa.
+
 **O contador de trajeto, e o O(n²) que travava a gravação.**
 
 ### `#/odometro` — quantos metros, quantos quilômetros
