@@ -18,7 +18,7 @@ dado antigo → apagar → dado novo
 
 ## As cinco classes, e por que a classe é o campo que decide tudo
 
-Declaradas em [`src/core/dados/catalogo.js`](../src/core/dados/catalogo.js).
+Declaradas em [`src/core/dados/catalogo.js`](../../src/core/dados/catalogo.js).
 
 | classe | o que é | pode ser descartado? |
 |---|---|---|
@@ -47,7 +47,7 @@ Nenhuma etapa pode ser pulada porque "é só um campo novo".
 
 ## O inventário só lê
 
-[`src/core/dados/inventario.js`](../src/core/dados/inventario.js) não escreve,
+[`src/core/dados/inventario.js`](../../src/core/dados/inventario.js) não escreve,
 não apaga e não normaliza. Ele roda **antes** e **depois** de qualquer migração,
 e é a única prova de que nada se perdeu — um inventário que altera o que mede
 deixa de ser prova. `test/dados-inventario.test.js` cobra isso com um

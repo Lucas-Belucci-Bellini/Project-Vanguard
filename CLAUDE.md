@@ -63,6 +63,14 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   carrega cada uma no aparelho (**Diagnóstico → TESTAR TODAS AS ROTAS**) e
   `src/core/relatorio-diagnostico.js` põe tudo em texto para o operador colar
   (**COPIAR RELATÓRIO**) — sem coordenada, trilha, foto nem contato
+- `src/core/dados/` + `src/core/rastreamento.js` — **a V3 de navegação** (ver
+  [`docs/v3/`](docs/v3/)). `catalogo.js` declara os 5 stores e as 25 chaves com
+  a classe que decide tudo (CRITICO não volta nunca; CACHE se reconstrói);
+  `inventario.js` **só lê** e bloqueia migração quando há chave desconhecida,
+  ilegível ou leitura parcial; `track-store.js` é append-only **sem teto**, com
+  a sessão gravada por checkpoint a cada 25 pontos; `migrar-trilha.js` **copia**
+  a trilha v1 e deixa `vanguard:trilha` intacta, conferindo contagem e checksum.
+  `rastreamento.js` tira o gravador da página: **página observa, não possui**.
 - `src/core/updater/` — **o sistema de atualização** (`#/atualizacoes`).
   Semver da especificação, canais, consulta pela API, download com checksum e
   capacidade por plataforma. Ver [`docs/UPDATER.md`](docs/UPDATER.md)
@@ -268,6 +276,36 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   ninguém cobrava. `test/versao-plataformas.test.js` cobra — inclusive que o
   `versionCode` suba, já que o Android recusa instalar um código menor ou igual
   ao instalado e a build fica verde do mesmo jeito.
+- **A trilha era um array em `localStorage` com `.slice(-12000)`.** Três
+  defeitos num só: descartava os pontos mais ANTIGOS em silêncio a partir de
+  ≈24 km de caminhada; reescrevia o array inteiro a cada fixo (1,53 MB de
+  `JSON.stringify` por ponto, contra ~5 MB de cota); e uma escrita interrompida
+  perdia a gravação, não o último ponto. Hoje é IndexedDB append-only
+  (`src/core/dados/track-store.js`). **Ponto vai ao disco na hora; contador vai
+  por checkpoint** — medido, regravar a sessão a cada fixo custava 1,182 ms/ponto
+  contra 0,600 com checkpoint, e morrer entre checkpoints não perde ponto porque
+  `recuperar()` reconcilia pelos pontos gravados.
+- **Limite de validação na saída prende o dado do operador.** O mesmo
+  `LIMITE_TRILHA` valia para importar e exportar: 4 001 pontos eram gravados e
+  **não conseguiam sair do aparelho** em nenhum formato. Entrada de fora precisa
+  de teto; saída do que já é do operador, não. E o teto de importação tem de
+  cobrir o que a exportação produz, senão o backup não volta.
+- **Vão de sinal somado vira distância inventada.** 100 m + 3 min sem sinal +
+  400 m adiante + 100 m dava **599 m** no odômetro. A reta entre dois fixos
+  separados por um buraco é palpite. Meça o observado e **declare** o não
+  observado ao lado (`src/engine/distancia.js`).
+- **Gravador dentro da página morre com a página.** O `desmontar()` do
+  `mapa.js` derrubava watcher e background: trocar de `#/mapa` para `#/bussola`
+  encerrava o rastreamento sem aviso. Serviço de rastreamento fica FORA das
+  páginas; deixar de observar nunca para nada.
+- **Teste de referência que tira a verdade do próprio motor não prova nada.**
+  Ele registra o defeito do dia e passa a concordar com ele. Em
+  `test/dados/trilhas-douradas.js` a distância verdadeira vem da GEOMETRIA que
+  gerou a trilha, calculada antes de existir ruído.
+- **Número agregado esconde de onde veio.** O benchmark dá 6,39× de redução de
+  erro — e 7 das 8 trilhas medem exatamente igual à 1.6.0, com uma só
+  respondendo por 100% do ganho. O relatório imprime essa ressalva sozinho, de
+  propósito.
 - **Item de flex que cresce precisa de `min-width: 0`.** O padrão é
   `min-width: auto`: ele se recusa a encolher abaixo do próprio conteúdo e
   empurra o resto para fora da tela. Mordeu no cabeçalho (1.2.0) e de novo na
