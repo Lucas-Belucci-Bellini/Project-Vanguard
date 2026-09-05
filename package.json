@@ -17,7 +17,8 @@
     "verificar:rotas": "node scripts/verificar-rotas.mjs",
     "verificar:fluxos": "node scripts/verificar-fluxos.mjs",
     "verificar:paridade": "node scripts/verificar-paridade.mjs",
-    "verificar:webview": "node scripts/verificar-webview.mjs"
+    "verificar:webview": "node scripts/verificar-webview.mjs",
+    "verificar:trilha": "node scripts/verificar-trilha-indexeddb.mjs"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",

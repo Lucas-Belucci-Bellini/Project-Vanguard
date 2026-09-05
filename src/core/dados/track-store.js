@@ -34,6 +34,19 @@
  * mapa desenharia uma reta por onde ninguém passou e a distância somaria um
  * trecho que ninguém observou.
  *
+ * ## O ponto é gravado sempre; a sessão, por checkpoint
+ *
+ * Medido em IndexedDB real: gravar ponto **e** regravar a sessão a cada fixo
+ * custava 1,18 ms por ponto — duas transações onde uma bastava. Os pontos eram
+ * append-only, mas o registro da sessão estava sendo reescrito a cada fixo, que
+ * é a mesma classe de erro que este módulo veio consertar.
+ *
+ * Agora o ponto é persistido **na hora** (é ele o dado que não pode se perder)
+ * e a sessão é persistida a cada `PONTOS_POR_CHECKPOINT` ou em qualquer
+ * transição de estado. Uma morte do aplicativo entre checkpoints não perde
+ * ponto nenhum: `recuperar()` reconcilia os contadores lendo os pontos que
+ * realmente estão gravados. Contador defasado é recuperável; ponto perdido não.
+ *
  * A persistência é injetada (`persistencia`): o store é a regra, e a regra é
  * testada em memória, sem navegador.
  */
@@ -49,6 +62,15 @@ import {
 
 export const ESQUEMA_TRILHA = 'vanguard-trilha';
 export const VERSAO_TRILHA = 2;
+
+/**
+ * A cada quantos pontos o registro da sessão é persistido.
+ *
+ * O ponto vai para o disco imediatamente; isto é só o contador. 25 mantém a
+ * defasagem máxima em ~4 minutos de caminhada na cadência típica, e corta pela
+ * metade o número de transações por fixo.
+ */
+export const PONTOS_POR_CHECKPOINT = 25;
 
 /** Estado de uma sessão de gravação. */
 export const ESTADO_SESSAO = Object.freeze({
@@ -113,13 +135,34 @@ export function criarTrackStore({ persistencia, relogio = () => Date.now() } = {
   let sessaoAtual = null;
   let ultimoPonto = null;
 
+  /**
+   * Carrega a sessão e **reconcilia os contadores com os pontos reais**.
+   *
+   * O registro da sessão pode estar até um checkpoint atrás — é o preço de não
+   * reescrevê-lo a cada fixo. Quem manda é o que está gravado no store de
+   * pontos, não o contador: por isso a contagem é relida do disco e o
+   * `ultimoSeq` vem do último ponto que existe de verdade. Assim uma morte
+   * entre checkpoints custa zero ponto.
+   */
   async function carregarSessao(id) {
     const sessao = await persistencia.lerSessao(id);
     if (!sessao) return null;
+
+    const gravados = await persistencia.contarPontos(id);
+    const cauda = await persistencia.lerPontos(id, { desde: Math.max(0, (sessao.ultimoSeq ?? 0) - 1) });
+    const ultimo = cauda.at(-1) ?? null;
+
+    if (ultimo && (sessao.ultimoSeq ?? -1) < ultimo.seq) sessao.ultimoSeq = ultimo.seq;
+    if (gravados !== sessao.pontos) {
+      sessao.pontos = gravados;
+      sessao.reconciliadaEm = relogio();
+    }
+
     sessaoAtual = sessao;
-    const pontos = await persistencia.lerPontos(id, { desde: Math.max(0, sessao.ultimoSeq ?? 0) });
-    ultimoPonto = pontos.at(-1) ?? null;
-    return sessao;
+    ultimoPonto = ultimo;
+    // O checkpoint reconciliado é gravado: a próxima recuperação já parte dele.
+    await persistencia.gravarSessao(sessaoAtual);
+    return { ...sessao };
   }
 
   return {
@@ -178,13 +221,17 @@ export function criarTrackStore({ persistencia, relogio = () => Date.now() } = {
         sessaoAtual.vaos += 1;
       }
 
+      // O ponto vai para o disco AGORA. Ele é o dado; o resto é contador.
       await persistencia.anexarPontos(sessaoAtual.id, [ponto]);
 
       sessaoAtual.ultimoSeq = seq;
       sessaoAtual.pontos += 1;
       sessaoAtual.porQualidade[classe.qualidade] = (sessaoAtual.porQualidade[classe.qualidade] ?? 0) + 1;
       sessaoAtual.atualizadaEm = relogio();
-      await persistencia.gravarSessao(sessaoAtual);
+      // A sessão só é persistida no checkpoint. Morrer entre um e outro não
+      // perde ponto: `recuperar()` reconcilia os contadores pelos pontos que
+      // estão gravados de verdade.
+      if (sessaoAtual.pontos % PONTOS_POR_CHECKPOINT === 0) await persistencia.gravarSessao(sessaoAtual);
 
       ultimoPonto = ponto;
       return { resultado: RESULTADO_PONTO.GRAVADO, qualidade: classe.qualidade, motivo: classe.motivo, seq, vao: vao ?? null };

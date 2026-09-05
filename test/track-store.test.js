@@ -187,3 +187,52 @@ test('sem sessão aberta, o ponto não some em silêncio: o motivo é dito', asy
   assert.equal(r.resultado, RESULTADO_PONTO.SEM_SESSAO);
   assert.match(r.motivo, /Nenhuma sessão/);
 });
+
+test('a sessão é gravada por checkpoint, não a cada ponto', async () => {
+  // Medido em IndexedDB real: regravar a sessão a cada fixo custava 1,18 ms por
+  // ponto — duas transações onde uma bastava. O ponto continua indo para o
+  // disco na hora; o que virou checkpoint é o contador.
+  const persistencia = persistenciaEmMemoria();
+  let gravacoesDeSessao = 0;
+  const original = persistencia.gravarSessao;
+  persistencia.gravarSessao = async (s) => { gravacoesDeSessao += 1; return original(s); };
+
+  const store = criarTrackStore({ persistencia, relogio: () => T0 });
+  await store.iniciar();
+  const aoIniciar = gravacoesDeSessao;
+
+  for (let i = 0; i < 100; i += 1) await store.registrar(passo(i));
+
+  const duranteGravacao = gravacoesDeSessao - aoIniciar;
+  assert.equal(await store.contar(), 100, 'todos os pontos foram gravados na hora');
+  assert.ok(duranteGravacao <= 5, `${duranteGravacao} gravações de sessão em 100 pontos — deveria ser ~4`);
+  assert.ok(duranteGravacao >= 1, 'mas o checkpoint precisa acontecer');
+});
+
+test('morrer entre checkpoints não perde ponto: a recuperação reconcilia', async () => {
+  // O ponto vai para o disco imediatamente; o contador da sessão pode estar
+  // até um checkpoint atrás. Quem manda é o que está gravado.
+  const persistencia = persistenciaEmMemoria();
+  let agora = T0;
+  const antes = criarTrackStore({ persistencia, relogio: () => agora });
+  const sessao = await antes.iniciar();
+
+  // 107 pontos: 100 caem em checkpoint, 7 ficam depois do último.
+  for (let i = 0; i < 107; i += 1) { await antes.registrar(passo(i)); agora += 10_000; }
+
+  const registroDaSessao = await persistencia.lerSessao(sessao.id);
+  assert.ok(registroDaSessao.pontos < 107, `o contador ficou defasado de propósito: ${registroDaSessao.pontos}`);
+  assert.equal(await persistencia.contarPontos(sessao.id), 107, 'mas os 107 pontos estão no disco');
+
+  const depois = criarTrackStore({ persistencia, relogio: () => agora });
+  const recuperada = await depois.recuperar();
+
+  assert.equal(recuperada.pontos, 107, 'a recuperação corrige o contador pelos pontos reais');
+  assert.equal(recuperada.ultimoSeq, 106);
+  assert.ok(recuperada.reconciliadaEm, 'e registra que houve reconciliação');
+
+  // E a gravação continua sem colidir com o que já existe.
+  const seguinte = await depois.registrar(passo(107));
+  assert.equal(seguinte.seq, 107);
+  assert.equal(await depois.contar(recuperada.id), 108);
+});
