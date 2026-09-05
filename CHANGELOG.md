@@ -1,5 +1,76 @@
 # Changelog
 
+## Não lançado
+
+**O contador de trajeto, e o O(n²) que travava a gravação.**
+
+### `#/odometro` — quantos metros, quantos quilômetros
+
+Saber a distância andada exigia abrir `#/mapa`: carregar o MapLibre (802 kB),
+instanciar o motor e buscar tiles pela rede. Numa estrada sem sinal, com
+bateria curta, isso é caro para responder uma pergunta que não precisa de mapa
+nenhum. O contador custa **6,1 kB** e não toca a rede — há fluxo cobrando que
+ele não peça **um único tile**.
+
+Não é uma segunda gravação: INICIAR aqui é a MESMA rota que o mapa controla.
+Duas telas, um gravador, nunca dois números para a mesma caminhada.
+
+Perda de sinal aparece **separada, fora do total** — a reta entre dois fixos
+com um buraco no meio é palpite. O ritmo se cala abaixo de 50 m em vez de
+inventar um número que o ruído do GNSS domina.
+
+### O defeito que estava atrás de "problema para gravar o caminho"
+
+`mapa.js` chamava `medirTrilha(trilha)` — a trilha **inteira** — a cada fixo
+gravado. Medido, com fixos de 1 Hz:
+
+| pontos | tempo total | por ponto |
+| ---: | ---: | ---: |
+| 1 000 | 134 ms | 0,134 ms |
+| 4 000 | 1 870 ms | 0,467 ms |
+| 12 000 | 15 731 ms | **1,311 ms** |
+
+O custo **por ponto** crescia com a caminhada: o aparelho ficava mais lento
+justamente quando a pessoa estava longe e com bateria curta.
+
+`criarOdometroCorrente()` faz a mesma dobra um ponto por vez, e `medirTrilha`
+virou um envelope dele — uma implementação só, que não pode divergir por
+construção. Medido na mesma máquina: **268× a 1 000 pontos, 1105× a 4 000,
+4509× a 12 000**. O fator cresce com a trilha porque o custo por ponto agora é
+constante.
+
+De quebra: somar a **janela cortada** faria a distância **encolher** depois de
+≈24 km, quando o teto descarta os pontos mais antigos. O corte tira o traçado
+da memória, nunca o quilômetro que a pessoa andou.
+
+### Mapa offline por região — e por que não existe mapa-múndi
+
+O preparo offline guardava **256 tiles** do que estava na tela: alguns
+quarteirões. Agora dá para baixar o **corredor** por onde se vai passar, de 5 a
+30 km de raio, em zoom 11–15, com o tamanho estimado **antes** de baixar.
+
+Não existe "baixar o mundo", e o app mostra a conta em vez de só dizer não: o
+planeta em zoom 14 são **268 435 456 tiles** — contagem exata, é a definição da
+pirâmide — o que a 41,5 kB por tile dá cerca de **10 TB**. Mesmo supondo 1 kB
+por tile de oceano, passaria de 250 GB.
+
+Os 41,5 kB são **medidos**, não chutados: 10 tiles reais do OSM, zooms 12 a 15,
+região de São Paulo. O palpite razoável seria ~15 kB — errar para baixo em 2,8×
+só apareceria no aparelho, como download interrompido por falta de espaço.
+
+O mesmo raio custa mais longe do equador (a caixa alarga com o cosseno): 30 km
+são 8 088 tiles em São Paulo e **26 628 a 60° N**. Por isso o tamanho é
+calculado para o lugar de quem está usando, e a região grande demais é recusada
+com um raio menor sugerido — verificado em teste que a sugestão de fato cabe.
+A opção de 40 km foi retirada da lista: com base e rótulos ativos ela era
+**sempre** recusada, e botão que promete o que não entrega é pior que opção a
+menos.
+
+O download é em lotes de 64 com pausa entre eles, de propósito: o provedor de
+tiles não permite download em massa.
+
+839 testes, 15 rotas × 2 larguras, 20 fluxos em navegador.
+
 ## 1.7.0 — 2026-09-05
 
 **Trocar de tela deixou de encerrar a gravação.** Até a 1.6.0 o rastreamento

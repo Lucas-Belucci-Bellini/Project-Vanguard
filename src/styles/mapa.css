@@ -115,3 +115,12 @@
   .mapa__hud { top: 18px; left: 18px; }
   .mapa__hint { top: 18px; }
 }
+
+/* ── Pacote de região offline ─────────────────────────────────────────────
+ * O preparo por viewport guarda o que está na tela; a região guarda o
+ * corredor por onde se vai passar. Os dois convivem no mesmo cartão de
+ * estilo — é a mesma ação com alcance diferente, não duas interfaces. */
+.mapa__regiao-raio { width: 100%; min-height: 44px; margin-bottom: var(--space-sm); padding: var(--space-sm); border: var(--border-base); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 12px; }
+/* A nota carrega a aritmética do planeta: ela existe para a recusa ser
+ * verificável, não para ser bonita. Por isso é menor e apagada. */
+.mapa__offline-nota { margin-top: var(--space-sm); color: var(--color-text-muted); font-size: 10px; line-height: 1.5; }

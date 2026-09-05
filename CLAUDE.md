@@ -71,6 +71,14 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   a sessão gravada por checkpoint a cada 25 pontos; `migrar-trilha.js` **copia**
   a trilha v1 e deixa `vanguard:trilha` intacta, conferindo contagem e checksum.
   `rastreamento.js` tira o gravador da página: **página observa, não possui**.
+- `src/pages/odometro.js` (`#/odometro`) + `src/ui/formato-trajeto.js` — **o
+  contador de trajeto**: metros e km sem carregar mapa, sem tile e sem rede
+  (6,1 kB de chunk contra 802 kB do MapLibre). Observa o MESMO gravador do
+  mapa — duas telas, um gravador, nunca dois números para a mesma caminhada.
+- `src/core/mapa-regiao.js` — **pacotes de mapa por região**: planeja o
+  corredor por onde se vai passar, com tamanho declarado antes de baixar e
+  recusa explícita com raio sugerido. `custoDoPlaneta()` é a aritmética que
+  explica por que não existe "baixar o mundo".
 - `src/core/rastreamento-app.js` + `src/core/trilha-gravador.js` — **o dono do
   GPS no aplicativo inteiro**, e a trilha que saiu de dentro de `mapa.js`. Um
   watcher só, escrita dupla (`vanguard:trilha` para a tela, Track Store da V3
@@ -312,6 +320,34 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   `localStorage` continua (a cota é ~5 MB e é real), mas agora o que sai é
   contado em `saidosDaJanela()` e o registro **completo** vai para o Track Store
   da V3, append-only e sem teto. Teto pode existir; silêncio não.
+- **Remedir a trilha inteira a cada fixo é O(n²), e o custo POR PONTO cresce.**
+  `mapa.js` chamava `medirTrilha(trilha)` a cada ponto gravado: 1 000 pontos
+  custavam 0,134 ms/ponto, 12 000 custavam **1,311 ms/ponto** — 15,7 s de CPU
+  numa caminhada. O aparelho ficava mais lento justamente quando a pessoa
+  estava longe e com bateria curta. Hoje o gravador mantém
+  `criarOdometroCorrente()` e `medirTrilha` é um envelope DELE — uma
+  implementação só, que não pode divergir por construção. Medido: **4509× a
+  12 000 pontos**, e o fator cresce com a trilha porque o custo por ponto agora
+  é constante. Não era a linguagem; era o algoritmo.
+- **Somar a JANELA cortada faz a distância encolher.** O teto de 12 000 pontos
+  descarta os mais antigos a partir de ≈24 km; medir sobre a janela faria o
+  número na tela DIMINUIR no meio da caminhada. O odômetro corrente não
+  esquece o que já contou — o corte tira o traçado, nunca o quilômetro. Há
+  teste cobrando que a sequência de distâncias nunca decresça.
+- **Tamanho de tile não se chuta: 41,5 kB, medido.** O palpite razoável seria
+  ~15 kB. Errar para baixo em 2,8× só aparece no aparelho, como download
+  interrompido por falta de espaço. `mapa-regiao.js` traz
+  `PROCEDENCIA_BYTES_POR_TILE` com amostra, fonte, região e data — estimativa
+  sem procedência é chute com aparência de dado.
+- **Não existe mapa-múndi offline, e o número prova.** O planeta em zoom 14 são
+  **268 435 456 tiles** (contagem exata, é a definição da pirâmide) ≈ 10 TB.
+  Mesmo a 1 kB por tile de oceano passaria de 250 GB. `custoDoPlaneta()` existe
+  para a interface MOSTRAR a conta em vez de só dizer "não dá".
+- **O mesmo raio custa mais longe do equador.** A caixa alarga com o cosseno da
+  latitude: 30 km são 8 088 tiles em São Paulo e **26 628 a 60° N**. Lista fixa
+  de raios finge uma garantia que não existe — o tamanho é calculado para o
+  lugar da pessoa e aparece ANTES de baixar. Oferecer uma opção que sempre
+  falha é botão que promete o que não entrega (40 km era assim).
 - **Teste de referência que tira a verdade do próprio motor não prova nada.**
   Ele registra o defeito do dia e passa a concordar com ele. Em
   `test/dados/trilhas-douradas.js` a distância verdadeira vem da GEOMETRIA que

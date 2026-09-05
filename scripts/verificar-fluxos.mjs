@@ -252,6 +252,56 @@ conferir(
   rotuloNoMapa.trim()
 );
 
+// ── FLUXO 14: a região offline diz o tamanho ANTES de baixar ─────────────────
+// Ninguém aceita 400 MB às cegas, e um app que promete "mapa offline" sem
+// dizer o preço mente por omissão. Aqui se cobra que o número apareça sozinho
+// ao escolher o raio, e que a nota traga a aritmética do planeta — a recusa
+// tem de ser verificável, não uma opinião do desenvolvedor.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(1500);
+
+const seletorRaio = p.locator('.mapa__regiao-raio');
+const statusRegiao = p.locator('.mapa__offline-status').nth(1);
+await seletorRaio.selectOption('5');
+await p.waitForTimeout(250);
+const pequena = await statusRegiao.innerText();
+conferir('região pequena mostra tiles e tamanho antes de baixar', /tiles/.test(pequena) && /(MB|kB)/.test(pequena), pequena.trim().slice(0, 72));
+
+await seletorRaio.selectOption('30');
+await p.waitForTimeout(250);
+const grande = await statusRegiao.innerText();
+const mb = (t) => Number((t.match(/([\d.,]+)\s*MB/) ?? [])[1]?.replace(',', '.') ?? 0);
+conferir(
+  'raio maior custa mais, e TODA opção oferecida cabe de verdade',
+  mb(grande) > mb(pequena) && !/grande demais/i.test(grande),
+  `5 km: ${mb(pequena)} MB → 30 km: ${mb(grande)} MB`
+);
+
+// A recusa também precisa funcionar: a MESMA caixa alarga com o cosseno da
+// latitude, então 30 km na Escandinávia custa 3× o que custa em São Paulo.
+// Um app que aceitasse os dois estaria mentindo em um deles.
+await ctx.setGeolocation({ latitude: 60.2, longitude: 10.5, accuracy: 8 });
+await p.reload({ waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(1800);
+await p.locator('.mapa__regiao-raio').selectOption('30');
+await p.waitForTimeout(300);
+const noNorte = await p.locator('.mapa__offline-status').nth(1).innerText();
+conferir(
+  'longe do equador o mesmo raio é recusado, com um raio menor sugerido',
+  /grande demais/i.test(noNorte) && /Tente \d+ km/.test(noNorte),
+  noNorte.trim().slice(0, 70)
+);
+await ctx.setGeolocation({ latitude: -23.5505, longitude: -46.6333, accuracy: 12 });
+
+const nota = await p.locator('.mapa__offline-nota').innerText();
+conferir(
+  'a nota traz a aritmética que explica por que não existe mapa-múndi',
+  /268\.435\.456|268,435,456/.test(nota) && /TB/.test(nota),
+  nota.trim().slice(0, 78)
+);
+
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);

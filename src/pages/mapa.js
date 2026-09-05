@@ -12,6 +12,7 @@ import { criarSensorDePassos } from '../core/passos-sensor.js';
 import { criarAvisoDaJornada } from '../core/notificacao-jornada.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
+import { planejarRegiao, formatarBytes, custoDoPlaneta, MOTIVOS_REGIAO } from '../core/mapa-regiao.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
 import { ESTADOS_BACKGROUND } from '../core/background-localizacao.js';
 import { rastreamentoDoAplicativo } from '../core/rastreamento-app.js';
@@ -132,6 +133,23 @@ export function mapaPage() {
   const offlineButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'PREPARAR ÁREA OFFLINE');
   const offlineStatus = h('p', { className: 'mapa__offline-status', role: 'status' }, 'Baixe a área visível antes de sair sem internet.');
   const offlineClearButton = h('button', { className: 'mapa__offline-clear', type: 'button' }, 'LIMPAR ÁREA PREPARADA');
+
+  // ── Região: o corredor por onde se vai passar, não só o que está na tela ──
+  // O preparo por viewport guarda 256 tiles — alguns quarteirões. Serve para
+  // "não perder o mapa se o sinal cair agora"; não serve para "vou andar
+  // 300 km sem rede".
+  const regiaoRaio = h('select', { className: 'mapa__regiao-raio', ariaLabel: 'Raio da região a baixar' },
+    // 40 km era oferecido e SEMPRE recusado com base + rótulos (duas fontes):
+    // botão que promete o que não entrega. O teto real também muda com a
+    // latitude — a mesma caixa alarga com o cosseno, e 30 km custa 8 088 tiles
+    // em São Paulo contra 26 628 a 60° N. Por isso o tamanho é calculado para
+    // o SEU lugar e aparece antes de baixar, em vez de a lista fingir garantia.
+    ...[5, 10, 15, 25, 30].map((km) => h('option', { value: String(km) }, `${km} km ao redor`)));
+  regiaoRaio.value = '15';
+  const regiaoButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'BAIXAR REGIÃO');
+  const regiaoStatus = h('p', { className: 'mapa__offline-status', role: 'status', ariaLive: 'polite' }, 'Escolha o raio para ver o tamanho antes de baixar.');
+  const regiaoNota = h('p', { className: 'mapa__offline-nota' },
+    `Não existe "baixar o mundo": o planeta em zoom 14 são ${custoDoPlaneta(14).tiles.toLocaleString('pt-BR')} tiles — cerca de ${formatarBytes(custoDoPlaneta(14).bytesSupondoTerra)}. Não é limite deste aplicativo, é a ordem de grandeza. Baixe o corredor por onde vai passar. O provedor de tiles não permite download em massa: o app baixa devagar e em lotes, de propósito.`);
   const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR JSON');
   const registroGpxButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR GPX');
   const registroKmlButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR KML');
@@ -215,6 +233,7 @@ export function mapaPage() {
     ),
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
+    h('div', { className: 'mapa__offline-card' }, regiaoRaio, regiaoButton, regiaoStatus, regiaoNota),
     h('div', { className: 'mapa__registro-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DADOS LOCAIS'), h('span', { className: 'mapa__privacy' }, '⌖ JSON')),
       h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroGpxButton, registroKmlButton, registroImportarButton),
@@ -1335,6 +1354,89 @@ export function mapaPage() {
         offlineButton.disabled = false;
         offlineClearButton.disabled = false;
         offlineButton.textContent = 'PREPARAR ÁREA OFFLINE';
+      }
+    };
+
+    /** Centro da região: a posição real se houver, senão o centro da vista. */
+    function centroDaRegiao() {
+      if (posicao) return { lat: posicao.lat, lon: posicao.lon };
+      const c = mapa?.getCenter?.();
+      return c ? { lat: c.lat, lon: c.lng } : null;
+    }
+
+    function planoDaRegiao() {
+      const baseAtual = BASES[selectBase.value] ?? {};
+      const tilesRegiao = ROTULOS
+        ? [...(baseAtual.tiles ?? []), ...(ROTULOS.tiles ?? [])]
+        : baseAtual.tiles;
+      return planejarRegiao({
+        centro: centroDaRegiao(),
+        raioKm: Number(regiaoRaio.value),
+        base: { ...baseAtual, tiles: tilesRegiao },
+      });
+    }
+
+    /** O tamanho aparece ANTES de baixar — ninguém aceita 400 MB às cegas. */
+    function mostrarTamanhoDaRegiao() {
+      const plano = planoDaRegiao();
+      if (plano.motivo === MOTIVOS_REGIAO.CENTRO_INVALIDO) {
+        regiaoStatus.textContent = 'Aguardando um fixo de GPS ou uma vista de mapa para saber o centro da região.';
+        regiaoButton.disabled = true;
+        return;
+      }
+      if (plano.motivo === MOTIVOS_REGIAO.SEM_FONTE) {
+        regiaoStatus.textContent = 'Esta base de mapa não expõe tiles que possam ser guardados.';
+        regiaoButton.disabled = true;
+        return;
+      }
+      regiaoButton.disabled = false;
+      regiaoStatus.textContent = plano.cabe
+        ? `${plano.tiles.toLocaleString('pt-BR')} tiles ≈ ${formatarBytes(plano.bytesEstimados)} (estimativa; o tamanho real depende do conteúdo). Baixe com internet, use sem.`
+        : `${formatarBytes(plano.bytesEstimados)} é grande demais para um pacote. Tente ${plano.raioSugeridoKm} km.`;
+    }
+
+    regiaoRaio.onchange = mostrarTamanhoDaRegiao;
+    mostrarTamanhoDaRegiao();
+
+    regiaoButton.onclick = async () => {
+      if (!('serviceWorker' in navigator)) {
+        regiaoStatus.textContent = 'Service worker indisponível neste navegador; a rota local continua disponível.';
+        return;
+      }
+      const registro = await navigator.serviceWorker.getRegistration().catch(() => null);
+      if (!registro) {
+        regiaoStatus.textContent = 'PREPARO OFFLINE INDISPONÍVEL: o service worker não está registrado neste ambiente. Posição, trilha e waypoints continuam funcionando sem rede; os tiles é que não podem ser guardados agora.';
+        return;
+      }
+      const plano = planoDaRegiao();
+      if (!plano.cabe) { mostrarTamanhoDaRegiao(); return; }
+
+      regiaoButton.disabled = true;
+      regiaoRaio.disabled = true;
+      const rotuloOriginal = regiaoButton.textContent;
+      regiaoButton.textContent = 'BAIXANDO…';
+      let salvos = 0;
+      try {
+        // Em LOTES, com pausa entre eles. O provedor de tiles não permite
+        // download em massa, e uma única mensagem com milhares de URLs é
+        // grande demais para o service worker responder sem estourar.
+        const LOTE = 64;
+        for (let i = 0; i < plano.urls.length; i += LOTE) {
+          if (desmontado) return;
+          const fatia = plano.urls.slice(i, i + LOTE);
+          const resposta = await mensagemOffline('CACHE_TILES', { urls: fatia });
+          salvos += Number(resposta?.salvos ?? 0);
+          const feito = Math.min(i + LOTE, plano.urls.length);
+          regiaoStatus.textContent = `${feito.toLocaleString('pt-BR')} de ${plano.urls.length.toLocaleString('pt-BR')} tiles · ${salvos.toLocaleString('pt-BR')} guardados. Não feche a tela.`;
+          await new Promise((r) => window.setTimeout(r, 120));
+        }
+        regiaoStatus.textContent = `Região de ${plano.raioKm} km pronta: ${salvos.toLocaleString('pt-BR')} de ${plano.urls.length.toLocaleString('pt-BR')} tiles no aparelho. O que não baixou continua vindo da rede quando houver.`;
+      } catch {
+        regiaoStatus.textContent = `Download interrompido com ${salvos.toLocaleString('pt-BR')} tiles guardados. O que já baixou continua valendo — tente de novo para completar.`;
+      } finally {
+        regiaoButton.disabled = false;
+        regiaoRaio.disabled = false;
+        regiaoButton.textContent = rotuloOriginal;
       }
     };
 
