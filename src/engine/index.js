@@ -23,6 +23,9 @@ export * from './wmm.js';
  * filtrar: o ponto suspeito é marcado, nunca apagado — quem decide o que fazer
  * com ele é o consumidor. */
 export * from './trilha-ponto.js';
+/* As três medidas de distância e o que faltou observar. `medirTrilha` continua
+ * onde estava; isto acrescenta o desconto do vão e o rótulo honesto. */
+export * from './distancia.js';
 export * from './mgrs.js';
 export * from './gridref.js';
 /* Grade REAL dos terrenos do Arma 3 (offset e SINAL do passo por mundo).
