@@ -1,6 +1,6 @@
 # Changelog
 
-## Não lançado
+## 1.7.0 — 2026-09-05
 
 **Trocar de tela deixou de encerrar a gravação.** Até a 1.6.0 o rastreamento
 inteiro morava dentro de `src/pages/mapa.js` — watcher, controle de segundo
