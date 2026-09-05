@@ -8,7 +8,6 @@ import { CAMADAS_BASE, CAMADAS_OVERLAY } from '../data/camadas-mapa.js';
 import { ROTAS_PEREGRINACAO, rotaPorId, statusRotaLabel } from '../data/rotas-peregrinacao.js';
 import { contextoPorId, detectarContexto } from '../core/contexto.js';
 import { resumoTrilha, trilhaGeoJSON, inicioDaTrilha } from '../core/trilha.js';
-import { medirTrilha } from '../engine/odometro.js';
 import { criarSensorDePassos } from '../core/passos-sensor.js';
 import { criarAvisoDaJornada } from '../core/notificacao-jornada.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
@@ -339,7 +338,10 @@ export function mapaPage() {
       // A passada é aprendida nos trechos em que o GPS está bom; é ela que
       // sustenta a contagem quando o sinal some dentro de prédio ou em mata.
       const passos = sensorPassos.resumo();
-      sensorPassos.observarGps(nova, medirTrilha(trilha).distanciaM);
+      // Era `medirTrilha(trilha)` aqui — a trilha INTEIRA, a cada fixo. O(n²):
+      // 12 000 pontos custavam 15,7 s de CPU, com o custo por ponto subindo de
+      // 0,134 ms para 1,311 ms. O gravador mantém o total corrente.
+      sensorPassos.observarGps(nova, gravador.distanciaM());
       void avisoJornada.atualizar(trilha, { passos: passos.passos, passosCalibrados: passos.calibrada });
     }
     if (!document.hidden) {
@@ -416,7 +418,7 @@ export function mapaPage() {
    * a tela não mostrar dois números diferentes para a mesma caminhada.
    */
   function distanciaTrilha() {
-    return medirTrilha(trilha).distanciaM;
+    return gravador.distanciaM();
   }
 
   function atualizarHud() {

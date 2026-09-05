@@ -28,7 +28,7 @@
  * Tudo é injetado: sem DOM, sem `navigator`, sem `localStorage` real.
  */
 
-import { distancia3D } from '../engine/odometro.js';
+import { distancia3D, criarOdometroCorrente } from '../engine/odometro.js';
 
 /**
  * Teto da janela guardada em `localStorage`. É o mesmo número que a página
@@ -90,6 +90,23 @@ export function criarGravadorDeTrilha({
   let saidosDaJanela = 0;
   const observadores = new Set();
 
+  /**
+   * O odômetro corrente — a distância da CAMINHADA, não da janela.
+   *
+   * Dois defeitos num só acumulador:
+   *
+   * 1. A página do mapa chamava `medirTrilha(trilha)` a cada fixo gravado.
+   *    Medido: 12 000 pontos custavam 15,7 s de CPU, com o custo POR PONTO
+   *    subindo de 0,134 ms para 1,311 ms. O(n²) — o aparelho ficava mais
+   *    lento justamente quando a caminhada ficava longa.
+   * 2. Somar a janela cortada faria a distância **encolher** depois de ≈24 km,
+   *    quando o teto começa a descartar os pontos mais antigos. O acumulador
+   *    não esquece o que já contou: o corte tira o traçado da memória, nunca
+   *    o quilômetro que a pessoa andou.
+   */
+  let odometro = criarOdometroCorrente();
+  for (const ponto of trilha) odometro.adicionar(ponto);
+
   function avisar(evento) {
     for (const cb of [...observadores]) {
       try { cb(evento); } catch { /* uma tela que quebra ao desenhar não derruba a gravação */ }
@@ -102,6 +119,7 @@ export function criarGravadorDeTrilha({
 
   function anexar(ponto) {
     const comModo = modo ? { ...ponto, modo } : ponto;
+    odometro.adicionar(comModo);
     const proxima = [...trilha, comModo];
     if (Number.isFinite(limite) && proxima.length > limite) {
       const excedente = proxima.length - limite;
@@ -165,6 +183,8 @@ export function criarGravadorDeTrilha({
       trilha = Array.isArray(nova) ? [...nova] : [];
       ultimoRegistrado = trilha.length ? trilha[trilha.length - 1] : null;
       saidosDaJanela = 0;
+      odometro = criarOdometroCorrente();
+      for (const ponto of trilha) odometro.adicionar(ponto);
       guardar();
       avisar({ tipo: 'SUBSTITUIU', total: trilha.length });
       return trilha.length;
@@ -175,6 +195,7 @@ export function criarGravadorDeTrilha({
       trilha = [];
       ultimoRegistrado = null;
       saidosDaJanela = 0;
+      odometro = criarOdometroCorrente();
       guardar();
       this.definirRota({ ativa: false, pausada: false });
       avisar({ tipo: 'LIMPOU', total: 0 });
@@ -182,6 +203,10 @@ export function criarGravadorDeTrilha({
 
     trilha: () => trilha,
     total: () => trilha.length,
+    /** Distância da caminhada inteira, em metros. Não encolhe com o corte. */
+    distanciaM: () => odometro.distancia(),
+    /** O mesmo objeto de `medirTrilha`, sem percorrer a trilha de novo. */
+    odometro: () => odometro.resultado(),
     ultimo: () => ultimoRegistrado,
     rota: () => ({ rotaAtiva, rotaPausada }),
     /** Quantos pontos saíram da janela local — o corte que era silencioso. */

@@ -193,6 +193,65 @@ await p.waitForTimeout(800);
 const aoVoltar = await pontosGravados();
 conferir('voltar ao mapa reencontra a mesma trilha', aoVoltar >= foraDoMapa, `${aoVoltar} pontos`);
 
+// ── FLUXO 13: o contador de trajeto conta, e conta SEM MAPA ───────────────────
+// A pergunta "quantos metros eu andei" não deve exigir o MapLibre (802 kB) nem
+// um único tile pela rede. Aqui se cobra as duas coisas: o número sobe, e
+// nenhuma requisição de tile sai enquanto a tela está aberta.
+const tilesPedidos = [];
+const espiao = (req) => {
+  const u = req.url();
+  if (/tile|\.png|\.jpg|\.pbf|maplibre/i.test(u) && !u.startsWith(BASE)) tilesPedidos.push(u);
+};
+p.on('request', espiao);
+
+await p.goto(`${BASE}/#/odometro`, { waitUntil: 'domcontentloaded' });
+const botaoContador = p.getByRole('button', { name: /^(INICIAR|PAUSAR|RETOMAR)$/ });
+await botaoContador.waitFor({ timeout: 15_000 });
+// Estado limpo de verdade: o fluxo anterior deixou uma rota ATIVA, e o botão
+// deste contador é o mesmo estado — com rota ativa ele diz PAUSAR, e clicar
+// pausaria em vez de iniciar. Apagar a trilha sem apagar a rota é um estado
+// pela metade.
+await p.evaluate(() => {
+  for (const k of ['vanguard:trilha', 'vanguard:rotaAtiva', 'vanguard:rotaPausada']) localStorage.removeItem(k);
+});
+await p.reload({ waitUntil: 'domcontentloaded' });
+await botaoContador.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(600);
+const rotuloInicial = await botaoContador.innerText();
+conferir('sem rota, o botão convida a INICIAR', /INICIAR/.test(rotuloInicial), rotuloInicial.trim());
+
+const lerContador = () => p.locator('.odometro__numero').innerText();
+const zerado = await lerContador();
+conferir('contador começa em zero, não em lixo', zerado.trim() === '0', `"${zerado.trim()}"`);
+
+await botaoContador.click();
+await p.waitForTimeout(300);
+await caminhar(4, 40);
+const andou = await lerContador();
+const unidade = await p.locator('.odometro__unidade').innerText();
+conferir(
+  'o contador SOBE conforme se anda',
+  Number(andou.replace(',', '.')) > 0,
+  `${andou.trim()} ${unidade.trim()}`
+);
+
+const tempo = await p.locator('.odometro__campo', { hasText: 'TEMPO' }).locator('.odometro__campo-valor').innerText();
+conferir('o tempo decorrido aparece como tempo, não como segundos crus', /^\d+:\d{2}/.test(tempo.trim()), tempo.trim());
+
+conferir('a tela do contador NÃO pede tile nenhum', tilesPedidos.length === 0, `${tilesPedidos.length} requisição(ões) externas`);
+p.off('request', espiao);
+
+// E a contagem é a MESMA rota do mapa: um gravador, nunca dois números.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(900);
+const rotuloNoMapa = await botaoRota.innerText();
+conferir(
+  'iniciar no contador deixa o mapa já gravando — um gravador só',
+  /PAUSAR ROTA/.test(rotuloNoMapa),
+  rotuloNoMapa.trim()
+);
+
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);

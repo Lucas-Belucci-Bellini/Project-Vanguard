@@ -197,3 +197,42 @@ test('o gravador nasce do que já estava guardado — recarregar não recomeça'
   assert.equal(g.rota().rotaAtiva, true);
   assert.equal(g.ultimo().timestamp, T0 + 5000);
 });
+
+test('a distância NÃO encolhe quando o corte da janela descarta pontos antigos', () => {
+  // O segundo defeito do `.slice(-12000)`: somar a janela cortada faria o
+  // número da tela DIMINUIR depois de ≈24 km de caminhada. O odômetro
+  // corrente não esquece — o corte tira o traçado, nunca o quilômetro.
+  const g = criarGravadorDeTrilha({ estado: gravando(), chaves: CHAVES, limite: 4 });
+  const distancias = [];
+  for (let i = 0; i < 12; i += 1) {
+    g.registrar(ponto(i * 30, i * 20));
+    distancias.push(g.distanciaM());
+  }
+  assert.equal(g.total(), 4, 'a janela cortou');
+  assert.ok(g.saidosDaJanela() > 0, 'e cortou de verdade');
+  for (let i = 1; i < distancias.length; i += 1) {
+    assert.ok(
+      distancias[i] >= distancias[i - 1],
+      `a distância caiu de ${distancias[i - 1].toFixed(1)} m para ${distancias[i].toFixed(1)} m no ponto ${i}`
+    );
+  }
+  assert.ok(g.distanciaM() > 250, `andou ~330 m, mediu ${g.distanciaM().toFixed(0)} m`);
+});
+
+test('o odômetro corrente concorda com medirTrilha enquanto a janela não corta', async () => {
+  const { medirTrilha } = await import('../src/engine/odometro.js');
+  const g = criarGravadorDeTrilha({ estado: gravando(), chaves: CHAVES });
+  for (let i = 0; i < 20; i += 1) g.registrar(ponto(i * 30, i * 20));
+  assert.equal(g.distanciaM(), medirTrilha(g.trilha()).distanciaM);
+  assert.deepEqual(g.odometro(), medirTrilha(g.trilha()));
+});
+
+test('limpar zera a distância; substituir recalcula a partir do que veio', () => {
+  const g = criarGravadorDeTrilha({ estado: gravando(), chaves: CHAVES });
+  for (let i = 0; i < 5; i += 1) g.registrar(ponto(i * 30, i * 20));
+  assert.ok(g.distanciaM() > 0);
+  g.limpar();
+  assert.equal(g.distanciaM(), 0);
+  g.substituir([ponto(0, 0), ponto(100, 40), ponto(200, 80)]);
+  assert.ok(g.distanciaM() > 150, `importou 200 m, mediu ${g.distanciaM().toFixed(0)} m`);
+});
