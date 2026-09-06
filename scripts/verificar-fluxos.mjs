@@ -261,7 +261,7 @@ await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
 await botaoRota.waitFor({ timeout: 15_000 });
 await p.waitForTimeout(1500);
 
-const seletorRaio = p.locator('.mapa__regiao-raio');
+const seletorRaio = p.getByLabel('Raio da região a baixar');
 const statusRegiao = p.locator('.mapa__offline-status').nth(1);
 await seletorRaio.selectOption('5');
 await p.waitForTimeout(250);
@@ -285,7 +285,7 @@ await ctx.setGeolocation({ latitude: 60.2, longitude: 10.5, accuracy: 8 });
 await p.reload({ waitUntil: 'domcontentloaded' });
 await botaoRota.waitFor({ timeout: 15_000 });
 await p.waitForTimeout(1800);
-await p.locator('.mapa__regiao-raio').selectOption('30');
+await p.getByLabel('Raio da região a baixar').selectOption('30');
 await p.waitForTimeout(300);
 const noNorte = await p.locator('.mapa__offline-status').nth(1).innerText();
 conferir(
@@ -295,7 +295,7 @@ conferir(
 );
 await ctx.setGeolocation({ latitude: -23.5505, longitude: -46.6333, accuracy: 12 });
 
-const nota = await p.locator('.mapa__offline-nota').innerText();
+const nota = await p.locator('.mapa__offline-nota').first().innerText();
 conferir(
   'a nota traz a aritmética que explica por que não existe mapa-múndi',
   /268\.435\.456|268,435,456/.test(nota) && /TB/.test(nota),
@@ -345,6 +345,77 @@ conferir(
   statusClima.trim().slice(0, 70)
 );
 await ctx.unroute('**://api.open-meteo.com/**');
+
+// ── FLUXO 16: o corredor segue a ROTA CARREGADA, e não inventa linha ─────────
+// Uma peregrinação não é um círculo. E o traçado tem de vir do aparelho — um
+// caminho inventado dentro de um app de navegação é o pior tipo de dado falso,
+// porque alguém segue.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+// Espera o cartão do corredor, não um botão vizinho: é ele que este fluxo
+// cobra, e é a presença dele que diz que a tela terminou de montar.
+const statusCorredor = p.locator('.mapa__offline-status').nth(2);
+/** Espera os três cartões do painel offline existirem.
+ *  `locator.nth(n).waitFor()` trava aqui mesmo com os elementos já no DOM
+ *  (medido: `count()` devolve 3 no primeiro instante e o `waitFor` estoura
+ *  20 s assim mesmo). Contar é o que a página promete e o que basta. */
+const esperarCartoesOffline = async (quantos = 3, limiteMs = 20_000) => {
+  const ate = Date.now() + limiteMs;
+  while (Date.now() < ate) {
+    if (await p.locator('.mapa__offline-status').count() >= quantos) return true;
+    await p.waitForTimeout(250);
+  }
+  return false;
+};
+conferir('a tela do mapa monta os três cartões de preparo offline', await esperarCartoesOffline());
+await p.waitForTimeout(1200);
+await p.evaluate(() => {
+  for (const k of ['vanguard:trilha', 'vanguard:rotaAtiva', 'vanguard:rotaPausada']) localStorage.removeItem(k);
+});
+await p.reload({ waitUntil: 'domcontentloaded' });
+await esperarCartoesOffline();
+await p.waitForTimeout(2000);
+
+const semRota = await statusCorredor.innerText();
+conferir(
+  'sem rota carregada, o corredor NÃO inventa uma linha',
+  /Nenhuma rota carregada/i.test(semRota),
+  semRota.trim().slice(0, 62)
+);
+
+// Carrega o trecho Londrina → Bandeirantes como rota do aparelho.
+await p.evaluate(() => {
+  const envelope = (v) => JSON.stringify({ schema: 'vanguard-state', version: 1, value: v });
+  const t0 = Date.now();
+  const pontos = [];
+  for (let i = 0; i <= 40; i += 1) {
+    pontos.push({
+      lat: -23.3103 + (0.2 * i) / 40, lon: -51.1628 + (0.7956 * i) / 40,
+      accuracy: 6, timestamp: t0 + i * 60_000,
+    });
+  }
+  localStorage.setItem('vanguard:trilha', envelope(pontos));
+});
+await p.reload({ waitUntil: 'domcontentloaded' });
+await esperarCartoesOffline();
+await p.waitForTimeout(2500);
+
+const comRota = await statusCorredor.innerText();
+const kmLido = Number((comRota.match(/([\d.,]+)\s*km de rota/) ?? [])[1]?.replace(',', '.') ?? 0);
+conferir(
+  'com a rota carregada, o corredor mede os 84 km do trecho real',
+  kmLido > 82 && kmLido < 87,
+  comRota.trim().slice(0, 76)
+);
+
+// Pedir casas (z17) tem de ser recusado com o zoom que cabe — não aceito em silêncio.
+await p.getByLabel('Detalhe do corredor').selectOption('17');
+await p.waitForTimeout(300);
+const comCasas = await statusCorredor.innerText();
+conferir(
+  'pedir casas em 84 km é recusado, dizendo até que detalhe cabe',
+  /grande demais/i.test(comCasas) && /Até z\d+ cabe/.test(comCasas),
+  comCasas.trim().slice(0, 76)
+);
 
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });

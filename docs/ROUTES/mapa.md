@@ -32,6 +32,14 @@ apagar parada.
   recusada com um raio menor sugerido quando não cabe. Baixa em lotes de 64
   com pausa: o provedor de tiles não permite download em massa.
 
+- **BAIXAR CORREDOR DA ROTA** — pacote ao longo da rota que **este aparelho**
+  tem carregada (trilha gravada ou GPX/KML importado), com largura de 2 a
+  10 km de cada lado e detalhe até z17. O corredor custa ~70 % menos que a
+  caixa retangular que o contém — medido no trecho Londrina → Bandeirantes
+  (84,3 km): 726 tiles contra 2 460 em z15. **Nenhum traçado vem embutido no
+  aplicativo**: linha inventada em app de navegação é o pior tipo de dado
+  falso, porque alguém segue.
+
 ## Saídas
 Trilha desenhada (trecho a pé e trecho de veículo em camadas separadas),
 distância com desnível, arquivos de registro, pacote para o menu de

@@ -116,3 +116,92 @@ test('tamanho aparece em unidade legível, nunca como soma crua de bytes', () =>
   assert.match(formatarBytes(2 * 1024 ** 3), /GB$/);
   assert.match(formatarBytes(11 * 1024 ** 4), /TB$/);
 });
+
+/* ──────────────────────────── CORREDOR DE ROTA ──────────────────────────── */
+
+const { planejarCorredor, comprimentoDaRota, ZOOM_CASAS } = await import('../src/core/mapa-regiao.js');
+
+// Londrina → Bandeirantes (PR): o trecho que motivou o corredor.
+const LONDRINA = { lat: -23.3103, lon: -51.1628 };
+const BANDEIRANTES = { lat: -23.1103, lon: -50.3672 };
+const CAMINHO = [LONDRINA, BANDEIRANTES];
+const corredor = (opcoes = {}) => planejarCorredor({ pontos: CAMINHO, base: OSM, ...opcoes });
+
+test('o comprimento da rota bate com a distância conhecida do trecho', () => {
+  // Londrina a Bandeirantes são ~84 km em linha reta. Uma conta que ignorasse
+  // o cosseno da latitude erraria a longitude em ~8 %.
+  const km = comprimentoDaRota(CAMINHO);
+  assert.ok(km > 82 && km < 87, `${km.toFixed(1)} km`);
+  assert.equal(comprimentoDaRota([]), 0);
+  assert.equal(comprimentoDaRota([LONDRINA]), 0, 'um ponto só não é caminho');
+});
+
+test('o comprimento soma os trechos, não a reta entre as pontas', () => {
+  // Uma rota que sobe e volta tem comprimento; a reta ponta a ponta é zero.
+  const idaEVolta = [LONDRINA, BANDEIRANTES, LONDRINA];
+  assert.ok(comprimentoDaRota(idaEVolta) > comprimentoDaRota(CAMINHO) * 1.9);
+});
+
+test('CORREDOR É MUITO MAIS BARATO QUE A CAIXA que o contém', () => {
+  // É a razão inteira de este planejador existir: um círculo que cobrisse as
+  // duas pontas teria 42 km de raio e baixaria onde ninguém vai pisar.
+  const c = corredor({ raioKm: 5, zoomMaximo: 15 });
+  const circulo = planejarRegiao({
+    centro: { lat: (LONDRINA.lat + BANDEIRANTES.lat) / 2, lon: (LONDRINA.lon + BANDEIRANTES.lon) / 2 },
+    raioKm: 45, zoomMaximo: 15, base: OSM,
+  });
+  assert.ok(c.tiles * 3 < circulo.tiles, `corredor ${c.tiles} vs círculo ${circulo.tiles}`);
+});
+
+test('o corredor cabe até z15 e é recusado com casas, sugerindo o zoom que cabe', () => {
+  const ate15 = corredor({ raioKm: 5, zoomMaximo: 15 });
+  assert.equal(ate15.cabe, true);
+  assert.ok(ate15.bytesEstimados < 60 * 1024 * 1024, formatarBytes(ate15.bytesEstimados));
+
+  const comCasas = corredor({ raioKm: 5, zoomMaximo: ZOOM_CASAS });
+  assert.equal(comCasas.cabe, false);
+  assert.equal(comCasas.motivo, MOTIVOS_REGIAO.GRANDE_DEMAIS);
+  assert.ok(comCasas.zoomSugerido !== null, 'diz até onde daria');
+  // E o zoom sugerido tem de caber de verdade, senão é número simpático.
+  assert.equal(corredor({ raioKm: 5, zoomMaximo: comCasas.zoomSugerido }).cabe, true);
+});
+
+test('mais raio custa mais, e a conta acompanha', () => {
+  const estreito = corredor({ raioKm: 2, zoomMaximo: 15 }).tiles;
+  const largo = corredor({ raioKm: 10, zoomMaximo: 15 }).tiles;
+  assert.ok(largo > estreito * 2, `${estreito} → ${largo}`);
+});
+
+test('rota com menos de dois pontos é recusada com motivo próprio', () => {
+  // Três problemas, três respostas: sem rota, sem raio, sem fonte.
+  for (const p of [null, [], [LONDRINA], [{ lat: 'x', lon: 'y' }, { lat: 1 }]]) {
+    assert.equal(planejarCorredor({ pontos: p, base: OSM }).motivo, MOTIVOS_REGIAO.ROTA_INVALIDA);
+  }
+  assert.equal(corredor({ raioKm: 0 }).motivo, MOTIVOS_REGIAO.RAIO_INVALIDO);
+  assert.equal(planejarCorredor({ pontos: CAMINHO, base: {} }).motivo, MOTIVOS_REGIAO.SEM_FONTE);
+});
+
+test('coordenada inválida no meio da rota é descartada, sem derrubar o resto', () => {
+  // Trilha importada de GPX alheio traz lixo. Descartar o ponto ruim é certo;
+  // recusar o caminho inteiro por causa dele não é.
+  const comLixo = [LONDRINA, { lat: null, lon: -50.9 }, { lat: 'abc', lon: 0 }, BANDEIRANTES];
+  const c = planejarCorredor({ pontos: comLixo, raioKm: 5, zoomMaximo: 14, base: OSM });
+  assert.equal(c.cabe, true);
+  assert.ok(Math.abs(c.comprimentoKm - comprimentoDaRota(CAMINHO)) < 1);
+});
+
+test('as URLs entregues são exatamente as prometidas na contagem', () => {
+  const c = corredor({ raioKm: 3, zoomMaximo: 14 });
+  assert.equal(c.urls.length, c.tiles);
+  assert.equal(new Set(c.urls).size, c.urls.length, 'sem tile repetido — seria download pago duas vezes');
+});
+
+test('rota parada no mesmo lugar não trava nem explode', () => {
+  // Trilha de quem ficou sentado: todos os fixos praticamente iguais. O
+  // segmento degenerado divide por zero se ninguém cuidar.
+  const parado = Array.from({ length: 20 }, () => ({ ...LONDRINA }));
+  const c = planejarCorredor({ pontos: parado, raioKm: 2, zoomMaximo: 14, base: OSM });
+  assert.equal(c.cabe, true);
+  assert.ok(c.tiles > 0 && c.tiles < 400, `${c.tiles} tiles`);
+  assert.ok(c.comprimentoKm < 0.001);
+});

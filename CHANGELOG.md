@@ -1,5 +1,41 @@
 # Changelog
 
+## Não lançado
+
+**Corredor de rota — o mapa offline segue o caminho, não um círculo.**
+
+Uma peregrinação não é um círculo. Londrina → Bandeirantes são **84,3 km**: um
+círculo que cobrisse as duas pontas teria 42 km de raio e baixaria uma área
+enorme onde ninguém vai pisar.
+
+`BAIXAR CORREDOR DA ROTA` pega os tiles a até X km da **linha** do caminho.
+Medido nesse trecho, contra a caixa retangular que o contém:
+
+| zoom | corredor | caixa | economia |
+| ---: | ---: | ---: | ---: |
+| z13 | 45 | 168 | 73 % |
+| z15 | 726 | 2 460 | 70 % |
+| z17 | 11 683 | 37 816 | 69 % |
+
+Setenta por cento é a diferença entre caber e não caber. O trecho inteiro sai
+por **38 MB** até z15 (rodovias, estradas rurais, ferrovias e o traçado das
+cidades), 154 MB até z16, e 617 MB até z17 — que é onde **as casas** aparecem.
+Pedir casas em 84 km é recusado com o zoom que cabe dito na tela, em vez de
+aceitar e falhar no fim do download.
+
+**Nenhum traçado vem embutido no aplicativo.** O corredor segue a rota que
+*este aparelho* tem carregada: trilha gravada, ou arquivo GPX/KML importado.
+Linha inventada dentro de um app de navegação é o pior tipo de dado falso,
+porque alguém segue.
+
+Dois defeitos achados ao verificar, os dois meus: o mapa registrava um
+observador no gravador do aplicativo **sem cancelar no desmontar** (um
+observador vivo a mais por visita à tela, apontando para DOM morto); e três
+`<select>` passaram a dividir a mesma classe, derrubando um fluxo que já
+existia — locator por classe quebra quando a classe é reusada.
+
+872 testes, 16 rotas × 2 larguras, 30 fluxos.
+
 ## 1.8.0 — 2026-09-05
 
 ### `#/clima` — tempestade, e a metade que funciona sem internet

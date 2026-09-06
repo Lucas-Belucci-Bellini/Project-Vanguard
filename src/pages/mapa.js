@@ -12,7 +12,7 @@ import { criarSensorDePassos } from '../core/passos-sensor.js';
 import { criarAvisoDaJornada } from '../core/notificacao-jornada.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
-import { planejarRegiao, formatarBytes, custoDoPlaneta, MOTIVOS_REGIAO } from '../core/mapa-regiao.js';
+import { planejarRegiao, planejarCorredor, formatarBytes, custoDoPlaneta, MOTIVOS_REGIAO } from '../core/mapa-regiao.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
 import { ESTADOS_BACKGROUND } from '../core/background-localizacao.js';
 import { rastreamentoDoAplicativo } from '../core/rastreamento-app.js';
@@ -148,6 +148,22 @@ export function mapaPage() {
   regiaoRaio.value = '15';
   const regiaoButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'BAIXAR REGIÃO');
   const regiaoStatus = h('p', { className: 'mapa__offline-status', role: 'status', ariaLive: 'polite' }, 'Escolha o raio para ver o tamanho antes de baixar.');
+  // ── Corredor: o caminho por onde se vai passar, não um círculo ───────────
+  // Uma peregrinação não é um círculo. Londrina → Bandeirantes são 84 km: um
+  // círculo que cobrisse as duas pontas teria 42 km de raio e baixaria onde
+  // ninguém vai pisar. O corredor mede 70% menos, medido.
+  const corredorRaio = h('select', { className: 'mapa__regiao-raio', ariaLabel: 'Largura do corredor da rota' },
+    ...[2, 5, 10].map((km) => h('option', { value: String(km) }, `${km} km de cada lado`)));
+  corredorRaio.value = '5';
+  const corredorDetalhe = h('select', { className: 'mapa__regiao-raio', ariaLabel: 'Detalhe do corredor' },
+    h('option', { value: '15' }, 'Estradas, ferrovias e cidades (z15)'),
+    h('option', { value: '16' }, 'Acima, mais quarteirões (z16)'),
+    h('option', { value: '17' }, 'Acima, mais casas (z17)'));
+  const corredorButton = h('button', { className: 'mapa__offline-button', type: 'button' }, 'BAIXAR CORREDOR DA ROTA');
+  const corredorStatus = h('p', { className: 'mapa__offline-status', role: 'status', ariaLive: 'polite' }, 'Carregue ou grave uma rota para calcular o corredor.');
+  const corredorNota = h('p', { className: 'mapa__offline-nota' },
+    'O corredor segue a rota que ESTE aparelho tem carregada — trilha gravada ou arquivo GPX/KML importado acima. O aplicativo não traz traçado de caminho nenhum embutido: linha inventada em app de navegação é o pior tipo de dado falso, porque alguém segue.');
+
   const regiaoNota = h('p', { className: 'mapa__offline-nota' },
     `Não existe "baixar o mundo": o planeta em zoom 14 são ${custoDoPlaneta(14).tiles.toLocaleString('pt-BR')} tiles — cerca de ${formatarBytes(custoDoPlaneta(14).bytesSupondoTerra)}. Não é limite deste aplicativo, é a ordem de grandeza. Baixe o corredor por onde vai passar. O provedor de tiles não permite download em massa: o app baixa devagar e em lotes, de propósito.`);
   const registroExportarButton = h('button', { className: 'mapa__quick-button', type: 'button' }, 'EXPORTAR JSON');
@@ -234,6 +250,7 @@ export function mapaPage() {
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
     h('div', { className: 'mapa__offline-card' }, regiaoRaio, regiaoButton, regiaoStatus, regiaoNota),
+    h('div', { className: 'mapa__offline-card' }, corredorRaio, corredorDetalhe, corredorButton, corredorStatus, corredorNota),
     h('div', { className: 'mapa__registro-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DADOS LOCAIS'), h('span', { className: 'mapa__privacy' }, '⌖ JSON')),
       h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroGpxButton, registroKmlButton, registroImportarButton),
@@ -331,6 +348,7 @@ export function mapaPage() {
     rotaPausada = rota.rotaPausada;
   }
   let desmontado = false;
+  let pararObservarGravador = null;
   let gradeAtual = { type: 'FeatureCollection', features: [], passo: 1000 };
   let versaoGrade = 0;
   let ultimaChaveRotulos = null;
@@ -1440,6 +1458,92 @@ export function mapaPage() {
       }
     };
 
+    /* ── Corredor da rota ────────────────────────────────────────────────── */
+
+    function planoDoCorredor() {
+      const baseAtual = BASES[selectBase.value] ?? {};
+      const tilesCorredor = ROTULOS
+        ? [...(baseAtual.tiles ?? []), ...(ROTULOS.tiles ?? [])]
+        : baseAtual.tiles;
+      return planejarCorredor({
+        // A linha vem da trilha DESTE aparelho: gravada ou importada de GPX/KML.
+        pontos: gravador.trilha(),
+        raioKm: Number(corredorRaio.value),
+        zoomMaximo: Number(corredorDetalhe.value),
+        base: { ...baseAtual, tiles: tilesCorredor },
+      });
+    }
+
+    function mostrarTamanhoDoCorredor() {
+      const plano = planoDoCorredor();
+      if (plano.motivo === MOTIVOS_REGIAO.ROTA_INVALIDA) {
+        corredorStatus.textContent = 'Nenhuma rota carregada. Importe um GPX/KML do caminho, ou grave a trilha andando — o corredor segue a linha que existir aqui.';
+        corredorButton.disabled = true;
+        return;
+      }
+      if (plano.motivo === MOTIVOS_REGIAO.SEM_FONTE) {
+        corredorStatus.textContent = 'Esta base de mapa não expõe tiles que possam ser guardados.';
+        corredorButton.disabled = true;
+        return;
+      }
+      corredorButton.disabled = !plano.cabe;
+      corredorStatus.textContent = plano.cabe
+        ? `${plano.comprimentoKm.toFixed(1)} km de rota · ${plano.tiles.toLocaleString('pt-BR')} tiles ≈ ${formatarBytes(plano.bytesEstimados)} (estimativa). O corredor custa ~70 % menos que a caixa que o contém.`
+        : `${plano.comprimentoKm.toFixed(1)} km neste detalhe dariam ${formatarBytes(plano.bytesEstimados)} — grande demais para um pacote.${plano.zoomSugerido ? ` Até z${plano.zoomSugerido} cabe.` : ''}`;
+    }
+
+    corredorRaio.onchange = mostrarTamanhoDoCorredor;
+    corredorDetalhe.onchange = mostrarTamanhoDoCorredor;
+    mostrarTamanhoDoCorredor();
+    // A rota pode mudar por importação ou por gravação: o número acompanha.
+    //
+    // O cancelador precisa sobreviver até o `desmontar()`: o gravador é do
+    // APLICATIVO, não desta página (ADR-0047). Registrar sem cancelar deixava
+    // um observador vivo por montagem, todos apontando para DOM morto — o
+    // custo cresce a cada visita ao mapa, e é o tipo de vazamento que só
+    // aparece depois de muitas trocas de tela.
+    pararObservarGravador = gravador.observar(() => { if (!desmontado) mostrarTamanhoDoCorredor(); });
+
+    corredorButton.onclick = async () => {
+      if (!('serviceWorker' in navigator)) {
+        corredorStatus.textContent = 'Service worker indisponível neste navegador; a rota local continua disponível.';
+        return;
+      }
+      const registro = await navigator.serviceWorker.getRegistration().catch(() => null);
+      if (!registro) {
+        corredorStatus.textContent = 'PREPARO OFFLINE INDISPONÍVEL: o service worker não está registrado neste ambiente. Posição, trilha e waypoints continuam funcionando sem rede.';
+        return;
+      }
+      const plano = planoDoCorredor();
+      if (!plano.cabe) { mostrarTamanhoDoCorredor(); return; }
+
+      corredorButton.disabled = true;
+      corredorRaio.disabled = true;
+      corredorDetalhe.disabled = true;
+      const rotuloOriginal = corredorButton.textContent;
+      corredorButton.textContent = 'BAIXANDO…';
+      let salvos = 0;
+      try {
+        const LOTE = 64;
+        for (let i = 0; i < plano.urls.length; i += LOTE) {
+          if (desmontado) return;
+          const resposta = await mensagemOffline('CACHE_TILES', { urls: plano.urls.slice(i, i + LOTE) });
+          salvos += Number(resposta?.salvos ?? 0);
+          const feito = Math.min(i + LOTE, plano.urls.length);
+          corredorStatus.textContent = `${feito.toLocaleString('pt-BR')} de ${plano.urls.length.toLocaleString('pt-BR')} tiles · ${salvos.toLocaleString('pt-BR')} guardados. Não feche a tela.`;
+          await new Promise((r) => window.setTimeout(r, 120));
+        }
+        corredorStatus.textContent = `Corredor de ${plano.comprimentoKm.toFixed(1)} km pronto: ${salvos.toLocaleString('pt-BR')} de ${plano.urls.length.toLocaleString('pt-BR')} tiles no aparelho.`;
+      } catch {
+        corredorStatus.textContent = `Download interrompido com ${salvos.toLocaleString('pt-BR')} tiles guardados. O que já baixou continua valendo — tente de novo para completar.`;
+      } finally {
+        corredorButton.disabled = false;
+        corredorRaio.disabled = false;
+        corredorDetalhe.disabled = false;
+        corredorButton.textContent = rotuloOriginal;
+      }
+    };
+
     offlineClearButton.onclick = async () => {
       if (!window.confirm('Limpar todos os mapas offline guardados neste aparelho?')) return;
       offlineClearButton.disabled = true;
@@ -1591,5 +1695,5 @@ export function mapaPage() {
     atualizarTrajeto();
     avaliarExposicaoAtual();
   }, 1000);
-  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); sensorPassos.parar(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); observarBackground(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); inscricao.parar(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
+  return { elemento: raiz, desmontar: () => { desmontado = true; liberarUrlDoVisor(); sensorPassos.parar(); window.clearInterval(tickTrajeto); controleCentralizacao.desmontar(); observarBackground(); window.clearInterval(intervaloFrescor); document.removeEventListener('visibilitychange', aoMudarVisibilidade); configurarWakeLock(false); inscricao.parar(); pararObservarGravador?.(); if (motorMapa) { try { motorMapa.desmontar(); } catch {} motorMapa = null; mapa = null; } else if (mapa) { try { mapa.remove(); } catch {} mapa = null; } } };
 }

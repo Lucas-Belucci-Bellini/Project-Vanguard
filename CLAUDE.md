@@ -364,6 +364,32 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   **268 435 456 tiles** (contagem exata, é a definição da pirâmide) ≈ 10 TB.
   Mesmo a 1 kB por tile de oceano passaria de 250 GB. `custoDoPlaneta()` existe
   para a interface MOSTRAR a conta em vez de só dizer "não dá".
+- **Peregrinação não é círculo — é corredor.** Londrina → Bandeirantes são
+  84,3 km: um círculo que cobrisse as duas pontas teria 42 km de raio e
+  baixaria onde ninguém vai pisar. `planejarCorredor()` pega os tiles a até
+  X km da LINHA e custa ~70 % menos que a caixa que a contém (medido: 726
+  contra 2 460 tiles em z15). Ele varre a caixa de cada SEGMENTO, não a da
+  rota inteira — numa rota longa a caixa total tem milhões de células vazias.
+- **Traçado de caminho não se embute e não se inventa.** O corredor segue a
+  rota que o APARELHO tem carregada (trilha gravada ou GPX/KML importado).
+  Linha inventada dentro de um app de navegação é o pior tipo de dado falso,
+  porque alguém segue — é a mesma regra do "dado de jogo nunca é inventado",
+  com consequência maior.
+- **Casas custam um zoom inteiro.** Elas só aparecem em z17, e cada zoom
+  quadruplica: o mesmo corredor de 84 km dá 38 MB até z15, 154 MB até z16 e
+  617 MB até z17 (1,2 GB com a camada de rótulos junto). A interface recusa e
+  diz **até que zoom cabe**, em vez de aceitar e falhar no fim do download.
+- **`locator.nth(n).waitFor()` do Playwright pode travar com o elemento já no
+  DOM.** Medido em `verificar-fluxos`: `count()` devolvia 3 no primeiro
+  instante e o `waitFor` estourava 20 s do mesmo jeito, de forma
+  intermitente. Espere pela CONTAGEM (laço com `count()`), não pelo índice.
+  E locator por CLASSE quebra quando a classe é reusada — três selects
+  passaram a dividir `.mapa__regiao-raio` e derrubaram um fluxo que já
+  existia; `getByLabel` é único e ainda documenta o que o teste mexe.
+- **Observador registrado em singleton do aplicativo precisa ser cancelado no
+  `desmontar()`.** O mapa registrava `gravador.observar(...)` sem guardar o
+  cancelador: cada montagem deixava mais um observador vivo apontando para DOM
+  morto, e o custo cresce a cada visita à tela.
 - **O mesmo raio custa mais longe do equador.** A caixa alarga com o cosseno da
   latitude: 30 km são 8 088 tiles em São Paulo e **26 628 a 60° N**. Lista fixa
   de raios finge uma garantia que não existe — o tamanho é calculado para o
