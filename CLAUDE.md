@@ -82,6 +82,13 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   contador de trajeto**: metros e km sem carregar mapa, sem tile e sem rede
   (6,1 kB de chunk contra 802 kB do MapLibre). Observa o MESMO gravador do
   mapa — duas telas, um gravador, nunca dois números para a mesma caminhada.
+- `src/engine/comparar-trilhas.js` + `src/core/dados/acervo-trilhas.js` +
+  `src/pages/trilhas.js` (`#/trilhas`) — **o que cada pessoa andou**. Compara
+  cada trilha com uma referência (faixa de 60 m, justificada pelo erro do GNSS
+  somado em quadratura) e entrega as três evidências que permitem atualizar um
+  guia sem inventar linha: CONFIRMADO, SEM MOVIMENTO e CAMINHO NOVO. O acervo é
+  banco **próprio** (`vanguard-acervo`): importar dez trilhas não encosta em
+  `vanguard:trilha`.
 - `src/core/mapa-regiao.js` — **pacotes de mapa por região**: planeja o
   corredor por onde se vai passar, com tamanho declarado antes de baixar e
   recusa explícita com raio sugerido. `custoDoPlaneta()` é a aritmética que
@@ -290,6 +297,14 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   do campo fica perto de −72°, não vertical. Teste de polo cobra **continuidade
   e finitude** (o termo leste divide por cos da latitude geocêntrica), nunca um
   valor "óbvio" de dip.
+- **`versionCode` estreito colide, e colisão é atualização recusada.** A regra
+  era `maior*100 + menor*10 + correcao`: **`1.10.0` e `2.0.0` davam 200 os
+  dois**. O Android exige código estritamente MAIOR que o instalado, então a
+  build fica verde e a instalação falha no aparelho — a mesma família do
+  conflito de certificado (ADR-0042). Hoje é `maior*10 000 + menor*100 +
+  correcao`. E o teste de monotonicidade **existia e passava**: a lista de
+  exemplo ia de 1.3.1 a 2.0.0 sem nunca cruzar `menor >= 10`. Amostra escolhida
+  a dedo concorda com o defeito — varra um intervalo.
 - **A versão do app mora em QUATRO lugares e só um é fonte.** `package.json`,
   `android/app/build.gradle` (`versionName` + `versionCode`) e as duas
   configurações do Xcode. O iOS ficou em **1.3.1 por seis releases** porque
@@ -370,6 +385,20 @@ Precisa de DOM ou de biblioteca? O lugar é `src/ui/` ou `src/pages/`.
   X km da LINHA e custa ~70 % menos que a caixa que a contém (medido: 726
   contra 2 460 tiles em z15). Ele varre a caixa de cada SEGMENTO, não a da
   rota inteira — numa rota longa a caixa total tem milhões de células vazias.
+- **Índice espacial que só olha as células vizinhas devolve `Infinity` para
+  quem está longe.** Em `comparar-trilhas.js`, quem está DENTRO da faixa está a
+  uma célula; quem está FORA pode estar a quilômetros — e aí não havia segmento
+  na vizinhança e a distância saía `Infinity`, direto para a tela como "maior
+  afastamento: Infinity m". Justamente o caso que se quer medir. A busca abre
+  em anéis e cai em varredura completa quando precisa: o mesmo desvio passou a
+  medir 21 819 m.
+- **Comparar trilhas conta por TRILHA distinta, nunca por ponto.** Quem parou
+  para almoçar deixa duzentos fixos no mesmo lugar; contando ponto, um almoço
+  viraria "caminho novo confirmado por 200 pessoas".
+- **O app não gera traçado consensual, e isso é decisão.** A média entre duas
+  variantes legítimas passa pelo meio do mato, entre as duas. `consensoDeTrilhas`
+  entrega evidência CONTADA — confirmado, sem movimento, caminho novo — com
+  coordenada, e a decisão de mudar o guia é de quem organiza a caminhada.
 - **Traçado de caminho não se embute e não se inventa.** O corredor segue a
   rota que o APARELHO tem carregada (trilha gravada ou GPX/KML importado).
   Linha inventada dentro de um app de navegação é o pior tipo de dado falso,

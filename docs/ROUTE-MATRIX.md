@@ -18,6 +18,7 @@ navegador é `WEB_ONLY`, não `IMPLEMENTED`.
 | `#/inicio` | Prontidão para sair andando | `IMPLEMENTED` | `estado` local (posição, trilha, waypoints, mapas), service worker | `prontidao-offline`, `localizacao` | `prontidao-offline.test.js` · varredura |
 | `#/mapa` | Mapa, trilha, waypoints, foto de parada, exportação | `IMPLEMENTED` | GPS, tiles (rede/cache), IndexedDB de fotos, `estado` | `map-engine` + MapLibre (CDN), `trilha`, `odometro`, `foto-*` | `trilha` · `odometro` · `foto-*` · `registro-*` |
 | `#/odometro` | Metros e quilômetros andados, sem carregar mapa | `IMPLEMENTED` | GPS contínuo | `rastreamento-app`, `trilha-gravador`, `distancia`, `odometro` | `odometro-corrente` · `formato-trajeto` · `trilha-gravador` |
+| `#/trilhas` | O que cada pessoa andou, e o que isso diz sobre o guia | `IMPLEMENTED` | Nenhum — acervo IndexedDB próprio, sem rede | `comparar-trilhas`, `acervo-trilhas`, `distancia` | `comparar-trilhas` · `acervo-trilhas` |
 | `#/navegacao` | Posição em MGRS/UTM, rumo e distância a um waypoint | `IMPLEMENTED` | GPS contínuo | `navegacao-rumo`, `mgrs`, `numero-seguro` | `navegacao-rumo` · fluxos 1–4 |
 | `#/bussola` | Três nortes, calibração pelo Sol, estabilidade | `IMPLEMENTED` | Sensor de orientação, posição | `bussola-leitura`, `rumo-filtro`, `sol` | `bussola-leitura` · `rumo-filtro` · fluxos 5–6 |
 | `#/clima` | Distância do raio pelo trovão (sem rede) e previsão (com rede) | `IMPLEMENTED` | Nenhum offline; posição + internet para previsão | `tempestade`, `clima`, `rastreamento-app` | `tempestade` · `clima` |

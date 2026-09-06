@@ -456,6 +456,62 @@ conferir(
   notaPreset.trim().slice(0, 78)
 );
 
+// ── FLUXO 18: comparar o que cada um andou, sem tocar na trilha em gravação ──
+// Guardar no acervo COPIA. Se movesse, a pessoa perderia a caminhada em
+// andamento no momento em que tentou arquivá-la — e isso não volta.
+await p.goto(`${BASE}/#/trilhas`, { waitUntil: 'domcontentloaded' });
+await p.getByRole('button', { name: /GUARDAR A TRILHA DESTE APARELHO/ }).waitFor({ timeout: 20_000 });
+await p.waitForTimeout(800);
+
+const pontosNoAparelho = () => p.evaluate(() => {
+  const b = localStorage.getItem('vanguard:trilha');
+  if (!b) return 0;
+  const l = JSON.parse(b); const a = Array.isArray(l) ? l : l?.value;
+  return Array.isArray(a) ? a.length : -1;
+});
+const antesDeGuardar = await pontosNoAparelho();
+conferir('há trilha gravada no aparelho antes de arquivar', antesDeGuardar > 5, `${antesDeGuardar} pontos`);
+
+// Duas cópias com nomes diferentes: é o mínimo para haver comparação.
+for (const nome of ['Referência antiga', 'Peregrino A']) {
+  p.once('dialog', (d) => d.accept(nome));
+  await p.getByRole('button', { name: /GUARDAR A TRILHA DESTE APARELHO/ }).click();
+  await p.waitForTimeout(700);
+}
+
+const depoisDeGuardar = await pontosNoAparelho();
+conferir(
+  'guardar no acervo COPIA — a trilha em gravação continua intacta',
+  depoisDeGuardar === antesDeGuardar,
+  `${antesDeGuardar} → ${depoisDeGuardar} pontos`
+);
+
+const itens = await p.locator('.trilhas__item').count();
+conferir('as duas trilhas ficam guardadas lado a lado, sem sobrescrever', itens === 2, `${itens} no acervo`);
+
+await p.getByLabel('Trilha de referência').selectOption({ index: 1 });
+await p.waitForTimeout(600);
+const linhas = await p.locator('.trilhas__linha').count();
+conferir('escolher a referência produz a tabela de quem andou o quê', linhas >= 2, `${linhas} linha(s), com cabeçalho`);
+
+const consensoTexto = await p.locator('.trilhas__consenso').innerText();
+conferir(
+  'o quadro do guia aparece com as três evidências contadas',
+  /CONFIRMADO/.test(consensoTexto) && /SEM MOVIMENTO/.test(consensoTexto) && /CAMINHO NOVO/.test(consensoTexto),
+  consensoTexto.replace(/\n+/g, ' · ').trim().slice(0, 74)
+);
+conferir(
+  'e diz explicitamente que o app NÃO desenha traçado novo',
+  /NÃO desenha traçado novo/i.test(consensoTexto) && /decisão de mudar o guia/i.test(consensoTexto),
+  'aviso presente'
+);
+
+// Apagar exige o nome exato: nome errado não pode apagar nada.
+p.once('dialog', (d) => d.accept('nome errado de propósito'));
+await p.locator('.trilhas__apagar').first().click();
+await p.waitForTimeout(600);
+conferir('nome errado NÃO apaga a trilha de ninguém', await p.locator('.trilhas__item').count() === 2, 'acervo intacto');
+
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
 await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
 await p.waitForTimeout(700);

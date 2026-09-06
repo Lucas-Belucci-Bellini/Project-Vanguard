@@ -25,10 +25,35 @@ const leia = (caminho) => readFileSync(join(raiz, caminho), 'utf8');
 
 const { version: VERSAO } = JSON.parse(leia('package.json'));
 
-/** 1.6.0 → 160. A mesma regra nas duas plataformas, para o número ser comparável. */
+/**
+ * 1.6.0 → 10600. A mesma regra nas duas plataformas, para o número ser
+ * comparável.
+ *
+ * ## Por que os campos são largos
+ *
+ * A regra anterior era `maior*100 + menor*10 + correcao`, e ela quebrava no
+ * dia em que o `menor` chegasse a 10:
+ *
+ *     1.10.0 → 1*100 + 10*10 + 0 = 200
+ *     2.0.0  → 2*100 +  0*10 + 0 = 200   ← o MESMO número
+ *
+ * `versionCode` repetido é o Android recusando a instalação: ele exige um
+ * código **estritamente maior** que o instalado. A build fica verde, a
+ * atualização falha no aparelho, e o defeito só aparece em campo — a mesma
+ * família do conflito de certificado do ADR-0042.
+ *
+ * O teste de monotonicidade abaixo existia e passava, porque a lista de
+ * exemplo ia de `1.3.1` a `2.0.0` sem nunca cruzar `menor >= 10`. Amostra
+ * escolhida a dedo concorda com o defeito; hoje a lista cruza, e há uma
+ * varredura que cobra ausência de colisão.
+ *
+ * Com 100 por campo cabem 99 correções por minor e 99 minors por maior. E a
+ * troca é segura: o maior código já publicado é 190 (1.9.0), e a regra nova
+ * dá 11000 para a 1.10.0 — bem acima dele.
+ */
 function codigoDaVersao(versao) {
   const [maior, menor, correcao] = versao.split('.').map(Number);
-  return maior * 100 + menor * 10 + correcao;
+  return maior * 10_000 + menor * 100 + correcao;
 }
 
 test('a versão do package.json é um semver de três números', () => {
@@ -70,11 +95,39 @@ test('o código de versão sobe junto com a versão', () => {
   // O Android recusa instalar um versionCode menor ou igual ao instalado: se a
   // regra não for monotônica, a atualização falha no aparelho e a build fica
   // verde do mesmo jeito.
-  const ordem = ['1.3.1', '1.4.0', '1.4.4', '1.5.0', '1.6.0', '2.0.0'];
+  // A lista PRECISA cruzar `menor >= 10`: era justamente o que a antiga não
+  // fazia, e por isso ela passava com a fórmula quebrada.
+  const ordem = ['1.3.1', '1.4.0', '1.4.4', '1.5.0', '1.6.0', '1.9.0', '1.10.0', '1.10.1', '1.11.0', '2.0.0', '2.0.1', '2.10.0'];
   for (let i = 1; i < ordem.length; i += 1) {
     assert.ok(
       codigoDaVersao(ordem[i]) > codigoDaVersao(ordem[i - 1]),
       `${ordem[i]} (${codigoDaVersao(ordem[i])}) deveria ser maior que ${ordem[i - 1]} (${codigoDaVersao(ordem[i - 1])})`
     );
   }
+});
+
+test('nenhuma versão plausível colide com outra no versionCode', () => {
+  // Colisão é indistinguível de regressão para o Android: ele recusa código
+  // menor OU IGUAL ao instalado. Varre um intervalo inteiro em vez de confiar
+  // numa lista escolhida a dedo — foi a lista curta que deixou passar o
+  // `1.10.0` e o `2.0.0` valendo 200 os dois.
+  const vistos = new Map();
+  for (let maior = 1; maior <= 3; maior += 1) {
+    for (let menor = 0; menor <= 30; menor += 1) {
+      for (let correcao = 0; correcao <= 20; correcao += 1) {
+        const versao = `${maior}.${menor}.${correcao}`;
+        const codigo = codigoDaVersao(versao);
+        assert.ok(!vistos.has(codigo), `${versao} colide com ${vistos.get(codigo)} — ambos dão ${codigo}`);
+        vistos.set(codigo, versao);
+      }
+    }
+  }
+});
+
+test('a regra nova fica acima do maior código já publicado', () => {
+  // Trocar a regra só é seguro se o código novo superar tudo que já foi ao
+  // aparelho. O maior publicado é 190, da 1.9.0.
+  const MAIOR_PUBLICADO = 190;
+  assert.ok(codigoDaVersao(VERSAO) > MAIOR_PUBLICADO,
+    `${VERSAO} dá ${codigoDaVersao(VERSAO)}, que não supera o ${MAIOR_PUBLICADO} já instalado`);
 });

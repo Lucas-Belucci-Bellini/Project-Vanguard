@@ -1,5 +1,68 @@
 # Changelog
 
+## 1.10.0 — 2026-09-06
+
+### `#/trilhas` — o que cada um andou de verdade
+
+Dez pessoas saem do mesmo lugar e chegam no mesmo lugar, e **nenhuma anda a
+mesma coisa**. Uma corta por dentro, outra erra a saída e volta, outra faz a
+variante por outra cidade. A tela mostra, por pessoa: distância andada,
+fração dos fixos dentro de 60 m da referência, e o maior afastamento.
+
+**A referência é um guia, não a verdade.** Se ela é antiga e quatro pessoas
+passaram pelo mesmo lugar fora dela, o provável é que o caminho mudou — não
+que quatro erraram. A tela nunca escreve "errou".
+
+### O guia que se atualiza conforme as pessoas andam
+
+Sem inventar traçado. O app conta quem passou por onde e entrega **três
+evidências**, cada uma com quantas pessoas a sustentam:
+
+| categoria | o que significa |
+| --- | --- |
+| `CONFIRMADO` | trecho da referência com 3+ pessoas passando |
+| `SEM MOVIMENTO` | trecho com menos que isso — mudou? fechou? |
+| `CAMINHO NOVO` | lugar fora da referência com 3+ pessoas, **com coordenada** |
+
+A tentação seria gerar uma linha média das trilhas e chamar de "traçado
+atualizado". Não: a média entre duas variantes legítimas passa pelo meio do
+mato, entre as duas. A decisão de mudar o guia é de quem organiza a caminhada.
+
+A contagem é por **trilha distinta**, nunca por ponto — quem parou para
+almoçar deixa duzentos fixos no mesmo lugar, e isso viraria "caminho novo
+confirmado por 200".
+
+### Acervo separado, e uma cópia que é cópia
+
+O acervo é um banco IndexedDB **próprio** (`vanguard-acervo`): importar a
+trilha de dez peregrinos não encosta em `vanguard:trilha` nem no Track Store
+da V3. `GUARDAR A TRILHA DESTE APARELHO` **copia** — há fluxo cobrando que a
+gravação em andamento continue com os mesmos pontos (41 → 41). Apagar exige
+digitar o **nome exato**: lista é fácil de tocar por engano.
+
+### Um defeito achado ao verificar
+
+A grade espacial que torna a comparação viável olhava só as células vizinhas.
+Quem está *dentro* da faixa está a uma célula; quem está **fora** pode estar a
+quilômetros — e aí não havia segmento na vizinhança e a distância saía
+`Infinity`, direto para a tela como "maior afastamento: Infinity m". Justamente
+o caso interessante. Hoje a busca abre em anéis e cai numa varredura completa
+quando precisa; medido, o mesmo desvio dá **21 819 m**.
+
+### E um defeito latente que a subida de versão destapou
+
+O `versionCode` do Android era `maior*100 + menor*10 + correcao`. Ele quebra
+**exatamente em 1.10.0**: `1.10.0` e `2.0.0` davam **200 os dois**. O Android
+exige código estritamente maior que o instalado — colisão é a build ficando
+verde e a atualização falhando no aparelho, sem erro que explique.
+
+O teste de monotonicidade existia e passava: a lista de exemplo ia de 1.3.1 a
+2.0.0 **sem nunca cruzar minor ≥ 10**. Amostra escolhida a dedo concorda com o
+defeito. Hoje a regra é `maior*10 000 + menor*100 + correcao`, a lista cruza, e
+há uma varredura de 1 900 versões cobrando ausência de colisão.
+
+904 testes, 17 rotas × 2 larguras, 38 fluxos.
+
 ## 1.9.0 — 2026-09-06
 
 ### Caminhos dos Anjos — o corredor de 167 MB que cobre os 106 km

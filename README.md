@@ -183,6 +183,8 @@ A versão corrente é a mostrada na tela `#/sobre`, e ela vem do `package.json`
 no momento do build — a mesma fonte que o `versionName` do Android e o gate de
 versão do workflow conferem.
 
+- **1.10.0** — `#/trilhas`: o que cada pessoa andou, e as três evidências que
+  permitem atualizar o guia sem inventar traçado.
 - **1.9.0** — Caminhos dos Anjos como corredor de mapa offline (167 MB para
   os 106 km), com a sequência de municípios geocodificada e declarada.
 - **1.8.0** — tempestade: distância do raio pelo trovão, sem internet, com a
