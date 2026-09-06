@@ -1,6 +1,27 @@
 # Changelog
 
-## Não lançado
+## 1.9.0 — 2026-09-06
+
+### Caminhos dos Anjos — o corredor de 167 MB que cobre os 106 km
+
+`src/data/caminhos.js` traz a sequência de municípios do Caminho dos Anjos —
+Catedral de Londrina, Ibiporã, Jataizinho, Uraí, Cornélio Procópio, Santa
+Mariana, Bandeirantes — com o **identificador OSM de cada ponto**,
+geocodificados no Nominatim. Coordenada sem procedência é chute com aparência
+de dado.
+
+**Não é o traçado, e o app diz isso na tela.** A reta pelos sete municípios
+mede 84,2 km; a trilha real tem 106 km — **22 km de sinuosidade**. Por isso a
+largura sugerida é de 10 km de cada lado, que cobre a diferença sem precisar
+conhecê-la. Tendo o GPX oficial, importe: aí o corredor segue o caminho de
+verdade em vez desta aproximação.
+
+Escolher um caminho conhecido **não apaga nem sobrescreve a trilha gravada** —
+o preset é só a linha que o planejador usa para escolher tiles. Há fluxo
+cobrando isso ponto a ponto (41 → 41).
+
+O Santuário de São Miguel Arcanjo não está indexado no OSM; o último ponto é a
+sede de Bandeirantes, e com 10 km de raio o corredor cobre o entorno dele.
 
 **Corredor de rota — o mapa offline segue o caminho, não um círculo.**
 

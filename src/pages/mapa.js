@@ -13,6 +13,7 @@ import { criarAvisoDaJornada } from '../core/notificacao-jornada.js';
 import { estadoTrilha, transicionarTrilha, ESTADOS_TRILHA } from '../core/trilha-sessao.js';
 import { planejarTilesDoViewport } from '../core/mapa-offline.js';
 import { planejarRegiao, planejarCorredor, formatarBytes, custoDoPlaneta, MOTIVOS_REGIAO } from '../core/mapa-regiao.js';
+import { CAMINHOS, caminhoPorId, avisoDoCaminho } from '../data/caminhos.js';
 import { criarControleCentralizacao } from '../core/centralizacao-manual.js';
 import { ESTADOS_BACKGROUND } from '../core/background-localizacao.js';
 import { rastreamentoDoAplicativo } from '../core/rastreamento-app.js';
@@ -152,8 +153,14 @@ export function mapaPage() {
   // Uma peregrinação não é um círculo. Londrina → Bandeirantes são 84 km: um
   // círculo que cobrisse as duas pontas teria 42 km de raio e baixaria onde
   // ninguém vai pisar. O corredor mede 70% menos, medido.
+  // De onde vem a linha do corredor. A trilha DESTE aparelho é o primeiro
+  // item de propósito: caminho conhecido é uma conveniência, o que a pessoa
+  // gravou ou importou é o dado dela.
+  const corredorFonte = h('select', { className: 'mapa__regiao-raio', ariaLabel: 'Origem da linha do corredor' },
+    h('option', { value: 'trilha' }, 'Rota carregada neste aparelho'),
+    ...CAMINHOS.map((c) => h('option', { value: c.id }, `${c.nome} — ${c.trecho}`)));
   const corredorRaio = h('select', { className: 'mapa__regiao-raio', ariaLabel: 'Largura do corredor da rota' },
-    ...[2, 5, 10].map((km) => h('option', { value: String(km) }, `${km} km de cada lado`)));
+    ...[2, 5, 10, 15].map((km) => h('option', { value: String(km) }, `${km} km de cada lado`)));
   corredorRaio.value = '5';
   const corredorDetalhe = h('select', { className: 'mapa__regiao-raio', ariaLabel: 'Detalhe do corredor' },
     h('option', { value: '15' }, 'Estradas, ferrovias e cidades (z15)'),
@@ -250,7 +257,7 @@ export function mapaPage() {
     h('div', { className: 'mapa__quick-actions' }, centerButton, clearButton),
     h('div', { className: 'mapa__offline-card' }, offlineButton, offlineStatus, offlineClearButton),
     h('div', { className: 'mapa__offline-card' }, regiaoRaio, regiaoButton, regiaoStatus, regiaoNota),
-    h('div', { className: 'mapa__offline-card' }, corredorRaio, corredorDetalhe, corredorButton, corredorStatus, corredorNota),
+    h('div', { className: 'mapa__offline-card' }, corredorFonte, corredorRaio, corredorDetalhe, corredorButton, corredorStatus, corredorNota),
     h('div', { className: 'mapa__registro-card' },
       h('div', { className: 'mapa__route-card-head' }, h('span', { className: 'mapa__kicker' }, 'DADOS LOCAIS'), h('span', { className: 'mapa__privacy' }, '⌖ JSON')),
       h('div', { className: 'mapa__registro-actions' }, registroExportarButton, registroGpxButton, registroKmlButton, registroImportarButton),
@@ -1460,24 +1467,41 @@ export function mapaPage() {
 
     /* ── Corredor da rota ────────────────────────────────────────────────── */
 
+    /**
+     * A linha do corredor.
+     *
+     * Escolher um caminho conhecido **NÃO** mexe na trilha do operador: o
+     * preset é só a linha que o planejador usa para escolher tiles. Escrever
+     * os municípios por cima da trilha gravada seria trocar o dado dele por
+     * uma aproximação — e uma aproximação que ele não pediu.
+     */
+    function linhaDoCorredor() {
+      const caminho = caminhoPorId(corredorFonte.value);
+      if (caminho) return { pontos: caminho.pontos, caminho };
+      return { pontos: gravador.trilha(), caminho: null };
+    }
+
     function planoDoCorredor() {
       const baseAtual = BASES[selectBase.value] ?? {};
       const tilesCorredor = ROTULOS
         ? [...(baseAtual.tiles ?? []), ...(ROTULOS.tiles ?? [])]
         : baseAtual.tiles;
-      return planejarCorredor({
-        // A linha vem da trilha DESTE aparelho: gravada ou importada de GPX/KML.
-        pontos: gravador.trilha(),
-        raioKm: Number(corredorRaio.value),
-        zoomMaximo: Number(corredorDetalhe.value),
-        base: { ...baseAtual, tiles: tilesCorredor },
-      });
+      const { pontos, caminho } = linhaDoCorredor();
+      return {
+        ...planejarCorredor({
+          pontos,
+          raioKm: Number(corredorRaio.value),
+          zoomMaximo: Number(corredorDetalhe.value),
+          base: { ...baseAtual, tiles: tilesCorredor },
+        }),
+        caminho,
+      };
     }
 
     function mostrarTamanhoDoCorredor() {
       const plano = planoDoCorredor();
       if (plano.motivo === MOTIVOS_REGIAO.ROTA_INVALIDA) {
-        corredorStatus.textContent = 'Nenhuma rota carregada. Importe um GPX/KML do caminho, ou grave a trilha andando — o corredor segue a linha que existir aqui.';
+        corredorStatus.textContent = 'Nenhuma rota carregada. Importe um GPX/KML do caminho, grave a trilha andando, ou escolha um caminho conhecido na lista acima.';
         corredorButton.disabled = true;
         return;
       }
@@ -1488,10 +1512,23 @@ export function mapaPage() {
       }
       corredorButton.disabled = !plano.cabe;
       corredorStatus.textContent = plano.cabe
-        ? `${plano.comprimentoKm.toFixed(1)} km de rota · ${plano.tiles.toLocaleString('pt-BR')} tiles ≈ ${formatarBytes(plano.bytesEstimados)} (estimativa). O corredor custa ~70 % menos que a caixa que o contém.`
+        ? `${plano.comprimentoKm.toFixed(1)} km de linha · ${plano.tiles.toLocaleString('pt-BR')} tiles ≈ ${formatarBytes(plano.bytesEstimados)} (estimativa). O corredor custa ~70 % menos que a caixa que o contém.`
         : `${plano.comprimentoKm.toFixed(1)} km neste detalhe dariam ${formatarBytes(plano.bytesEstimados)} — grande demais para um pacote.${plano.zoomSugerido ? ` Até z${plano.zoomSugerido} cabe.` : ''}`;
+      // O aviso do caminho vem do dado, não da tela: se um dia entrar um
+      // caminho com traçado real, o texto muda junto em vez de continuar
+      // dizendo a coisa errada aqui.
+      corredorNota.textContent = plano.caminho
+        ? avisoDoCaminho(plano.caminho)
+        : 'O corredor segue a rota que ESTE aparelho tem carregada — trilha gravada ou arquivo GPX/KML importado acima. Escolher um caminho conhecido na lista NÃO apaga a sua trilha: o preset é só a linha usada para escolher os tiles.';
     }
 
+    corredorFonte.onchange = () => {
+      // Ao escolher um caminho conhecido, já sugere a largura que a fonte
+      // recomenda — é ela que cobre a sinuosidade que a reta não conhece.
+      const caminho = caminhoPorId(corredorFonte.value);
+      if (caminho?.raioSugeridoKm) corredorRaio.value = String(caminho.raioSugeridoKm);
+      mostrarTamanhoDoCorredor();
+    };
     corredorRaio.onchange = mostrarTamanhoDoCorredor;
     corredorDetalhe.onchange = mostrarTamanhoDoCorredor;
     mostrarTamanhoDoCorredor();

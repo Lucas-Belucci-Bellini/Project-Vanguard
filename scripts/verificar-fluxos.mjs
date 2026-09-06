@@ -400,7 +400,7 @@ await esperarCartoesOffline();
 await p.waitForTimeout(2500);
 
 const comRota = await statusCorredor.innerText();
-const kmLido = Number((comRota.match(/([\d.,]+)\s*km de rota/) ?? [])[1]?.replace(',', '.') ?? 0);
+const kmLido = Number((comRota.match(/([\d.,]+)\s*km de linha/) ?? [])[1]?.replace(',', '.') ?? 0);
 conferir(
   'com a rota carregada, o corredor mede os 84 km do trecho real',
   kmLido > 82 && kmLido < 87,
@@ -415,6 +415,45 @@ conferir(
   'pedir casas em 84 km é recusado, dizendo até que detalhe cabe',
   /grande demais/i.test(comCasas) && /Até z\d+ cabe/.test(comCasas),
   comCasas.trim().slice(0, 76)
+);
+
+// ── FLUXO 17: caminho conhecido não apaga a trilha do operador ───────────────
+// O preset é só a LINHA que escolhe tiles. Escrever os municípios por cima da
+// trilha gravada seria trocar o dado da pessoa por uma aproximação que ela não
+// pediu — e é o tipo de perda que só se descobre quando o backup não volta.
+const contarPontos = () => p.evaluate(() => {
+  const b = localStorage.getItem('vanguard:trilha');
+  if (!b) return 0;
+  const l = JSON.parse(b); const a = Array.isArray(l) ? l : l?.value;
+  return Array.isArray(a) ? a.length : -1;
+});
+const antesDoPreset = await contarPontos();
+conferir('há uma trilha gravada antes de mexer no preset', antesDoPreset > 5, `${antesDoPreset} pontos`);
+
+// O fluxo anterior deixou o detalhe em z17; sem voltar para z15 o preset é
+// recusado por tamanho e a leitura vira a mensagem de recusa, não o número.
+await p.getByLabel('Detalhe do corredor').selectOption('15');
+await p.getByLabel('Origem da linha do corredor').selectOption('caminhos-dos-anjos');
+await p.waitForTimeout(600);
+const depoisDoPreset = await contarPontos();
+conferir(
+  'escolher o Caminhos dos Anjos NÃO apaga nem sobrescreve a trilha',
+  depoisDoPreset === antesDoPreset,
+  `${antesDoPreset} → ${depoisDoPreset} pontos`
+);
+
+const comPreset = await statusCorredor.innerText();
+const kmPreset = Number((comPreset.match(/([\d.,]+)\s*km de linha/) ?? [])[1]?.replace(',', '.') ?? 0);
+conferir('o preset mede os ~84 km da reta pelos sete municípios', kmPreset > 80 && kmPreset < 90, comPreset.trim().slice(0, 74));
+
+const larguraSugerida = await p.getByLabel('Largura do corredor da rota').inputValue();
+conferir('e já sugere a largura que cobre a sinuosidade da trilha real', larguraSugerida === '10', `${larguraSugerida} km de cada lado`);
+
+const notaPreset = await p.locator('.mapa__offline-nota').nth(1).innerText();
+conferir(
+  'a tela avisa que é sequência de municípios, não o traçado',
+  /RETA/.test(notaPreset) && /106 km/.test(notaPreset) && /GPX/.test(notaPreset),
+  notaPreset.trim().slice(0, 78)
 );
 
 // ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
