@@ -16,11 +16,16 @@ test('compararVersoes trata versões inválidas como inferiores', () => {
 });
 
 test('releaseMaisNova recusa rascunhos e releases iguais ou anteriores', () => {
-  assert.equal(releaseMaisNova({ tag_name: 'v1.3.2', draft: false }), true);
-  assert.equal(releaseMaisNova({ tag_name: 'v1.3.1', draft: false }), false);
-  assert.equal(releaseMaisNova({ tag_name: 'v1.3.1-rc.2', draft: false }), false);
-  assert.equal(releaseMaisNova({ tag_name: 'v1.3.2', draft: true }), false);
-  assert.equal(releaseMaisNova(null), false);
+  // A versão instalada é passada explicitamente: ela vem do build, e depender
+  // da constante do módulo foi exatamente o defeito — o valor ficou congelado
+  // em 1.3.1 por quatro releases e o app anunciava atualização para uma versão
+  // que ele já era.
+  const instalada = '1.3.1';
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.2', draft: false }, instalada), true);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.1', draft: false }, instalada), false);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.1-rc.2', draft: false }, instalada), false);
+  assert.equal(releaseMaisNova({ tag_name: 'v1.3.2', draft: true }, instalada), false);
+  assert.equal(releaseMaisNova(null, instalada), false);
 });
 
 test('nomeVersao extrai tag pública sem alterar o objeto remoto', () => {

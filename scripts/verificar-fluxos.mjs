@@ -1,0 +1,523 @@
+/**
+ * Fluxos funcionais num navegador de verdade.
+ *
+ * `npm test` prova que o motor calcula certo. Isto prova outra coisa, que
+ * nenhum teste de unidade alcança: que **apertar o botão faz o que ele diz**.
+ * Cada fluxo aqui é uma ação real de ponta a ponta, e vários existem porque o
+ * defeito correspondente já aconteceu:
+ *
+ * - campo de waypoint VAZIO produzia distância e rumo para a coordenada (0, 0);
+ * - campo de declinação VAZIO aplicava 0° como se fosse correção medida;
+ * - a tela legada de tiro não se declarava legada em lugar nenhum;
+ * - a tela "Sobre" mostrava a palavra PROTÓTIPO no lugar da versão.
+ *
+ * Não faz parte de `npm test`: exige Playwright e Chromium, que não são
+ * dependências deste repositório. Ver `scripts/verificar-rotas.mjs`.
+ *
+ * Como rodar:
+ *   npm run build && npx vite preview --port 4319 &
+ *   CHROMIUM=<caminho do chrome> node scripts/verificar-fluxos.mjs
+ */
+
+import { readFileSync } from 'node:fs';
+import { chromium } from 'playwright';
+
+/* A versão esperada vem do `package.json`, nunca de um literal aqui: um número
+ * cravado num teste envelhece exatamente como envelheceu o `'1.3.1'` que a
+ * configuração do app carregava — e aí o teste passa a mentir junto. */
+const { version: VERSAO } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+const BASE = process.env.BASE ?? 'http://localhost:4319';
+const b = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ['--no-sandbox'] });
+const ctx = await b.newContext({ viewport: { width: 390, height: 780 }, permissions: ['geolocation'], geolocation: { latitude: -23.5505, longitude: -46.6333, accuracy: 12 } });
+const p = await ctx.newPage();
+let falhas = 0;
+const conferir = (nome, ok, detalhe = '') => { if (!ok) falhas++; console.log(`${ok ? '✓' : '✗'} ${nome}${detalhe ? ' → ' + detalhe : ''}`); };
+
+// ── FLUXO 1: navegação com campo vazio NÃO pode produzir rumo ────────────────
+await p.goto(`${BASE}/#/navegacao`, { waitUntil: 'networkidle' });
+await p.waitForTimeout(1200);
+await p.getByRole('button', { name: 'CALCULAR RUMO' }).click();
+await p.waitForTimeout(200);
+let txt = await p.locator('.navegacao__estado').nth(1).textContent();
+conferir('campo vazio não vira coordenada (0,0)', !/DIST[ÂA]NCIA\s+[\d.,]/i.test(txt), txt.trim().slice(0, 70));
+
+// ── FLUXO 2: destino real produz distância e rumo ────────────────────────────
+await p.getByLabel('Latitude do waypoint').fill('-23.5605');
+await p.getByLabel('Longitude do waypoint').fill('-46.6433');
+await p.getByRole('button', { name: 'CALCULAR RUMO' }).click();
+await p.waitForTimeout(200);
+txt = await p.locator('.navegacao__estado').nth(1).textContent();
+conferir('destino informado produz distância e rumo', /DIST[ÂA]NCIA.*RUMO/i.test(txt), txt.trim().slice(0, 70));
+
+// ── FLUXO 3: coordenada fora de faixa é recusada ─────────────────────────────
+await p.getByLabel('Latitude do waypoint').fill('999');
+await p.getByRole('button', { name: 'CALCULAR RUMO' }).click();
+await p.waitForTimeout(200);
+txt = await p.locator('.navegacao__estado').nth(1).textContent();
+conferir('latitude fora de faixa é recusada', /inv[áa]lido/i.test(txt), txt.trim().slice(0, 70));
+
+// ── FLUXO 4: conversor MGRS ──────────────────────────────────────────────────
+await p.getByLabel('Coordenada MGRS para converter').fill('23K LP 33287 94588');
+await p.getByRole('button', { name: 'CONVERTER MGRS' }).click();
+await p.waitForTimeout(200);
+txt = await p.locator('.navegacao__estado').last().textContent();
+conferir('conversor MGRS devolve lat/lon', /LAT\/LON\s*-2[0-9]/.test(txt), txt.trim().slice(0, 60));
+
+// ── FLUXO 5: bússola com declinação vazia NÃO aplica correção ────────────────
+await p.goto(`${BASE}/#/bussola`, { waitUntil: 'networkidle' });
+await p.waitForTimeout(1000);
+await p.getByRole('button', { name: /USAR ESTA DECLINA/i }).click();
+await p.waitForTimeout(300);
+const status = await p.locator('.bussola__status-texto').textContent();
+conferir('declinação vazia não vira correção de 0°', /Informe a declina/i.test(status), status.trim().slice(0, 70));
+
+// ── FLUXO 6: declinação válida aplica ────────────────────────────────────────
+await p.getByLabel(/Declina/i).fill('-20.5');
+await p.getByRole('button', { name: /USAR ESTA DECLINA/i }).click();
+await p.waitForTimeout(300);
+const status2 = await p.locator('.bussola__status-texto').textContent();
+conferir('declinação informada é aplicada', /-20\.5/.test(status2), status2.trim().slice(0, 70));
+
+// ── FLUXO 7: o modelo magnético dá a declinação e diz que é PREVISÃO ─────────
+// Precisa de posição: o modelo calcula para um lugar, e sem lugar não há o que
+// calcular. Semear aqui é o que permite conferir o cartão sem GPS no runner.
+await p.evaluate(() => {
+  localStorage.setItem('vanguard:local', JSON.stringify({ lat: -23.3103, lon: -51.1628, accuracy: 12, heading: 90, ts: Date.now() }));
+  localStorage.removeItem('vanguard:bussola');
+});
+// `goto` para a MESMA URL não recarrega o documento, e o `estado` mantém cópia
+// em memória: sem o reload, a correção de -20,5° do fluxo 6 continuaria viva e
+// o botão do modelo apareceria (corretamente) desabilitado.
+await p.reload({ waitUntil: 'networkidle' });
+await p.waitForTimeout(900);
+const cartaoModelo = () => p.locator('.bussola__card', { hasText: 'MODELO MAGNÉTICO' });
+const textoModelo = await cartaoModelo().innerText();
+conferir(
+  'modelo magnético mostra a declinação do lugar',
+  /DECLINAÇÃO AQUI/.test(textoModelo) && /-\d+[.,]\d°/.test(textoModelo) && /WMM-\d{4}/.test(textoModelo),
+  textoModelo.replace(/\n+/g, ' · ').slice(0, 70)
+);
+
+await cartaoModelo().getByRole('button').click();
+await p.waitForTimeout(300);
+const origemPrevista = await p.locator('.bussola__origem').textContent();
+const correcaoPrevista = await p.locator('.bussola__linha', { hasText: 'CORREÇÃO APLICADA' }).first().innerText();
+conferir(
+  'ligar o modelo dá azimute PREVISTO, não CORRIGIDO',
+  /PREVISTO/.test(origemPrevista) && !/CORRIGIDO/.test(origemPrevista) && /prevista pelo WMM/.test(correcaoPrevista),
+  `${origemPrevista.trim()} · ${correcaoPrevista.replace(/\n+/g, ' ').slice(0, 40)}`
+);
+
+// ── FLUXO 8: medida ganha de prevista ────────────────────────────────────────
+// Com o modelo LIGADO, informar uma declinação tem de tomar a frente: o modelo
+// prevê o campo da Terra e não sabe nada sobre este aparelho.
+await p.getByLabel(/Declina/i).fill('-18.2');
+await p.getByRole('button', { name: /USAR ESTA DECLINA/i }).click();
+await p.waitForTimeout(300);
+const origemMedida = await p.locator('.bussola__origem').textContent();
+const correcaoMedida = await p.locator('.bussola__linha', { hasText: 'CORREÇÃO APLICADA' }).first().innerText();
+conferir(
+  'medida ganha de prevista mesmo com o modelo ligado',
+  /CORRIGIDO/.test(origemMedida) && /-18[.,]2/.test(correcaoMedida) && /informada por você/.test(correcaoMedida),
+  `${origemMedida.trim()} · ${correcaoMedida.replace(/\n+/g, ' ').slice(0, 45)}`
+);
+
+// ── FLUXO 9: doar não promete pagamento ──────────────────────────────────────
+await p.goto(`${BASE}/#/doar`, { waitUntil: 'networkidle' });
+await p.waitForTimeout(700);
+await p.locator('.doar__checkout').click();
+await p.waitForTimeout(200);
+const doar = await p.locator('.doar__status').textContent();
+conferir('checkout diz que não está configurado', /CHECKOUT N[ÃA]O CONFIGURADO/i.test(doar) && !/ASAAS_API_KEY/.test(doar), doar.trim().slice(0, 60));
+
+// ── FLUXO 10: tela legada se declara legada ───────────────────────────────────
+await p.goto(`${BASE}/#/tiro`, { waitUntil: 'networkidle' });
+await p.waitForTimeout(900);
+const legado = await p.locator('.tiro__legado').textContent().catch(() => '');
+conferir('tela legada mostra o aviso', /LEGADA/.test(legado) && /Arma 3/.test(legado), legado.trim().slice(0, 60));
+
+// ── FLUXO 12: trocar de tela NÃO encerra a gravação ───────────────────────────
+// Este é o fluxo do defeito medido na 1.6.0: o `desmontar()` de `mapa.js`
+// chamava `pararGps()`, então conferir a bússola no meio de uma caminhada
+// parava a trilha em silêncio. Aqui a pessoa anda, sai do mapa, continua
+// andando, e a contagem tem de continuar subindo.
+// `.mapa__route-button` veste dois botões (TRAJETO e ROTA); mirar pelo nome.
+const botaoRota = p.getByRole('button', { name: /^(INICIAR|PAUSAR|RETOMAR) ROTA$/ });
+const pontosGravados = () => p.evaluate(() => {
+  // `estado.js` grava envelopado: { schema, version, value }.
+  try {
+    const bruto = localStorage.getItem('vanguard:trilha');
+    if (!bruto) return 0;
+    const lido = JSON.parse(bruto);
+    const lista = Array.isArray(lido) ? lido : lido?.value;
+    return Array.isArray(lista) ? lista.length : -1;
+  } catch { return -1; }
+});
+/** Anda `passos` vezes ~40 m para o norte, esperando o watcher a cada passo. */
+const caminhar = async (passos, partida = 0) => {
+  for (let i = 1; i <= passos; i += 1) {
+    await ctx.setGeolocation({ latitude: -23.5505 + (partida + i) * 0.00036, longitude: -46.6333, accuracy: 8 });
+    await p.waitForTimeout(400);
+  }
+};
+
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.evaluate(() => { localStorage.removeItem('vanguard:trilha'); });
+await p.reload({ waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(1200);
+await botaoRota.click();
+await p.waitForTimeout(400);
+await caminhar(3);
+const noMapa = await pontosGravados();
+conferir('gravar no mapa acumula pontos', noMapa >= 2, `${noMapa} pontos`);
+
+// A pessoa vai conferir a bússola. A página do mapa é desmontada aqui.
+await p.goto(`${BASE}/#/bussola`, { waitUntil: 'domcontentloaded' });
+await p.waitForTimeout(1200);
+const mapaMontado = await botaoRota.count();
+await caminhar(3, 3);
+const foraDoMapa = await pontosGravados();
+conferir(
+  'sair do mapa NÃO encerra a gravação',
+  mapaMontado === 0 && foraDoMapa > noMapa,
+  `mapa desmontado · ${noMapa} → ${foraDoMapa} pontos`
+);
+
+// E o registro continua inteiro ao voltar: nada foi reiniciado.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(800);
+const aoVoltar = await pontosGravados();
+conferir('voltar ao mapa reencontra a mesma trilha', aoVoltar >= foraDoMapa, `${aoVoltar} pontos`);
+
+// ── FLUXO 13: o contador de trajeto conta, e conta SEM MAPA ───────────────────
+// A pergunta "quantos metros eu andei" não deve exigir o MapLibre (802 kB) nem
+// um único tile pela rede. Aqui se cobra as duas coisas: o número sobe, e
+// nenhuma requisição de tile sai enquanto a tela está aberta.
+const tilesPedidos = [];
+const espiao = (req) => {
+  const u = req.url();
+  if (/tile|\.png|\.jpg|\.pbf|maplibre/i.test(u) && !u.startsWith(BASE)) tilesPedidos.push(u);
+};
+p.on('request', espiao);
+
+await p.goto(`${BASE}/#/odometro`, { waitUntil: 'domcontentloaded' });
+const botaoContador = p.getByRole('button', { name: /^(INICIAR|PAUSAR|RETOMAR)$/ });
+await botaoContador.waitFor({ timeout: 15_000 });
+// Estado limpo de verdade: o fluxo anterior deixou uma rota ATIVA, e o botão
+// deste contador é o mesmo estado — com rota ativa ele diz PAUSAR, e clicar
+// pausaria em vez de iniciar. Apagar a trilha sem apagar a rota é um estado
+// pela metade.
+await p.evaluate(() => {
+  for (const k of ['vanguard:trilha', 'vanguard:rotaAtiva', 'vanguard:rotaPausada']) localStorage.removeItem(k);
+});
+await p.reload({ waitUntil: 'domcontentloaded' });
+await botaoContador.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(600);
+const rotuloInicial = await botaoContador.innerText();
+conferir('sem rota, o botão convida a INICIAR', /INICIAR/.test(rotuloInicial), rotuloInicial.trim());
+
+const lerContador = () => p.locator('.odometro__numero').innerText();
+const zerado = await lerContador();
+conferir('contador começa em zero, não em lixo', zerado.trim() === '0', `"${zerado.trim()}"`);
+
+await botaoContador.click();
+await p.waitForTimeout(300);
+await caminhar(4, 40);
+const andou = await lerContador();
+const unidade = await p.locator('.odometro__unidade').innerText();
+conferir(
+  'o contador SOBE conforme se anda',
+  Number(andou.replace(',', '.')) > 0,
+  `${andou.trim()} ${unidade.trim()}`
+);
+
+const tempo = await p.locator('.odometro__campo', { hasText: 'TEMPO' }).locator('.odometro__campo-valor').innerText();
+conferir('o tempo decorrido aparece como tempo, não como segundos crus', /^\d+:\d{2}/.test(tempo.trim()), tempo.trim());
+
+conferir('a tela do contador NÃO pede tile nenhum', tilesPedidos.length === 0, `${tilesPedidos.length} requisição(ões) externas`);
+p.off('request', espiao);
+
+// E a contagem é a MESMA rota do mapa: um gravador, nunca dois números.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(900);
+const rotuloNoMapa = await botaoRota.innerText();
+conferir(
+  'iniciar no contador deixa o mapa já gravando — um gravador só',
+  /PAUSAR ROTA/.test(rotuloNoMapa),
+  rotuloNoMapa.trim()
+);
+
+// ── FLUXO 14: a região offline diz o tamanho ANTES de baixar ─────────────────
+// Ninguém aceita 400 MB às cegas, e um app que promete "mapa offline" sem
+// dizer o preço mente por omissão. Aqui se cobra que o número apareça sozinho
+// ao escolher o raio, e que a nota traga a aritmética do planeta — a recusa
+// tem de ser verificável, não uma opinião do desenvolvedor.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(1500);
+
+const seletorRaio = p.getByLabel('Raio da região a baixar');
+const statusRegiao = p.locator('.mapa__offline-status').nth(1);
+await seletorRaio.selectOption('5');
+await p.waitForTimeout(250);
+const pequena = await statusRegiao.innerText();
+conferir('região pequena mostra tiles e tamanho antes de baixar', /tiles/.test(pequena) && /(MB|kB)/.test(pequena), pequena.trim().slice(0, 72));
+
+await seletorRaio.selectOption('30');
+await p.waitForTimeout(250);
+const grande = await statusRegiao.innerText();
+const mb = (t) => Number((t.match(/([\d.,]+)\s*MB/) ?? [])[1]?.replace(',', '.') ?? 0);
+conferir(
+  'raio maior custa mais, e TODA opção oferecida cabe de verdade',
+  mb(grande) > mb(pequena) && !/grande demais/i.test(grande),
+  `5 km: ${mb(pequena)} MB → 30 km: ${mb(grande)} MB`
+);
+
+// A recusa também precisa funcionar: a MESMA caixa alarga com o cosseno da
+// latitude, então 30 km na Escandinávia custa 3× o que custa em São Paulo.
+// Um app que aceitasse os dois estaria mentindo em um deles.
+await ctx.setGeolocation({ latitude: 60.2, longitude: 10.5, accuracy: 8 });
+await p.reload({ waitUntil: 'domcontentloaded' });
+await botaoRota.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(1800);
+await p.getByLabel('Raio da região a baixar').selectOption('30');
+await p.waitForTimeout(300);
+const noNorte = await p.locator('.mapa__offline-status').nth(1).innerText();
+conferir(
+  'longe do equador o mesmo raio é recusado, com um raio menor sugerido',
+  /grande demais/i.test(noNorte) && /Tente \d+ km/.test(noNorte),
+  noNorte.trim().slice(0, 70)
+);
+await ctx.setGeolocation({ latitude: -23.5505, longitude: -46.6333, accuracy: 12 });
+
+const nota = await p.locator('.mapa__offline-nota').first().innerText();
+conferir(
+  'a nota traz a aritmética que explica por que não existe mapa-múndi',
+  /268\.435\.456|268,435,456/.test(nota) && /TB/.test(nota),
+  nota.trim().slice(0, 78)
+);
+
+// ── FLUXO 15: o cronômetro do trovão mede, e mede SEM REDE ───────────────────
+// A metade que decide procurar abrigo não pode depender de internet: numa
+// tempestade a rede é a primeira coisa a sumir. Aqui a rede é BLOQUEADA de
+// propósito antes de abrir a tela.
+await ctx.route('**://api.open-meteo.com/**', (rota) => rota.abort());
+await p.goto(`${BASE}/#/clima`, { waitUntil: 'domcontentloaded' });
+const botaoClarao = p.getByRole('button', { name: /VI O CLAR/i });
+await botaoClarao.waitFor({ timeout: 15_000 });
+await p.waitForTimeout(400);
+
+const semMedida = await p.locator('.clima__veredito').innerText();
+conferir(
+  'sem medida a tela diz SEM MEDIDA — e não "sem risco"',
+  /SEM MEDIDA/i.test(semMedida) && !/segur/i.test(await p.locator('.clima__veredito-corpo').innerText()),
+  semMedida.trim()
+);
+
+// Clarão, três segundos, trovão: ~1 km. É a conta que a regra de bolso faz.
+await botaoClarao.click();
+await p.waitForTimeout(3000);
+await p.getByRole('button', { name: /OUVI O TROV/i }).click();
+await p.waitForTimeout(300);
+
+const distancia = await p.locator('.clima__cronometro').innerText();
+const km = Number(distancia.replace(/[^\d.,]/g, '').replace(',', '.'));
+conferir('3 segundos viram ~1 km, sem internet nenhuma', km > 0.8 && km < 1.3, `${distancia.trim()}`);
+
+const leitura = await p.locator('.clima__leitura').innerText();
+conferir('a distância vem com a incerteza junto, nunca sozinha', /±/.test(leitura) && /m\/s/.test(leitura), leitura.trim().slice(0, 76));
+
+const vered = await p.locator('.clima__veredito').innerText();
+conferir('a 1 km o veredito manda procurar abrigo', /ABRIGO AGORA/i.test(vered), vered.trim());
+
+const espera = await p.locator('.clima__espera').innerText();
+conferir('e começa a contar os 30 minutos depois do trovão', /30 minutos/.test(espera) && /Faltam/.test(espera), espera.trim().slice(0, 64));
+
+const statusClima = await p.locator('.clima__status').innerText();
+conferir(
+  'sem rede a tela DIZ que está sem rede, em vez de mentir ou ficar vazia',
+  /sem rede|Nenhuma leitura/i.test(statusClima),
+  statusClima.trim().slice(0, 70)
+);
+await ctx.unroute('**://api.open-meteo.com/**');
+
+// ── FLUXO 16: o corredor segue a ROTA CARREGADA, e não inventa linha ─────────
+// Uma peregrinação não é um círculo. E o traçado tem de vir do aparelho — um
+// caminho inventado dentro de um app de navegação é o pior tipo de dado falso,
+// porque alguém segue.
+await p.goto(`${BASE}/#/mapa`, { waitUntil: 'domcontentloaded' });
+// Espera o cartão do corredor, não um botão vizinho: é ele que este fluxo
+// cobra, e é a presença dele que diz que a tela terminou de montar.
+const statusCorredor = p.locator('.mapa__offline-status').nth(2);
+/** Espera os três cartões do painel offline existirem.
+ *  `locator.nth(n).waitFor()` trava aqui mesmo com os elementos já no DOM
+ *  (medido: `count()` devolve 3 no primeiro instante e o `waitFor` estoura
+ *  20 s assim mesmo). Contar é o que a página promete e o que basta. */
+const esperarCartoesOffline = async (quantos = 3, limiteMs = 20_000) => {
+  const ate = Date.now() + limiteMs;
+  while (Date.now() < ate) {
+    if (await p.locator('.mapa__offline-status').count() >= quantos) return true;
+    await p.waitForTimeout(250);
+  }
+  return false;
+};
+conferir('a tela do mapa monta os três cartões de preparo offline', await esperarCartoesOffline());
+await p.waitForTimeout(1200);
+await p.evaluate(() => {
+  for (const k of ['vanguard:trilha', 'vanguard:rotaAtiva', 'vanguard:rotaPausada']) localStorage.removeItem(k);
+});
+await p.reload({ waitUntil: 'domcontentloaded' });
+await esperarCartoesOffline();
+await p.waitForTimeout(2000);
+
+const semRota = await statusCorredor.innerText();
+conferir(
+  'sem rota carregada, o corredor NÃO inventa uma linha',
+  /Nenhuma rota carregada/i.test(semRota),
+  semRota.trim().slice(0, 62)
+);
+
+// Carrega o trecho Londrina → Bandeirantes como rota do aparelho.
+await p.evaluate(() => {
+  const envelope = (v) => JSON.stringify({ schema: 'vanguard-state', version: 1, value: v });
+  const t0 = Date.now();
+  const pontos = [];
+  for (let i = 0; i <= 40; i += 1) {
+    pontos.push({
+      lat: -23.3103 + (0.2 * i) / 40, lon: -51.1628 + (0.7956 * i) / 40,
+      accuracy: 6, timestamp: t0 + i * 60_000,
+    });
+  }
+  localStorage.setItem('vanguard:trilha', envelope(pontos));
+});
+await p.reload({ waitUntil: 'domcontentloaded' });
+await esperarCartoesOffline();
+await p.waitForTimeout(2500);
+
+const comRota = await statusCorredor.innerText();
+const kmLido = Number((comRota.match(/([\d.,]+)\s*km de linha/) ?? [])[1]?.replace(',', '.') ?? 0);
+conferir(
+  'com a rota carregada, o corredor mede os 84 km do trecho real',
+  kmLido > 82 && kmLido < 87,
+  comRota.trim().slice(0, 76)
+);
+
+// Pedir casas (z17) tem de ser recusado com o zoom que cabe — não aceito em silêncio.
+await p.getByLabel('Detalhe do corredor').selectOption('17');
+await p.waitForTimeout(300);
+const comCasas = await statusCorredor.innerText();
+conferir(
+  'pedir casas em 84 km é recusado, dizendo até que detalhe cabe',
+  /grande demais/i.test(comCasas) && /Até z\d+ cabe/.test(comCasas),
+  comCasas.trim().slice(0, 76)
+);
+
+// ── FLUXO 17: caminho conhecido não apaga a trilha do operador ───────────────
+// O preset é só a LINHA que escolhe tiles. Escrever os municípios por cima da
+// trilha gravada seria trocar o dado da pessoa por uma aproximação que ela não
+// pediu — e é o tipo de perda que só se descobre quando o backup não volta.
+const contarPontos = () => p.evaluate(() => {
+  const b = localStorage.getItem('vanguard:trilha');
+  if (!b) return 0;
+  const l = JSON.parse(b); const a = Array.isArray(l) ? l : l?.value;
+  return Array.isArray(a) ? a.length : -1;
+});
+const antesDoPreset = await contarPontos();
+conferir('há uma trilha gravada antes de mexer no preset', antesDoPreset > 5, `${antesDoPreset} pontos`);
+
+// O fluxo anterior deixou o detalhe em z17; sem voltar para z15 o preset é
+// recusado por tamanho e a leitura vira a mensagem de recusa, não o número.
+await p.getByLabel('Detalhe do corredor').selectOption('15');
+await p.getByLabel('Origem da linha do corredor').selectOption('caminhos-dos-anjos');
+await p.waitForTimeout(600);
+const depoisDoPreset = await contarPontos();
+conferir(
+  'escolher o Caminhos dos Anjos NÃO apaga nem sobrescreve a trilha',
+  depoisDoPreset === antesDoPreset,
+  `${antesDoPreset} → ${depoisDoPreset} pontos`
+);
+
+const comPreset = await statusCorredor.innerText();
+const kmPreset = Number((comPreset.match(/([\d.,]+)\s*km de linha/) ?? [])[1]?.replace(',', '.') ?? 0);
+conferir('o preset mede os ~84 km da reta pelos sete municípios', kmPreset > 80 && kmPreset < 90, comPreset.trim().slice(0, 74));
+
+const larguraSugerida = await p.getByLabel('Largura do corredor da rota').inputValue();
+conferir('e já sugere a largura que cobre a sinuosidade da trilha real', larguraSugerida === '10', `${larguraSugerida} km de cada lado`);
+
+const notaPreset = await p.locator('.mapa__offline-nota').nth(1).innerText();
+conferir(
+  'a tela avisa que é sequência de municípios, não o traçado',
+  /RETA/.test(notaPreset) && /106 km/.test(notaPreset) && /GPX/.test(notaPreset),
+  notaPreset.trim().slice(0, 78)
+);
+
+// ── FLUXO 18: comparar o que cada um andou, sem tocar na trilha em gravação ──
+// Guardar no acervo COPIA. Se movesse, a pessoa perderia a caminhada em
+// andamento no momento em que tentou arquivá-la — e isso não volta.
+await p.goto(`${BASE}/#/trilhas`, { waitUntil: 'domcontentloaded' });
+await p.getByRole('button', { name: /GUARDAR A TRILHA DESTE APARELHO/ }).waitFor({ timeout: 20_000 });
+await p.waitForTimeout(800);
+
+const pontosNoAparelho = () => p.evaluate(() => {
+  const b = localStorage.getItem('vanguard:trilha');
+  if (!b) return 0;
+  const l = JSON.parse(b); const a = Array.isArray(l) ? l : l?.value;
+  return Array.isArray(a) ? a.length : -1;
+});
+const antesDeGuardar = await pontosNoAparelho();
+conferir('há trilha gravada no aparelho antes de arquivar', antesDeGuardar > 5, `${antesDeGuardar} pontos`);
+
+// Duas cópias com nomes diferentes: é o mínimo para haver comparação.
+for (const nome of ['Referência antiga', 'Peregrino A']) {
+  p.once('dialog', (d) => d.accept(nome));
+  await p.getByRole('button', { name: /GUARDAR A TRILHA DESTE APARELHO/ }).click();
+  await p.waitForTimeout(700);
+}
+
+const depoisDeGuardar = await pontosNoAparelho();
+conferir(
+  'guardar no acervo COPIA — a trilha em gravação continua intacta',
+  depoisDeGuardar === antesDeGuardar,
+  `${antesDeGuardar} → ${depoisDeGuardar} pontos`
+);
+
+const itens = await p.locator('.trilhas__item').count();
+conferir('as duas trilhas ficam guardadas lado a lado, sem sobrescrever', itens === 2, `${itens} no acervo`);
+
+await p.getByLabel('Trilha de referência').selectOption({ index: 1 });
+await p.waitForTimeout(600);
+const linhas = await p.locator('.trilhas__linha').count();
+conferir('escolher a referência produz a tabela de quem andou o quê', linhas >= 2, `${linhas} linha(s), com cabeçalho`);
+
+const consensoTexto = await p.locator('.trilhas__consenso').innerText();
+conferir(
+  'o quadro do guia aparece com as três evidências contadas',
+  /CONFIRMADO/.test(consensoTexto) && /SEM MOVIMENTO/.test(consensoTexto) && /CAMINHO NOVO/.test(consensoTexto),
+  consensoTexto.replace(/\n+/g, ' · ').trim().slice(0, 74)
+);
+conferir(
+  'e diz explicitamente que o app NÃO desenha traçado novo',
+  /NÃO desenha traçado novo/i.test(consensoTexto) && /decisão de mudar o guia/i.test(consensoTexto),
+  'aviso presente'
+);
+
+// Apagar exige o nome exato: nome errado não pode apagar nada.
+p.once('dialog', (d) => d.accept('nome errado de propósito'));
+await p.locator('.trilhas__apagar').first().click();
+await p.waitForTimeout(600);
+conferir('nome errado NÃO apaga a trilha de ninguém', await p.locator('.trilhas__item').count() === 2, 'acervo intacto');
+
+// ── FLUXO 11: sobre mostra a versão real ──────────────────────────────────────
+await p.goto(`${BASE}/#/sobre`, { waitUntil: 'networkidle' });
+await p.waitForTimeout(700);
+const versao = await p.locator('.sobre__version').textContent();
+conferir('sobre mostra a versão real do app', versao.includes(`v${VERSAO}`), versao.trim().slice(0, 40));
+
+await b.close();
+console.log(falhas ? `\n${falhas} fluxo(s) com falha` : '\ntodos os fluxos passaram');
+process.exit(falhas ? 1 : 0);

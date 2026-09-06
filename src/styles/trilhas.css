@@ -1,0 +1,59 @@
+/*
+ * Trilhas — comparação do que cada pessoa andou.
+ *
+ * A tabela é o coração da tela, e ela é lida de cima para baixo procurando
+ * quem destoa. Por isso a linha divergente ganha marca visual E o número já
+ * está lá: a cor reforça, nunca substitui — quem não distingue cor lê a mesma
+ * porcentagem.
+ */
+
+.trilhas { background: var(--color-bg); }
+.trilhas__scroll { height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 14px calc(86px + env(safe-area-inset-bottom)); }
+.trilhas__scroll > * { width: min(100%, 760px); margin-right: auto; margin-left: auto; }
+
+.trilhas__topo { padding: 24px 0 8px; }
+.trilhas__topo h1 { margin-bottom: 6px; }
+.trilhas__subtitulo { color: var(--color-text-muted); font-size: 11px; }
+
+.trilhas__cartao { margin-top: 12px; padding: 14px; border: var(--border-base); border-radius: var(--radius-md); background: var(--color-surface); }
+.trilhas__cartao h2 { margin-bottom: 10px; color: var(--color-cyan); font-size: 10px; letter-spacing: var(--tracking-widest); }
+.trilhas__cartao--consenso:empty { display: none; }
+
+/* ── Acervo ─────────────────────────────────────────────────────────────── */
+.trilhas__lista { display: flex; flex-direction: column; gap: var(--space-sm); }
+.trilhas__item { min-width: 0; padding: 10px; border: var(--border-thin); border-radius: var(--radius-sm); }
+.trilhas__item-topo { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: baseline; justify-content: space-between; }
+.trilhas__item-topo strong { min-width: 0; color: var(--color-text-primary); font-size: 13px; overflow-wrap: anywhere; }
+.trilhas__etiqueta { color: var(--color-text-muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.trilhas__item-meta { margin-top: 6px; color: var(--color-text-secondary); font-family: var(--font-mono); font-size: 11px; overflow-wrap: anywhere; }
+.trilhas__apagar { margin-top: 8px; min-height: 36px; padding: 0 12px; border: var(--border-thin); border-radius: var(--radius-sm); background: transparent; color: var(--color-text-muted); font-family: var(--font-mono); font-size: 10px; cursor: pointer; }
+
+.trilhas__vazio { color: var(--color-text-muted); font-size: 11px; line-height: 1.6; }
+.trilhas__status { margin-top: 10px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.5; }
+
+.trilhas__acoes { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: 12px; }
+.trilhas__botao { flex: 1 1 180px; min-width: 0; min-height: 48px; padding: var(--space-sm) var(--space-md); border: var(--border-base); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-wide); cursor: pointer; }
+
+.trilhas__select { width: 100%; min-height: 44px; margin-bottom: 12px; padding: var(--space-sm); border: var(--border-base); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 12px; }
+
+/* ── Tabela ─────────────────────────────────────────────────────────────── */
+.trilhas__tabela { display: flex; flex-direction: column; }
+.trilhas__linha { display: grid; grid-template-columns: 1.4fr 0.9fr 0.8fr 0.9fr; gap: var(--space-sm); align-items: center; padding: 9px 6px; border-bottom: var(--border-thin); font-family: var(--font-mono); font-size: 11px; }
+.trilhas__linha:last-child { border-bottom: 0; }
+/* `min-width: 0` porque o padrão do item de grid é `auto`: sem isso o nome
+ * longo se recusa a encolher e empurra as colunas para fora da tela. */
+.trilhas__linha > span { min-width: 0; color: var(--color-text-primary); overflow-wrap: anywhere; }
+.trilhas__linha > span:not(:first-child) { text-align: right; color: var(--color-text-secondary); }
+.trilhas__linha--cabecalho { border-bottom: var(--border-base); color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-widest); }
+.trilhas__linha--cabecalho > span { color: var(--color-text-muted); }
+/* Divergente: a borda marca. A porcentagem já está na linha — a cor reforça
+ * o que o número diz, nunca substitui. */
+.trilhas__linha.is-divergente { border-left: 2px solid var(--color-warning); padding-left: 8px; }
+.trilhas__linha.is-divergente > span:first-child { color: var(--color-warning); }
+
+/* ── Consenso ───────────────────────────────────────────────────────────── */
+.trilhas__consenso-linha { margin-bottom: 8px; color: var(--color-text-secondary); font-family: var(--font-mono); font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
+.trilhas__nota { margin-top: 10px; color: var(--color-text-muted); font-size: 10px; line-height: 1.55; }
+
+.trilhas__cartao--nota p { margin-bottom: 8px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.6; }
+.trilhas__cartao--nota p:last-child { margin-bottom: 0; }

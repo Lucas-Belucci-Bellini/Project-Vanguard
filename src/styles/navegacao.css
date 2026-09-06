@@ -1,11 +1,39 @@
-.navegacao { max-width: 980px; margin: 0 auto; padding: 1rem; }
-.navegacao > header { margin-bottom: 1rem; }
-.navegacao__bloco { background: var(--color-panel, #151a14); border: 1px solid var(--color-border, #394332); border-radius: .5rem; padding: 1rem; margin: .75rem 0; }
-.navegacao__bloco h2 { margin: 0 0 .75rem; font-size: .9rem; letter-spacing: .08em; }
-.navegacao__linha { display: flex; justify-content: space-between; gap: 1rem; padding: .45rem 0; border-bottom: 1px solid color-mix(in srgb, currentColor 16%, transparent); font-family: var(--font-mono, monospace); }
+/*
+ * Navegação — leitura da posição e cálculo de rumo para um waypoint.
+ *
+ * Esta folha usava `--color-panel`, `--color-border` e `--color-accent`, que
+ * NÃO existem em `variables.css`: todas caíam no fallback hexadecimal escrito
+ * ao lado, que é justamente o que a regra "tokens primeiro" existe para
+ * impedir. Uma mudança de tema não alcançava esta tela, e ela ia divergindo
+ * das outras em silêncio.
+ */
+
+.navegacao { background: var(--color-bg); }
+/* `.vg-pagina` é `overflow: hidden`; quem rola é o contêiner interno, e a
+ * folga do rodapé precisa passar da barra de abas fixa — sem ela o botão
+ * ABRIR NO MAPA fica preso embaixo da barra, medido no Chromium a 390 px. */
+.navegacao__scroll { height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 14px calc(86px + env(safe-area-inset-bottom)); }
+.navegacao__scroll > * { width: min(100%, 760px); margin-right: auto; margin-left: auto; }
+
+.navegacao > .navegacao__scroll > header { padding: 24px 0 14px; }
+.navegacao h1 { margin-bottom: 8px; }
+
+.navegacao__bloco { margin-top: 16px; padding: 14px; border: var(--border-base); border-radius: var(--radius-md); background: var(--color-surface); }
+.navegacao__bloco h2 { margin-bottom: 10px; color: var(--color-cyan); font-size: 10px; letter-spacing: var(--tracking-widest); }
+
+.navegacao__linha { display: flex; justify-content: space-between; gap: var(--space-md); padding: var(--space-sm) 0; border-bottom: var(--border-thin); font-family: var(--font-mono); }
 .navegacao__linha:last-child { border-bottom: 0; }
-.navegacao__linha strong { text-align: right; overflow-wrap: anywhere; }
-.navegacao__form { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
-.navegacao__form input { min-height: 2.75rem; min-width: 11rem; padding: .55rem; background: var(--color-bg, #0c0f0a); color: inherit; border: 1px solid var(--color-border, #394332); border-radius: .35rem; }
-.navegacao__estado { color: var(--color-accent, #ffb000); font-family: var(--font-mono, monospace); }
-@media (max-width: 560px) { .navegacao { padding: .65rem; } .navegacao__linha { display: block; } .navegacao__linha strong { display: block; text-align: left; margin-top: .2rem; } .navegacao__form input, .navegacao__form button { width: 100%; } }
+.navegacao__linha > span { flex: 1 1 auto; min-width: 0; color: var(--color-text-muted); font-size: 10px; }
+.navegacao__linha strong { flex: 1 1 auto; min-width: 0; color: var(--color-text-primary); font-size: 12px; text-align: right; overflow-wrap: anywhere; }
+
+.navegacao__form { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+.navegacao__form input { flex: 1 1 140px; min-width: 0; min-height: 44px; padding: var(--space-sm); border: var(--border-base); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text-primary); font-family: var(--font-mono); font-size: 12px; }
+.navegacao__form button { flex: 1 1 100%; min-width: 0; }
+
+.navegacao__estado { margin-top: var(--space-sm); color: var(--color-warning); font-family: var(--font-mono); font-size: 11px; line-height: 1.6; }
+.navegacao__abrir-mapa { display: block; width: 100%; margin-top: var(--space-md); }
+
+@media (max-width: 560px) {
+  .navegacao__linha { display: block; }
+  .navegacao__linha strong { display: block; margin-top: var(--space-2xs); text-align: left; }
+}

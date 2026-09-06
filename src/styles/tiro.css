@@ -1,6 +1,9 @@
 /* Computador de tiro — entrada à esquerda, saída à direita. */
 
-.tiro { display: grid; grid-template-columns: 340px 1fr; gap: var(--space-md); padding: var(--space-md); }
+/* A barra de abas é fixa e tem ~86 px: com 24 px de folga o último parágrafo
+ * — e, nesta tela, um BOTÃO — ficam presos embaixo dela, inalcançáveis por
+ * rolagem. Medido no Chromium a 390 px, não deduzido. */
+.tiro { display: grid; grid-template-columns: 340px 1fr; gap: var(--space-md); overflow-y: auto; overflow-x: hidden; padding: var(--space-md) var(--space-md) calc(86px + env(safe-area-inset-bottom)); }
 
 .tiro__entrada {
   display: flex;
@@ -85,3 +88,10 @@
   border-top: var(--border-thin);
   max-height: 420px;
 }
+
+/* O aviso de legado atravessa as duas colunas da grade: ele precisa ser a
+ * primeira coisa lida, não uma nota de rodapé ao lado do formulário. */
+.tiro__legado { grid-column: 1 / -1; padding: var(--space-md); border: 1px solid var(--color-warning); border-left-width: 4px; border-radius: var(--radius-md); background: var(--color-warning-soft); }
+.tiro__legado strong { display: block; margin-bottom: var(--space-sm); color: var(--color-warning); font-size: 11px; letter-spacing: var(--tracking-widest); }
+.tiro__legado p { margin-top: var(--space-xs); color: var(--color-text-secondary); font-size: 11px; line-height: 1.7; }
+.tiro__legado a { color: var(--color-cyan); }

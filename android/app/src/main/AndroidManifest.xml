@@ -50,5 +50,23 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Exigidas pelo @capacitor/camera apenas para `saveToGallery`. O limite de
+         SDK evita pedir armazenamento em Android novo, onde a gravação na
+         galeria passa pelo MediaStore e não precisa de permissão. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" tools:node="remove" />
+
+    <!-- Escuta de ambiente (#/escuta): o microfone é lido para medir energia por
+         faixa de frequência. O áudio não é gravado, guardado nem transmitido —
+         só existe o espectro em memória. Nenhuma permissão de rede a mais é
+         pedida por causa dela. -->
+    <!-- Aviso persistente com o quanto se andou hoje, legível na tela
+         bloqueada (ver src/core/notificacao-jornada.js). No Android 13+ a
+         notificação não aparece sem esta permissão. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 </manifest>

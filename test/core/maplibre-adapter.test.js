@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { criarMapLibreAdapter } from '../../src/core/maplibre-adapter.js';
 
 function criarMapLibreFake() {
@@ -32,10 +33,10 @@ describe('MapLibreAdapter', () => {
       maxzoom: 14,
     });
 
-    expect(mapa).toBe(fake.instancias[0]);
-    expect(mapa.opcoes.container).toBe('mapa');
-    expect(mapa.opcoes.style).toBe('style.json');
-    expect(mapa.opcoes.maxZoom).toBe(14);
+    assert.equal(mapa, fake.instancias[0]);
+    assert.equal(mapa.opcoes.container, 'mapa');
+    assert.equal(mapa.opcoes.style, 'style.json');
+    assert.equal(mapa.opcoes.maxZoom, 14);
   });
 
   it('remove a instância anterior ao renderizar novamente', () => {
@@ -46,8 +47,8 @@ describe('MapLibreAdapter', () => {
     const primeiro = adapter.obterMapa();
     adapter.renderizar({ container: 'b', style: 'b' });
 
-    expect(primeiro.removido).toBe(true);
-    expect(adapter.obterMapa()).toBe(fake.instancias[1]);
+    assert.equal(primeiro.removido, true);
+    assert.equal(adapter.obterMapa(), fake.instancias[1]);
   });
 
   it('destrói o mapa e limpa o estado', () => {
@@ -58,14 +59,14 @@ describe('MapLibreAdapter', () => {
     const mapa = adapter.obterMapa();
     adapter.destruir();
 
-    expect(mapa.removido).toBe(true);
-    expect(adapter.obterMapa()).toBe(null);
+    assert.equal(mapa.removido, true);
+    assert.equal(adapter.obterMapa(), null);
   });
 
   it('exige um container', () => {
     const fake = criarMapLibreFake();
     const adapter = criarMapLibreAdapter(fake);
 
-    expect(() => adapter.renderizar({ style: 'style' })).toThrow(/container é obrigatório/);
+    assert.throws(() => adapter.renderizar({ style: 'style' }), /container é obrigatório/);
   });
 });

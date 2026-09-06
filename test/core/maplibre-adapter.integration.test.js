@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { criarMapLibreAdapter } from '../../src/core/maplibre-adapter.js';
 
 function fakeMapLibre() {
@@ -34,11 +35,11 @@ describe('MapLibreAdapter integration surface', () => {
     adapter.adicionarLayer({ id: 'grade', type: 'line', source: 'grade' });
     adapter.em('moveend', listener);
 
-    expect(adapter.obterMapa()).toBe(map);
-    expect(lib.calls[0]).toEqual(['control', control, 'bottom-right']);
-    expect(adapter.obterSource('grade')).toEqual({ type: 'geojson' });
-    expect(adapter.obterLayer('grade').id).toBe('grade');
-    expect(lib.events.get('moveend')).toBe(listener);
+    assert.equal(adapter.obterMapa(), map);
+    assert.deepEqual(lib.calls[0], ['control', control, 'bottom-right']);
+    assert.deepEqual(adapter.obterSource('grade'), { type: 'geojson' });
+    assert.equal(adapter.obterLayer('grade').id, 'grade');
+    assert.equal(lib.events.get('moveend'), listener);
   });
 
   it('permite remover sources e layers existentes', () => {
@@ -49,7 +50,7 @@ describe('MapLibreAdapter integration surface', () => {
     adapter.adicionarLayer({ id: 'l', type: 'line', source: 's' });
     adapter.removerLayer('l');
     adapter.removerSource('s');
-    expect(adapter.obterLayer('l')).toBeUndefined();
-    expect(adapter.obterSource('s')).toBeUndefined();
+    assert.equal(adapter.obterLayer('l'), undefined);
+    assert.equal(adapter.obterSource('s'), undefined);
   });
 });
