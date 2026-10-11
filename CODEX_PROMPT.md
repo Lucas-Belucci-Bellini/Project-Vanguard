@@ -1,0 +1,3 @@
+# Project Vanguard — prompt de engenharia
+
+Siga CLAUDE.md, README, plano mestre, decisões, limitações e matriz de testes. O app civil usa JavaScript ES2022 + Vite; src/engine permanece sem DOM/dependências npm. Dados offline devem distinguir posição antiga, validade e ausência de rede/GPS; não prometa precisão/cobertura sem evidência. Preserve fontes/licenças de mapas. A wiki/simulação Arma 3 é legado restrito a videogame: não misture com navegação civil nem adapte a uso real. Preserve matemática e testes; não duplique engine. Use scripts reais, siga design system para UI, preserve diffs locais e reporte evidências/limitações do dispositivo.
