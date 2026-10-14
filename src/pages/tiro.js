@@ -57,9 +57,32 @@ export function tiroPage({ query = {} } = {}) {
   });
 
   const raiz = h('div', { className: 'vg-pagina tiro' });
+
+  /*
+   * Esta tela é LEGADA e fica fora do menu de propósito — só se chega a ela
+   * por link direto. Ela pertence ao ambiente de testes de Arma 3 e não faz
+   * parte do fluxo do Vanguard Field.
+   *
+   * O aviso é renderizado na própria tela, e não apenas registrado na
+   * documentação, porque quem abre a URL não leu a documentação. Uma
+   * calculadora balística sem rótulo, num aplicativo de navegação civil, é
+   * exatamente o tipo de coisa que alguém pode confundir com ferramenta
+   * operacional — e os valores aqui são referências de simulação de um
+   * videogame, não tabela de tiro.
+   */
+  const avisoLegado = h('aside', { className: 'tiro__legado', role: 'note' },
+    h('strong', null, 'TELA LEGADA · SIMULAÇÃO DE VIDEOGAME'),
+    h('p', null, 'Ferramenta de teste do ambiente de ',
+      h('b', null, 'Arma 3'),
+      '. Os valores são referências de modelo dentro daquele jogo — não são tabela de tiro, manual, nem orientação para equipamento, treinamento ou operação real.'),
+    h('p', null, 'Está fora do fluxo do Vanguard Field e não recebe funcionalidade nova. Para navegação civil, use ',
+      h('a', { href: '#/mapa' }, 'Mapa'), ', ',
+      h('a', { href: '#/navegacao' }, 'Navegação'), ' ou ',
+      h('a', { href: '#/bussola' }, 'Bússola'), '.'));
+
   const entrada = h('section', { className: 'tiro__entrada' });
   const saida = h('section', { className: 'tiro__saida' });
-  raiz.append(entrada, saida);
+  raiz.append(avisoLegado, entrada, saida);
 
   /* ── Entradas ── */
   const campo = (rotulo, el, dica) =>

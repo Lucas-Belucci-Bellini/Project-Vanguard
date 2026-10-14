@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { criarMotorMapa } from '../../src/core/map-engine.js';
 
 function mapLibreFake() {
@@ -19,10 +20,10 @@ describe('map-engine', () => {
 
     const mapa = motor.montar({ container: 'mapa', center: [-43.21, -22.95], zoom: 8 });
 
-    expect(carregamentos).toBe(1);
-    expect(motor.provider.id).toBe('terreno');
-    expect(mapa.options.container).toBe('mapa');
-    expect(mapa.options.style.sources.terreno.tiles[0]).toContain('opentopomap');
+    assert.equal(carregamentos, 1);
+    assert.equal(motor.provider.id, 'terreno');
+    assert.equal(mapa.options.container, 'mapa');
+    assert.ok(mapa.options.style.sources.terreno.tiles[0].includes('opentopomap'));
   });
 
   it('permite fornecer um style completo sem perder o provider', async () => {
@@ -30,16 +31,37 @@ describe('map-engine', () => {
     const style = { version: 8, sources: {}, layers: [] };
     const mapa = motor.montar({ container: 'mapa', style });
 
-    expect(mapa.options.style).toBe(style);
+    assert.equal(mapa.options.style, style);
   });
 
   it('rejeita provider inexistente', async () => {
-    await expect(criarMotorMapa({ providerId: 'nao-existe', carregarMapLibre: async () => mapLibreFake() }))
-      .rejects.toThrow(/Provider de mapa indisponível/);
+    await assert.rejects(
+      criarMotorMapa({ providerId: 'nao-existe', carregarMapLibre: async () => mapLibreFake() }),
+      /Provider de mapa indisponível/,
+    );
   });
 
   it('rejeita falha no carregamento do MapLibre', async () => {
-    await expect(criarMotorMapa({ providerId: 'terreno', carregarMapLibre: async () => null }))
-      .rejects.toThrow(/MapLibre não pôde ser carregado/);
+    await assert.rejects(
+      criarMotorMapa({ providerId: 'terreno', carregarMapLibre: async () => null }),
+      /MapLibre não pôde ser carregado/,
+    );
+  });
+
+  it('exige a função de carregamento do motor', async () => {
+    await assert.rejects(criarMotorMapa({ providerId: 'terreno' }), /carregarMapLibre é obrigatório/);
+  });
+});
+
+describe('map-engine · superfície do motor', () => {
+  it('expõe o MapLibre carregado para a página montar controles', async () => {
+    const lib = mapLibreFake();
+    const motor = await criarMotorMapa({ providerId: 'terreno', carregarMapLibre: async () => lib });
+    assert.equal(motor.MapLibre, lib);
+  });
+
+  it('não deixa a página trocar o motor depois de composto', async () => {
+    const motor = await criarMotorMapa({ providerId: 'terreno', carregarMapLibre: async () => mapLibreFake() });
+    assert.throws(() => { 'use strict'; motor.MapLibre = {}; }, TypeError);
   });
 });

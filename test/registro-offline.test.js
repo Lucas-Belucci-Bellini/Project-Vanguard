@@ -49,9 +49,45 @@ test('importarRegistroLocal rejeita schema incompatível e geometria inválida',
   assert.throws(() => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: [{ lat: 91, lon: 0 }], waypoints: [], destino: null }), /fora dos limites/);
 });
 
-test('exportarRegistroLocal aplica limites de trilha e waypoints', () => {
-  assert.throws(() => exportarRegistroLocal({ trilha: Array.from({ length: LIMITE_TRILHA + 1 }, (_, i) => ponto(i)) }), /acima do limite/);
-  assert.throws(() => exportarRegistroLocal({ waypoints: Array.from({ length: LIMITE_WAYPOINTS + 1 }, (_, i) => ponto(i)) }), /acima do limite/);
+test('o limite vale para IMPORTAÇÃO — entrada de fora não é confiável', () => {
+  // Este teste antes cobrava o mesmo limite na exportação. Cobrava um defeito:
+  // medido na 1.6.0, uma trilha de 4 001 pontos era gravada normalmente (o
+  // armazenamento só corta em 12 000) e NÃO CONSEGUIA SAIR do aparelho — nem
+  // JSON, nem GPX, nem KML. Negar a saída de um dado que já está no aparelho
+  // não protege ninguém. O limite continua onde ele faz sentido: na entrada.
+  const acima = Array.from({ length: LIMITE_TRILHA + 1 }, (_, i) => ponto(i));
+  assert.throws(
+    () => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: acima, waypoints: [], destino: null }),
+    /acima do limite local/
+  );
+  assert.throws(
+    () => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: [], waypoints: Array.from({ length: LIMITE_WAYPOINTS + 1 }, (_, i) => ponto(i)), destino: null }),
+    /acima do limite local/
+  );
+});
+
+test('a trilha do operador SAI do aparelho, em qualquer tamanho, nos três formatos', () => {
+  // 12 000 é o teto do armazenamento hoje: se cabe na memória, tem de caber na
+  // exportação. O número aparece aqui de propósito — ele é o tamanho real que
+  // a 1.6.0 recusava.
+  const grande = Array.from({ length: 12_000 }, (_, i) => ponto(i));
+
+  const json = exportarRegistroLocal({ trilha: grande, waypoints: [] });
+  assert.equal(JSON.parse(json).trilha.length, 12_000, 'nenhum ponto some, e nenhum é truncado');
+
+  const gpx = exportarRegistroGpx({ trilha: grande, waypoints: [] });
+  assert.equal((gpx.match(/<trkpt /g) ?? []).length, 12_000);
+
+  const kml = exportarRegistroKml({ trilha: grande, waypoints: [] });
+  const coordenadas = kml.match(/<coordinates>([^<]*)<\/coordinates>/)?.[1] ?? '';
+  assert.equal(coordenadas.trim().split(/\s+/).length, 12_000);
+});
+
+test('exportar sem teto não significa exportar lixo: cada ponto continua validado', () => {
+  // Tirar o limite de quantidade não pode virar porta para coordenada inválida.
+  assert.throws(() => exportarRegistroLocal({ trilha: [{ lat: 91, lon: 0 }] }), /fora dos limites/);
+  assert.throws(() => exportarRegistroLocal({ trilha: [{ lat: 0, lon: 181 }] }), /fora dos limites/);
+  assert.throws(() => exportarRegistroLocal({ trilha: 'não é array' }), /inválida/);
 });
 
 test('exportarRegistroGpx cria trilha e waypoints com XML escapado', () => {
@@ -135,4 +171,41 @@ test('importarRegistroKml rejeita raiz, pontos ausentes e coordenadas inválidas
 test('importarRegistroLocal exige arrays de dados', () => {
   assert.throws(() => importarRegistroLocal({ schema: REGISTRO_SCHEMA, version: REGISTRO_VERSION, trilha: null, waypoints: [], destino: null }), /inválida/);
   assert.throws(() => importarRegistroLocal('{ quebrado'), /JSON inválido/);
+});
+
+test('importarRegistroLocal recusa coordenada nula em vez de virar 0', () => {
+  // `Number(null)` é 0: sem guarda, este waypoint entraria no golfo da Guiné.
+  const registro = JSON.stringify({
+    schema: 'vanguard-registro-local',
+    version: 1,
+    trilha: [],
+    waypoints: [{ nome: 'x', lat: -23.31, lon: null }],
+    destino: null,
+  });
+  assert.throws(() => importarRegistroLocal(registro), /fora dos limites/);
+});
+
+test('backup que não volta não é backup: ida e volta completa em 12 000 pontos', () => {
+  // A exportação foi liberada; se a importação continuasse em 4 000, o operador
+  // exportaria um arquivo que o próprio aplicativo recusaria a restaurar. Este
+  // teste é o que impede as duas pontas de divergirem de novo.
+  const original = Array.from({ length: 12_000 }, (_, i) => ({
+    lat: -23.31 + i * 1e-5, lon: -51.16 + i * 1e-5, accuracy: 8, altitude: 550, createdAt: 1e12 + i * 1000,
+  }));
+
+  const volta = importarRegistroLocal(exportarRegistroLocal({ trilha: original, waypoints: [] }));
+
+  assert.equal(volta.trilha.length, original.length, 'nenhum ponto se perde na ida e volta');
+  assert.equal(volta.trilha[0].lat, original[0].lat);
+  assert.equal(volta.trilha[0].lon, original[0].lon);
+  assert.equal(volta.trilha.at(-1).lat, original.at(-1).lat);
+  assert.equal(volta.trilha.at(-1).lon, original.at(-1).lon);
+  assert.equal(volta.trilha[0].altitude, 550, 'a altitude atravessa o formato');
+  assert.equal(volta.trilha[0].accuracy, 8, 'a precisão do fixo atravessa o formato');
+});
+
+test('o teto de importação cobre com folga o que a exportação pode produzir', () => {
+  // A regra é uma só: tudo que sai tem de poder voltar.
+  assert.ok(LIMITE_TRILHA >= 12_000, `teto de importação (${LIMITE_TRILHA}) abaixo do que o aparelho grava`);
+  assert.ok(LIMITE_WAYPOINTS >= 1_000);
 });

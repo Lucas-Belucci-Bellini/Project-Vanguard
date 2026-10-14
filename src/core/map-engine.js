@@ -23,6 +23,10 @@ export async function criarMotorMapa({ providerId = 'terreno', carregarMapLibre 
 
   return Object.freeze({
     provider,
+    // O motor carregado fica exposto para a página montar controles (navegação,
+    // escala) sem importar `maplibre-gl` nem instanciar o mapa: quem cria o
+    // `Map` continua sendo esta composição.
+    MapLibre,
     montar(opcoes = {}) {
       return runtime.montar({
         ...opcoes,

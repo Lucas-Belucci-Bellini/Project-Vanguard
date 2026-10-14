@@ -9,24 +9,13 @@ import { h, empty } from './ui/helpers.js';
 import { estado, CHAVES } from './core/estado.js';
 import { criarControleAtualizacao } from './core/atualizacao-ui.js';
 import { recuperarDatasetNoBoot } from './core/dataset-boot-recovery.js';
-
-const ROTAS = [
-  { hash: '#/inicio', titulo: 'Início', icone: '⌂', carregar: () => import('./pages/inicio.js').then((m) => m.inicioPage) },
-  { hash: '#/mapa', titulo: 'Mapa', icone: '⊕', carregar: () => import('./pages/mapa.js').then((m) => m.mapaPage) },
-  { hash: '#/navegacao', titulo: 'Navegação', icone: '⌖', carregar: () => import('./pages/navegacao.js').then((m) => m.navegacaoPage) },
-  { hash: '#/bussola', titulo: 'Bússola', icone: '◉', carregar: () => import('./pages/bussola.js').then((m) => m.bussolaPage) },
-  { hash: '#/socorro', titulo: 'Socorro', icone: '!', carregar: () => import('./pages/socorro.js').then((m) => m.socorroPage) },
-  { hash: '#/doar', titulo: 'Apoiar', icone: '＋', carregar: () => import('./pages/doar.js').then((m) => m.doarPage), secundária: true },
-  { hash: '#/contexto', titulo: 'Contexto', icone: '◈', carregar: () => import('./pages/contexto.js').then((m) => m.contextoPage), secundária: true },
-  { hash: '#/sobrevivencia', titulo: 'Sobrevivência', icone: '⌁', carregar: () => import('./pages/sobrevivencia.js').then((m) => m.sobrevivenciaPage), secundária: true },
-  { hash: '#/sobre', titulo: 'Sobre', icone: 'i', carregar: () => import('./pages/sobre.js').then((m) => m.sobrePage), secundária: true },
-  { hash: '#/diagnostico', titulo: 'Diagnóstico', icone: '⌁', carregar: () => import('./pages/diagnostico.js').then((m) => m.diagnosticoPage), secundária: true },
-  /* A tela legada continua acessível por link direto enquanto o app migra. */
-  { hash: '#/tiro', titulo: 'Cálculo legado', carregar: () => import('./pages/tiro.js').then((m) => m.tiroPage), legada: true }
-];
+import { criarNavegador } from './core/navegacao.js';
+import { registrarServiceWorker } from './core/service-worker.js';
+import { falhasDeTela } from './core/falhas-tela-app.js';
+import { ROTAS } from './core/rotas.js';
 
 const PADRAO = '#/inicio';
-let desmontarAtual = null;
+let navegador = null;
 
 function montarShell() {
   const abas = ROTAS.filter((rota) => !rota.legada).map((rota) =>
@@ -58,12 +47,17 @@ function montarShell() {
   seletorModo.value = estado.get(CHAVES.MODO, 'tatico');
   document.documentElement.dataset.modo = seletorModo.value;
 
+  // Duas linhas curtas em vez de uma linha longa: o cabeçalho tem 64 px de
+  // altura e sobra vertical, mas a largura é o recurso escasso num celular de
+  // 360 px. Uma linha só empurrava o seletor de modo para fora da tela.
+  const gpsRede = h('span', { className: 'vg-status__rede' }, 'ONLINE');
   const gpsStatus = h('span', { className: 'vg-status__text' }, 'GPS LOCAL');
   const status = h('div', { className: 'vg-status', title: 'A localização é mantida no dispositivo por padrão', 'aria-label': 'Status de conectividade e localização local', 'aria-live': 'polite' },
-    h('span', { className: 'vg-status__dot', ariaHidden: 'true' }), gpsStatus);
+    h('span', { className: 'vg-status__dot', ariaHidden: 'true' }),
+    h('span', { className: 'vg-status__linhas' }, gpsRede, gpsStatus));
   const atualizarConectividade = () => {
     const online = navigator.onLine !== false;
-    gpsStatus.textContent = online ? 'ONLINE · GPS LOCAL' : 'OFFLINE · GPS LOCAL';
+    gpsRede.textContent = online ? 'ONLINE' : 'OFFLINE';
     status.classList.toggle('is-offline', !online);
     status.title = online
       ? 'Internet disponível; a posição continua local por padrão.'
@@ -92,7 +86,7 @@ function montarShell() {
     main.focus({ preventScroll: false });
   };
   document.body.append(salto, header, main, nav);
-  return { abas, main, gpsStatus, status, desmontarAtualizacao: controleAtualizacao.desmontar };
+  return { abas, main, gpsRede, gpsStatus, status, desmontarAtualizacao: controleAtualizacao.desmontar };
 }
 
 function lerHash(bruto) {
@@ -114,26 +108,13 @@ async function navegar({ abas, main }) {
     else aba.removeAttribute('aria-current');
   }
   document.title = `VANGUARD · ${rota.titulo}`;
-  if (desmontarAtual) {
-    try { desmontarAtual(); } catch { /* tela anterior já pode ter sido removida */ }
-    desmontarAtual = null;
-  }
-  empty(main);
   main.setAttribute('aria-busy', 'true');
-  try {
-    const pagina = await rota.carregar();
-    const resultado = pagina({ query });
-    desmontarAtual = resultado?.desmontar ?? null;
-    main.append(resultado.elemento);
-  } catch (erro) {
-    main.append(h('div', { className: 'vg-pagina vg-erro-pagina' },
-      h('div', { className: 'vg-aviso vg-aviso--perigo', role: 'alert' },
-        `Falha ao carregar a tela “${rota.titulo}”: ${erro.message}`)
-    ));
-  } finally {
-    main.setAttribute('aria-busy', 'false');
-    main.focus({ preventScroll: true });
-  }
+  // A guarda de corrida vive no navegador: duas trocas rápidas de aba não
+  // podem montar duas telas no mesmo contêiner nem deixar a primeira viva
+  // sem desmontagem.
+  await navegador.navegar({ carregar: rota.carregar, props: { query } });
+  main.setAttribute('aria-busy', 'false');
+  main.focus({ preventScroll: true });
 }
 
 async function boot() {
@@ -149,9 +130,37 @@ async function boot() {
     shell.status.setAttribute('data-dataset-recovery', recovery.estado ?? 'ok');
   }
 
+  navegador = criarNavegador({
+    container: shell.main,
+    esvaziar: empty,
+    aoErro: (erro) => {
+      // A falha é registrada ANTES de ser pintada: o aviso na tela some na
+      // próxima navegação, e era só isso que existia. O registro é o que
+      // permite ao Diagnóstico dizer depois qual tela falhou e por quê — a
+      // diferença entre "não abre no app" e "o chunk da rota X não chegou ao
+      // pacote".
+      const { tipo } = falhasDeTela.registrar(lerHash(location.hash).caminho, erro);
+      console.error('[Vanguard] Falha ao carregar tela.', { tipo, erro });
+      const explicacao = tipo === 'CHUNK_NAO_CARREGOU'
+        ? 'O módulo desta tela não chegou a carregar — o pacote pode estar incompleto ou desatualizado. Abra Diagnóstico → TELAS.'
+        : 'Abra Diagnóstico → TELAS para o registro completo.';
+      shell.main.append(h('div', { className: 'vg-pagina vg-erro-pagina' },
+        h('div', { className: 'vg-aviso vg-aviso--perigo', role: 'alert' },
+          h('strong', null, `Falha ao carregar a tela: ${erro.message}`),
+          h('br'),
+          h('span', null, explicacao))
+      ));
+    },
+  });
+
   addEventListener('hashchange', () => navegar(shell));
   navegar(shell);
 }
 
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true });
 else boot();
+
+/* O service worker é registrado aqui, e não no `index.html`, para poder usar o
+ * identificador de build injetado no bundle. Falhar no registro nunca derruba o
+ * aplicativo: sem ele o app perde o cache offline, não a navegação. */
+void registrarServiceWorker();

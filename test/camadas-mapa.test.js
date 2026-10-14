@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  CAMADA_CARTO_OPCIONAL,
   CAMADAS_BASE,
   CAMADAS_OVERLAY,
   estiloMapLibre,
@@ -18,6 +19,19 @@ test('as bases cartográficas usam fontes HTTPS públicas e sem CARTO/API key', 
   assert.deepEqual(CAMADAS_BASE.find((camada) => camada.id === 'dark').tiles, [
     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   ]);
+});
+
+test('a base CARTO fica fora do catálogo oferecido enquanto depender de chave', () => {
+  // Ela é renderizável só com chave de build/runtime, então vive num export
+  // separado em vez de aparecer como opção que o operador escolhe e não
+  // carrega. A garantia que importa é a separação: nenhuma base do catálogo
+  // pode depender de chave, e é isso que este teste cobra.
+  assert.equal(CAMADA_CARTO_OPCIONAL.id, 'carto-voyager');
+  assert.equal(CAMADA_CARTO_OPCIONAL.disponivel, false);
+  assert.ok(!CAMADAS_BASE.some((camada) => camada.id === CAMADA_CARTO_OPCIONAL.id),
+    'base que depende de chave não pode voltar para o catálogo oferecido');
+  assert.ok(CAMADA_CARTO_OPCIONAL.tiles.some((tile) => /cartocdn/.test(tile)),
+    'se os tiles deixarem de ser CARTO, esta separação perdeu o motivo');
 });
 
 test('o overlay de nomes usa ArcGIS e o estilo o mantém sobre a base', () => {

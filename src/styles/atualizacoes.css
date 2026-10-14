@@ -1,0 +1,223 @@
+/*
+ * Tela de Atualizações. Todos os tokens usados aqui existem em
+ * `variables.css` — `test/tokens-definidos.test.js` cobra isso, e a folha do
+ * diagnóstico já pagou o preço de usar nomes inventados.
+ */
+
+.atualizacoes__wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  /* A barra de abas fixa come o fim da página; a folga é obrigatória. */
+  padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.atualizacoes__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-text-muted);
+}
+
+.atualizacoes__header h1 {
+  margin: var(--space-xs) 0;
+  color: var(--color-text-primary);
+}
+
+.atualizacoes__estado {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* O estado é a informação principal da tela: cada um tem sua cor. */
+.atualizacoes__estado[data-estado="DISPONIVEL"] { color: var(--color-cyan); }
+.atualizacoes__estado[data-estado="ATUALIZADO"] { color: var(--color-success); }
+.atualizacoes__estado[data-estado="SEM_INTERNET"] { color: var(--color-warning); }
+.atualizacoes__estado[data-estado="ERRO"] { color: var(--color-danger); }
+
+.atualizacoes__resumo {
+  display: grid;
+  gap: 1px;
+  border: var(--border-base);
+  background: var(--grid-line);
+}
+
+.atualizacoes__linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: space-between;
+  padding: var(--space-sm);
+  background: var(--color-surface);
+}
+
+.atualizacoes__nome {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+.atualizacoes__valor {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  /* Item de flex que cresce precisa disso, ou empurra o resto para fora. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.atualizacoes__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.atualizacoes__botao {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-base);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-widest);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.atualizacoes__botao--primario {
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan);
+}
+
+.atualizacoes__botao:disabled { opacity: 0.5; cursor: default; }
+
+.atualizacoes__progresso {
+  margin: 0;
+  padding: var(--space-sm);
+  border: var(--border-base);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+}
+
+/* Checksum reprovado é o alerta mais forte da tela: nada será instalado. */
+.atualizacoes__progresso[data-resultado="CHECKSUM_INVALIDO"] {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+.atualizacoes__progresso[data-resultado="SEM_CHECKSUM"] { color: var(--color-warning); }
+.atualizacoes__progresso[data-resultado="OK"] { color: var(--color-success); }
+
+.atualizacoes__titulo {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-sm);
+}
+
+.atualizacoes__limites {
+  margin: 0;
+  padding-left: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.atualizacoes__limites li { margin-bottom: var(--space-xs); }
+
+.atualizacoes__release {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: var(--border-base);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+.atualizacoes__release.is-instalada { background: var(--color-cyan-soft); }
+
+.atualizacoes__release-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: space-between;
+  min-width: 0;
+  color: var(--color-text-primary);
+}
+
+.atualizacoes__marcas,
+.atualizacoes__data,
+.atualizacoes__asset {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.atualizacoes__vazio {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  margin: 0;
+}
+
+.atualizacoes__config {
+  border: var(--border-base);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  background: var(--color-surface);
+}
+
+.atualizacoes__campo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  min-width: 0;
+}
+
+.atualizacoes__select {
+  min-width: 0;
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-base);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+.atualizacoes__nota {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 420px) {
+  .atualizacoes__wrap {
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
+    /* A folga da barra de abas some se um shorthand a apagar aqui dentro. */
+    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+}

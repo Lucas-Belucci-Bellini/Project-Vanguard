@@ -13,7 +13,6 @@
 .inicio__status-copy { display: flex; flex-direction: column; min-width: 0; gap: 3px; }
 .inicio__status-copy strong { font-size: 10px; letter-spacing: var(--tracking-wide); color: var(--color-text-primary); }
 .inicio__status-detail { color: var(--color-text-muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
-.inicio__status-lock { margin-left: auto; color: var(--color-cyan); font-size: 9px; white-space: nowrap; }
 .inicio__primary { position: relative; z-index: 1; width: min(100%, 650px); background: var(--color-cyan); color: var(--color-bg); border-color: var(--color-cyan); font-weight: var(--font-weight-bold); box-shadow: var(--shadow-glow-cyan); }
 .inicio__primary:hover { background: var(--color-text-primary); border-color: var(--color-text-primary); }
 .inicio__feedback { min-height: 18px; margin: 8px 0 0; color: var(--color-text-muted); font-size: 10px; }

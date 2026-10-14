@@ -1,0 +1,102 @@
+/*
+ * Visão noturna.
+ *
+ * A tela inteira é escura de propósito, e mais escura que as outras: ela é
+ * usada à noite, com a vista adaptada ao escuro, e um painel claro ao lado da
+ * imagem destrói em um segundo a adaptação que levou vinte minutos para
+ * acontecer. Pela mesma razão os textos de apoio ficam em cinza baixo e o
+ * acento forte é reservado aos números que precisam ser lidos de relance.
+ */
+
+.noturno { background: var(--color-bg); }
+.noturno__scroll { height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 14px calc(86px + env(safe-area-inset-bottom)); }
+.noturno__head,
+.noturno__visor,
+.noturno__diagnostico,
+.noturno__acoes,
+.noturno__status,
+.noturno__medidores,
+.noturno__controles,
+.noturno__captura,
+.noturno__limite { width: min(100%, 760px); margin-right: auto; margin-left: auto; }
+
+.noturno__head { padding: 24px 0 14px; }
+.noturno__head h1 { margin-bottom: 8px; }
+.noturno__head p { max-width: 620px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.7; }
+
+/* ── Visor ────────────────────────────────────────────────────────────────── */
+.noturno__visor {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  max-height: 58vh;
+  overflow: hidden;
+  border: var(--border-base);
+  border-radius: var(--radius-md);
+  background: #000;
+}
+.noturno__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* `contain` e não `cover`: recortar a imagem para preencher a moldura
+   * esconderia parte do que a câmera está vendo, que é o oposto do trabalho. */
+  object-fit: contain;
+  background: #000;
+}
+.noturno__vazio { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: 6px; padding: 16px; text-align: center; background: var(--color-bg); }
+.noturno__vazio strong { color: var(--color-cyan); font-size: 12px; letter-spacing: var(--tracking-widest); }
+.noturno__vazio p { max-width: 260px; color: var(--color-text-muted); font-size: 10px; line-height: 1.6; }
+
+.noturno__diagnostico { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--color-warning); border-radius: var(--radius-sm); background: var(--color-warning-soft); color: var(--color-warning); font-size: 10px; line-height: 1.6; }
+
+/* ── Ações ────────────────────────────────────────────────────────────────── */
+.noturno__acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.noturno__botao { flex: 1 1 140px; min-width: 0; }
+.noturno__botao.is-ativa { border-color: var(--color-warning); color: var(--color-warning); }
+.noturno__status { margin-top: 8px; color: var(--color-text-secondary); font-size: 11px; line-height: 1.6; }
+
+/* ── Medidores ────────────────────────────────────────────────────────────── */
+.noturno__medidores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.noturno__medidor { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: var(--border-thin); border-left: 3px solid var(--color-cyan-edge); border-radius: var(--radius-sm); background: var(--color-surface); }
+.noturno__medidor span { color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.noturno__medidor strong { color: var(--color-cyan); font-size: 15px; line-height: 1.1; }
+
+/* ── Controles ────────────────────────────────────────────────────────────── */
+.noturno__controles,
+.noturno__captura,
+.noturno__limite { margin-top: 18px; padding: 14px; border: var(--border-base); border-radius: var(--radius-md); background: var(--color-surface); }
+.noturno__controles h2,
+.noturno__captura h2,
+.noturno__limite h2 { margin-bottom: 10px; color: var(--color-cyan); font-size: 10px; letter-spacing: var(--tracking-widest); }
+
+.noturno__paletas { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+.noturno__paleta { padding: 8px 4px; overflow: hidden; border: var(--border-thin); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text-secondary); font-family: inherit; font-size: 9px; letter-spacing: var(--tracking-wide); text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.noturno__paleta.is-ativa { border-color: var(--color-cyan-edge); background: var(--color-cyan-soft); color: var(--color-cyan); }
+.noturno__nota { margin-top: 6px; color: var(--color-text-muted); font-size: 10px; line-height: 1.6; }
+
+.noturno__faixa-linha { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.noturno__faixa-linha > span:first-child { flex: 0 0 auto; color: var(--color-text-muted); font-size: 9px; letter-spacing: var(--tracking-wide); }
+.noturno__faixa { flex: 1 1 auto; min-width: 0; accent-color: var(--color-cyan); }
+.noturno__faixa-valor { flex: 0 0 auto; min-width: 34px; color: var(--color-cyan); font-size: 11px; text-align: right; }
+
+.noturno__opcao { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; color: var(--color-text-secondary); font-size: 10px; line-height: 1.5; cursor: pointer; }
+.noturno__opcao input { flex: 0 0 auto; margin-top: 1px; accent-color: var(--color-cyan); }
+/* `min-width: 0` não é enfeite: item de flex nasce com `min-width: auto` e se
+ * recusa a encolher abaixo do próprio conteúdo, empurrando o texto para fora
+ * da tela em aparelho estreito. É a mesma armadilha que o cabeçalho pagou. */
+.noturno__opcao > span { flex: 1 1 auto; min-width: 0; }
+
+.noturno__captura-status,
+.noturno__posicao { color: var(--color-text-secondary); font-size: 10px; line-height: 1.6; }
+.noturno__posicao { margin-top: 6px; color: var(--color-text-muted); }
+
+.noturno__limite p { margin-top: 8px; color: var(--color-text-muted); font-size: 10px; line-height: 1.7; }
+.noturno__limite p:first-of-type { color: var(--color-text-secondary); }
+.noturno__limite strong { color: var(--color-warning); }
+
+/* Telas estreitas: os medidores em duas colunas ainda cabem, as paletas não. */
+@media (max-width: 380px) {
+  .noturno__paletas { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

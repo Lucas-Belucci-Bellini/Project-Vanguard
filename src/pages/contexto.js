@@ -33,7 +33,19 @@ export function contextoPage() {
   const raiz = h('div', { className: 'vg-pagina contexto' });
   const local = estado.get(CHAVES.LOCAL, null);
   let contextoAtual = contextoPorId(estado.get(CHAVES.CONTEXTO, PADRAO));
-  let zonas = zonasAtivas(estado.get(CHAVES.ZONAS, []));
+  /*
+   * TODAS as zonas guardadas, não só as vigentes.
+   *
+   * A versão anterior carregava `zonasAtivas(...)` aqui e depois regravava
+   * essa lista filtrada — então uma zona que vencia era **apagada em
+   * definitivo na gravação seguinte**, sem ninguém ser avisado. Pior: ela
+   * sumia da lista antes disso, e a tela dizia "Nenhuma zona local
+   * cadastrada", o que era falso. A pessoa tinha digitado a fonte e a data;
+   * destruir o registro em silêncio é a última coisa que uma tela de proteção
+   * civil pode fazer. O filtro por validade continua existindo — mas só onde
+   * ele decide o MODO, nunca onde ele decide o que sobrevive no aparelho.
+   */
+  let zonas = (estado.get(CHAVES.ZONAS, []) ?? []).map(normalizarZona).filter(Boolean);
   let posicao = local;
 
   const titulo = h('h1', null, contextoAtual.rotulo);
@@ -65,18 +77,34 @@ export function contextoPage() {
     }));
   }
 
+  /** ATIVA, VENCIDA ou DESLIGADA — a zona nunca some sem explicação. */
+  function situacaoDaZona(zona) {
+    if (!zona.ativo) return { rotulo: 'DESLIGADA', classe: 'is-desligada' };
+    if (!zona.validadeEm) return { rotulo: 'ATIVA', classe: 'is-ativa' };
+    const validade = Date.parse(zona.validadeEm);
+    if (!Number.isFinite(validade)) return { rotulo: 'ATIVA', classe: 'is-ativa' };
+    return validade >= Date.now()
+      ? { rotulo: 'ATIVA', classe: 'is-ativa' }
+      : { rotulo: 'VENCIDA', classe: 'is-vencida' };
+  }
+
   function renderZonas() {
     for (const child of zonaLista.children) child.remove();
-    const ativas = zonasAtivas(zonas);
-    if (!ativas.length) {
-      zonaLista.append(h('p', { className: 'contexto__empty' }, 'Nenhuma zona local cadastrada. Sem uma fonte confirmada, o app não inventa alertas.'));
+    if (!zonas.length) {
+      zonaLista.append(h('p', { className: 'contexto__empty' },
+        'NENHUMA ZONA LOCAL CADASTRADA. Preencha o formulário acima com uma área verificada por uma fonte responsável, ou importe um arquivo de zonas. Sem fonte confirmada, o app não inventa alertas.'));
       return;
     }
-    zonaLista.append(...ativas.map((zona) => h('div', { className: 'contexto__zona' },
+    const vencidas = zonas.filter((zona) => situacaoDaZona(zona).rotulo === 'VENCIDA').length;
+    if (vencidas) {
+      zonaLista.append(h('p', { className: 'contexto__empty' },
+        `${vencidas} zona(s) passaram da validade: continuam guardadas para consulta, mas não ativam mais nenhum modo. Renove a data ou remova.`));
+    }
+    zonaLista.append(...zonas.map((zona) => h('div', { className: `contexto__zona ${situacaoDaZona(zona).classe}` },
       h('span', { className: `contexto__zona-dot contexto__zona-dot--${contextoPorId(zona.contexto).tom}` }),
       h('span', { className: 'contexto__zona-copy' },
         h('strong', null, `${zona.nome} · ${contextoPorId(zona.contexto).nome}`),
-        h('small', null, zonaTexto(zona))),
+        h('small', null, `${situacaoDaZona(zona).rotulo} · ${zonaTexto(zona)}`)),
       h('button', { className: 'contexto__zona-remove', type: 'button', ariaLabel: `Remover ${zona.nome}`, onclick: () => {
         zonas = zonas.filter((item) => item.id !== zona.id);
         estado.set(CHAVES.ZONAS, zonas);
@@ -121,7 +149,9 @@ export function contextoPage() {
     solicitarPosicao({
       onPosition: (nova) => {
         posicao = nova;
-        const resultado = detectarContexto(posicao, zonas, contextoAtual.id);
+        // Aqui, e só aqui, o filtro por validade manda: uma zona vencida não
+        // troca o modo, mas continua guardada no aparelho.
+        const resultado = detectarContexto(posicao, zonasAtivas(zonas), contextoAtual.id);
         if (resultado.zona) {
           estado.set(CHAVES.CONTEXTO, resultado.contexto.id);
           renderContexto();
@@ -200,7 +230,7 @@ export function contextoPage() {
 
   const raizConteudo = h('div', { className: 'contexto__wrap' },
     h('div', { className: 'contexto__header' },
-      h('div', null, h('div', { className: 'contexto__eyebrow' }, 'VANGUARD FIELD / PROTEÇÃO CIVIL'), titulo, descricao),
+      h('div', null, h('div', { className: 'contexto__eyebrow' }, 'PROTEÇÃO CIVIL'), titulo, descricao),
       h('div', { className: 'contexto__header-side' }, modoBadge, h('button', { className: 'contexto__back', type: 'button', onclick: () => { location.hash = '#/inicio'; } }, '← INÍCIO'))),
     h('div', { className: 'contexto__grid' },
       h('section', { className: 'contexto__card contexto__card--main' },
